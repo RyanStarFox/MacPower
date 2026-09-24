@@ -12,6 +12,7 @@ import os
 import subprocess
 import sys
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
 
@@ -27,8 +28,18 @@ def env(name: str) -> str:
 
 
 def get_json(url: str) -> dict:
-    with urllib.request.urlopen(url, timeout=60) as response:
-        return json.loads(response.read().decode("utf-8"))
+    try:
+        with urllib.request.urlopen(url, timeout=60) as response:
+            body = response.read()
+    except urllib.error.HTTPError as error:
+        # Baidu returns 400 while the user has not confirmed yet.
+        body = error.read()
+        if not body:
+            raise SystemExit(f"百度接口 HTTP {error.code}") from error
+    payload = json.loads(body.decode("utf-8"))
+    if not isinstance(payload, dict):
+        raise SystemExit(f"百度接口返回了无法识别的内容: {payload!r}")
+    return payload
 
 
 def repo() -> str:
@@ -86,9 +97,11 @@ def main() -> None:
             return
         error = payload.get("error", "")
         if error == "authorization_pending":
+            print("等待浏览器授权…", flush=True)
             continue
         if error == "slow_down":
             interval += 5
+            print("授权轮询过快，已放慢重试。", flush=True)
             continue
         raise SystemExit(f"授权失败: {payload}")
     raise SystemExit("授权超时。重新运行本脚本，并在 5 分钟内完成浏览器确认。")
