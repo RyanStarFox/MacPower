@@ -35,19 +35,27 @@ def mask(secret: str) -> None:
 
 
 def request(method: str, url: str, data: bytes | None = None, headers: dict | None = None) -> dict:
-    req = urllib.request.Request(url, data=data, headers=headers or {}, method=method)
-    try:
-        with urllib.request.urlopen(req, timeout=180) as response:
-            body = response.read()
-    except urllib.error.HTTPError as error:
-        detail = error.read().decode("utf-8", "replace")
-        raise SystemExit(f"百度接口 HTTP {error.code}: {detail[:500]}") from error
-    if not body:
-        return {}
-    payload = json.loads(body.decode("utf-8"))
-    if isinstance(payload, dict) and payload.get("errno") not in (None, 0):
-        raise SystemExit(f"百度接口失败 errno={payload.get('errno')} {payload}")
-    return payload
+    last_error: Exception | None = None
+    for attempt in range(1, 4):
+        req = urllib.request.Request(url, data=data, headers=headers or {}, method=method)
+        try:
+            with urllib.request.urlopen(req, timeout=180) as response:
+                body = response.read()
+        except urllib.error.HTTPError as error:
+            detail = error.read().decode("utf-8", "replace")
+            raise SystemExit(f"百度接口 HTTP {error.code}: {detail[:500]}") from error
+        except (urllib.error.URLError, TimeoutError, OSError) as error:
+            last_error = error
+            print(f"连接中断，5 秒后重试（第 {attempt} 次）", flush=True)
+            time.sleep(5)
+            continue
+        if not body:
+            return {}
+        payload = json.loads(body.decode("utf-8"))
+        if isinstance(payload, dict) and payload.get("errno") not in (None, 0):
+            raise SystemExit(f"百度接口失败 errno={payload.get('errno')} {payload}")
+        return payload
+    raise SystemExit(f"连接百度失败: {last_error}")
 
 
 def refresh_access_token() -> str:
