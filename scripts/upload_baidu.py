@@ -59,14 +59,32 @@ def refresh_access_token() -> str:
             "client_secret": env("BAIDU_SECRET_KEY"),
         }
     )
-    payload = request("GET", f"{TOKEN_URL}?{query}")
-    if payload.get("error"):
-        raise SystemExit(f"刷新 access_token 失败: {payload.get('error')} {payload.get('error_description', '')}")
-    token = payload.get("access_token", "")
-    mask(token)
-    if not token:
-        raise SystemExit("刷新 access_token 失败：响应里没有 access_token")
-    return token
+    url = f"{TOKEN_URL}?{query}"
+    delay = 20
+    last_detail = ""
+    for attempt in range(1, 9):
+        req = urllib.request.Request(url)
+        try:
+            with urllib.request.urlopen(req, timeout=60) as response:
+                payload = json.loads(response.read().decode("utf-8"))
+        except urllib.error.HTTPError as error:
+            last_detail = error.read().decode("utf-8", "replace")
+            if "security policy" in last_detail.lower() or "try again later" in last_detail.lower():
+                print(f"百度限制了令牌刷新，{delay} 秒后重试（第 {attempt} 次）", flush=True)
+                time.sleep(delay)
+                delay = min(delay * 2, 120)
+                continue
+            raise SystemExit(f"刷新 access_token 失败: HTTP {error.code}: {last_detail[:500]}") from error
+        if payload.get("error"):
+            raise SystemExit(
+                f"刷新 access_token 失败: {payload.get('error')} {payload.get('error_description', '')}"
+            )
+        token = payload.get("access_token", "")
+        mask(token)
+        if not token:
+            raise SystemExit("刷新 access_token 失败：响应里没有 access_token")
+        return token
+    raise SystemExit(f"刷新 access_token 多次被百度风控拦截: {last_detail[:500]}")
 
 
 def block_md5s(path: str) -> list[str]:
@@ -177,8 +195,7 @@ def create_file(token: str, path: str, size: int, upload_id: str, blocks: list[s
     request("POST", url, body)
 
 
-def upload(local_path: str) -> None:
-    token = refresh_access_token()
+def upload(local_path: str, token: str) -> None:
     app_root = f"/apps/{env('BAIDU_APP_NAME').strip('/')}"
     ensure_dir(token, app_root)
     ensure_dir(token, f"{app_root}/releases")
@@ -205,7 +222,9 @@ def main() -> None:
     for path in sys.argv[1:]:
         if not os.path.isfile(path):
             raise SystemExit(f"找不到文件: {path}")
-        upload(path)
+    token = refresh_access_token()
+    for path in sys.argv[1:]:
+        upload(path, token)
 
 
 if __name__ == "__main__":

@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Release tag to upload, for example v1.2.11
+        description: Release tag to upload, for example v1.2.11. Use all for every release.
         required: true
         default: v1.2.11
 
@@ -38,7 +38,14 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ github.event.release.tag_name || inputs.tag }}
         run: |
-          gh release download "$TAG" --pattern 'MacPower-*.dmg' --dir "$RUNNER_TEMP/dmg"
+          mkdir -p "$RUNNER_TEMP/dmg"
+          if [ "$TAG" = "all" ]; then
+            gh release list --limit 100 --json tagName --jq '.[].tagName' | while read -r tag; do
+              gh release download "$tag" --pattern 'MacPower-*.dmg' --dir "$RUNNER_TEMP/dmg" --clobber
+            done
+          else
+            gh release download "$TAG" --pattern 'MacPower-*.dmg' --dir "$RUNNER_TEMP/dmg"
+          fi
           ls -lh "$RUNNER_TEMP/dmg"
 
       - name: Upload to Baidu Netdisk
