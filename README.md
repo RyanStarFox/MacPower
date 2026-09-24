@@ -34,6 +34,16 @@ MacBook 菜单栏电池监视器。不进 Dock，点开后是 **Liquid Glass** �
 
 ## 安装
 
+### Homebrew
+
+```bash
+brew install --cask --no-quarantine ryanstarfox/tap/macpower
+```
+
+安装包是 ad-hoc 签名、未公证，所以要加 `--no-quarantine`。官方 `homebrew/cask` 不接收这类绕过 Gatekeeper 的应用，这里用的是个人 tap。
+
+### 磁盘镜像
+
 1. 从 [Releases](https://github.com/RyanStarFox/MacPower/releases) 下载最新的 `MacPower-*.dmg`，打开后把 **MacPower** 拖进 **应用程序**。
 2. **修复损坏**（Release 为 ad-hoc 签名、未公证，下载后系统常会隔离）：
 

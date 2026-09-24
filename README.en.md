@@ -34,6 +34,16 @@ A menu-bar battery monitor for MacBook. It stays out of the Dock and opens a **L
 
 ## Install
 
+### Homebrew
+
+```bash
+brew install --cask --no-quarantine ryanstarfox/tap/macpower
+```
+
+The disk image is ad-hoc signed and not notarized, so `--no-quarantine` is required. Official `homebrew/cask` does not accept a cask that has to bypass Gatekeeper; this command uses a personal tap.
+
+### Disk image
+
 1. Download the latest `MacPower-*.dmg` from [Releases](https://github.com/RyanStarFox/MacPower/releases), open it, and drag **MacPower** into **Applications**.
 2. **Fix “damaged” app** (Release builds are ad-hoc signed and not notarized, so Gatekeeper often quarantines them):
 

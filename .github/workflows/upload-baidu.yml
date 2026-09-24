@@ -1,0 +1,50 @@
+name: Upload release to Baidu Netdisk
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to upload, for example v1.2.11
+        required: true
+        default: v1.2.11
+
+permissions:
+  contents: read
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check Baidu configuration
+        env:
+          BAIDU_REFRESH_TOKEN: ${{ secrets.BAIDU_REFRESH_TOKEN }}
+          BAIDU_APP_NAME: ${{ vars.BAIDU_APP_NAME }}
+        run: |
+          if [ -z "$BAIDU_REFRESH_TOKEN" ]; then
+            echo "::error::缺少 Secret BAIDU_REFRESH_TOKEN。在本机运行 python3 scripts/baidu_auth.py 完成一次授权。"
+            exit 1
+          fi
+          if [ -z "$BAIDU_APP_NAME" ]; then
+            echo "::error::缺少 Variable BAIDU_APP_NAME。填百度开放平台里的应用名称，文件会传到 /apps/该名称/releases/。"
+            exit 1
+          fi
+
+      - name: Download release disk image
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.event.release.tag_name || inputs.tag }}
+        run: |
+          gh release download "$TAG" --pattern 'MacPower-*.dmg' --dir "$RUNNER_TEMP/dmg"
+          ls -lh "$RUNNER_TEMP/dmg"
+
+      - name: Upload to Baidu Netdisk
+        env:
+          BAIDU_APP_KEY: ${{ secrets.BAIDU_APP_KEY }}
+          BAIDU_SECRET_KEY: ${{ secrets.BAIDU_SECRET_KEY }}
+          BAIDU_REFRESH_TOKEN: ${{ secrets.BAIDU_REFRESH_TOKEN }}
+          BAIDU_APP_NAME: ${{ vars.BAIDU_APP_NAME }}
+        run: python3 scripts/upload_baidu.py "$RUNNER_TEMP"/dmg/*.dmg
