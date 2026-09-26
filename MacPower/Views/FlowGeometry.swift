@@ -66,14 +66,26 @@ enum FlowRibbon {
         return 1 - (remainingLength - floor) / (minimum - floor)
     }
 
-    /// Watt labels sit near the middle of each lane’s body, as a fraction of
-    /// horizontal span (not cubic parameter `t`). Merge lanes use a late `holdT`,
-    /// so parametric mid-t lands near the right tip.
-    static let wattLabelT: CGFloat = 0.42
-
-    /// X along a lane spine at `wattLabelT` of the end-to-end span.
+    /// Horizontal centre of the lane. Each branch spans the whole ribbon
+    /// (the shared trunk is part of the bar), so the label sits on the mid-span,
+    /// not halfway along the separated finger.
     static func wattLabelX(on cubic: FlowCubic) -> CGFloat {
-        cubic.p0.x + (cubic.p1.x - cubic.p0.x) * wattLabelT
+        (cubic.p0.x + cubic.p1.x) / 2
+    }
+
+    /// Spine Y at a horizontal position. Cubic parameter `t` is not the same x.
+    static func spineY(on cubic: FlowCubic, atX x: CGFloat) -> CGFloat {
+        var lo: CGFloat = 0
+        var hi: CGFloat = 1
+        for _ in 0..<18 {
+            let mid = (lo + hi) / 2
+            if cubic.point(mid).x < x {
+                lo = mid
+            } else {
+                hi = mid
+            }
+        }
+        return cubic.point((lo + hi) / 2).y
     }
 
     /// Vertical centre of `path` at `x` near `hintY`. Restricting the scan
@@ -90,19 +102,35 @@ enum FlowRibbon {
         let yMin = max(bounds.minY, hintY - searchRadius)
         let yMax = min(bounds.maxY, hintY + searchRadius)
         guard yMax > yMin else { return hintY }
-        var minY = CGFloat.infinity
-        var maxY = -CGFloat.infinity
+        var runs: [(CGFloat, CGFloat)] = []
+        var runStart: CGFloat?
+        var runEnd: CGFloat?
         var y = yMin
         let step = max(0.35, (yMax - yMin) / 80)
         while y <= yMax {
             if path.contains(CGPoint(x: clampedX, y: y), eoFill: false) {
-                minY = min(minY, y)
-                maxY = max(maxY, y)
+                if runStart == nil { runStart = y }
+                runEnd = y
+            } else if let start = runStart, let end = runEnd {
+                runs.append((start, end))
+                runStart = nil
+                runEnd = nil
             }
             y += step
         }
-        guard minY.isFinite, maxY.isFinite, maxY >= minY else { return hintY }
-        return (minY + maxY) / 2
+        if let start = runStart, let end = runEnd {
+            runs.append((start, end))
+        }
+        guard let run = runs.min(by: { distance($0, hintY) < distance($1, hintY) }) else {
+            return hintY
+        }
+        return (run.0 + run.1) / 2
+    }
+
+    private static func distance(_ run: (CGFloat, CGFloat), _ y: CGFloat) -> CGFloat {
+        if y < run.0 { return run.0 - y }
+        if y > run.1 { return y - run.1 }
+        return 0
     }
 
     /// Full-capsule sheen. Linear in watts, independent of filament speed.

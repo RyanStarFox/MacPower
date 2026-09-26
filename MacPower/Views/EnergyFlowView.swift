@@ -9,6 +9,7 @@ struct EnergyFlowView<Trailing: View>: View {
     var motion: EnergyMotionStyle
     var motionFrameRate: EnergyMotionFrameRate = .hz60
     var pulseFlowIcons: Bool
+    var flowIconScale: Double = 1
     var language: AppLanguage
     var showsFooter: Bool = true
     @ViewBuilder var trailingAccessory: () -> Trailing
@@ -30,6 +31,7 @@ struct EnergyFlowView<Trailing: View>: View {
         motion: EnergyMotionStyle,
         motionFrameRate: EnergyMotionFrameRate = .hz60,
         pulseFlowIcons: Bool,
+        flowIconScale: Double = 1,
         language: AppLanguage,
         showsFooter: Bool = true,
         @ViewBuilder trailingAccessory: @escaping () -> Trailing = { EmptyView() }
@@ -42,6 +44,7 @@ struct EnergyFlowView<Trailing: View>: View {
         self.motion = motion
         self.motionFrameRate = motionFrameRate
         self.pulseFlowIcons = pulseFlowIcons
+        self.flowIconScale = flowIconScale
         self.language = language
         self.showsFooter = showsFooter
         self.trailingAccessory = trailingAccessory
@@ -73,6 +76,7 @@ struct EnergyFlowView<Trailing: View>: View {
             motion: motion,
             motionFrameRate: motionFrameRate,
             pulseFlowIcons: pulseFlowIcons,
+            flowIconScale: flowIconScale,
             language: language,
             showsFooter: showsFooter,
             morph: morph,
@@ -143,6 +147,7 @@ private struct EnergyFlowDiagram<Trailing: View>: View {
     var motion: EnergyMotionStyle
     var motionFrameRate: EnergyMotionFrameRate = .hz60
     var pulseFlowIcons: Bool
+    var flowIconScale: Double = 1
     var language: AppLanguage
     var showsFooter: Bool = true
     /// During a mode change, the ribbon geometry and pigment interpolate from
@@ -430,13 +435,21 @@ private struct EnergyFlowDiagram<Trailing: View>: View {
     private var diagramHeight: CGFloat {
         let trunk = FlowRibbon.trunkWidth(totalWatts: 1)
         // Reserve fork headroom in every power state so connecting, charging,
-        // and unplugging never resize the surrounding popover.
-        return trunk + 24
+        // and unplugging never resize the surrounding popover. A typed icon
+        // size above the ribbon can still grow the row so the glyph is not clipped.
+        let glyph = max(
+            flowIcons.supply.renderScale,
+            flowIcons.battery.renderScale,
+            flowIcons.batteryCharging.renderScale,
+            flowIcons.mac.renderScale
+        )
+        let iconSide = 16 * glyph * flowIconScale * 1.16
+        return max(trunk + 24, iconSide + 8)
     }
 
     @ViewBuilder
     private func flowNode(_ bubble: Bubble, breath: CGFloat) -> some View {
-        let scale = CGFloat(bubble.glyph.normalizedScale)
+        let scale = CGFloat(bubble.glyph.renderScale) * CGFloat(flowIconScale)
         let side = 16 * scale
         GlyphSlotView(
             slot: bubble.glyph,
@@ -445,10 +458,9 @@ private struct EnergyFlowDiagram<Trailing: View>: View {
             prefersMonochrome: true,
             ink: ribbonInk
         )
-            .frame(width: side, height: max(side, 24 * min(scale, 1.25)))
+            .frame(width: side, height: side)
             .scaleEffect(1 + 0.16 * breath)
             .opacity(1 - 0.32 * breath)
-            .frame(width: FlowRibbon.nodeDiameter, height: FlowRibbon.nodeDiameter)
     }
 
     private func iconBreath(at date: Date) -> CGFloat {
@@ -1204,10 +1216,8 @@ private struct EnergyFlowDiagram<Trailing: View>: View {
     }
 
     private func drawWattLabel(context: inout GraphicsContext, body: Path, lane: Lane) {
-        // Use horizontal mid-span, not cubic parameter t — merge lanes hold Y late,
-        // so mid-t sits near the right tip next to the Mac icon.
         let x = FlowRibbon.wattLabelX(on: lane.cubic)
-        let hintY = lane.cubic.point(FlowRibbon.wattLabelT).y
+        let hintY = FlowRibbon.spineY(on: lane.cubic, atX: x)
         let point = CGPoint(
             x: x,
             y: FlowRibbon.centerY(
@@ -1220,8 +1230,7 @@ private struct EnergyFlowDiagram<Trailing: View>: View {
         let text = Text(String(format: "%.1f W", lane.watts))
             .font(.system(size: 11, weight: .semibold, design: .rounded).monospacedDigit())
             .foregroundStyle(ribbonInk)
-        // Digit strings optically sit high in the em-box; nudge down a hair.
-        context.draw(text, at: CGPoint(x: point.x, y: point.y + 1.5), anchor: .center)
+        context.draw(text, at: point, anchor: .center)
     }
 
     private var footer: some View {

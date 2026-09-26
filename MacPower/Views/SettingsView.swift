@@ -1,6 +1,65 @@
 import AppKit
 import SwiftUI
 
+/// macOS 15's hosting controller grows this window but will not shrink it when a
+/// shorter tab is shown. Apply the measured height in the same layout pass, with
+/// the title bar held still, so the resize is not a visible flash a frame later.
+private final class SettingsSizerView: NSView {
+    var height: CGFloat = 0 {
+        didSet {
+            guard height != oldValue else { return }
+            apply()
+        }
+    }
+
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        apply()
+    }
+
+    private func apply() {
+        guard height > 80, let window else { return }
+        let scale = window.backingScaleFactor
+        let snap = { (value: CGFloat) -> CGFloat in
+            (value * scale).rounded() / scale
+        }
+        let targetHeight = min(snap(height), 620)
+        let current = window.contentRect(forFrameRect: window.frame)
+        guard abs(current.width - 440) > 0.5 || abs(current.height - targetHeight) > 0.5 else { return }
+        var content = current
+        content.size = NSSize(width: 440, height: targetHeight)
+        content.origin.y += current.height - targetHeight
+        var frame = window.frameRect(forContentRect: content)
+        // Keep the title-bar top on a pixel so the tab row does not drift by a pixel
+        // when the content height's fractional part changes.
+        let top = snap(frame.maxY)
+        frame.size.width = snap(frame.size.width)
+        frame.size.height = snap(frame.size.height)
+        frame.origin.x = snap(frame.origin.x)
+        frame.origin.y = top - frame.size.height
+        NSAnimationContext.beginGrouping()
+        NSAnimationContext.current.duration = 0
+        NSAnimationContext.current.allowsImplicitAnimation = false
+        window.setFrame(frame, display: false, animate: false)
+        NSAnimationContext.endGrouping()
+    }
+}
+
+private struct SettingsWindowSizer: NSViewRepresentable {
+    var height: CGFloat
+
+    func makeNSView(context: Context) -> SettingsSizerView {
+        let view = SettingsSizerView(frame: .zero)
+        view.autoresizingMask = []
+        view.height = height
+        return view
+    }
+
+    func updateNSView(_ view: SettingsSizerView, context: Context) {
+        view.height = height
+    }
+}
+
 struct SettingsView: View {
     private enum Pane: String, CaseIterable, Identifiable {
         case general, menuBar, rings, flow
@@ -36,33 +95,43 @@ struct SettingsView: View {
     var body: some View {
         let hugHeight = settingsHugsContentHeight
         VStack(spacing: 0) {
-            Picker("settings.title", selection: $pane) {
-                Text("settings.section.general").tag(Pane.general)
-                Text("settings.section.icon").tag(Pane.menuBar)
-                Text("settings.tab.rings").tag(Pane.rings)
-                Text("settings.tab.flow").tag(Pane.flow)
-            }
-            .pickerStyle(.segmented)
-            .labelsHidden()
-            .padding(.horizontal, 16)
-            .padding(.top, 12)
-            .padding(.bottom, 2)
+            VStack(spacing: 0) {
+                settingsTabPicker
+                    .padding(.top, 12)
+                    .padding(.bottom, 2)
 
-            Form {
-                switch pane {
-                case .general: generalSections
-                case .menuBar: menuBarSections
-                case .rings: ringsSections
-                case .flow: flowSections
+                Form {
+                    switch pane {
+                    case .general: generalSections
+                    case .menuBar: menuBarSections
+                    case .rings: ringsSections
+                    case .flow: flowSections
+                    }
+                }
+                .formStyle(.grouped)
+                // The grouped form paints its own scroll fill, which on macOS 26+
+                // is a different shade than the window behind the tabs.
+                .scrollContentBackground(.hidden)
+                // Collapsed presets should hug the window; only scroll once editors expand.
+                .scrollDisabled(hugHeight)
+            }
+            .fixedSize(horizontal: false, vertical: hugHeight)
+            .background {
+                GeometryReader { proxy in
+                    SettingsWindowSizer(height: proxy.size.height)
+                        .frame(width: 0, height: 0)
                 }
             }
-            .formStyle(.grouped)
-            // Collapsed presets should hug the window; only scroll once editors expand.
-            .scrollDisabled(hugHeight)
+
+            // A pixel of slack from snapping the window height stays below the
+            // tabs. Without this, AppKit centers that slack and the tab row shifts.
+            if hugHeight {
+                Spacer(minLength: 0)
+            }
         }
-        .frame(width: 440)
-        .frame(maxHeight: hugHeight ? nil : 620)
-        .fixedSize(horizontal: true, vertical: hugHeight)
+        .frame(width: 440, alignment: .top)
+        .frame(maxHeight: hugHeight ? .infinity : 620, alignment: .top)
+        .animation(nil, value: pane)
         .background(Color(nsColor: .windowBackgroundColor))
         .environment(\.locale, appState.settings.resolvedLocale)
         .id(appState.settings.language)
@@ -95,6 +164,20 @@ struct SettingsView: View {
         } message: {
             Text("settings.tint.saveAs.message")
         }
+    }
+
+    /// Content-sized and centered, so macOS 14/15 don't stretch the control to the window edges.
+    private var settingsTabPicker: some View {
+        Picker("settings.title", selection: $pane) {
+            Text("settings.section.general").tag(Pane.general)
+            Text("settings.section.icon").tag(Pane.menuBar)
+            Text("settings.tab.rings").tag(Pane.rings)
+            Text("settings.tab.flow").tag(Pane.flow)
+        }
+        .pickerStyle(.segmented)
+        .labelsHidden()
+        .fixedSize(horizontal: true, vertical: true)
+        .frame(maxWidth: .infinity)
     }
 
     /// Prefer an intrinsic window height until a preset editor is opened.
@@ -615,6 +698,7 @@ struct SettingsView: View {
                     }
                 }
             }
+            FlowIconSizeControl(settings: appState.settings)
         }
 
         Section {
@@ -1487,6 +1571,67 @@ private struct MergedTintPercentEditor: View {
         if next != value {
             onCommit(next)
         }
+    }
+}
+
+/// One row: label, editable percent, then the slider. Typed sizes run 10...1000.
+/// The slider stays on its narrower range and pins when the number sits outside it.
+private struct FlowIconSizeControl: View {
+    @Bindable var settings: AppSettings
+    @State private var draft: String
+    @State private var focused = false
+
+    private static let editRange = 10...1000
+
+    init(settings: AppSettings) {
+        self.settings = settings
+        _draft = State(initialValue: "\(Self.percent(of: settings.flowIconScale))")
+    }
+
+    var body: some View {
+        let percent = Self.percent(of: settings.flowIconScale)
+        HStack(spacing: 8) {
+            Text("settings.flow.iconSize")
+            Spacer(minLength: 8)
+            CenteredPercentField(
+                text: $draft,
+                isEnabled: true,
+                isFocused: $focused,
+                onCommit: commit
+            )
+            .frame(width: 52, height: 22)
+            Text("%")
+                .foregroundStyle(.secondary)
+            Slider(
+                value: Binding(
+                    get: {
+                        min(
+                            max(settings.flowIconScale, AppSettings.flowIconScaleSliderBounds.lowerBound),
+                            AppSettings.flowIconScaleSliderBounds.upperBound
+                        )
+                    },
+                    set: { settings.flowIconScale = $0 }
+                ),
+                in: AppSettings.flowIconScaleSliderBounds
+            )
+            .frame(width: 148)
+        }
+        .onChange(of: percent) { _, newValue in
+            if !focused { draft = "\(newValue)" }
+        }
+    }
+
+    private func commit() {
+        let next = MenuBarTintPercentInput.commit(draft, range: Self.editRange, fallback: Self.percent(of: settings.flowIconScale))
+        draft = "\(next)"
+        let scale = Double(next) / 100
+        if scale != settings.flowIconScale {
+            settings.flowIconScale = scale
+        }
+    }
+
+    private static func percent(of scale: Double) -> Int {
+        Int((scale * 100).rounded())
     }
 }
 

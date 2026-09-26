@@ -94,8 +94,9 @@ struct GlyphSlotView: View {
         pointSize: CGFloat,
         weight: Font.Weight
     ) -> NSImage? {
+        // Monochrome keeps knockout regions (the laptop screen). A one-color
+        // palette paints those layers solid, so laptopcomputer loses its display.
         let config = NSImage.SymbolConfiguration(pointSize: pointSize, weight: nsWeight(weight))
-            .applying(NSImage.SymbolConfiguration(paletteColors: [.black]))
         guard let source = NSImage(systemSymbolName: name, accessibilityDescription: nil)?
             .withSymbolConfiguration(config) else { return nil }
         return rasterized(source, side: side, template: true)

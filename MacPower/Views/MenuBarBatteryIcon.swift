@@ -280,6 +280,14 @@ enum MenuBarBatteryRenderer {
         let innerPath = NSBezierPath(roundedRect: inner, xRadius: innerRadius, yRadius: innerRadius)
         let capRadius = min(cap.width, cap.height) / 2
         let capPath = NSBezierPath(roundedRect: cap, xRadius: capRadius, yRadius: capRadius)
+        let dim = fill.withAlpha(0.62)
+
+        // Same pad as the borderless body, so knocked-out digits stay readable
+        // where the charge has already been used.
+        NSGraphicsContext.saveGraphicsState()
+        innerPath.addClip()
+        paint(dim, in: inner)
+        NSGraphicsContext.restoreGraphicsState()
 
         if clamped > 0.004 {
             NSGraphicsContext.saveGraphicsState()

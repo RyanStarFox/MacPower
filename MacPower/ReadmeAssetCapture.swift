@@ -59,7 +59,9 @@ enum ReadmeAssetCapture {
                 .environment(\.colorScheme, .light)
                 .environment(\.readmeGalleryCapture, true)
         )
-        hosting.sizingOptions = [.intrinsicContentSize]
+        // Match the live menu extra: intrinsic sizing alone clips the 420pt
+        // panel, which cuts off the right-aligned time estimate.
+        hosting.sizingOptions = []
         let popover = NSPopover()
         popover.behavior = .applicationDefined
         popover.animates = false
@@ -85,18 +87,31 @@ enum ReadmeAssetCapture {
             state.settings.applyRingTintPreset(shot.tint)
             state.settings.applyFlowTintPreset(shot.tint)
             state.snapshot = .readme(shot.mode)
+            // Open tall enough to lay out, then lock to the measured height.
+            // Measuring before show clips the supply / charger footer.
+            popover.contentSize = NSSize(width: PopoverLayout.width, height: 640)
             popover.show(
                 relativeTo: anchor.contentView!.bounds,
                 of: anchor.contentView!,
                 preferredEdge: .maxY
             )
             // Give Liquid Glass / TimelineView time to settle before bitmap capture.
-            for _ in 0..<6 {
-                try? await Task.sleep(for: .milliseconds(500))
+            for _ in 0..<4 {
+                try? await Task.sleep(for: .milliseconds(400))
                 hosting.view.layoutSubtreeIfNeeded()
                 hosting.view.window?.layoutIfNeeded()
                 hosting.view.window?.displayIfNeeded()
             }
+            let fitted = hosting.sizeThatFits(
+                in: NSSize(width: PopoverLayout.width, height: CGFloat.greatestFiniteMagnitude)
+            )
+            let height = max(ceil(fitted.height), 1)
+            popover.contentSize = NSSize(width: PopoverLayout.width, height: height)
+            hosting.view.frame.size = NSSize(width: PopoverLayout.width, height: height)
+            hosting.view.layoutSubtreeIfNeeded()
+            hosting.view.window?.layoutIfNeeded()
+            hosting.view.window?.displayIfNeeded()
+            try? await Task.sleep(for: .milliseconds(250))
             let dest = output.appendingPathComponent("\(shot.name).png")
             if captureView(hosting.view, to: dest) {
                 flattenAndTrim(at: dest)
@@ -162,7 +177,9 @@ enum ReadmeAssetCapture {
                 guard let color = source.colorAt(x: x, y: y) else { continue }
                 let a = color.alphaComponent
                 let lum = color.redComponent * 0.3 + color.greenComponent * 0.59 + color.blueComponent * 0.11
-                if a > 0.08 && lum > 0.04 {
+                // Secondary labels rasterize as black at ~50% alpha. A luminance
+                // floor drops them, which cropped off the supply / charger footer.
+                if a > 0.22 || (a > 0.08 && lum > 0.04) {
                     minX = min(minX, x)
                     minY = min(minY, y)
                     maxX = max(maxX, x)

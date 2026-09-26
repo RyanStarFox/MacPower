@@ -145,24 +145,30 @@ final class AppState {
         }
 
         let hosting = NSHostingController(rootView: SettingsView(appState: self))
-        hosting.sizingOptions = [.intrinsicContentSize]
+        // macOS 15 grows this window from intrinsic size but does not shrink it
+        // when a shorter tab is selected. SettingsWindowSizer sets the size.
+        hosting.sizingOptions = []
         let window = NSWindow(contentViewController: hosting)
-        window.styleMask = [.titled, .closable, .fullSizeContentView]
+        // Content starts below the title bar. fullSizeContentView let the title-bar
+        // material tint the tab row (a mismatched band on macOS 26+) and made
+        // SwiftUI's top safe area jump between panes on macOS 15.
+        window.styleMask = [.titled, .closable]
+        window.titlebarAppearsTransparent = true
+        window.titlebarSeparatorStyle = .none
+        window.backgroundColor = .windowBackgroundColor
         window.title = Localization.string("settings.title", language: settings.language)
         window.isReleasedWhenClosed = false
 
-        // Sequoia lays out hosting controllers lazily; measure before center or
-        // the window can open at ~0 size and look like a no-op.
+        // Sequoia lays out hosting controllers lazily. Give the view a real size
+        // so it can measure, then let SettingsWindowSizer replace it before show.
+        // A flexible root reports the proposed height from sizeThatFits, which
+        // would open the window far too tall.
+        window.setContentSize(NSSize(width: 440, height: 360))
         if #available(macOS 15.0, *) {
             window.updateConstraintsIfNeeded()
         }
         window.layoutIfNeeded()
-        let fitted = hosting.sizeThatFits(
-            in: NSSize(width: 440, height: CGFloat.greatestFiniteMagnitude)
-        )
-        window.setContentSize(
-            NSSize(width: 440, height: max(ceil(fitted.height), 120))
-        )
+        hosting.view.layoutSubtreeIfNeeded()
         window.center()
         window.makeKeyAndOrderFront(nil)
         window.orderFrontRegardless()

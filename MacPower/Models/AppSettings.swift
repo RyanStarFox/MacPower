@@ -25,6 +25,7 @@ final class AppSettings {
         static let motionStyle = "motionStyle"
         static let motionFrameRate = "motionFrameRate"
         static let pulseFlowIcons = "pulseFlowIcons"
+        static let flowIconScale = "flowIconScale"
         static let showPopoverArrow = "showPopoverArrow"
         static let showStatusRings = "showStatusRings"
         static let showEnergyFlow = "showEnergyFlow"
@@ -145,6 +146,22 @@ final class AppSettings {
 
     var pulseFlowIcons: Bool {
         didSet { store.set(pulseFlowIcons, forKey: Keys.pulseFlowIcons) }
+    }
+
+    /// Shared size of the glyphs drawn on the energy ribbon. 1 is the default.
+    /// Typed values may sit outside the slider; the slider pins to its own ends.
+    static let flowIconScaleBounds: ClosedRange<Double> = 0.1...10
+    static let flowIconScaleSliderBounds: ClosedRange<Double> = 0.5...2.5
+
+    var flowIconScale: Double {
+        didSet {
+            let clamped = min(max(flowIconScale, Self.flowIconScaleBounds.lowerBound), Self.flowIconScaleBounds.upperBound)
+            if clamped != flowIconScale {
+                flowIconScale = clamped
+                return
+            }
+            store.set(flowIconScale, forKey: Keys.flowIconScale)
+        }
     }
 
     var showPopoverArrow: Bool {
@@ -303,6 +320,12 @@ final class AppSettings {
             pulseFlowIcons = true
         } else {
             pulseFlowIcons = defaults.bool(forKey: Keys.pulseFlowIcons)
+        }
+
+        if defaults.object(forKey: Keys.flowIconScale) == nil {
+            flowIconScale = 1
+        } else {
+            flowIconScale = defaults.double(forKey: Keys.flowIconScale)
         }
 
         if defaults.object(forKey: Keys.showPopoverArrow) == nil {

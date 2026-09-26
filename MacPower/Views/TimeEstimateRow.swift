@@ -53,8 +53,8 @@ struct TimeEstimateRow: View {
             Text(value)
                 .foregroundStyle(.primary)
                 .multilineTextAlignment(.trailing)
-                .autoFittingCaption(minimumScale: 0.7)
-                .layoutPriority(1)
+                .autoFittingCaption(minimumScale: 0.65)
+                .frame(maxWidth: .infinity, alignment: .trailing)
         }
     }
 }

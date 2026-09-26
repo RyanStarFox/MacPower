@@ -11,6 +11,7 @@ enum PopoverLayout {
 struct PopoverRootView: View {
     @Bindable var appState: AppState
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.readmeGalleryCapture) private var readmeGalleryCapture
 
     var body: some View {
         Group {
@@ -124,6 +125,7 @@ struct PopoverRootView: View {
             motion: appState.settings.motionStyle,
             motionFrameRate: appState.settings.motionFrameRate,
             pulseFlowIcons: appState.settings.pulseFlowIcons,
+            flowIconScale: appState.settings.flowIconScale,
             language: appState.settings.language
         )
     }
@@ -141,6 +143,7 @@ struct PopoverRootView: View {
             motion: appState.settings.motionStyle,
             motionFrameRate: appState.settings.motionFrameRate,
             pulseFlowIcons: appState.settings.pulseFlowIcons,
+            flowIconScale: appState.settings.flowIconScale,
             language: appState.settings.language,
             trailingAccessory: trailing
         )
@@ -158,7 +161,7 @@ struct PopoverRootView: View {
                 .font(.system(size: 18, weight: .semibold))
                 .foregroundStyle(.primary)
                 .frame(width: 58, height: 58)
-                .macPowerGlassEffect(.regularInteractive, in: Circle())
+                .modifier(SettingsGlassChrome(capture: readmeGalleryCapture))
                 .overlay(alignment: .bottom) {
                     Text(title)
                         .font(.system(size: 11, weight: .semibold, design: .rounded))
@@ -184,7 +187,7 @@ struct PopoverRootView: View {
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundStyle(.primary)
                     .frame(width: 58, height: 58)
-                    .macPowerGlassEffect(.regularInteractive, in: Circle())
+                    .modifier(SettingsGlassChrome(capture: readmeGalleryCapture))
                 Text(Localization.string("settings.title", language: language))
                     .font(.system(size: 11, weight: .semibold, design: .rounded))
                     .foregroundStyle(.primary)
@@ -197,5 +200,35 @@ struct PopoverRootView: View {
         .frame(maxWidth: .infinity)
         .help(Localization.string("settings.title", language: language))
         .accessibilityLabel(Localization.string("settings.title", language: language))
+    }
+}
+
+/// README bitmaps cannot sample Liquid Glass (it comes back as a solid dark
+/// disc). Draw a light rimmed circle that survives `cacheDisplay`.
+private struct SettingsGlassChrome: ViewModifier {
+    var capture: Bool
+
+    func body(content: Content) -> some View {
+        if capture {
+            content.background {
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color(white: 0.90),
+                                Color(white: 0.78)
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                    .overlay {
+                        Circle()
+                            .strokeBorder(Color(white: 0.62).opacity(0.55), lineWidth: 1)
+                    }
+            }
+        } else {
+            content.macPowerGlassEffect(.regularInteractive, in: Circle())
+        }
     }
 }

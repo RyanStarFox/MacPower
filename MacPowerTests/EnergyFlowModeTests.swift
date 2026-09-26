@@ -146,10 +146,15 @@ final class FlowRibbonTests: XCTestCase {
     }
 
     func testWattLabelSitsInTheMidBody() {
-        XCTAssertGreaterThan(FlowRibbon.wattLabelT, 0.4)
-        XCTAssertLessThan(FlowRibbon.wattLabelT, 0.65)
-        XCTAssertEqual(FlowRibbon.wattLabelT, 0.42, accuracy: 0.001)
-        // Merge lanes use late holdT; parametric mid-t is near the tip, mid-X is not.
+        let straight = FlowCubic(
+            p0: CGPoint(x: 24, y: 40),
+            c1: CGPoint(x: 24 + 336 * 0.45, y: 40),
+            c2: CGPoint(x: 24 + 336 * 0.55, y: 40),
+            p1: CGPoint(x: 360, y: 40)
+        )
+        XCTAssertEqual(FlowRibbon.wattLabelX(on: straight), 192, accuracy: 0.5)
+
+        // Forked lanes use the same mid-span: the trunk is part of each bar.
         let mergeLane = ForkOutline.stackedLane(
             from: CGPoint(x: 24, y: 20),
             to: CGPoint(x: 360, y: 60),
@@ -157,10 +162,7 @@ final class FlowRibbonTests: XCTestCase {
             endY: 52,
             holdT: 1 - FlowRibbon.forkT
         )
-        let midX = FlowRibbon.wattLabelX(on: mergeLane)
-        let parametricX = mergeLane.point(FlowRibbon.wattLabelT).x
-        XCTAssertEqual(midX, 24 + (360 - 24) * FlowRibbon.wattLabelT, accuracy: 0.01)
-        XCTAssertGreaterThan(parametricX - midX, 40)
+        XCTAssertEqual(FlowRibbon.wattLabelX(on: mergeLane), 192, accuracy: 0.5)
     }
 
     func testWattLabelUsesLocalRibbonCenterNotTipY() {
@@ -177,17 +179,20 @@ final class FlowRibbonTests: XCTestCase {
             endY: top.y,
             holdT: FlowRibbon.forkT
         )
+        let span = top.x - left.x
+        let splitX = left.x + span * FlowRibbon.forkT
         let x = FlowRibbon.wattLabelX(on: topLane)
-        let hintY = topLane.point(FlowRibbon.wattLabelT).y
+        XCTAssertEqual(x, (left.x + top.x) / 2, accuracy: 0.5)
+        XCTAssertGreaterThan(x, splitX)
+        let hintY = FlowRibbon.spineY(on: topLane, atX: x)
         let centered = FlowRibbon.centerY(
             of: body,
             atX: x,
             hintY: hintY,
             searchRadius: topW * 0.5 + 8
         )
-        // Tip Y locks early on forked spines; the filled tube at the label X is lower.
-        XCTAssertGreaterThan(centered, hintY)
-        XCTAssertNotEqual(centered, hintY, accuracy: 0.5)
+        XCTAssertEqual(centered, hintY, accuracy: topW * 0.35)
+        XCTAssertTrue(body.contains(CGPoint(x: x, y: centered)))
     }
 
     func testCollapseDoesNotDeflateCapsuleCorners() {
