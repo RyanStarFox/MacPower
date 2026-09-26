@@ -88,7 +88,17 @@ def refresh_access_token() -> str:
                 f"刷新 access_token 失败: {payload.get('error')} {payload.get('error_description', '')}"
             )
         token = payload.get("access_token", "")
+        new_refresh = payload.get("refresh_token", "")
         mask(token)
+        mask(new_refresh)
+        token_file = os.environ.get("BAIDU_TOKEN_FILE", "").strip()
+        if new_refresh and token_file:
+            os.makedirs(os.path.dirname(token_file), exist_ok=True)
+            with open(token_file, "w", encoding="utf-8") as handle:
+                handle.write(new_refresh + "\n")
+            os.chmod(token_file, 0o600)
+            if new_refresh != os.environ.get("BAIDU_REFRESH_TOKEN", ""):
+                print("已保存新的 refresh token", flush=True)
         if not token:
             raise SystemExit("刷新 access_token 失败：响应里没有 access_token")
         return token

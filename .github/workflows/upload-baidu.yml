@@ -1,8 +1,8 @@
 name: Upload release to Baidu Netdisk
 
+# Release uploads run on this Mac via scripts/sync_latest_release.py.
+# Refreshing the Baidu token from a GitHub-hosted runner invalidates it.
 on:
-  release:
-    types: [published]
   workflow_dispatch:
     inputs:
       tag:
