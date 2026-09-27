@@ -19,20 +19,27 @@ struct BatteryReading: Equatable, Sendable {
     var instantAmperageMilli: Int
 }
 
+enum BatteryTimeFallback {
+    /// Copying the IOPS power-source list is only useful when the smart-battery
+    /// snapshot has neither time-to-empty nor time-to-full.
+    static func needsPowerSourceTimes(empty: Int?, full: Int?) -> Bool {
+        empty == nil && full == nil
+    }
+}
+
 enum BatteryReader: Sendable {
-    static func read() -> BatteryReading? {
-        readSmartBattery() ?? readPowerSources()
+    static func read(cachedService: inout io_service_t) -> BatteryReading? {
+        readSmartBattery(cachedService: &cachedService) ?? readPowerSources()
     }
 
-    private static func readSmartBattery() -> BatteryReading? {
-        let service = IOServiceGetMatchingService(kIOMainPortDefault, IOServiceMatching("AppleSmartBattery"))
-        guard service != 0 else { return nil }
-        defer { IOObjectRelease(service) }
+    static func release(_ service: inout io_service_t) {
+        guard service != 0 else { return }
+        IOObjectRelease(service)
+        service = 0
+    }
 
-        var propsRef: Unmanaged<CFMutableDictionary>?
-        guard IORegistryEntryCreateCFProperties(service, &propsRef, kCFAllocatorDefault, 0) == KERN_SUCCESS,
-              let nsProps = propsRef?.takeRetainedValue() as? [String: Any]
-        else {
+    private static func readSmartBattery(cachedService: inout io_service_t) -> BatteryReading? {
+        guard let nsProps = smartBatteryProperties(cachedService: &cachedService) else {
             return nil
         }
 
@@ -96,9 +103,10 @@ enum BatteryReader: Sendable {
         if !isCharging, timeToEmpty == nil {
             timeToEmpty = sanitized(int(nsProps["TimeRemaining"]))
         }
-        if let iops = iopsTimes() {
-            if timeToEmpty == nil { timeToEmpty = iops.empty }
-            if timeToFull == nil { timeToFull = iops.full }
+        if BatteryTimeFallback.needsPowerSourceTimes(empty: timeToEmpty, full: timeToFull),
+           let iops = iopsTimes() {
+            timeToEmpty = iops.empty
+            timeToFull = iops.full
         }
 
         return BatteryReading(
@@ -158,6 +166,30 @@ enum BatteryReader: Sendable {
             )
         }
         return nil
+    }
+
+    /// One registry snapshot per read. The service stays open so the next sample
+    /// does not look up AppleSmartBattery by name again. A failed copy drops it
+    /// and opens a fresh port once.
+    private static func smartBatteryProperties(cachedService: inout io_service_t) -> [String: Any]? {
+        if let props = copyProperties(cachedService) {
+            return props
+        }
+        release(&cachedService)
+        cachedService = IOServiceGetMatchingService(kIOMainPortDefault, IOServiceMatching("AppleSmartBattery"))
+        guard cachedService != 0 else { return nil }
+        return copyProperties(cachedService)
+    }
+
+    private static func copyProperties(_ service: io_service_t) -> [String: Any]? {
+        guard service != 0 else { return nil }
+        var propsRef: Unmanaged<CFMutableDictionary>?
+        guard IORegistryEntryCreateCFProperties(service, &propsRef, kCFAllocatorDefault, 0) == KERN_SUCCESS,
+              let props = propsRef?.takeRetainedValue() as? [String: Any]
+        else {
+            return nil
+        }
+        return props
     }
 
     private static func iopsTimes() -> (empty: Int?, full: Int?)? {
@@ -254,6 +286,7 @@ final class PowerTelemetryService {
     private var smoothed: PowerSnapshot?
     private var estimateLoadWatts: Double?
     private var popoverOpen = false
+    private var batteryService: io_service_t = 0
 
     var onChange: ((PowerSnapshot) -> Void)?
 
@@ -289,6 +322,7 @@ final class PowerTelemetryService {
             self.powerSourceLoop = nil
         }
         powerSourceCallback = nil
+        BatteryReader.release(&batteryService)
     }
 
     private func scheduleIdleTimer() {
@@ -333,7 +367,7 @@ final class PowerTelemetryService {
     }
 
     private func refresh(smooth: Bool) {
-        guard let reading = BatteryReader.read() else {
+        guard let reading = BatteryReader.read(cachedService: &batteryService) else {
             onChange?(.empty)
             return
         }

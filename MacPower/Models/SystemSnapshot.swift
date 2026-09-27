@@ -6,6 +6,26 @@ struct SystemSnapshot: Equatable, Sendable {
     var memoryPercent: Double
 
     static let empty = SystemSnapshot(cpuPercent: 0, gpuPercent: 0, memoryPercent: 0)
+
+    /// Caption uses the nearest integer. Tint bands truncate. Either change
+    /// should redraw the rings; noise inside the same integers should not.
+    func sameRingDisplay(as other: SystemSnapshot) -> Bool {
+        Self.sameRingPercent(cpuPercent, other.cpuPercent)
+            && Self.sameRingPercent(gpuPercent, other.gpuPercent)
+            && Self.sameRingPercent(memoryPercent, other.memoryPercent)
+    }
+
+    private static func sameRingPercent(_ lhs: Double, _ rhs: Double) -> Bool {
+        captionPercent(lhs) == captionPercent(rhs) && tintPercent(lhs) == tintPercent(rhs)
+    }
+
+    private static func captionPercent(_ percent: Double) -> Int {
+        Int(percent.rounded())
+    }
+
+    private static func tintPercent(_ percent: Double) -> Int {
+        Int(min(100, max(0, percent)).rounded(.towardZero))
+    }
 }
 
 enum CPUTickSample: Equatable, Sendable {

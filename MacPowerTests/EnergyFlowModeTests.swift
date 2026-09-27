@@ -713,6 +713,21 @@ final class TimeEstimateTests: XCTestCase {
     }
 }
 
+final class BatteryTimeFallbackTests: XCTestCase {
+    func testSkipsPowerSourceTimesWhenSmartBatteryAlreadyHasBoth() {
+        XCTAssertFalse(BatteryTimeFallback.needsPowerSourceTimes(empty: 120, full: 45))
+    }
+
+    func testSkipsPowerSourceTimesWhenEitherEstimateIsPresent() {
+        XCTAssertFalse(BatteryTimeFallback.needsPowerSourceTimes(empty: 90, full: nil))
+        XCTAssertFalse(BatteryTimeFallback.needsPowerSourceTimes(empty: nil, full: 40))
+    }
+
+    func testQueriesPowerSourceTimesOnlyWhenBothEstimatesAreMissing() {
+        XCTAssertTrue(BatteryTimeFallback.needsPowerSourceTimes(empty: nil, full: nil))
+    }
+}
+
 final class SystemSnapshotTests: XCTestCase {
     func testCPUUsageIgnoresIdleDelta() {
         let previous = CPUTickSample.Ticks(user: 0, system: 0, idle: 0, nice: 0)
@@ -754,6 +769,30 @@ final class SystemSnapshotTests: XCTestCase {
         XCTAssertEqual(MemoryOccupancy.usagePercent(usedBytes: 8, totalBytes: 32), 25)
         XCTAssertEqual(MemoryOccupancy.usagePercent(usedBytes: 10, totalBytes: 0), 0)
         XCTAssertEqual(MemoryOccupancy.usagePercent(usedBytes: 50, totalBytes: 40), 100)
+    }
+
+    func testRingDisplayIgnoresSubIntegerNoise() {
+        let previous = SystemSnapshot(cpuPercent: 12.2, gpuPercent: 3.1, memoryPercent: 60.4)
+        let next = SystemSnapshot(cpuPercent: 12.4, gpuPercent: 3.4, memoryPercent: 60.2)
+        XCTAssertTrue(previous.sameRingDisplay(as: next))
+    }
+
+    func testRingDisplayChangesWhenCaptionIntegerChanges() {
+        let previous = SystemSnapshot(cpuPercent: 12.4, gpuPercent: 0, memoryPercent: 0)
+        let next = SystemSnapshot(cpuPercent: 12.5, gpuPercent: 0, memoryPercent: 0)
+        XCTAssertFalse(previous.sameRingDisplay(as: next))
+    }
+
+    func testRingDisplayChangesWhenTintIntegerChanges() {
+        let previous = SystemSnapshot(cpuPercent: 12.6, gpuPercent: 0, memoryPercent: 0)
+        let next = SystemSnapshot(cpuPercent: 13.0, gpuPercent: 0, memoryPercent: 0)
+        XCTAssertFalse(previous.sameRingDisplay(as: next))
+    }
+
+    func testRingDisplayChangesWhenAnyRingIntegerChanges() {
+        let previous = SystemSnapshot(cpuPercent: 10, gpuPercent: 4.2, memoryPercent: 40)
+        let next = SystemSnapshot(cpuPercent: 10, gpuPercent: 4.2, memoryPercent: 40.6)
+        XCTAssertFalse(previous.sameRingDisplay(as: next))
     }
 }
 

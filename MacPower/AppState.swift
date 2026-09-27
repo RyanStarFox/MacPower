@@ -141,6 +141,7 @@ final class AppState {
         if let settingsWindow {
             settingsWindow.makeKeyAndOrderFront(nil)
             settingsWindow.orderFrontRegardless()
+            NotificationCenter.default.post(name: .macPowerReapplySettingsFrame, object: settingsWindow)
             return
         }
 
@@ -172,6 +173,11 @@ final class AppState {
         window.center()
         window.makeKeyAndOrderFront(nil)
         window.orderFrontRegardless()
+        // macOS 15 only reserves the title bar once the window is on screen.
+        // Re-measure now so the title is not drawn through the tabs on first open.
+        window.layoutIfNeeded()
+        hosting.view.layoutSubtreeIfNeeded()
+        NotificationCenter.default.post(name: .macPowerReapplySettingsFrame, object: window)
         settingsWindow = window
         observeSettingsWindowClose(window)
     }

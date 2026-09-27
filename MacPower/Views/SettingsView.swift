@@ -1,10 +1,20 @@
 import AppKit
 import SwiftUI
 
+extension Notification.Name {
+    /// Posted after the settings window is on screen, so the title-bar inset
+    /// can be applied before the first paint. macOS 15 reports a content rect
+    /// with no title bar until then, which draws the title through the tabs.
+    static let macPowerReapplySettingsFrame = Notification.Name("MacPowerReapplySettingsFrame")
+}
+
 /// macOS 15's hosting controller grows this window but will not shrink it when a
 /// shorter tab is shown. Apply the measured height in the same layout pass, with
 /// the title bar held still, so the resize is not a visible flash a frame later.
 private final class SettingsSizerView: NSView {
+    private var applying = false
+    private var reapplyObserver: NSObjectProtocol?
+
     var height: CGFloat = 0 {
         didSet {
             guard height != oldValue else { return }
@@ -14,18 +24,34 @@ private final class SettingsSizerView: NSView {
 
     override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
+        if let reapplyObserver {
+            NotificationCenter.default.removeObserver(reapplyObserver)
+            self.reapplyObserver = nil
+        }
+        if let window {
+            reapplyObserver = NotificationCenter.default.addObserver(
+                forName: .macPowerReapplySettingsFrame,
+                object: window,
+                queue: .main
+            ) { [weak self] _ in
+                self?.apply()
+            }
+        }
         apply()
+        // Title-bar metrics can land a turn after the window is ordered front.
+        Task { @MainActor [weak self] in
+            self?.apply()
+        }
     }
 
     private func apply() {
-        guard height > 80, let window else { return }
+        guard !applying, height > 80, let window else { return }
         let scale = window.backingScaleFactor
         let snap = { (value: CGFloat) -> CGFloat in
             (value * scale).rounded() / scale
         }
         let targetHeight = min(snap(height), 620)
         let current = window.contentRect(forFrameRect: window.frame)
-        guard abs(current.width - 440) > 0.5 || abs(current.height - targetHeight) > 0.5 else { return }
         var content = current
         content.size = NSSize(width: 440, height: targetHeight)
         content.origin.y += current.height - targetHeight
@@ -37,11 +63,28 @@ private final class SettingsSizerView: NSView {
         frame.size.height = snap(frame.size.height)
         frame.origin.x = snap(frame.origin.x)
         frame.origin.y = top - frame.size.height
-        NSAnimationContext.beginGrouping()
-        NSAnimationContext.current.duration = 0
-        NSAnimationContext.current.allowsImplicitAnimation = false
-        window.setFrame(frame, display: false, animate: false)
-        NSAnimationContext.endGrouping()
+        let frameChanged = abs(window.frame.width - frame.width) > 0.5
+            || abs(window.frame.height - frame.height) > 0.5
+            || abs(window.frame.origin.x - frame.origin.x) > 0.5
+            || abs(window.frame.origin.y - frame.origin.y) > 0.5
+        applying = true
+        defer { applying = false }
+        if frameChanged {
+            NSAnimationContext.beginGrouping()
+            NSAnimationContext.current.duration = 0
+            NSAnimationContext.current.allowsImplicitAnimation = false
+            window.setFrame(frame, display: false, animate: false)
+            NSAnimationContext.endGrouping()
+        }
+        // macOS 15 can leave the content view under the title after the frame
+        // already matches. Pin it to the layout rect, which sits below the title.
+        guard let contentView = window.contentView else { return }
+        let layout = window.contentLayoutRect
+        guard abs(contentView.frame.minY - layout.minY) > 0.5
+            || abs(contentView.frame.height - layout.height) > 0.5
+            || abs(contentView.frame.width - layout.width) > 0.5
+        else { return }
+        contentView.frame = layout
     }
 }
 

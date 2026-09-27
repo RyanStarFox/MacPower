@@ -9,6 +9,7 @@ final class SystemMetricsService {
     private var lastCPU: Double?
     private var lastGPU: Double = 0
     private var lastMemory: Double = 0
+    private var lastPublished: SystemSnapshot?
     private var heavySampling = false
 
     var onChange: ((SystemSnapshot) -> Void)?
@@ -71,13 +72,16 @@ final class SystemMetricsService {
         }
 
         guard let lastCPU else { return }
-        onChange?(
-            SystemSnapshot(
-                cpuPercent: lastCPU,
-                gpuPercent: lastGPU,
-                memoryPercent: lastMemory
-            )
+        let next = SystemSnapshot(
+            cpuPercent: lastCPU,
+            gpuPercent: lastGPU,
+            memoryPercent: lastMemory
         )
+        if let lastPublished, lastPublished.sameRingDisplay(as: next) {
+            return
+        }
+        lastPublished = next
+        onChange?(next)
     }
 
     private static func cpuTicks() -> CPUTickSample.Ticks? {
