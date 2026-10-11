@@ -32,25 +32,27 @@ MacBook 菜单栏电池监视器。不进 Dock，点开后是 **Liquid Glass** �
 
 
 
-### Homebrew
+### 第一步：下载并安装
+
+从 [Releases](https://github.com/RyanStarFox/MacPower/releases) 下载最新的 `MacPower-*.dmg`，打开后把 **MacPower** 拖进 **应用程序**。
+
+也可以用 Homebrew：
 
 ```bash
 brew install --cask --no-quarantine ryanstarfox/tap/macpower
 ```
 
-安装包是 ad-hoc 签名、未公证，所以要加 `--no-quarantine`。官方 `homebrew/cask` 不接收这类绕过 Gatekeeper 的应用，这里用的是个人 tap。
+`--no-quarantine` 是必须的。官方 `homebrew/cask` 不接收这类安装包，这里用的是个人 tap。用这条命令安装时，第二步的拦截通常不会出现，第三步仍然要做。
 
-### 磁盘镜像
-
-1. 从 [Releases](https://github.com/RyanStarFox/MacPower/releases) 下载最新的 `MacPower-*.dmg`，打开后把 **MacPower** 拖进 **应用程序**。
-2. 双击打开 MacPower。系统会弹出下面这个窗口。点 **完成**，不要点 **移到废纸篓**。方法一和方法二都会先看到它。
+### 第二步：处理被系统拦住
 
 安装包没有经过 Apple 公证。我没有购买 Apple 开发者账号，个人账号每年 99 美元，所以系统会拦住第一次打开。这不是病毒。MacPower 是开源软件，代码都在仓库里，如果里面有病毒，看源码就能看出来。
 
+双击打开 MacPower。系统会弹出下面这个窗口。点 **完成**，不要点 **移到废纸篓**。方法一和方法二都会先看到它。
+
 ![未打开 MacPower.app](docs/install/gatekeeper-zh.png)
 
-3. 接着用方法一允许打开。方法一不行，再用方法二。
-4. 打开 **系统设置 → 菜单栏**，允许 **MacPower** 在菜单栏中显示，然后从「应用程序」启动。
+接着用方法一允许打开。方法一不行，再用方法二。
 
 #### 方法一：在系统设置里允许打开
 
@@ -65,6 +67,13 @@ brew install --cask --no-quarantine ryanstarfox/tap/macpower
 ```bash
 sudo xattr -rd com.apple.quarantine /Applications/MacPower.app
 ```
+
+### 第三步：在菜单栏里显示
+
+打开 **系统设置 → 菜单栏**。
+
+- 允许 **MacPower** 在菜单栏中显示，然后从「应用程序」启动。
+- 建议关掉系统自带的 **电池**。菜单栏只留 MacPower，避免两个电池图标叠在一起。这一项可以不关。
 
 ## 运行要求
 

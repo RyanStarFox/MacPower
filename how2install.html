@@ -15,18 +15,18 @@
 <body>
   <h1>How to install MacPower</h1>
   <p>MacPower is a menu-bar battery monitor. It does not appear in the Dock. It requires macOS 14 or later and an Apple silicon MacBook with a battery.</p>
-  <p>The disk image is not notarized by Apple. I do not have an Apple Developer account, which costs 99 USD a year, so macOS blocks the first launch. This is not a virus. MacPower is open source. The code is in the repository, and a virus in it would be visible there.</p>
 
-  <h2>Disk image</h2>
-  <ol>
-    <li>Open the <code>MacPower-*.dmg</code> in this folder and drag <strong>MacPower</strong> into <strong>Applications</strong>.</li>
-    <li>Double-click MacPower. macOS shows the window below. Click <strong>Done</strong>. Do not click <strong>Move to Trash</strong>. Both methods start after this window.</li>
-  </ol>
+  <h2>Step 1: Download and install</h2>
+  <p>Open the <code>MacPower-*.dmg</code> in this folder and drag <strong>MacPower</strong> into <strong>Applications</strong>.</p>
+  <p>You can skip the disk image and run this in Terminal instead:</p>
+  <pre><code>brew install --cask --no-quarantine ryanstarfox/tap/macpower</code></pre>
+  <p><code>--no-quarantine</code> is required. Official <code>homebrew/cask</code> does not accept this kind of package, so the command uses a personal tap. This command usually skips the block in step 2. Step 3 still applies.</p>
+
+  <h2>Step 2: If macOS blocks the app</h2>
+  <p>The disk image is not notarized by Apple. I do not have an Apple Developer account, which costs 99 USD a year, so macOS blocks the first launch. This is not a virus. MacPower is open source. The code is in the repository, and a virus in it would be visible there.</p>
+  <p>Double-click MacPower. macOS shows the window below. Click <strong>Done</strong>. Do not click <strong>Move to Trash</strong>. Both methods start after this window.</p>
   <p><img src="docs/install/gatekeeper-en.png" alt="MacPower.app Not Opened"></p>
-  <ol start="3">
-    <li>Then allow it with method 1. Use method 2 if method 1 does not work.</li>
-    <li>Open <strong>System Settings → Menu Bar</strong>, allow <strong>MacPower</strong> to appear in the menu bar, then launch it from Applications.</li>
-  </ol>
+  <p>Then allow it with method 1. Use method 2 if method 1 does not work.</p>
 
   <h3>Method 1: Allow it in System Settings</h3>
   <p>Open <strong>System Settings → Privacy &amp; Security</strong> and scroll the page to the bottom of the Security section. When you see <strong>“MacPower.app” was blocked to protect your Mac</strong>, click <strong>Open Anyway</strong> and confirm the prompt.</p>
@@ -36,9 +36,11 @@
   <p>Open Terminal, paste the command below, and press Enter. Nothing appears while you type the password. Press Enter when you finish:</p>
   <pre><code>sudo xattr -rd com.apple.quarantine /Applications/MacPower.app</code></pre>
 
-  <h2>Homebrew</h2>
-  <p>You can skip the disk image and run this in Terminal instead:</p>
-  <pre><code>brew install --cask --no-quarantine ryanstarfox/tap/macpower</code></pre>
-  <p><code>--no-quarantine</code> is required. Official <code>homebrew/cask</code> does not accept this kind of package, so the command uses a personal tap.</p>
+  <h2>Step 3: Show it in the menu bar</h2>
+  <p>Open <strong>System Settings → Menu Bar</strong>.</p>
+  <ul>
+    <li>Allow <strong>MacPower</strong> to appear in the menu bar, then launch it from Applications.</li>
+    <li>Turning off the built-in <strong>Battery</strong> item is recommended, so the menu bar shows one battery icon. You can leave the system icon on.</li>
+  </ul>
 </body>
 </html>

@@ -34,25 +34,27 @@ A menu-bar battery monitor for MacBook. It stays out of the Dock and opens a **L
 
 ## Install
 
-### Homebrew
+### Step 1: Download and install
+
+Download the latest `MacPower-*.dmg` from [Releases](https://github.com/RyanStarFox/MacPower/releases), open it, and drag **MacPower** into **Applications**.
+
+Or use Homebrew:
 
 ```bash
 brew install --cask --no-quarantine ryanstarfox/tap/macpower
 ```
 
-The disk image is ad-hoc signed and not notarized, so `--no-quarantine` is required. Official `homebrew/cask` does not accept a cask that has to bypass Gatekeeper; this command uses a personal tap.
+`--no-quarantine` is required. Official `homebrew/cask` does not accept this kind of package, so the command uses a personal tap. This command usually skips the block in step 2. Step 3 still applies.
 
-### Disk image
-
-1. Download the latest `MacPower-*.dmg` from [Releases](https://github.com/RyanStarFox/MacPower/releases), open it, and drag **MacPower** into **Applications**.
-2. Double-click MacPower. macOS shows the window below. Click **Done**. Do not click **Move to Trash**. Both methods start after this window.
+### Step 2: If macOS blocks the app
 
 The disk image is not notarized by Apple. I do not have an Apple Developer account, which costs 99 USD a year, so macOS blocks the first launch. This is not a virus. MacPower is open source. The code is in the repository, and a virus in it would be visible there.
 
+Double-click MacPower. macOS shows the window below. Click **Done**. Do not click **Move to Trash**. Both methods start after this window.
+
 ![MacPower.app Not Opened](docs/install/gatekeeper-en.png)
 
-3. Then allow it with method 1. Use method 2 if method 1 does not work.
-4. Open **System Settings → Menu Bar**, allow **MacPower** to appear in the menu bar, then launch it from Applications.
+Then allow it with method 1. Use method 2 if method 1 does not work.
 
 #### Method 1: Allow it in System Settings
 
@@ -67,6 +69,13 @@ Open Terminal, paste the command below, and press Enter. Nothing appears while y
 ```bash
 sudo xattr -rd com.apple.quarantine /Applications/MacPower.app
 ```
+
+### Step 3: Show it in the menu bar
+
+Open **System Settings → Menu Bar**.
+
+- Allow **MacPower** to appear in the menu bar, then launch it from Applications.
+- Turning off the built-in **Battery** item is recommended, so the menu bar shows one battery icon. You can leave the system icon on.
 
 ## Requirements
 
