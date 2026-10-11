@@ -30,6 +30,8 @@ MacBook 菜单栏电池监视器。不进 Dock，点开后是 **Liquid Glass** �
 
 ## 安装
 
+
+
 ### Homebrew
 
 ```bash
@@ -41,14 +43,28 @@ brew install --cask --no-quarantine ryanstarfox/tap/macpower
 ### 磁盘镜像
 
 1. 从 [Releases](https://github.com/RyanStarFox/MacPower/releases) 下载最新的 `MacPower-*.dmg`，打开后把 **MacPower** 拖进 **应用程序**。
-2. **修复损坏**（Release 为 ad-hoc 签名、未公证，下载后系统常会隔离）：
+2. 双击打开 MacPower。系统会弹出下面这个窗口。点 **完成**，不要点 **移到废纸篓**。方法一和方法二都会先看到它。
+
+安装包没有经过 Apple 公证。我没有购买 Apple 开发者账号，个人账号每年 99 美元，所以系统会拦住第一次打开。这不是病毒。MacPower 是开源软件，代码都在仓库里，如果里面有病毒，看源码就能看出来。
+
+![未打开 MacPower.app](docs/install/gatekeeper-zh.png)
+
+3. 接着用方法一允许打开。方法一不行，再用方法二。
+4. 打开 **系统设置 → 菜单栏**，允许 **MacPower** 在菜单栏中显示，然后从「应用程序」启动。
+
+#### 方法一：在系统设置里允许打开
+
+打开 **系统设置 → 隐私与安全**，把右边页面拉到「安全性」最下面。看到 **已阻止「MacPower.app」以保护 Mac** 后，点右边的 **仍要打开**，再按提示确认。
+
+![在隐私与安全中仍要打开](docs/install/privacy-zh.png)
+
+#### 方法二：用终端清除隔离
+
+打开「终端」，粘贴下面的命令并回车。输入密码时屏幕不会显示圆点，输完直接回车：
 
 ```bash
 sudo xattr -rd com.apple.quarantine /Applications/MacPower.app
 ```
-
-在「终端」中粘贴运行；输入密码时屏幕不会显示圆点，输完直接回车即可。
-3. 打开 **系统设置 → 菜单栏**，确保允许 **MacPower** 在菜单栏中显示，然后从「应用程序」启动。
 
 ## 运行要求
 
@@ -72,6 +88,32 @@ xcodebuild -project MacPower.xcodeproj -scheme MacPower -configuration Release -
 ```
 
 生成的 `.dmg` 在 `dist/`。
+
+## 发布后同步
+
+GitHub Release 发出去之后，在这台已经登录阿里云盘的 Mac 上再执行一次：
+
+```bash
+python3 scripts/sync_latest_release.py
+```
+
+同一次会做这三件事：
+
+- 把 GitHub 上的 `main` 和该版本 tag 推到 [Gitee](https://gitee.com/Ryan_LS_Wang/MacPower)，创建对应发行版，并上传 `MacPower-*.dmg`
+- 把安装包上传到阿里云盘备份盘 `/软件/MacPower`
+- 把安装包上传到百度网盘 `/apps/MacPower/releases/`
+
+Gitee 使用本机 `~/.netrc` 里的 `machine gitee.com`，私人令牌不要写进仓库。这个版本已经同步过时，命令会直接结束。
+
+安装说明是仓库根目录里的固定文件：`如何安装.txt`、`如何安装.md`、`如何安装.html`、`如何安装.docx`，以及英文的 `how2install.txt`、`how2install.md`、`how2install.html`、`how2install.docx`。内容不随版本变化，不随每次 Release 重复上传。
+
+百度的 refresh token 只授权一次。脚本刷新后会把新 token 存回本机，不用每次手动改。第一次，或 token 失效后：
+
+```bash
+python3 scripts/set_baidu_refresh_token.py
+```
+
+终端会打印授权网址和用户码。在浏览器打开那个网址，登录百度，输入用户码并确认。完成后 token 会写入本机。
 
 ## 许可证
 

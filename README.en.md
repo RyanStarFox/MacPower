@@ -45,14 +45,28 @@ The disk image is ad-hoc signed and not notarized, so `--no-quarantine` is requi
 ### Disk image
 
 1. Download the latest `MacPower-*.dmg` from [Releases](https://github.com/RyanStarFox/MacPower/releases), open it, and drag **MacPower** into **Applications**.
-2. **Fix “damaged” app** (Release builds are ad-hoc signed and not notarized, so Gatekeeper often quarantines them):
+2. Double-click MacPower. macOS shows the window below. Click **Done**. Do not click **Move to Trash**. Both methods start after this window.
+
+The disk image is not notarized by Apple. I do not have an Apple Developer account, which costs 99 USD a year, so macOS blocks the first launch. This is not a virus. MacPower is open source. The code is in the repository, and a virus in it would be visible there.
+
+![MacPower.app Not Opened](docs/install/gatekeeper-en.png)
+
+3. Then allow it with method 1. Use method 2 if method 1 does not work.
+4. Open **System Settings → Menu Bar**, allow **MacPower** to appear in the menu bar, then launch it from Applications.
+
+#### Method 1: Allow it in System Settings
+
+Open **System Settings → Privacy & Security** and scroll the page to the bottom of the Security section. When you see **“MacPower.app” was blocked to protect your Mac**, click **Open Anyway** and confirm the prompt.
+
+![Open Anyway in Privacy & Security](docs/install/privacy-en.png)
+
+#### Method 2: Clear quarantine in Terminal
+
+Open Terminal, paste the command below, and press Enter. Nothing appears while you type the password. Press Enter when you finish:
 
 ```bash
 sudo xattr -rd com.apple.quarantine /Applications/MacPower.app
 ```
-
-Paste that into Terminal and press Enter. Nothing appears while you type the password — that is normal.
-3. Open **System Settings → Menu Bar**, make sure **MacPower** is allowed to appear in the menu bar, then launch it from Applications.
 
 ## Requirements
 
@@ -74,6 +88,32 @@ Rebuild the Release disk image:
 ```
 
 The `.dmg` lands in `dist/`.
+
+## Mirror a release
+
+After the GitHub Release is published, run this once on the Mac that is signed in to Aliyun Drive:
+
+```bash
+python3 scripts/sync_latest_release.py
+```
+
+One run does all three:
+
+- Push GitHub `main` and that version tag to [Gitee](https://gitee.com/Ryan_LS_Wang/MacPower), create the release, and upload `MacPower-*.dmg`
+- Upload the disk image to Aliyun Drive backup `/软件/MacPower`
+- Upload the disk image to Baidu Netdisk `/apps/MacPower/releases/`
+
+Gitee reads `machine gitee.com` from `~/.netrc` on this Mac. Do not put the token in the repository. If this version is already mirrored, the command exits.
+
+Install notes live in the repository root: `如何安装.txt`, `如何安装.md`, `如何安装.html`, `如何安装.docx`, and the English files `how2install.txt`, `how2install.md`, `how2install.html`, `how2install.docx`. They do not change per version and are not uploaded again with each release.
+
+The Baidu refresh token is authorized once. The script saves the replacement token locally after each refresh. The first time, or after the token is rejected, run:
+
+```bash
+python3 scripts/set_baidu_refresh_token.py
+```
+
+The terminal prints a verification URL and a user code. Open that URL, sign in to Baidu, enter the code, and confirm. The token is then stored on this Mac.
 
 ## License
 

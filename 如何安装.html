@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>如何安装 MacPower</title>
+  <style>
+    body { font-family: "PingFang SC", "Microsoft YaHei", sans-serif; line-height: 1.6; max-width: 42rem; margin: 2rem auto; padding: 0 1.25rem; color: #1d1d1f; }
+    img { max-width: 100%; height: auto; border-radius: 8px; }
+    code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    pre { background: #f5f5f7; padding: 0.8rem 1rem; border-radius: 8px; overflow-x: auto; }
+    h1, h2, h3 { line-height: 1.25; }
+  </style>
+</head>
+<body>
+  <h1>如何安装 MacPower</h1>
+  <p>MacPower 是菜单栏电池监视器，不进 Dock。需要 macOS 14 或更高，以及带电池的 Apple 芯片 MacBook。</p>
+  <p>安装包没有经过 Apple 公证。我没有购买 Apple 开发者账号，个人账号每年 99 美元，所以系统会拦住第一次打开。这不是病毒。MacPower 是开源软件，代码都在仓库里，如果里面有病毒，看源码就能看出来。</p>
+
+  <h2>磁盘镜像</h2>
+  <ol>
+    <li>打开同目录里的 <code>MacPower-*.dmg</code>，把 <strong>MacPower</strong> 拖进 <strong>应用程序</strong>。</li>
+    <li>双击打开 MacPower。系统会弹出下面这个窗口。点 <strong>完成</strong>，不要点 <strong>移到废纸篓</strong>。方法一和方法二都会先看到它。</li>
+  </ol>
+  <p><img src="docs/install/gatekeeper-zh.png" alt="未打开 MacPower.app"></p>
+  <ol start="3">
+    <li>接着用方法一允许打开。方法一不行，再用方法二。</li>
+    <li>打开 <strong>系统设置 → 菜单栏</strong>，允许 <strong>MacPower</strong> 在菜单栏中显示，然后从「应用程序」启动。</li>
+  </ol>
+
+  <h3>方法一：在系统设置里允许打开</h3>
+  <p>打开 <strong>系统设置 → 隐私与安全</strong>，把右边页面拉到「安全性」最下面。看到 <strong>已阻止「MacPower.app」以保护 Mac</strong> 后，点右边的 <strong>仍要打开</strong>，再按提示确认。</p>
+  <p><img src="docs/install/privacy-zh.png" alt="在隐私与安全中仍要打开"></p>
+
+  <h3>方法二：用终端清除隔离</h3>
+  <p>打开「终端」，粘贴下面的命令并回车。输入密码时屏幕不会显示圆点，输完直接回车：</p>
+  <pre><code>sudo xattr -rd com.apple.quarantine /Applications/MacPower.app</code></pre>
+
+  <h2>Homebrew</h2>
+  <p>也可以不下载磁盘镜像，在终端执行：</p>
+  <pre><code>brew install --cask --no-quarantine ryanstarfox/tap/macpower</code></pre>
+  <p><code>--no-quarantine</code> 是必须的。官方 <code>homebrew/cask</code> 不接收这类安装包，这里用的是个人 tap。</p>
+</body>
+</html>
