@@ -424,11 +424,16 @@ final class PowerTelemetryService {
             missingCapacityWh: snapshot.missingCapacityWh,
             chargeWatts: snapshot.chargeWatts
         )
+        let emptyLoad = TimeEstimateService.drainWattsForEmptyEstimate(
+            flowMode: snapshot.flowMode,
+            dischargeWatts: snapshot.dischargeWatts,
+            averageLoadWatts: estimateLoadWatts ?? instantEstimateLoad
+        )
         snapshot.timeToEmptyMinutes = TimeEstimateService.timeToEmptyMinutes(
             isOnBattery: !snapshot.externalConnected || snapshot.flowMode == .discharging || snapshot.flowMode == .underpowered,
             systemMinutes: snapshot.systemTimeToEmptyMinutes,
             remainingCapacityWh: snapshot.remainingCapacityWh,
-            averageLoadWatts: estimateLoadWatts ?? instantEstimateLoad
+            averageLoadWatts: emptyLoad
         )
 
         // Panel closed: keep internal EMA state, but skip UI publishes when the

@@ -55,6 +55,7 @@ enum UpdateCheckPolicy {
 @MainActor
 final class UpdateChecker {
     static let githubRepoURL = URL(string: "https://github.com/RyanStarFox/MacPower")!
+    static let koFiURL = URL(string: "https://ko-fi.com/ryanstarfox")!
     static let latestReleaseURL = URL(string: "https://api.github.com/repos/RyanStarFox/MacPower/releases/latest")!
 
     private enum Keys {

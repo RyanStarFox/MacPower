@@ -356,6 +356,77 @@
         }
       }
     },
+    "energy.noExternalPower": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not plugged in"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未接入电源"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未接上電源"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "電源未接続"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "전원 미연결"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Non branché"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nicht am Netz"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin alimentación"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sem alimentação"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Non collegato"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Без питания"
+          }
+        }
+      }
+    },
     "energy.supplyPower": {
       "extractionState": "manual",
       "localizations": {
@@ -636,6 +707,77 @@
           "stringUnit": {
             "state": "translated",
             "value": "Расчёт…"
+          }
+        }
+      }
+    },
+    "estimate.charged": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fully charged"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已充满"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已充滿"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "充電完了"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "충전 완료"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chargé"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voll geladen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Carga completa"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Totalmente carregado"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Carica completa"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Полностью заряжен"
           }
         }
       }
@@ -3975,6 +4117,70 @@
             "value": "Движение энергии"
           }
         }
+      }
+    },
+    "settings.tab.about": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "About" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "关于" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "關於" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "情報" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "정보" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "À propos" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Info" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Info" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Sobre" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Info" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "О программе" } }
+      }
+    },
+    "settings.about.coffee": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Buy me a coffee" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "请我喝杯咖啡" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "請我喝杯咖啡" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "コーヒーをおごる" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "커피 한 잔" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Offrez-moi un café" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Spendier einen Kaffee" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Invítame a un café" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Pague-me um café" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Offrimi un caffè" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Купи мне кофе" } }
+      }
+    },
+    "settings.about.wechat": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "WeChat" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "微信" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "微信" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "WeChat" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "WeChat" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "WeChat" } },
+        "de": { "stringUnit": { "state": "translated", "value": "WeChat" } },
+        "es": { "stringUnit": { "state": "translated", "value": "WeChat" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "WeChat" } },
+        "it": { "stringUnit": { "state": "translated", "value": "WeChat" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "WeChat" } }
+      }
+    },
+    "settings.about.alipay": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Alipay" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "支付宝" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "支付寶" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Alipay" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Alipay" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Alipay" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Alipay" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Alipay" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Alipay" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Alipay" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Alipay" } }
       }
     },
     "settings.tab.flow": {

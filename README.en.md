@@ -124,6 +124,15 @@ python3 scripts/set_baidu_refresh_token.py
 
 The terminal prints a verification URL and a user code. Open that URL, sign in to Baidu, enter the code, and confirm. The token is then stored on this Mac.
 
+## Support
+
+[Buy me a coffee on Ko-fi](https://ko-fi.com/ryanstarfox). WeChat and Alipay are below.
+
+<p>
+  <img src="docs/support/wechat.jpg" width="220" alt="WeChat Pay">
+  <img src="docs/support/alipay.jpg" width="220" alt="Alipay">
+</p>
+
 ## License
 
 This project is licensed under the MIT License with the Commons Clause. You may use, modify, and distribute it free of charge, but you may not sell the software or monetize a product or service whose value derives substantially from its functionality. See [LICENSE](LICENSE).

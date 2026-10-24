@@ -9,8 +9,7 @@ extension Notification.Name {
 }
 
 /// macOS 15's hosting controller grows this window but will not shrink it when a
-/// shorter tab is shown. Apply the measured height in the same layout pass, with
-/// the title bar held still, so the resize is not a visible flash a frame later.
+/// shorter tab is shown. Apply the measured height with the title bar held still.
 private final class SettingsSizerView: NSView {
     private var applying = false
     private var reapplyObserver: NSObjectProtocol?
@@ -44,47 +43,110 @@ private final class SettingsSizerView: NSView {
         }
     }
 
+    /// Runs inside SwiftUI's layout pass, so the new frame and the new content
+    /// reach the screen in the same commit. Resizing a turn later shows the
+    /// grown area blank until the content catches up.
     private func apply() {
         guard !applying, height > 80, let window else { return }
+        defer { window.styleSettingsChrome() }
         let scale = window.backingScaleFactor
         let snap = { (value: CGFloat) -> CGFloat in
             (value * scale).rounded() / scale
         }
+        // The content view fills the whole window (title strip included), so
+        // the measured height is the frame height.
         let targetHeight = min(snap(height), 620)
-        let current = window.contentRect(forFrameRect: window.frame)
-        var content = current
-        content.size = NSSize(width: 440, height: targetHeight)
-        content.origin.y += current.height - targetHeight
-        var frame = window.frameRect(forContentRect: content)
         // Keep the title-bar top on a pixel so the tab row does not drift by a pixel
         // when the content height's fractional part changes.
-        let top = snap(frame.maxY)
-        frame.size.width = snap(frame.size.width)
-        frame.size.height = snap(frame.size.height)
-        frame.origin.x = snap(frame.origin.x)
-        frame.origin.y = top - frame.size.height
-        let frameChanged = abs(window.frame.width - frame.width) > 0.5
-            || abs(window.frame.height - frame.height) > 0.5
-            || abs(window.frame.origin.x - frame.origin.x) > 0.5
-            || abs(window.frame.origin.y - frame.origin.y) > 0.5
+        let top = snap(window.frame.maxY)
+        let frame = NSRect(
+            x: snap(window.frame.minX),
+            y: top - targetHeight,
+            width: 440,
+            height: targetHeight
+        )
+        let unchanged = abs(window.frame.width - frame.width) < 0.5
+            && abs(window.frame.height - frame.height) < 0.5
+            && abs(window.frame.origin.x - frame.origin.x) < 0.5
+            && abs(window.frame.origin.y - frame.origin.y) < 0.5
+        guard !unchanged else { return }
         applying = true
         defer { applying = false }
-        if frameChanged {
-            NSAnimationContext.beginGrouping()
-            NSAnimationContext.current.duration = 0
-            NSAnimationContext.current.allowsImplicitAnimation = false
-            window.setFrame(frame, display: false, animate: false)
-            NSAnimationContext.endGrouping()
+        NSAnimationContext.beginGrouping()
+        NSAnimationContext.current.duration = 0
+        NSAnimationContext.current.allowsImplicitAnimation = false
+        window.setFrame(frame, display: true, animate: false)
+        NSAnimationContext.endGrouping()
+    }
+}
+
+/// Observers holding the title bar's tint layers plain, keyed by layer.
+@MainActor private var titlebarTintPins: [ObjectIdentifier: [NSKeyValueObservation]] = [:]
+
+private func makePlain(_ layer: CALayer) {
+    guard layer.opacity != 1 || layer.filters?.isEmpty == false else { return }
+    CATransaction.begin()
+    CATransaction.setDisableActions(true)
+    layer.opacity = 1
+    layer.filters = nil
+    CATransaction.commit()
+}
+
+extension NSWindow {
+    /// The settings content paints a solid background, so the window's background
+    /// material and the title bar's blur add nothing visible.
+    func styleSettingsChrome() {
+        guard let themeFrame = contentView?.superview else { return }
+        for view in themeFrame.subviews where view is NSVisualEffectView {
+            view.isHidden = true
         }
-        // macOS 15 can leave the content view under the title after the frame
-        // already matches. Pin it to the layout rect, which sits below the title.
-        guard let contentView = window.contentView else { return }
-        let layout = window.contentLayoutRect
-        guard abs(contentView.frame.minY - layout.minY) > 0.5
-            || abs(contentView.frame.height - layout.height) > 0.5
-            || abs(contentView.frame.width - layout.width) > 0.5
-        else { return }
-        contentView.frame = layout
+        func hideBackdrops(in view: NSView) {
+            for sub in view.subviews {
+                if let layer = sub.layer, String(describing: type(of: layer)).contains("Backdrop") {
+                    sub.isHidden = true
+                } else {
+                    hideBackdrops(in: sub)
+                }
+            }
+        }
+        // The title bar's fill must stay: it covers the strip the compositor leaves
+        // black after the window grows. Its hairline over the tabs goes. Its tint is
+        // the window color, but drawn translucent and through a color filter that
+        // lifts it lighter than the window in dark mode, so it is held opaque and
+        // unfiltered (AppKit restores both after every resize).
+        func pinTint(_ layer: CALayer) {
+            makePlain(layer)
+            let id = ObjectIdentifier(layer)
+            guard titlebarTintPins[id] == nil else { return }
+            titlebarTintPins[id] = [
+                layer.observe(\.opacity) { layer, _ in makePlain(layer) },
+                layer.observe(\.filters) { layer, _ in makePlain(layer) },
+            ]
+        }
+        func styleTitlebarFill(in layer: CALayer) {
+            for sub in layer.sublayers ?? [] {
+                if sub.frame.height > 0, sub.frame.height <= 1, sub.frame.minY < 0 {
+                    sub.isHidden = true
+                } else if String(describing: type(of: sub)).contains("Backdrop"),
+                          sub.opacity < 1, sub.frame.width > 0 {
+                    pinTint(sub)
+                } else {
+                    styleTitlebarFill(in: sub)
+                }
+            }
+        }
+        for container in themeFrame.subviews {
+            let name = String(describing: type(of: container))
+            if name.contains("Pocket") {
+                container.isHidden = true
+            } else if name.contains("Titlebar") {
+                hideBackdrops(in: container)
+                for background in container.subviews
+                where String(describing: type(of: background)).contains("TitlebarBackground") {
+                    if let layer = background.layer { styleTitlebarFill(in: layer) }
+                }
+            }
+        }
     }
 }
 
@@ -105,7 +167,7 @@ private struct SettingsWindowSizer: NSViewRepresentable {
 
 struct SettingsView: View {
     private enum Pane: String, CaseIterable, Identifiable {
-        case general, menuBar, rings, flow
+        case general, menuBar, rings, flow, about
         var id: String { rawValue }
     }
 
@@ -140,7 +202,7 @@ struct SettingsView: View {
         VStack(spacing: 0) {
             VStack(spacing: 0) {
                 settingsTabPicker
-                    .padding(.top, 12)
+                    .padding(.top, Self.titlebarHeight + 12)
                     .padding(.bottom, 2)
 
                 Form {
@@ -149,6 +211,7 @@ struct SettingsView: View {
                     case .menuBar: menuBarSections
                     case .rings: ringsSections
                     case .flow: flowSections
+                    case .about: aboutSections
                     }
                 }
                 .formStyle(.grouped)
@@ -173,9 +236,15 @@ struct SettingsView: View {
             }
         }
         .frame(width: 440, alignment: .top)
-        .frame(maxHeight: hugHeight ? .infinity : 620, alignment: .top)
+        // A zero minimum keeps NSHostingView from growing the window on its own to
+        // fit a taller tab (and adding the title bar twice with a full-size content
+        // view). SettingsWindowSizer is the only thing that sizes this window.
+        .frame(minHeight: 0, maxHeight: hugHeight ? .infinity : 620, alignment: .top)
         .animation(nil, value: pane)
         .background(Color(nsColor: .windowBackgroundColor))
+        // Full-size content view: the title-bar inset is padded in by hand above,
+        // so SwiftUI's safe area cannot shift the tabs between panes.
+        .ignoresSafeArea()
         .environment(\.locale, appState.settings.resolvedLocale)
         .id(appState.settings.language)
         .onChange(of: appState.settings.language) { _, _ in
@@ -209,6 +278,12 @@ struct SettingsView: View {
         }
     }
 
+    /// Standard title-bar height on this OS, independent of any window's layout state.
+    private static let titlebarHeight: CGFloat = {
+        let content = NSRect(x: 0, y: 0, width: 100, height: 100)
+        return NSWindow.frameRect(forContentRect: content, styleMask: [.titled, .closable]).height - content.height
+    }()
+
     /// Content-sized and centered, so macOS 14/15 don't stretch the control to the window edges.
     private var settingsTabPicker: some View {
         Picker("settings.title", selection: $pane) {
@@ -216,6 +291,7 @@ struct SettingsView: View {
             Text("settings.section.icon").tag(Pane.menuBar)
             Text("settings.tab.rings").tag(Pane.rings)
             Text("settings.tab.flow").tag(Pane.flow)
+            Text("settings.tab.about").tag(Pane.about)
         }
         .pickerStyle(.segmented)
         .labelsHidden()
@@ -234,6 +310,8 @@ struct SettingsView: View {
             !ringTintEditorExpanded && !ringIconsEditorExpanded
         case .flow:
             !flowTintEditorExpanded && !flowIconsEditorExpanded
+        case .about:
+            true
         }
     }
 
@@ -275,21 +353,82 @@ struct SettingsView: View {
             .foregroundStyle(.red)
             .frame(maxWidth: .infinity)
         } footer: {
-            HStack(spacing: 6) {
-                Text(versionLabel)
-                Link(destination: UpdateChecker.githubRepoURL) {
-                    Image("GitHubMark")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 12, height: 12)
-                }
-                .accessibilityLabel("GitHub")
-            }
-            .font(.caption)
-            .foregroundStyle(.secondary)
-            .frame(maxWidth: .infinity)
-            .padding(.top, 2)
+            Text(versionLabel)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity)
+                .padding(.top, 2)
         }
+    }
+
+    @ViewBuilder
+    private var aboutSections: some View {
+        Section {
+            VStack(spacing: 16) {
+                HStack(spacing: 10) {
+                    aboutLink(
+                        title: "GitHub",
+                        url: UpdateChecker.githubRepoURL
+                    ) {
+                        Image("GitHubMark")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 15, height: 15)
+                    }
+                    aboutLink(
+                        title: Localization.string("settings.about.coffee", language: appState.settings.language),
+                        url: UpdateChecker.koFiURL
+                    ) {
+                        Image(systemName: "cup.and.saucer.fill")
+                            .font(.system(size: 14))
+                            .foregroundStyle(Color(red: 1, green: 0.37, blue: 0.36))
+                    }
+                }
+
+                HStack(alignment: .top, spacing: 12) {
+                    paymentCode(image: "WeChatPay", titleKey: "settings.about.wechat")
+                    paymentCode(image: "Alipay", titleKey: "settings.about.alipay")
+                }
+            }
+            .padding(.vertical, 4)
+        }
+    }
+
+    private func aboutLink<Icon: View>(title: String, url: URL, @ViewBuilder icon: () -> Icon) -> some View {
+        Link(destination: url) {
+            HStack(spacing: 7) {
+                icon()
+                Text(title)
+                    .font(.callout.weight(.medium))
+                    .lineLimit(1)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+            .background(.quaternary.opacity(0.55), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(title)
+    }
+
+    private func paymentCode(image: String, titleKey: String) -> some View {
+        let title = Localization.string(titleKey, language: appState.settings.language)
+        return VStack(spacing: 8) {
+            Image(image)
+                .resizable()
+                .scaledToFit()
+                .frame(maxHeight: 236)
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .strokeBorder(.primary.opacity(0.08), lineWidth: 1)
+                }
+            Text(title)
+                .font(.caption.weight(.medium))
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(title)
     }
 
     @ViewBuilder

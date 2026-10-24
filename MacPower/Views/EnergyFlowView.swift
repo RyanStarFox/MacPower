@@ -1234,34 +1234,23 @@ private struct EnergyFlowDiagram<Trailing: View>: View {
     }
 
     private var footer: some View {
-        VStack(alignment: .leading, spacing: 3) {
-            labeled(Localization.string("energy.supplyPower", language: language), value: supplyText)
-            // Always reserve this row: plugging in a charger should reveal its
-            // rating, not make the whole popover grow by one text line.
-            labeled(
-                Localization.string("energy.chargerRating", language: language),
-                value: String(format: "%.0f W", snapshot.adapterCeilingWatts)
-            )
-            .opacity(showsChargerRating ? 1 : 0)
-            .accessibilityHidden(!showsChargerRating)
-            .animation(.easeInOut(duration: 0.24), value: showsChargerRating)
+        // One stable row: charger rating while plugged in, otherwise “未接入电源”.
+        // Supply watts live on the ribbon already.
+        Group {
+            switch EnergyFlowFooterPresentation.forSnapshot(snapshot) {
+            case .unplugged:
+                labeled(
+                    Localization.string("energy.noExternalPower", language: language),
+                    value: ""
+                )
+            case .chargerRating(let watts):
+                labeled(
+                    Localization.string("energy.chargerRating", language: language),
+                    value: watts > 0 ? String(format: "%.0f W", watts) : "—"
+                )
+            }
         }
         .font(.caption)
-    }
-
-    private var showsChargerRating: Bool {
-        snapshot.adapterCeilingWatts > 0 && snapshot.externalConnected
-    }
-
-    private var supplyText: String {
-        switch snapshot.flowMode {
-        case .charging, .adapterHold:
-            return String(format: "%.1f W", snapshot.adapterInWatts)
-        case .discharging:
-            return String(format: "%.1f W", max(snapshot.dischargeWatts, snapshot.systemLoadWatts))
-        case .underpowered:
-            return String(format: "%.1f W", snapshot.adapterInWatts + snapshot.dischargeWatts)
-        }
     }
 
     private func labeled(_ title: String, value: String) -> some View {
@@ -1270,11 +1259,25 @@ private struct EnergyFlowDiagram<Trailing: View>: View {
                 .foregroundStyle(.secondary)
                 .autoFittingCaption(minimumScale: 0.7)
             Spacer(minLength: 8)
-            Text(value)
-                .font(.caption.monospacedDigit().weight(.medium))
-                .autoFittingCaption(minimumScale: 0.7)
-                .layoutPriority(1)
+            if !value.isEmpty {
+                Text(value)
+                    .font(.caption.monospacedDigit().weight(.medium))
+                    .autoFittingCaption(minimumScale: 0.7)
+                    .layoutPriority(1)
+            }
         }
+    }
+}
+
+enum EnergyFlowFooterPresentation: Equatable, Sendable {
+    case unplugged
+    case chargerRating(watts: Double)
+
+    static func forSnapshot(_ snapshot: PowerSnapshot) -> EnergyFlowFooterPresentation {
+        if snapshot.externalConnected {
+            return .chargerRating(watts: snapshot.adapterCeilingWatts)
+        }
+        return .unplugged
     }
 }
 

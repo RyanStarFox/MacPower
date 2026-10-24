@@ -49,4 +49,19 @@ enum TimeEstimateService: Sendable {
         }
         return minutesFromEnergy(wattHours: remainingCapacityWh, watts: averageLoadWatts)
     }
+
+    /// Underpowered draws from both adapter and battery. Only the battery's
+    /// discharge rate drains remaining capacity, so do not use whole-system load.
+    static func drainWattsForEmptyEstimate(
+        flowMode: EnergyFlowMode,
+        dischargeWatts: Double,
+        averageLoadWatts: Double
+    ) -> Double {
+        switch flowMode {
+        case .underpowered:
+            dischargeWatts
+        case .charging, .adapterHold, .discharging:
+            averageLoadWatts
+        }
+    }
 }

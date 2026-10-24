@@ -141,6 +141,7 @@ final class AppState {
         if let settingsWindow {
             settingsWindow.makeKeyAndOrderFront(nil)
             settingsWindow.orderFrontRegardless()
+            settingsWindow.styleSettingsChrome()
             NotificationCenter.default.post(name: .macPowerReapplySettingsFrame, object: settingsWindow)
             return
         }
@@ -150,11 +151,12 @@ final class AppState {
         // when a shorter tab is selected. SettingsWindowSizer sets the size.
         hosting.sizingOptions = []
         let window = NSWindow(contentViewController: hosting)
-        // Content starts below the title bar. fullSizeContentView let the title-bar
-        // material tint the tab row (a mismatched band on macOS 26+) and made
-        // SwiftUI's top safe area jump between panes on macOS 15.
-        window.styleMask = [.titled, .closable]
-        window.titlebarAppearsTransparent = true
+        // SwiftUI lays out under the title bar and pads the title-bar height in by
+        // hand, so the safe area cannot move the tabs. The title bar stays opaque:
+        // on macOS 27 a transparent one showed its strip black for up to half a
+        // second whenever the window grew for a taller tab.
+        window.styleMask = [.titled, .closable, .fullSizeContentView]
+        window.titlebarAppearsTransparent = false
         window.titlebarSeparatorStyle = .none
         window.backgroundColor = .windowBackgroundColor
         window.title = Localization.string("settings.title", language: settings.language)
@@ -178,6 +180,7 @@ final class AppState {
         window.layoutIfNeeded()
         hosting.view.layoutSubtreeIfNeeded()
         NotificationCenter.default.post(name: .macPowerReapplySettingsFrame, object: window)
+        window.styleSettingsChrome()
         settingsWindow = window
         observeSettingsWindowClose(window)
     }

@@ -124,6 +124,15 @@ python3 scripts/set_baidu_refresh_token.py
 
 终端会打印授权网址和用户码。在浏览器打开那个网址，登录百度，输入用户码并确认。完成后 token 会写入本机。
 
+## 支持
+
+[Ko-fi](https://ko-fi.com/ryanstarfox) 请我喝杯咖啡。也可以用微信或支付宝。
+
+<p>
+  <img src="docs/support/wechat.jpg" width="220" alt="微信支付">
+  <img src="docs/support/alipay.jpg" width="220" alt="支付宝">
+</p>
+
 ## 许可证
 
 本项目采用 MIT License，并附加 Commons Clause。允许免费使用、修改和分发，但不得销售本软件，或通过主要依赖本软件功能的产品或服务获利。详见 [LICENSE](LICENSE)。

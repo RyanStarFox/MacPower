@@ -711,6 +711,104 @@ final class TimeEstimateTests: XCTestCase {
         XCTAssertEqual(charging, 2 * 11.55, accuracy: 0.01)
         XCTAssertEqual(discharging, 2 * 11.55, accuracy: 0.01)
     }
+
+    func testPresentationShowsFullyChargedWhenPluggedAndFull() {
+        var snapshot = PowerSnapshot.empty
+        snapshot.hasBattery = true
+        snapshot.percent = 100
+        snapshot.externalConnected = true
+        snapshot.isCharging = false
+        snapshot.fullyCharged = true
+        snapshot.flowMode = .adapterHold
+        XCTAssertEqual(TimeEstimatePresentation.forSnapshot(snapshot), .fullyCharged)
+    }
+
+    func testPresentationShowsUntilFullWhileCharging() {
+        var snapshot = PowerSnapshot.empty
+        snapshot.hasBattery = true
+        snapshot.percent = 80
+        snapshot.externalConnected = true
+        snapshot.isCharging = true
+        snapshot.fullyCharged = false
+        snapshot.flowMode = .charging
+        XCTAssertEqual(TimeEstimatePresentation.forSnapshot(snapshot), .untilFull)
+    }
+
+    func testPresentationShowsRuntimeOnBattery() {
+        var snapshot = PowerSnapshot.empty
+        snapshot.hasBattery = true
+        snapshot.percent = 40
+        snapshot.externalConnected = false
+        snapshot.flowMode = .discharging
+        XCTAssertEqual(TimeEstimatePresentation.forSnapshot(snapshot), .runtime)
+    }
+
+    func testPresentationShowsRuntimeWhenUnderpowered() {
+        var snapshot = PowerSnapshot.empty
+        snapshot.hasBattery = true
+        snapshot.percent = 10
+        snapshot.externalConnected = true
+        snapshot.isCharging = false
+        snapshot.fullyCharged = false
+        snapshot.flowMode = .underpowered
+        XCTAssertEqual(TimeEstimatePresentation.forSnapshot(snapshot), .runtime)
+    }
+
+    func testUnderpoweredEmptyEstimateUsesBatteryDischarge() {
+        let watts = TimeEstimateService.drainWattsForEmptyEstimate(
+            flowMode: .underpowered,
+            dischargeWatts: 3.7,
+            averageLoadWatts: 19.7
+        )
+        XCTAssertEqual(watts, 3.7, accuracy: 0.001)
+        XCTAssertEqual(
+            TimeEstimateService.timeToEmptyMinutes(
+                isOnBattery: true,
+                systemMinutes: 65535,
+                remainingCapacityWh: 37,
+                averageLoadWatts: watts
+            ),
+            600
+        )
+    }
+
+    func testDischargingEmptyEstimateKeepsAverageLoad() {
+        let watts = TimeEstimateService.drainWattsForEmptyEstimate(
+            flowMode: .discharging,
+            dischargeWatts: 3.7,
+            averageLoadWatts: 19.7
+        )
+        XCTAssertEqual(watts, 19.7, accuracy: 0.001)
+    }
+}
+
+final class EnergyFlowFooterTests: XCTestCase {
+    func testUnpluggedShowsNoExternalPower() {
+        var snapshot = PowerSnapshot.empty
+        snapshot.externalConnected = false
+        snapshot.adapterCeilingWatts = 94
+        XCTAssertEqual(EnergyFlowFooterPresentation.forSnapshot(snapshot), .unplugged)
+    }
+
+    func testPluggedShowsChargerRating() {
+        var snapshot = PowerSnapshot.empty
+        snapshot.externalConnected = true
+        snapshot.adapterCeilingWatts = 94
+        XCTAssertEqual(
+            EnergyFlowFooterPresentation.forSnapshot(snapshot),
+            .chargerRating(watts: 94)
+        )
+    }
+
+    func testPluggedWithoutKnownRatingStillUsesChargerRow() {
+        var snapshot = PowerSnapshot.empty
+        snapshot.externalConnected = true
+        snapshot.adapterCeilingWatts = 0
+        XCTAssertEqual(
+            EnergyFlowFooterPresentation.forSnapshot(snapshot),
+            .chargerRating(watts: 0)
+        )
+    }
 }
 
 final class BatteryTimeFallbackTests: XCTestCase {
