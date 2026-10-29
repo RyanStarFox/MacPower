@@ -11,7 +11,9 @@ enum ReleaseNotesPanel {
         secondary: String? = nil,
         alternate: String? = nil,
         onPrimary: @escaping () -> Void = {},
-        onAlternate: @escaping () -> Void = {}
+        onAlternate: @escaping () -> Void = {},
+        onLater: @escaping () -> Void = {},
+        install: UpdateInstallController? = nil
     ) {
         let dismiss = ReleaseNotesDismissBox()
         let hosting = NSHostingView(rootView: ReleaseNotesCard(
@@ -21,7 +23,8 @@ enum ReleaseNotesPanel {
             primary: primary,
             secondary: secondary,
             alternate: alternate,
-            dismiss: dismiss
+            dismiss: dismiss,
+            install: install
         ))
         let window = ReleaseNotesWindow(
             contentRect: NSRect(x: 0, y: 0, width: 460, height: 360),
@@ -51,6 +54,18 @@ enum ReleaseNotesPanel {
         dismiss.window = window
         dismiss.onPrimary = onPrimary
         dismiss.onAlternate = onAlternate
+        dismiss.onLater = onLater
+        dismiss.resize = { [weak hosting, weak window] in
+            guard let hosting, let window else { return }
+            hosting.layoutSubtreeIfNeeded()
+            let fitted = hosting.fittingSize
+            let screenHeight = window.screen?.visibleFrame.height ?? NSScreen.main?.visibleFrame.height ?? 800
+            window.setContentSize(NSSize(
+                width: 460,
+                height: min(max(fitted.height, 120), screenHeight - 48)
+            ))
+        }
+        install?.onInstalled = { dismiss.installedAndQuit() }
 
         let restoreAccessory = NSApp.activationPolicy() == .accessory
         if restoreAccessory {
@@ -77,11 +92,20 @@ private final class ReleaseNotesDismissBox {
     weak var window: NSWindow?
     var onPrimary: () -> Void = {}
     var onAlternate: () -> Void = {}
+    var onLater: () -> Void = {}
+    var resize: (() -> Void)?
     private var closed = false
 
     func confirm() { finish(onPrimary) }
     func chooseAlternate() { finish(onAlternate) }
-    func dismiss() { finish {} }
+    func dismiss() { finish(onLater) }
+    func installedAndQuit() {
+        guard !closed else { return }
+        closed = true
+        NSApp.stopModal()
+        window?.orderOut(nil)
+        NSApp.terminate(nil)
+    }
 
     private func finish(_ action: () -> Void) {
         guard !closed else { return }
@@ -100,6 +124,7 @@ private struct ReleaseNotesCard: View {
     let secondary: String?
     let alternate: String?
     let dismiss: ReleaseNotesDismissBox
+    let install: UpdateInstallController?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -107,13 +132,47 @@ private struct ReleaseNotesCard: View {
             if !items.isEmpty {
                 notes
             }
+            if let status {
+                Text(status)
+                    .font(.system(size: 12))
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             buttons
         }
         .padding(20)
         .frame(width: 460)
         .fixedSize(horizontal: true, vertical: true)
         .background(Color(nsColor: .windowBackgroundColor))
-        .onExitCommand { dismiss.dismiss() }
+        .onExitCommand {
+            if install?.phase != .installing {
+                close()
+            }
+        }
+        .onChange(of: install?.phase) { _, _ in
+            DispatchQueue.main.async { dismiss.resize?() }
+        }
+    }
+
+    private var status: String? {
+        guard let install else { return nil }
+        switch install.phase {
+        case .ready:
+            return nil
+        case .downloading(.github):
+            return install.text.downloadingGitHub
+        case .downloading(.gitee):
+            return install.text.downloadingGitee
+        case .installing:
+            return install.text.installing
+        case .failed:
+            return install.text.failed
+        }
+    }
+
+    private func close() {
+        install?.cancel()
+        dismiss.dismiss()
     }
 
     private var header: some View {
@@ -163,7 +222,16 @@ private struct ReleaseNotesCard: View {
         }
     }
 
+    @ViewBuilder
     private var buttons: some View {
+        if let install {
+            installButtons(install)
+        } else {
+            linkButtons
+        }
+    }
+
+    private var linkButtons: some View {
         HStack(spacing: 8) {
             Spacer(minLength: 0)
             if let secondary {
@@ -175,6 +243,34 @@ private struct ReleaseNotesCard: View {
                 .buttonStyle(.borderedProminent)
             if let alternate {
                 Button(alternate) { dismiss.chooseAlternate() }
+            }
+        }
+        .controlSize(.large)
+    }
+
+    @ViewBuilder
+    private func installButtons(_ install: UpdateInstallController) -> some View {
+        HStack(spacing: 8) {
+            Spacer(minLength: 0)
+            if let secondary {
+                Button(secondary) { close() }
+                    .keyboardShortcut(.cancelAction)
+                    .disabled(install.phase == .installing)
+            }
+            switch install.phase {
+            case .ready, .downloading, .installing:
+                Button(install.text.update) { install.start() }
+                    .keyboardShortcut(.defaultAction)
+                    .buttonStyle(.borderedProminent)
+                    .disabled(install.phase != .ready)
+            case .failed:
+                Button(install.text.update) { install.start() }
+                    .keyboardShortcut(.defaultAction)
+                    .buttonStyle(.borderedProminent)
+                Button(primary) { dismiss.confirm() }
+                if let alternate {
+                    Button(alternate) { dismiss.chooseAlternate() }
+                }
             }
         }
         .controlSize(.large)

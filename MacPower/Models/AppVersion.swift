@@ -36,6 +36,7 @@ struct ReleaseNotes: Equatable, Sendable {
 
     static let markerStart = "<!-- macpower-notes"
     static let markerEnd = "-->"
+    static let shaMarkerStart = "<!-- macpower-sha256"
 
     static let current: ReleaseNotes = {
         guard let url = Bundle.main.url(forResource: "ReleaseNotes", withExtension: "json"),
@@ -56,6 +57,18 @@ struct ReleaseNotes: Equatable, Sendable {
               let decoded = try? JSONDecoder().decode([String: String].self, from: data)
         else { return ReleaseNotes(sections: [:]) }
         return ReleaseNotes(sections: decoded)
+    }
+
+    /// Lowercase hex digest published beside the notes in a GitHub release body.
+    static func sha256(in releaseBody: String) -> String? {
+        guard let start = releaseBody.range(of: shaMarkerStart),
+              let end = releaseBody.range(of: markerEnd, range: start.upperBound..<releaseBody.endIndex)
+        else { return nil }
+        let token = releaseBody[start.upperBound..<end.lowerBound]
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
+        guard token.count == 64, token.allSatisfy(\.isHexDigit) else { return nil }
+        return token
     }
 
     /// One visual row per bullet. Wrapped lines in the source stay with that bullet.

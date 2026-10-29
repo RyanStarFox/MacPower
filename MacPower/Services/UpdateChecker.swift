@@ -4,28 +4,57 @@ struct GitHubLatestRelease: Equatable, Sendable {
     var tagName: String
     var htmlURL: URL
     var notes: ReleaseNotes
+    var body: String
+    var assets: [ReleaseAsset]
+
+    var updateOffer: UpdatePackage.Offer? {
+        UpdatePackage.offer(tag: tagName, body: body, assets: assets)
+    }
 
     static func decode(_ data: Data) throws -> GitHubLatestRelease {
         let payload = try JSONDecoder().decode(Payload.self, from: data)
         guard let url = URL(string: payload.htmlURL) else {
             throw URLError(.badURL)
         }
+        let assets = (payload.assets ?? []).compactMap { asset -> ReleaseAsset? in
+            guard let url = URL(string: asset.browserDownloadURL) else { return nil }
+            return ReleaseAsset(name: asset.name, url: url)
+        }
         return GitHubLatestRelease(
             tagName: payload.tagName,
             htmlURL: url,
-            notes: ReleaseNotes.parse(releaseBody: payload.body ?? "")
+            notes: ReleaseNotes.parse(releaseBody: payload.body ?? ""),
+            body: payload.body ?? "",
+            assets: assets
         )
+    }
+
+    struct ReleaseAsset: Equatable, Sendable {
+        var name: String
+        var url: URL
     }
 
     private struct Payload: Decodable {
         let tagName: String
         let htmlURL: String
         let body: String?
+        let assets: [Asset]?
+
+        struct Asset: Decodable {
+            let name: String
+            let browserDownloadURL: String
+
+            enum CodingKeys: String, CodingKey {
+                case name
+                case browserDownloadURL = "browser_download_url"
+            }
+        }
 
         enum CodingKeys: String, CodingKey {
             case tagName = "tag_name"
             case htmlURL = "html_url"
             case body
+            case assets
         }
     }
 }
@@ -41,6 +70,11 @@ enum UpdateCheckReason: Sendable {
 
 enum UpdateCheckPolicy {
     static let interval: TimeInterval = 86_400
+
+    static func shouldPresentUpdate(latest: String, deferred: String?) -> Bool {
+        guard let deferred else { return true }
+        return AppVersion.isNewer(latest, than: deferred)
+    }
 
     static func shouldCheck(
         enabled: Bool,

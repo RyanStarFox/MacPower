@@ -20,6 +20,7 @@
 		4FFBD90B79C693E34CD8081F /* IconPackSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = C26090AEDCFA0FA04EE890E0 /* IconPackSettings.swift */; };
 		5C3C597B1BFA1822FD09B878 /* Compatibility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ED65D999AA01B5F39EEF59A /* Compatibility.swift */; };
 		5F595B872BFAA1196FE69194 /* UpdateChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0BE273AFEFD0F7B157013AE /* UpdateChecker.swift */; };
+		E4A18C0D9B2F47A6C5D81F33 /* UpdateInstaller.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7E2C91A4D6F4088A1C35E70 /* UpdateInstaller.swift */; };
 		683634EED54AA3FB20C4DBC6 /* EnergyFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A5D8AFD1B7F1B45F51B583B /* EnergyFlowView.swift */; };
 		6A4700B5CC53C0C3E8118460 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 88590B5A04281A553757B0B3 /* AppIcon.icon */; };
 		6F9C22DA2FCF1138F03E58BD /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4989CA67625E8BAE3ED36794 /* AppTheme.swift */; };
@@ -86,6 +87,7 @@
 		9C2FEFC39A66B680FA815B74 /* MacPower.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacPower.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E3AC898FC0E9E06A6F67EF0 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		A0BE273AFEFD0F7B157013AE /* UpdateChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateChecker.swift; sourceTree = "<group>"; };
+		B7E2C91A4D6F4088A1C35E70 /* UpdateInstaller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateInstaller.swift; sourceTree = "<group>"; };
 		A37FA8D0166A96191F3B552B /* PowerTelemetryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowerTelemetryService.swift; sourceTree = "<group>"; };
 		AA21DF4EFAFE0D26294AD728 /* MenuBarBatteryIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarBatteryIcon.swift; sourceTree = "<group>"; };
 		B07D3EE64903A4F05FF797FF /* EnergyMotionFrameRate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnergyMotionFrameRate.swift; sourceTree = "<group>"; };
@@ -135,6 +137,7 @@
 				657F5C7C59BE6E53B6C0E514 /* SystemMetricsService.swift */,
 				C2AFE15BB6E2593BA442FDA8 /* TimeEstimateService.swift */,
 				A0BE273AFEFD0F7B157013AE /* UpdateChecker.swift */,
+				B7E2C91A4D6F4088A1C35E70 /* UpdateInstaller.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -363,6 +366,7 @@
 				02568E8BE7F9038DBCF40765 /* TimeEstimateRow.swift in Sources */,
 				85D69FE970F34B47739CA0BD /* TimeEstimateService.swift in Sources */,
 				5F595B872BFAA1196FE69194 /* UpdateChecker.swift in Sources */,
+				E4A18C0D9B2F47A6C5D81F33 /* UpdateInstaller.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

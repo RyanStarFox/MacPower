@@ -2,7 +2,7 @@
 set -euo pipefail
 
 root="$(cd "$(dirname "$0")/.." && pwd)"
-version="${1:-1.3.0}"
+version="${1:-1.3.1}"
 derived="$root/dist/DerivedData"
 app="$derived/Build/Products/Release/MacPower.app"
 stage="$root/dist/dmg-root"
@@ -40,5 +40,14 @@ hdiutil create \
   -format UDZO \
   "$dmg"
 
+zip="$root/dist/MacPower-${version}.zip"
+rm -f "$zip"
+ditto -c -k --keepParent "$stage/MacPower.app" "$zip"
+checksum="$(shasum -a 256 "$zip" | awk '{print $1}')"
+
 echo "Created $dmg"
+echo "Created $zip"
+echo "<!-- macpower-sha256"
+echo "$checksum"
+echo "-->"
 codesign -dv --verbose=2 "$stage/MacPower.app" 2>&1 | head -20

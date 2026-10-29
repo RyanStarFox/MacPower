@@ -73,6 +73,13 @@ final class UpdateCheckPolicyTests: XCTestCase {
         XCTAssertTrue(UpdateCheckPolicy.shouldCheck(enabled: true, reason: .periodic, lastCheck: nil, now: now))
     }
 
+    func testDeferredUpdateStaysQuietUntilANewerRelease() {
+        XCTAssertFalse(UpdateCheckPolicy.shouldPresentUpdate(latest: "1.3.1", deferred: "v1.3.1"))
+        XCTAssertFalse(UpdateCheckPolicy.shouldPresentUpdate(latest: "v1.3.1", deferred: "1.3.1"))
+        XCTAssertTrue(UpdateCheckPolicy.shouldPresentUpdate(latest: "1.3.2", deferred: "1.3.1"))
+        XCTAssertTrue(UpdateCheckPolicy.shouldPresentUpdate(latest: "1.3.1", deferred: nil))
+    }
+
     func testPeriodicChecksAfterTwentyFourHours() {
         let now = Date(timeIntervalSince1970: 1_000_000)
         let stale = now.addingTimeInterval(-UpdateCheckPolicy.interval)
@@ -107,6 +114,48 @@ final class ReleaseNotesTests: XCTestCase {
         XCTAssertEqual(ReleaseNotes.paragraphs(in: notes), ["第一行比较长", "第二行 续在下一段"])
         XCTAssertEqual(ReleaseNotes.paragraphs(in: "1. Hello\n2) Next"), ["Hello", "Next"])
         XCTAssertTrue(ReleaseNotes.paragraphs(in: "   \n").isEmpty)
+    }
+
+    func testSha256MarkerReadsTheDigest() {
+        let digest = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+        let body = """
+        notes
+        <!-- macpower-sha256
+        \(digest)
+        -->
+        """
+        XCTAssertEqual(ReleaseNotes.sha256(in: body), digest)
+        XCTAssertNil(ReleaseNotes.sha256(in: "<!-- macpower-sha256\nnope\n-->"))
+    }
+
+    func testUpdateOfferUsesGitHubZipAndFallsBackToGiteeURL() {
+        let digest = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+        let body = "<!-- macpower-sha256 \(digest) -->"
+        let github = URL(string: "https://github.com/RyanStarFox/MacPower/releases/download/v1.3.1/MacPower-1.3.1.zip")!
+        let offer = UpdatePackage.offer(
+            tag: "v1.3.1",
+            body: body,
+            assets: [.init(name: "MacPower-1.3.1.zip", url: github), .init(name: "MacPower-1.3.1.dmg", url: github)]
+        )
+        XCTAssertEqual(offer?.sha256, digest)
+        XCTAssertEqual(offer?.githubZip, github)
+        XCTAssertEqual(
+            offer?.giteeZip.absoluteString,
+            "https://gitee.com/Ryan_LS_Wang/MacPower/releases/download/v1.3.1/MacPower-1.3.1.zip"
+        )
+        XCTAssertEqual(UpdatePackage.sourceOrder, [.github, .gitee])
+        XCTAssertEqual(UpdatePackage.stallTimeout, 15)
+        XCTAssertNil(UpdatePackage.offer(tag: "v1.3.1", body: body, assets: []))
+    }
+
+    func testFileSha256MatchesCryptoKit() throws {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("macpower-sha-\(UUID().uuidString)")
+        try Data("MacPower".utf8).write(to: url)
+        XCTAssertEqual(
+            UpdateInstaller.sha256Hex(of: url),
+            "d66e7cc8af522112be9c0b2c6d75a580552094ec4c74e1ce6b65c263e8643f2a"
+        )
+        try? FileManager.default.removeItem(at: url)
     }
 
     func testWhatsNewShowsWhenVersionChangesOrIsUnrecorded() {

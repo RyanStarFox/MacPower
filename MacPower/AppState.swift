@@ -80,6 +80,8 @@ final class AppState {
                 reason: reason,
                 currentVersion: version
             ) else { return }
+            let deferred = UserDefaults.standard.string(forKey: Self.deferredUpdateKey)
+            guard UpdateCheckPolicy.shouldPresentUpdate(latest: release.tagName, deferred: deferred) else { return }
             presentUpdateAlert(release: release, currentVersion: version, language: language)
         }
     }
@@ -114,23 +116,34 @@ final class AppState {
         currentVersion: String,
         language: AppLanguage
     ) {
+        let install = release.updateOffer.map { offer in
+            UpdateInstallController(
+                offer: offer,
+                text: UpdateInstallText(
+                    update: Localization.string("update.install.now", language: language),
+                    downloadingGitHub: Localization.string("update.install.downloading.github", language: language),
+                    downloadingGitee: Localization.string("update.install.downloading.gitee", language: language),
+                    installing: Localization.string("update.install.installing", language: language),
+                    failed: Localization.string("update.install.failed", language: language)
+                )
+            )
+        }
+        let messageKey = install == nil ? "update.available.message %@" : "update.available.installed %@"
         ReleaseNotesPanel.present(
             title: Localization.string(
                 "update.available.title %@",
                 language: language,
                 AppVersion.display(release.tagName)
             ),
-            message: Localization.string(
-                "update.available.message %@",
-                language: language,
-                currentVersion
-            ),
+            message: Localization.string(messageKey, language: language, currentVersion),
             notes: release.notes.text(for: language),
             primary: Localization.string("update.available.open", language: language),
             secondary: Localization.string("update.available.later", language: language),
             alternate: Localization.string("update.available.gitee", language: language),
             onPrimary: { NSWorkspace.shared.open(release.htmlURL) },
-            onAlternate: { NSWorkspace.shared.open(UpdateChecker.giteeReleaseURL(tag: release.tagName)) }
+            onAlternate: { NSWorkspace.shared.open(UpdateChecker.giteeReleaseURL(tag: release.tagName)) },
+            onLater: { UserDefaults.standard.set(release.tagName, forKey: Self.deferredUpdateKey) },
+            install: install
         )
     }
 
@@ -163,6 +176,7 @@ final class AppState {
     }
 
     private static let whatsNewKey = "lastLaunchedMarketingVersion"
+    private static let deferredUpdateKey = "deferredUpdateTag"
 
     func openSettings() {
         // Accessory (menu-bar-only) apps on macOS 15 often create the window but
