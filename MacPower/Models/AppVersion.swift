@@ -58,6 +58,36 @@ struct ReleaseNotes: Equatable, Sendable {
         return ReleaseNotes(sections: decoded)
     }
 
+    /// One visual row per bullet. Wrapped lines in the source stay with that bullet.
+    static func paragraphs(in text: String) -> [String] {
+        let lines = text
+            .split(whereSeparator: \.isNewline)
+            .map { String($0).trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
+        var items: [String] = []
+        for line in lines {
+            let stripped = stripMarker(line)
+            if stripped.isItem || items.isEmpty {
+                if !stripped.text.isEmpty { items.append(stripped.text) }
+            } else if !stripped.text.isEmpty {
+                items[items.count - 1] += " " + stripped.text
+            }
+        }
+        return items
+    }
+
+    private static func stripMarker(_ line: String) -> (text: String, isItem: Bool) {
+        let markers = ["•", "·", "●", "–", "—", "-", "*"]
+        for marker in markers where line.hasPrefix(marker) {
+            let rest = line.dropFirst(marker.count).trimmingCharacters(in: .whitespaces)
+            return (rest, true)
+        }
+        if let range = line.range(of: #"^\d+[.)]\s+"#, options: .regularExpression) {
+            return (String(line[range.upperBound...]).trimmingCharacters(in: .whitespaces), true)
+        }
+        return (line, false)
+    }
+
     func text(for language: AppLanguage) -> String {
         for key in Self.languageKeys(for: language) {
             if let text = sections[key]?.trimmingCharacters(in: .whitespacesAndNewlines), !text.isEmpty {

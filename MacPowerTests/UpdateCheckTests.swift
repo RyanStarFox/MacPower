@@ -102,6 +102,13 @@ final class ReleaseNotesTests: XCTestCase {
         XCTAssertEqual(notes.text(for: .simplifiedChinese), "你好")
     }
 
+    func testParagraphsKeepEachBulletOnItsOwnRow() {
+        let notes = "• 第一行比较长\n• 第二行\n续在下一段"
+        XCTAssertEqual(ReleaseNotes.paragraphs(in: notes), ["第一行比较长", "第二行 续在下一段"])
+        XCTAssertEqual(ReleaseNotes.paragraphs(in: "1. Hello\n2) Next"), ["Hello", "Next"])
+        XCTAssertTrue(ReleaseNotes.paragraphs(in: "   \n").isEmpty)
+    }
+
     func testWhatsNewShowsWhenVersionChangesOrIsUnrecorded() {
         XCTAssertTrue(ReleaseNotes.shouldPresentWhatsNew(stored: nil, current: "1.3.0"))
         XCTAssertTrue(ReleaseNotes.shouldPresentWhatsNew(stored: "1.2.14", current: "1.3.0"))

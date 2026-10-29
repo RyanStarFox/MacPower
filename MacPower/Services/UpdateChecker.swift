@@ -62,6 +62,17 @@ enum UpdateCheckPolicy {
 @MainActor
 final class UpdateChecker {
     static let githubRepoURL = URL(string: "https://github.com/RyanStarFox/MacPower")!
+    static let giteeRepoURL = URL(string: "https://gitee.com/Ryan_LS_Wang/MacPower")!
+
+    static func giteeReleaseURL(tag: String) -> URL {
+        var name = tag.trimmingCharacters(in: .whitespacesAndNewlines)
+        if name.first != "v" && name.first != "V" {
+            name = "v" + name
+        }
+        let allowed = CharacterSet.urlPathAllowed
+        let encoded = name.addingPercentEncoding(withAllowedCharacters: allowed) ?? name
+        return URL(string: "https://gitee.com/Ryan_LS_Wang/MacPower/releases/tag/\(encoded)")!
+    }
     static let koFiURL = URL(string: "https://ko-fi.com/ryanstarfox")!
     static let latestReleaseURL = URL(string: "https://api.github.com/repos/RyanStarFox/MacPower/releases/latest")!
 

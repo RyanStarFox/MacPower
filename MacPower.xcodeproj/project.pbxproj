@@ -41,6 +41,7 @@
 		CE824792B085DE3B56568E98 /* MenuBarIconStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = C238426EC73D173324F283A9 /* MenuBarIconStyle.swift */; };
 		D00A2FB9CA62CEB4F9D8AE67 /* PopoverRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 567E626D5987780BEB24265E /* PopoverRootView.swift */; };
 		DC0EB15541D10D69D1D8FB28 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F32418AF410C0C43E82CEC2 /* SettingsView.swift */; };
+		8E4C1A90B7D24F6E9A3C5B12 /* ReleaseNotesPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F7A2D18C6B54E90A1D8C4E6 /* ReleaseNotesPanel.swift */; };
 		EAB0CFD52F0066DD540EAB32 /* GlyphSlotView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ADCA90FA9D5D89AE86F9600 /* GlyphSlotView.swift */; };
 		F49AC23404C038E06308DDDA /* PowerSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 424B895D8EAD698D2709E1C4 /* PowerSnapshot.swift */; };
 		F676AEA3B2252403F2114D1F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 04FD5D63D480A11EE0E91E88 /* Assets.xcassets */; };
@@ -80,6 +81,7 @@
 		7A5D8AFD1B7F1B45F51B583B /* EnergyFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnergyFlowView.swift; sourceTree = "<group>"; };
 		7CE2A6B6480F8B121ADADF81 /* MacPower.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MacPower.entitlements; sourceTree = "<group>"; };
 		7F32418AF410C0C43E82CEC2 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		3F7A2D18C6B54E90A1D8C4E6 /* ReleaseNotesPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReleaseNotesPanel.swift; sourceTree = "<group>"; };
 		88590B5A04281A553757B0B3 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		9C2FEFC39A66B680FA815B74 /* MacPower.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacPower.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E3AC898FC0E9E06A6F67EF0 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
@@ -146,6 +148,7 @@
 				AA21DF4EFAFE0D26294AD728 /* MenuBarBatteryIcon.swift */,
 				567E626D5987780BEB24265E /* PopoverRootView.swift */,
 				7F32418AF410C0C43E82CEC2 /* SettingsView.swift */,
+				3F7A2D18C6B54E90A1D8C4E6 /* ReleaseNotesPanel.swift */,
 				2A87ED6CEDCC37BA32FEFD25 /* StatusRingView.swift */,
 				D014F62CBF5CA300F430CDA1 /* TimeEstimateRow.swift */,
 			);
@@ -351,6 +354,7 @@
 				C4FABB659148ED0D35A073E7 /* ReadmeAssetCapture.swift in Sources */,
 				15EF3D8359D1897EFCDD17C6 /* SavedTintLibrary.swift in Sources */,
 				DC0EB15541D10D69D1D8FB28 /* SettingsView.swift in Sources */,
+				8E4C1A90B7D24F6E9A3C5B12 /* ReleaseNotesPanel.swift in Sources */,
 				CE35A94AAA802FA535FAFB65 /* StatusItemController.swift in Sources */,
 				FD176A1FA9DE4D0BCEBC6FD9 /* StatusRingView.swift in Sources */,
 				9C2C68B2B7510476A25638C2 /* SystemMetricsService.swift in Sources */,
