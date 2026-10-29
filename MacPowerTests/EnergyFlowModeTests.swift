@@ -624,7 +624,7 @@ final class LocalizationTests: XCTestCase {
         XCTAssertEqual(Localization.string("settings.tab.rings", language: .simplifiedChinese), "圆环")
         XCTAssertEqual(Localization.string("settings.tab.flow", language: .simplifiedChinese), "能量流")
         XCTAssertEqual(Localization.string("settings.tab.rings", language: .english), "Rings")
-        XCTAssertEqual(Localization.string("settings.tab.flow", language: .english), "Energy Flow")
+        XCTAssertEqual(Localization.string("settings.tab.flow", language: .english), "Energy")
         XCTAssertEqual(Localization.string("settings.section.general", language: .simplifiedChinese), "通用")
         XCTAssertEqual(Localization.string("settings.section.icon", language: .simplifiedChinese), "菜单栏")
         XCTAssertEqual(Localization.string("settings.icon.border", language: .simplifiedChinese), "边框")
@@ -1189,6 +1189,33 @@ final class RingColorTests: XCTestCase {
         XCTAssertEqual(scheme.fillSwatches(percent: 100).left, .systemRed)
     }
 
+    func testLegacyRingTintJSONBecomesColorCatalog() throws {
+        struct LegacyRingTint: Codable {
+            var preset: PopoverTintPreset
+            var battery: ValueTintScheme
+            var cpu: ValueTintScheme
+            var gpu: ValueTintScheme
+            var memory: ValueTintScheme
+        }
+        let load = ValueTintScheme.gradientLoad
+        let legacy = LegacyRingTint(
+            preset: .gradient,
+            battery: .gradientBattery,
+            cpu: load,
+            gpu: load,
+            memory: load
+        )
+        let decoded = try JSONDecoder().decode(RingTintSettings.self, from: JSONEncoder().encode(legacy))
+        XCTAssertEqual(decoded.preset, .gradient)
+        XCTAssertEqual(decoded.battery.bands.map(\.blend), [.gradient])
+        XCTAssertEqual(decoded.cpu.bands.map(\.blend), [.gradient])
+        XCTAssertEqual(decoded.scheme(for: .disk).bands.map(\.highLeft), decoded.memory.bands.map(\.highLeft))
+        XCTAssertEqual(decoded.scheme(forSegment: .download).bands.map(\.blend), [.gradient])
+        let stored = try JSONDecoder().decode(RingTintSettings.self, from: JSONEncoder().encode(decoded))
+        XCTAssertEqual(stored.battery.bands.map(\.blend), [.gradient])
+        XCTAssertEqual(stored.scheme(forSegment: .upload).bands.map(\.blend), [.gradient])
+    }
+
     func testRingTintEditingForksCustom() {
         var tint = RingTintSettings.preset(.semantic)
         XCTAssertEqual(tint.preset, .semantic)
@@ -1219,6 +1246,36 @@ final class RingColorTests: XCTestCase {
         ])
         let mixedStops = TintSchemeMerge.bands(from: [a, c])
         XCTAssertNil(mixedStops[0].throughPercent)
+    }
+
+    func testRingColorCatalogEditsStaySharedUntilReassigned() {
+        var tint = RingTintSettings.preset(.gradient)
+        let shared = tint.assignments[.cpu]
+        XCTAssertEqual(tint.assignments[.gpu], shared)
+        XCTAssertEqual(tint.assignments[.memory], shared)
+        tint = tint.updatingColor(id: shared!, scheme: tint.cpu.replacingBand(at: 0) { $0.throughPercent = 33 })
+        XCTAssertEqual(tint.preset, .custom)
+        XCTAssertEqual(tint.cpu.sortedBands[0].throughPercent, 33)
+        XCTAssertEqual(tint.gpu.sortedBands[0].throughPercent, 33)
+        XCTAssertEqual(tint.memory.sortedBands[0].throughPercent, 33)
+        XCTAssertNotEqual(tint.battery.sortedBands[0].throughPercent, 33)
+
+        let batteryID = tint.assignments[.battery]!
+        tint = tint.assigning(.disk, to: batteryID)
+        XCTAssertEqual(tint.assignments[.disk], batteryID)
+        XCTAssertEqual(tint.assignments[.memoryPressure], shared)
+        XCTAssertEqual(tint.scheme(for: .disk).sortedBands[0].throughPercent, tint.battery.sortedBands[0].throughPercent)
+
+        let before = tint.colors.count
+        tint = tint.addingColor(copying: batteryID)
+        XCTAssertEqual(tint.colors.count, before + 1)
+        XCTAssertEqual(Set(tint.assignments.values).count, before)
+
+        let added = tint.colors.last!.id
+        tint = tint.assigning(.upload, to: added)
+        tint = tint.removingColor(id: added)
+        XCTAssertNotEqual(tint.assignments[.upload], added)
+        XCTAssertTrue(tint.colors.contains { $0.id == tint.assignments[.upload] })
     }
 
     func testRingTintMapAllUpdatesFourRings() {

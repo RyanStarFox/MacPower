@@ -150,6 +150,26 @@ struct ValueTintScheme: Codable, Equatable, Sendable {
         ValueTintScheme(bands: [MenuBarTintBand(throughPercent: 100, swatch: swatch)])
     }
 
+    /// Download ring: blue on the left, lighter blue on the right.
+    static let downloadSpeed = ValueTintScheme(bands: [
+        MenuBarTintBand(
+            throughPercent: 100,
+            swatch: .from(color: Color(red: 0.45, green: 0.84, blue: 1)),
+            blend: .gradient,
+            highLeft: .from(color: Color(red: 0.27, green: 0.58, blue: 0.98))
+        )
+    ])
+
+    /// Upload ring: orange on the left, lighter orange on the right.
+    static let uploadSpeed = ValueTintScheme(bands: [
+        MenuBarTintBand(
+            throughPercent: 100,
+            swatch: .from(color: Color(red: 1, green: 0.78, blue: 0.38)),
+            blend: .gradient,
+            highLeft: .from(color: Color(red: 0.98, green: 0.58, blue: 0.24))
+        )
+    ])
+
     /// Battery ring defaults: ≤10 red, ≤25 orange, ≤40 yellow, else green.
     static func batteryLevel(red: MenuBarTintSwatch, orange: MenuBarTintSwatch, yellow: MenuBarTintSwatch, green: MenuBarTintSwatch) -> ValueTintScheme {
         ValueTintScheme(bands: [
@@ -245,9 +265,12 @@ struct ValueTintScheme: Codable, Equatable, Sendable {
 }
 
 enum RingKind: String, CaseIterable, Identifiable, Codable, Sendable {
-    case battery, cpu, gpu, memory
+    case battery, cpu, gpu, memory, disk, memoryPressure, swap
 
     var id: String { rawValue }
+
+    /// Kinds whose glyph can be edited. Extra rings keep the memory glyph.
+    static let customizable: [RingKind] = [.battery, .cpu, .gpu, .memory]
 
     var localizationKey: String {
         switch self {
@@ -255,32 +278,52 @@ enum RingKind: String, CaseIterable, Identifiable, Codable, Sendable {
         case .cpu: "ring.cpu"
         case .gpu: "ring.gpu"
         case .memory: "ring.memory"
+        case .disk: "ring.disk"
+        case .memoryPressure: "ring.pressure"
+        case .swap: "ring.swap"
+        }
+    }
+
+    var captionKey: String {
+        switch self {
+        case .battery: "ring.caption.battery %lld"
+        case .cpu: "ring.caption.cpu %lld"
+        case .gpu: "ring.caption.gpu %lld"
+        case .memory: "ring.caption.memory %lld"
+        case .disk: "ring.caption.disk %lld"
+        case .memoryPressure: "ring.caption.pressure %lld"
+        case .swap: "ring.caption.swap %lld"
         }
     }
 }
 
-enum RingEditorTarget: String, CaseIterable, Identifiable, Sendable {
-    case battery, cpu, gpu, memory, all
+enum RingOddRow: String, CaseIterable, Identifiable, Sendable {
+    case stagger
+    case align
 
     var id: String { rawValue }
 
     var localizationKey: String {
         switch self {
-        case .battery: "ring.battery"
-        case .cpu: "ring.cpu"
-        case .gpu: "ring.gpu"
-        case .memory: "ring.memory"
-        case .all: "settings.tint.selection.all"
+        case .stagger: "settings.rings.oddStagger"
+        case .align: "settings.rings.oddAlign"
         }
     }
+}
 
-    var ring: RingKind? {
+enum RingSlot: String, CaseIterable, Identifiable, Codable, Sendable {
+    case battery, cpu, gpu, memory, disk, memoryPressure, swap, download, upload, speedPair
+
+    var id: String { rawValue }
+
+    var metric: RingKind? { RingKind(rawValue: rawValue) }
+
+    var localizationKey: String {
         switch self {
-        case .battery: .battery
-        case .cpu: .cpu
-        case .gpu: .gpu
-        case .memory: .memory
-        case .all: nil
+        case .download: "settings.rings.download"
+        case .upload: "settings.rings.upload"
+        case .speedPair: "settings.rings.speedPair"
+        default: metric?.localizationKey ?? rawValue
         }
     }
 }
@@ -334,12 +377,43 @@ enum PopoverTintPreset: String, CaseIterable, Identifiable, Codable, Sendable {
     }
 }
 
+/// One reusable ring color. A solid, a slide, a gradient, and a sliding gradient are all one scheme.
+struct RingColor: Codable, Equatable, Identifiable, Sendable {
+    var id: UUID
+    var scheme: ValueTintScheme
+}
+
+/// Which catalog color a ring segment paints with.
+enum RingColorSegment: String, Codable, CaseIterable, Identifiable, Sendable {
+    case battery, cpu, gpu, memory, disk, memoryPressure, swap, download, upload
+
+    var id: String { rawValue }
+
+    init(_ kind: RingKind) {
+        self = RingColorSegment(rawValue: kind.rawValue) ?? .memory
+    }
+
+    var localizationKey: String {
+        switch self {
+        case .battery: "ring.battery"
+        case .cpu: "ring.cpu"
+        case .gpu: "ring.gpu"
+        case .memory: "ring.memory"
+        case .disk: "ring.disk"
+        case .memoryPressure: "ring.pressure"
+        case .swap: "ring.swap"
+        case .download: "settings.rings.download"
+        case .upload: "settings.rings.upload"
+        }
+    }
+}
+
 struct RingTintSettings: Codable, Equatable, Sendable {
     var preset: PopoverTintPreset
-    var battery: ValueTintScheme
-    var cpu: ValueTintScheme
-    var gpu: ValueTintScheme
-    var memory: ValueTintScheme
+    /// Color catalog. Several segments may share one entry.
+    var colors: [RingColor]
+    /// Segment → `colors` id.
+    var assignments: [RingColorSegment: UUID]
 
     static let semantic = RingTintSettings.preset(.semantic)
     static let system = RingTintSettings.preset(.system)
@@ -348,6 +422,14 @@ struct RingTintSettings: Codable, Equatable, Sendable {
     static let smooth = RingTintSettings.preset(.smooth)
     static let gradient = RingTintSettings.preset(.gradient)
     static let glide = RingTintSettings.preset(.glide)
+
+    private static let editableSegments: [RingColorSegment] = [.battery, .cpu, .gpu, .memory]
+    private static let memoryFollowers: [RingColorSegment] = [.disk, .memoryPressure, .swap]
+
+    var battery: ValueTintScheme { scheme(forSegment: .battery) }
+    var cpu: ValueTintScheme { scheme(forSegment: .cpu) }
+    var gpu: ValueTintScheme { scheme(forSegment: .gpu) }
+    var memory: ValueTintScheme { scheme(forSegment: .memory) }
 
     static func preset(_ preset: PopoverTintPreset) -> RingTintSettings {
         switch preset {
@@ -361,13 +443,7 @@ struct RingTintSettings: Codable, Equatable, Sendable {
             let green = MenuBarTintSwatch.from(color: theme.charging)
             let battery = ValueTintScheme.batteryLevel(red: red, orange: orange, yellow: yellow, green: green)
             let load = ValueTintScheme.loadLevel(green: green, yellow: yellow, orange: orange, red: red)
-            return RingTintSettings(
-                preset: preset,
-                battery: battery,
-                cpu: load,
-                gpu: load,
-                memory: load
-            )
+            return RingTintSettings(preset: preset, battery: battery, cpu: load, gpu: load, memory: load)
         case .smooth:
             return RingTintSettings(
                 preset: .smooth,
@@ -395,13 +471,55 @@ struct RingTintSettings: Codable, Equatable, Sendable {
         }
     }
 
-    func scheme(for kind: RingKind) -> ValueTintScheme {
-        switch kind {
-        case .battery: battery
-        case .cpu: cpu
-        case .gpu: gpu
-        case .memory: memory
+    init(
+        preset: PopoverTintPreset,
+        battery: ValueTintScheme,
+        cpu: ValueTintScheme,
+        gpu: ValueTintScheme,
+        memory: ValueTintScheme,
+        download: ValueTintScheme = .downloadSpeed,
+        upload: ValueTintScheme = .uploadSpeed
+    ) {
+        self.preset = preset
+        var colors: [RingColor] = []
+        func adopt(_ scheme: ValueTintScheme) -> UUID {
+            let normalized = scheme.normalized()
+            if let existing = colors.first(where: { $0.scheme == normalized }) {
+                return existing.id
+            }
+            let id = UUID()
+            colors.append(RingColor(id: id, scheme: normalized))
+            return id
         }
+        let batteryID = adopt(battery)
+        let cpuID = adopt(cpu)
+        let gpuID = adopt(gpu)
+        let memoryID = adopt(memory)
+        let downloadID = adopt(download)
+        let uploadID = adopt(upload)
+        self.colors = colors
+        assignments = [
+            .battery: batteryID,
+            .cpu: cpuID,
+            .gpu: gpuID,
+            .memory: memoryID,
+            .disk: memoryID,
+            .memoryPressure: memoryID,
+            .swap: memoryID,
+            .download: downloadID,
+            .upload: uploadID,
+        ]
+    }
+
+    func scheme(for kind: RingKind) -> ValueTintScheme {
+        scheme(forSegment: RingColorSegment(kind))
+    }
+
+    func scheme(forSegment segment: RingColorSegment) -> ValueTintScheme {
+        if let id = assignments[segment], let color = colors.first(where: { $0.id == id }) {
+            return color.scheme
+        }
+        return colors.first?.scheme ?? .constant(.systemGreen)
     }
 
     func markedCustom() -> RingTintSettings {
@@ -412,45 +530,206 @@ struct RingTintSettings: Codable, Equatable, Sendable {
 
     func replacing(_ kind: RingKind, with scheme: ValueTintScheme) -> RingTintSettings {
         var copy = markedCustom()
-        switch kind {
-        case .battery: copy.battery = scheme.normalized()
-        case .cpu: copy.cpu = scheme.normalized()
-        case .gpu: copy.gpu = scheme.normalized()
-        case .memory: copy.memory = scheme.normalized()
-        }
+        let segment = RingColorSegment(kind)
+        let followers = segment == .memory ? Self.memoryFollowers : []
+        copy.write(scheme.normalized(), to: segment, followers: followers)
         return copy
     }
 
     func replacingAll(with scheme: ValueTintScheme) -> RingTintSettings {
-        let normalized = scheme.normalized()
         var copy = markedCustom()
-        copy.battery = normalized
-        copy.cpu = normalized
-        copy.gpu = normalized
-        copy.memory = normalized
+        let id = UUID()
+        copy.colors.append(RingColor(id: id, scheme: scheme.normalized()))
+        for segment in Self.editableSegments + Self.memoryFollowers {
+            copy.assignments[segment] = id
+        }
+        copy.pruneUnusedColors()
         return copy
     }
 
+    /// Transforms each catalog color used by the battery, CPU, GPU, or memory segment once.
+    /// Shared segments stay shared.
     func mapAll(_ transform: (ValueTintScheme) -> ValueTintScheme) -> RingTintSettings {
         var copy = markedCustom()
-        copy.battery = transform(battery).normalized()
-        copy.cpu = transform(cpu).normalized()
-        copy.gpu = transform(gpu).normalized()
-        copy.memory = transform(memory).normalized()
+        let ids = Set(Self.editableSegments.compactMap { copy.assignments[$0] })
+        copy.colors = copy.colors.map { color in
+            guard ids.contains(color.id) else { return color }
+            var next = color
+            next.scheme = transform(color.scheme).normalized()
+            return next
+        }
         return copy
     }
 
     var allSchemes: [ValueTintScheme] { [battery, cpu, gpu, memory] }
 
+    /// Edits one catalog entry. Every segment pointing at it changes together.
+    func updatingColor(id: UUID, scheme: ValueTintScheme) -> RingTintSettings {
+        var copy = markedCustom()
+        guard let index = copy.colors.firstIndex(where: { $0.id == id }) else { return self }
+        copy.colors[index].scheme = scheme.normalized()
+        return copy
+    }
+
+    func assigning(_ segment: RingColorSegment, to colorID: UUID) -> RingTintSettings {
+        guard colors.contains(where: { $0.id == colorID }) else { return self }
+        var copy = markedCustom()
+        copy.assignments[segment] = colorID
+        return copy
+    }
+
+    /// Appends a copy of `sourceID`, or of the last color. The copy stays unused until a segment selects it.
+    func addingColor(copying sourceID: UUID?) -> RingTintSettings {
+        var copy = markedCustom()
+        let source = copy.colors.first(where: { $0.id == sourceID }) ?? copy.colors.last
+        let scheme = source?.scheme ?? .constant(.systemGreen)
+        copy.colors.append(RingColor(id: UUID(), scheme: scheme))
+        return copy
+    }
+
+    /// Drops a catalog entry. Segments that used it move to another remaining color.
+    func removingColor(id: UUID) -> RingTintSettings {
+        guard colors.count > 1, let fallback = colors.first(where: { $0.id != id }) else { return self }
+        var copy = markedCustom()
+        for segment in RingColorSegment.allCases where copy.assignments[segment] == id {
+            copy.assignments[segment] = fallback.id
+        }
+        copy.colors.removeAll { $0.id == id }
+        return copy
+    }
+
     /// Older defaults used 9/24/39 and 59/74/89 so `<=` matched half-open AppTheme bands.
     /// Remap those exact stop lists to round fives without touching custom schemes.
     func withRoundedDefaultStops() -> RingTintSettings {
         var copy = self
-        copy.battery = copy.battery.replacingStops([9, 24, 39, 100], with: [10, 25, 40, 100])
-        for keyPath in [\RingTintSettings.cpu, \RingTintSettings.gpu, \RingTintSettings.memory] {
-            copy[keyPath: keyPath] = copy[keyPath: keyPath].replacingStops([59, 74, 89, 100], with: [60, 75, 90, 100])
+        copy.colors = colors.map { color in
+            var next = color
+            next.scheme = color.scheme
+                .replacingStops([9, 24, 39, 100], with: [10, 25, 40, 100])
+                .replacingStops([59, 74, 89, 100], with: [60, 75, 90, 100])
+            return next
         }
         return copy
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case preset, colors, assignments
+        case battery, cpu, gpu, memory
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let preset = try container.decode(PopoverTintPreset.self, forKey: .preset)
+        if container.contains(.colors) {
+            var migrated = RingTintSettings(
+                preset: preset,
+                colors: try container.decode([RingColor].self, forKey: .colors),
+                assignments: try container.decode([RingColorSegment: UUID].self, forKey: .assignments)
+            )
+            migrated.ensureSegments()
+            self = migrated
+            return
+        }
+        let battery = try container.decode(ValueTintScheme.self, forKey: .battery)
+        let cpu = try container.decode(ValueTintScheme.self, forKey: .cpu)
+        let gpu = try container.decode(ValueTintScheme.self, forKey: .gpu)
+        let memory = try container.decode(ValueTintScheme.self, forKey: .memory)
+        self.init(preset: preset, battery: battery, cpu: cpu, gpu: gpu, memory: memory)
+    }
+
+    private init(preset: PopoverTintPreset, colors: [RingColor], assignments: [RingColorSegment: UUID]) {
+        self.preset = preset
+        self.colors = colors
+        self.assignments = assignments
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(preset, forKey: .preset)
+        try container.encode(colors, forKey: .colors)
+        try container.encode(assignments, forKey: .assignments)
+    }
+
+    /// Fills segments missing from an older catalog. Disk, pressure, and swap follow memory.
+    private mutating func ensureSegments() {
+        if colors.isEmpty {
+            let id = UUID()
+            colors = [RingColor(id: id, scheme: .constant(.systemGreen))]
+        }
+        func resolved(_ segment: RingColorSegment, fallback: UUID) -> UUID {
+            if let id = assignments[segment], colors.contains(where: { $0.id == id }) {
+                return id
+            }
+            return fallback
+        }
+        let fallback = colors[0].id
+        let batteryID = resolved(.battery, fallback: fallback)
+        let cpuID = resolved(.cpu, fallback: batteryID)
+        let gpuID = resolved(.gpu, fallback: cpuID)
+        let memoryID = resolved(.memory, fallback: cpuID)
+        assignments[.battery] = batteryID
+        assignments[.cpu] = cpuID
+        assignments[.gpu] = gpuID
+        assignments[.memory] = memoryID
+        for follower in Self.memoryFollowers {
+            assignments[follower] = resolved(follower, fallback: memoryID)
+        }
+        if let downloadID = assignments[.download], colors.contains(where: { $0.id == downloadID }) {
+            assignments[.download] = downloadID
+        } else {
+            assignments[.download] = adopt(.downloadSpeed)
+        }
+        if let uploadID = assignments[.upload], colors.contains(where: { $0.id == uploadID }) {
+            assignments[.upload] = uploadID
+        } else {
+            assignments[.upload] = adopt(.uploadSpeed)
+        }
+    }
+
+    private mutating func adopt(_ scheme: ValueTintScheme) -> UUID {
+        let normalized = scheme.normalized()
+        if let existing = colors.first(where: { $0.scheme == normalized }) {
+            return existing.id
+        }
+        let id = UUID()
+        colors.append(RingColor(id: id, scheme: normalized))
+        return id
+    }
+
+    /// Writes `scheme` onto `segment`. When that color is also used by another
+    /// editable ring, this segment gets its own copy. Memory's followers move with it.
+    private mutating func write(
+        _ scheme: ValueTintScheme,
+        to segment: RingColorSegment,
+        followers: [RingColorSegment]
+    ) {
+        let current = assignments[segment]
+        let shared = Self.editableSegments.contains { $0 != segment && assignments[$0] == current }
+        if shared {
+            let id = UUID()
+            colors.append(RingColor(id: id, scheme: scheme))
+            assignments[segment] = id
+            for follower in followers {
+                assignments[follower] = id
+            }
+            pruneUnusedColors()
+            return
+        }
+        if let current, let index = colors.firstIndex(where: { $0.id == current }) {
+            colors[index].scheme = scheme
+            return
+        }
+        let id = UUID()
+        colors.append(RingColor(id: id, scheme: scheme))
+        assignments[segment] = id
+        for follower in followers {
+            assignments[follower] = id
+        }
+    }
+
+    private mutating func pruneUnusedColors() {
+        let used = Set(assignments.values)
+        colors.removeAll { !used.contains($0.id) }
     }
 }
 

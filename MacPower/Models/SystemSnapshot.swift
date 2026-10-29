@@ -4,6 +4,11 @@ struct SystemSnapshot: Equatable, Sendable {
     var cpuPercent: Double
     var gpuPercent: Double
     var memoryPercent: Double
+    var diskPercent: Double = 0
+    var memoryPressurePercent: Double = 0
+    var swapPercent: Double = 0
+    var downloadBytesPerSecond: Double = 0
+    var uploadBytesPerSecond: Double = 0
 
     static let empty = SystemSnapshot(cpuPercent: 0, gpuPercent: 0, memoryPercent: 0)
 
@@ -13,6 +18,15 @@ struct SystemSnapshot: Equatable, Sendable {
         Self.sameRingPercent(cpuPercent, other.cpuPercent)
             && Self.sameRingPercent(gpuPercent, other.gpuPercent)
             && Self.sameRingPercent(memoryPercent, other.memoryPercent)
+            && Self.sameRingPercent(diskPercent, other.diskPercent)
+            && Self.sameRingPercent(memoryPressurePercent, other.memoryPressurePercent)
+            && Self.sameRingPercent(swapPercent, other.swapPercent)
+            && Self.sameRate(downloadBytesPerSecond, other.downloadBytesPerSecond)
+            && Self.sameRate(uploadBytesPerSecond, other.uploadBytesPerSecond)
+    }
+
+    private static func sameRate(_ lhs: Double, _ rhs: Double) -> Bool {
+        Int((lhs / 1024).rounded()) == Int((rhs / 1024).rounded())
     }
 
     private static func sameRingPercent(_ lhs: Double, _ rhs: Double) -> Bool {
@@ -25,6 +39,25 @@ struct SystemSnapshot: Equatable, Sendable {
 
     private static func tintPercent(_ percent: Double) -> Int {
         Int(min(100, max(0, percent)).rounded(.towardZero))
+    }
+}
+
+enum NetworkRateFormat {
+    static func string(bytesPerSecond: Double) -> String {
+        let bytes = max(0, bytesPerSecond)
+        if bytes < 1024 * 1024 {
+            return String(format: "%.0f KB/s", bytes / 1024)
+        }
+        return String(format: "%.1f MB/s", bytes / (1024 * 1024))
+    }
+
+    /// arctan(log10(speed / 1 MB/s)). 1 MB/s sits at 50%; 0 and +∞ approach the ends.
+    static func ringPercent(bytesPerSecond: Double) -> Double {
+        let bytes = max(0, bytesPerSecond)
+        guard bytes > 0 else { return 0 }
+        let megabyte = 1024.0 * 1024.0
+        let unit = atan(log10(bytes / megabyte)) / .pi + 0.5
+        return min(100, max(0, unit * 100))
     }
 }
 

@@ -25,6 +25,7 @@
 		6F9C22DA2FCF1138F03E58BD /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4989CA67625E8BAE3ED36794 /* AppTheme.swift */; };
 		712037877C28DA053FC423EB /* Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 160699993F1F6529C046625A /* Localization.swift */; };
 		80B7D3366C4DE0B34F8F070F /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 9E3AC898FC0E9E06A6F67EF0 /* Localizable.xcstrings */; };
+		D5F9B2C10A3E5B7F9C2D4E60 /* ReleaseNotes.json in Resources */ = {isa = PBXBuildFile; fileRef = C4E8A1B09F2D4A6E8B1C3D5F /* ReleaseNotes.json */; };
 		85D69FE970F34B47739CA0BD /* TimeEstimateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2AFE15BB6E2593BA442FDA8 /* TimeEstimateService.swift */; };
 		8BC313899864F57596DC06B5 /* EnergyMotionFrameRate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B07D3EE64903A4F05FF797FF /* EnergyMotionFrameRate.swift */; };
 		92376D10D7128EA67F7F408D /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3968B1F4514587C19DC9E189 /* AppSettings.swift */; };
@@ -90,6 +91,7 @@
 		C238426EC73D173324F283A9 /* MenuBarIconStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarIconStyle.swift; sourceTree = "<group>"; };
 		C26090AEDCFA0FA04EE890E0 /* IconPackSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconPackSettings.swift; sourceTree = "<group>"; };
 		C2AFE15BB6E2593BA442FDA8 /* TimeEstimateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeEstimateService.swift; sourceTree = "<group>"; };
+		C4E8A1B09F2D4A6E8B1C3D5F /* ReleaseNotes.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = ReleaseNotes.json; sourceTree = "<group>"; };
 		CF97ADE4B8CDD69AECEE68E7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		CFC5BF114A1B6DF65790D248 /* StatusItemController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusItemController.swift; sourceTree = "<group>"; };
 		D014F62CBF5CA300F430CDA1 /* TimeEstimateRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeEstimateRow.swift; sourceTree = "<group>"; };
@@ -110,6 +112,7 @@
 				04FD5D63D480A11EE0E91E88 /* Assets.xcassets */,
 				CF97ADE4B8CDD69AECEE68E7 /* Info.plist */,
 				9E3AC898FC0E9E06A6F67EF0 /* Localizable.xcstrings */,
+				C4E8A1B09F2D4A6E8B1C3D5F /* ReleaseNotes.json */,
 				160699993F1F6529C046625A /* Localization.swift */,
 				7CE2A6B6480F8B121ADADF81 /* MacPower.entitlements */,
 				531C675B6E0118D153F44918 /* MacPowerApp.swift */,
@@ -303,6 +306,7 @@
 				6A4700B5CC53C0C3E8118460 /* AppIcon.icon in Resources */,
 				F676AEA3B2252403F2114D1F /* Assets.xcassets in Resources */,
 				80B7D3366C4DE0B34F8F070F /* Localizable.xcstrings in Resources */,
+				D5F9B2C10A3E5B7F9C2D4E60 /* ReleaseNotes.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

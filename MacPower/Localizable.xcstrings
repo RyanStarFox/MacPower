@@ -3972,7 +3972,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Основные"
+            "value": "Общие"
           }
         }
       }
@@ -3983,7 +3983,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Menu Bar"
+            "value": "Menu"
           }
         },
         "zh-Hans": {
@@ -4001,49 +4001,49 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "メニューバー"
+            "value": "メニュー"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "메뉴 막대"
+            "value": "메뉴"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Barre des menus"
+            "value": "Menus"
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Menüleiste"
+            "value": "Menü"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Barra de menús"
+            "value": "Menús"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Barra de menus"
+            "value": "Menus"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Barra dei menu"
+            "value": "Menu"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Строка меню"
+            "value": "Меню"
           }
         }
       }
@@ -4122,65 +4122,285 @@
     "settings.tab.about": {
       "extractionState": "manual",
       "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "About" } },
-        "zh-Hans": { "stringUnit": { "state": "translated", "value": "关于" } },
-        "zh-Hant": { "stringUnit": { "state": "translated", "value": "關於" } },
-        "ja": { "stringUnit": { "state": "translated", "value": "情報" } },
-        "ko": { "stringUnit": { "state": "translated", "value": "정보" } },
-        "fr": { "stringUnit": { "state": "translated", "value": "À propos" } },
-        "de": { "stringUnit": { "state": "translated", "value": "Info" } },
-        "es": { "stringUnit": { "state": "translated", "value": "Info" } },
-        "pt-BR": { "stringUnit": { "state": "translated", "value": "Sobre" } },
-        "it": { "stringUnit": { "state": "translated", "value": "Info" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "О программе" } }
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "关于"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "關於"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "情報"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "정보"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Infos"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Info"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Info"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sobre"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Info"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Инфо"
+          }
+        }
       }
     },
     "settings.about.coffee": {
       "extractionState": "manual",
       "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Buy me a coffee" } },
-        "zh-Hans": { "stringUnit": { "state": "translated", "value": "请我喝杯咖啡" } },
-        "zh-Hant": { "stringUnit": { "state": "translated", "value": "請我喝杯咖啡" } },
-        "ja": { "stringUnit": { "state": "translated", "value": "コーヒーをおごる" } },
-        "ko": { "stringUnit": { "state": "translated", "value": "커피 한 잔" } },
-        "fr": { "stringUnit": { "state": "translated", "value": "Offrez-moi un café" } },
-        "de": { "stringUnit": { "state": "translated", "value": "Spendier einen Kaffee" } },
-        "es": { "stringUnit": { "state": "translated", "value": "Invítame a un café" } },
-        "pt-BR": { "stringUnit": { "state": "translated", "value": "Pague-me um café" } },
-        "it": { "stringUnit": { "state": "translated", "value": "Offrimi un caffè" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Купи мне кофе" } }
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buy me a coffee"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请我喝杯咖啡"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "請我喝杯咖啡"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "コーヒーをおごる"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "커피 한 잔"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Offrez-moi un café"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spendier einen Kaffee"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Invítame a un café"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pague-me um café"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Offrimi un caffè"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Купи мне кофе"
+          }
+        }
       }
     },
     "settings.about.wechat": {
       "extractionState": "manual",
       "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "WeChat" } },
-        "zh-Hans": { "stringUnit": { "state": "translated", "value": "微信" } },
-        "zh-Hant": { "stringUnit": { "state": "translated", "value": "微信" } },
-        "ja": { "stringUnit": { "state": "translated", "value": "WeChat" } },
-        "ko": { "stringUnit": { "state": "translated", "value": "WeChat" } },
-        "fr": { "stringUnit": { "state": "translated", "value": "WeChat" } },
-        "de": { "stringUnit": { "state": "translated", "value": "WeChat" } },
-        "es": { "stringUnit": { "state": "translated", "value": "WeChat" } },
-        "pt-BR": { "stringUnit": { "state": "translated", "value": "WeChat" } },
-        "it": { "stringUnit": { "state": "translated", "value": "WeChat" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "WeChat" } }
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WeChat"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "微信"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "微信"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WeChat"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WeChat"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WeChat"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WeChat"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WeChat"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WeChat"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WeChat"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WeChat"
+          }
+        }
       }
     },
     "settings.about.alipay": {
       "extractionState": "manual",
       "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Alipay" } },
-        "zh-Hans": { "stringUnit": { "state": "translated", "value": "支付宝" } },
-        "zh-Hant": { "stringUnit": { "state": "translated", "value": "支付寶" } },
-        "ja": { "stringUnit": { "state": "translated", "value": "Alipay" } },
-        "ko": { "stringUnit": { "state": "translated", "value": "Alipay" } },
-        "fr": { "stringUnit": { "state": "translated", "value": "Alipay" } },
-        "de": { "stringUnit": { "state": "translated", "value": "Alipay" } },
-        "es": { "stringUnit": { "state": "translated", "value": "Alipay" } },
-        "pt-BR": { "stringUnit": { "state": "translated", "value": "Alipay" } },
-        "it": { "stringUnit": { "state": "translated", "value": "Alipay" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Alipay" } }
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alipay"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "支付宝"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "支付寶"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alipay"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alipay"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alipay"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alipay"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alipay"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alipay"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alipay"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alipay"
+          }
+        }
       }
     },
     "settings.tab.flow": {
@@ -4189,7 +4409,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Energy Flow"
+            "value": "Energy"
           }
         },
         "zh-Hans": {
@@ -5104,6 +5324,38 @@
             "value": "Версия %@"
           }
         }
+      }
+    },
+    "update.whatsNew.title %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "What's new in MacPower %@" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "MacPower %@ 更新了这些" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "MacPower %@ 更新了這些" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "MacPower %@ の更新内容" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "MacPower %@의 새 소식" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Nouveautés de MacPower %@" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Neu in MacPower %@" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Novedades de MacPower %@" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Novidades do MacPower %@" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Novità di MacPower %@" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Что нового в MacPower %@" } }
+      }
+    },
+    "update.whatsNew.ok": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "OK" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "好" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "好" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "OK" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "확인" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "OK" } },
+        "de": { "stringUnit": { "state": "translated", "value": "OK" } },
+        "es": { "stringUnit": { "state": "translated", "value": "OK" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "OK" } },
+        "it": { "stringUnit": { "state": "translated", "value": "OK" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "OK" } }
       }
     },
     "update.available.title %@": {
@@ -11847,6 +12099,963 @@
           "stringUnit": {
             "state": "translated",
             "value": "Открыть панель"
+          }
+        }
+      }
+    },
+    "ring.disk": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disk"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "磁盘"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "磁碟"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ディスク"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "디스크"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disque"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disk"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disco"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disco"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disco"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Диск"
+          }
+        }
+      }
+    },
+    "ring.pressure": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pressure"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "内存压力"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "記憶體壓力"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "圧力"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "압력"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pression"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Druck"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Presión"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pressão"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pressione"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Давление"
+          }
+        }
+      }
+    },
+    "ring.swap": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Swap"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "交换"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "交換"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スワップ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "스왑"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Swap"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Swap"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Swap"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Swap"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Swap"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подкачка"
+          }
+        }
+      }
+    },
+    "ring.caption.disk %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disk: %lld%"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "磁盘：%lld%"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "磁碟：%lld%"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ディスク: %lld%"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "디스크: %lld%"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disque : %lld%"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disk: %lld%"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disco: %lld%"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disco: %lld%"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disco: %lld%"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Диск: %lld%"
+          }
+        }
+      }
+    },
+    "ring.caption.pressure %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pressure: %lld%"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "内存压力：%lld%"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "記憶體壓力：%lld%"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "圧力: %lld%"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "압력: %lld%"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pression : %lld%"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Druck: %lld%"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Presión: %lld%"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pressão: %lld%"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pressione: %lld%"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Давление: %lld%"
+          }
+        }
+      }
+    },
+    "ring.caption.swap %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Swap: %lld%"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "交换：%lld%"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "交換：%lld%"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スワップ: %lld%"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "스왑: %lld%"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Swap : %lld%"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Swap: %lld%"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Swap: %lld%"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Swap: %lld%"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Swap: %lld%"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подкачка: %lld%"
+          }
+        }
+      }
+    },
+    "ring.speed.download %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "↓ %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "↓ %@"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "↓ %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "↓ %@"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "↓ %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "↓ %@"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "↓ %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "↓ %@"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "↓ %@"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "↓ %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "↓ %@"
+          }
+        }
+      }
+    },
+    "ring.speed.upload %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "↑ %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "↑ %@"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "↑ %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "↑ %@"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "↑ %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "↑ %@"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "↑ %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "↑ %@"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "↑ %@"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "↑ %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "↑ %@"
+          }
+        }
+      }
+    },
+    "settings.rings.download": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Download"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下载速度"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下載速度"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ダウンロード"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다운로드"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Téléchargement"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Download"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descarga"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Download"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Download"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Загрузка"
+          }
+        }
+      }
+    },
+    "settings.rings.upload": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Upload"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上传速度"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上傳速度"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "アップロード"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "업로드"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Envoi"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Upload"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subida"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Upload"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Upload"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отдача"
+          }
+        }
+      }
+    },
+    "settings.rings.hideList": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Hide Ring List" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "收起圆环列表" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "收起圓環列表" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "リング一覧を隠す" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "링 목록 숨기기" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Masquer la liste" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Ringliste ausblenden" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Ocultar lista" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Ocultar lista" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Nascondi elenco" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Скрыть список" } }
+      }
+    },
+    "settings.tint.colors": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Colors" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "颜色" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "顏色" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "色" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "색" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Couleurs" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Farben" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Colores" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Cores" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Colori" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Цвета" } }
+      }
+    },
+    "settings.tint.color %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Color %lld" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "颜色 %lld" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "顏色 %lld" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "色 %lld" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "색 %lld" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Couleur %lld" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Farbe %lld" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Color %lld" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Cor %lld" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Colore %lld" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Цвет %lld" } }
+      }
+    },
+    "settings.tint.addColor": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Add color" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "添加颜色" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "加入顏色" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "色を追加" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "색 추가" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Ajouter une couleur" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Farbe hinzufügen" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Añadir color" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Adicionar cor" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Aggiungi colore" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Добавить цвет" } }
+      }
+    },
+    "settings.tint.removeColor": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Remove color" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "删除颜色" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "刪除顏色" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "色を削除" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "색 삭제" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Supprimer la couleur" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Farbe entfernen" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Quitar color" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Remover cor" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Rimuovi colore" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Удалить цвет" } }
+      }
+    },
+    "settings.tint.assignments": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Color scheme" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "配色方案" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "配色方案" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "配色" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "배색" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Schéma de couleurs" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Farbschema" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Esquema de color" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Esquema de cores" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Schema colori" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Цветовая схема" } }
+      }
+    },
+    "settings.rings.list": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Ring list" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "圆环列表" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "圓環列表" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "リング一覧" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "링 목록" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Liste des anneaux" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Ringliste" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Lista de anillos" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Lista de anéis" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Elenco anelli" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Список колец" } }
+      }
+    },
+    "settings.rings.twoRows": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Two rows" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "分成两行" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "分成兩行" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "2行にする" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "두 줄로" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Deux rangées" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Zwei Reihen" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Dos filas" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Duas linhas" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Due righe" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Два ряда" } }
+      }
+    },
+    "settings.rings.oddRow": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Odd row" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "奇数第二行" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "奇數第二行" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "奇数行" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "홀수 줄" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Rangée impaire" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Ungerade Reihe" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Fila impar" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Linha ímpar" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Riga dispari" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Нечётный ряд" } }
+      }
+    },
+    "settings.rings.oddStagger": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "In the gaps" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "插空" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "插空" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "隙間" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "사이" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Dans les espaces" } },
+        "de": { "stringUnit": { "state": "translated", "value": "In den Lücken" } },
+        "es": { "stringUnit": { "state": "translated", "value": "En los huecos" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Nos vãos" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Negli spazi" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "В промежутках" } }
+      }
+    },
+    "settings.rings.oddAlign": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Aligned" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "对齐" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "對齊" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "揃える" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "맞추기" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Alignée" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Ausgerichtet" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Alineada" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Alinhada" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Allineata" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "По колонкам" } }
+      }
+    },
+    "settings.rings.speedPair": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Up/Down"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上传下载"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上傳下載"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "送受信"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "송수신"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Débit"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Up/Down"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subida/Bajada"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Envio/Recebimento"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Invio/Ricezione"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обмен"
           }
         }
       }

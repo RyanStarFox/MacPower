@@ -9,6 +9,12 @@ final class SystemMetricsService {
     private var lastCPU: Double?
     private var lastGPU: Double = 0
     private var lastMemory: Double = 0
+    private var lastDisk: Double = 0
+    private var lastPressure: Double = 0
+    private var lastSwap: Double = 0
+    private var lastDownload: Double = 0
+    private var lastUpload: Double = 0
+    private var lastNetworkBytes: (rx: UInt64, tx: UInt64, time: TimeInterval)?
     private var lastPublished: SystemSnapshot?
     private var heavySampling = false
 
@@ -69,13 +75,25 @@ final class SystemMetricsService {
         if heavy {
             lastGPU = Self.gpuUtilization() ?? lastGPU
             lastMemory = Self.memoryPercent()
+            lastDisk = Self.diskPercent() ?? lastDisk
+            lastPressure = Self.memoryPressurePercent()
+            lastSwap = Self.swapPercent()
+            if let rates = Self.networkRates(since: &lastNetworkBytes) {
+                lastDownload = rates.download
+                lastUpload = rates.upload
+            }
         }
 
         guard let lastCPU else { return }
         let next = SystemSnapshot(
             cpuPercent: lastCPU,
             gpuPercent: lastGPU,
-            memoryPercent: lastMemory
+            memoryPercent: lastMemory,
+            diskPercent: lastDisk,
+            memoryPressurePercent: lastPressure,
+            swapPercent: lastSwap,
+            downloadBytesPerSecond: lastDownload,
+            uploadBytesPerSecond: lastUpload
         )
         if let lastPublished, lastPublished.sameRingDisplay(as: next) {
             return
@@ -119,6 +137,71 @@ final class SystemMetricsService {
         let page = UInt64(pageSize)
         let used = (UInt64(stats.active_count) + UInt64(stats.wire_count) + UInt64(stats.compressor_page_count)) * page
         return MemoryOccupancy.usagePercent(usedBytes: used, totalBytes: memsize)
+    }
+
+    private static func diskPercent() -> Double? {
+        let url = URL(fileURLWithPath: "/")
+        guard let values = try? url.resourceValues(forKeys: [
+            .volumeTotalCapacityKey,
+            .volumeAvailableCapacityForImportantUsageKey,
+        ]),
+            let total = values.volumeTotalCapacity,
+            let available = values.volumeAvailableCapacityForImportantUsage,
+            total > 0
+        else { return nil }
+        let used = max(0, Int64(total) - available)
+        return min(100, Double(used) / Double(total) * 100)
+    }
+
+    /// Maps the kernel pressure level onto a ring. Normal stays low; critical fills the ring.
+    private static func memoryPressurePercent() -> Double {
+        var level: UInt32 = 0
+        var size = MemoryLayout<UInt32>.size
+        guard sysctlbyname("kern.memorystatus_vm_pressure_level", &level, &size, nil, 0) == 0 else { return 0 }
+        switch level {
+        case 0x2: return 45
+        case 0x4: return 75
+        case 0x8: return 100
+        default: return 15
+        }
+    }
+
+    private static func swapPercent() -> Double {
+        var usage = xsw_usage()
+        var size = MemoryLayout<xsw_usage>.size
+        guard sysctlbyname("vm.swapusage", &usage, &size, nil, 0) == 0, usage.xsu_total > 0 else { return 0 }
+        return min(100, Double(usage.xsu_used) / Double(usage.xsu_total) * 100)
+    }
+
+    private static func networkRates(since previous: inout (rx: UInt64, tx: UInt64, time: TimeInterval)?) -> (download: Double, upload: Double)? {
+        guard let totals = interfaceBytes() else { return nil }
+        let now = Date().timeIntervalSinceReferenceDate
+        defer { previous = (totals.rx, totals.tx, now) }
+        guard let previous else { return (0, 0) }
+        let elapsed = now - previous.time
+        guard elapsed > 0.2 else { return nil }
+        let download = Double(totals.rx &- previous.rx) / elapsed
+        let upload = Double(totals.tx &- previous.tx) / elapsed
+        return (max(0, download), max(0, upload))
+    }
+
+    private static func interfaceBytes() -> (rx: UInt64, tx: UInt64)? {
+        var pointer: UnsafeMutablePointer<ifaddrs>?
+        guard getifaddrs(&pointer) == 0, let first = pointer else { return nil }
+        defer { freeifaddrs(first) }
+        var rx: UInt64 = 0
+        var tx: UInt64 = 0
+        var cursor: UnsafeMutablePointer<ifaddrs>? = first
+        while let item = cursor {
+            let flags = Int32(item.pointee.ifa_flags)
+            if flags & IFF_LOOPBACK == 0, flags & IFF_UP != 0, let data = item.pointee.ifa_data {
+                let stats = data.assumingMemoryBound(to: if_data.self).pointee
+                rx += UInt64(stats.ifi_ibytes)
+                tx += UInt64(stats.ifi_obytes)
+            }
+            cursor = item.pointee.ifa_next
+        }
+        return (rx, tx)
     }
 
     private static func gpuUtilization() -> Double? {

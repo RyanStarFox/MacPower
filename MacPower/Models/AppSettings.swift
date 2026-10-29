@@ -3,6 +3,26 @@ import Observation
 
 @Observable
 final class AppSettings {
+    static let defaultRingOrder: [RingSlot] = [.battery, .cpu, .gpu, .memory, .disk, .download, .upload]
+
+    private static func restoredRingOrder(from defaults: UserDefaults) -> [RingSlot] {
+        let stored = defaults.stringArray(forKey: Keys.visibleRings)?.compactMap(RingSlot.init(rawValue:)) ?? []
+        var seen = Set<RingSlot>()
+        var order = stored.filter { seen.insert($0).inserted }
+        if order.isEmpty {
+            return defaultRingOrder
+        }
+        guard defaults.bool(forKey: Keys.ringOrderMigrated) else {
+            let showDownload = defaults.object(forKey: Keys.showDownloadSpeed) == nil
+                || defaults.bool(forKey: Keys.showDownloadSpeed)
+            let showUpload = defaults.object(forKey: Keys.showUploadSpeed) == nil
+                || defaults.bool(forKey: Keys.showUploadSpeed)
+            if showDownload, !order.contains(.download) { order.append(.download) }
+            if showUpload, !order.contains(.upload) { order.append(.upload) }
+            return order
+        }
+        return order
+    }
     private enum Keys {
         static let iconStyle = "iconStyle"
         static let iconOutlined = "iconOutlined"
@@ -28,6 +48,13 @@ final class AppSettings {
         static let flowIconScale = "flowIconScale"
         static let showPopoverArrow = "showPopoverArrow"
         static let showStatusRings = "showStatusRings"
+        static let twoRingRows = "twoRingRows"
+        static let ringOddRow = "ringOddRow"
+        static let visibleRings = "visibleRings"
+        static let showDownloadSpeed = "showDownloadSpeed"
+        static let showUploadSpeed = "showUploadSpeed"
+        static let ringOrderMigrated = "ringOrderMigrated"
+        static let ringCatalog = "ringCatalog"
         static let showEnergyFlow = "showEnergyFlow"
         static let menuBarRightClickAction = "menuBarRightClickAction"
         static let automaticallyCheckForUpdates = "automaticallyCheckForUpdates"
@@ -170,6 +197,71 @@ final class AppSettings {
 
     var showStatusRings: Bool {
         didSet { store.set(showStatusRings, forKey: Keys.showStatusRings) }
+    }
+
+    /// When set, rings and the settings button split into two rows.
+    var twoRingRows: Bool {
+        didSet { store.set(twoRingRows, forKey: Keys.twoRingRows) }
+    }
+
+    /// Where the shorter second row sits when the cell count is odd.
+    var ringOddRow: RingOddRow {
+        didSet { store.set(ringOddRow.rawValue, forKey: Keys.ringOddRow) }
+    }
+
+    /// Every ring and speed slot, in the order shown in settings. Enabled ones
+    /// keep this order in the popover.
+    var ringCatalog: [RingSlot] {
+        didSet {
+            let unique = Self.uniqueSlots(ringCatalog)
+            if unique != ringCatalog {
+                ringCatalog = unique
+                return
+            }
+            store.set(unique.map(\.rawValue), forKey: Keys.ringCatalog)
+            storeVisibleRings()
+        }
+    }
+
+    var enabledRingSlots: Set<RingSlot> {
+        didSet { storeVisibleRings() }
+    }
+
+    /// Enabled slots in popover order.
+    var ringOrder: [RingSlot] {
+        ringCatalog.filter { enabledRingSlots.contains($0) }
+    }
+
+    func setRingSlot(_ slot: RingSlot, visible: Bool) {
+        if visible {
+            enabledRingSlots.insert(slot)
+        } else {
+            enabledRingSlots.remove(slot)
+        }
+    }
+
+    func moveRingCatalogItem(_ slot: RingSlot, to target: RingSlot) {
+        guard slot != target,
+              let from = ringCatalog.firstIndex(of: slot),
+              let destination = ringCatalog.firstIndex(of: target)
+        else { return }
+        var items = ringCatalog
+        items.move(fromOffsets: IndexSet(integer: from), toOffset: destination > from ? destination + 1 : destination)
+        ringCatalog = items
+    }
+
+    private func storeVisibleRings() {
+        store.set(ringOrder.map(\.rawValue), forKey: Keys.visibleRings)
+        store.set(true, forKey: Keys.ringOrderMigrated)
+    }
+
+    private static func uniqueSlots(_ slots: [RingSlot]) -> [RingSlot] {
+        var seen = Set<RingSlot>()
+        var unique = slots.filter { seen.insert($0).inserted }
+        for slot in RingSlot.allCases where !seen.contains(slot) {
+            unique.append(slot)
+        }
+        return unique
     }
 
     var showEnergyFlow: Bool {
@@ -340,6 +432,23 @@ final class AppSettings {
             showStatusRings = defaults.bool(forKey: Keys.showStatusRings)
         }
 
+        if defaults.object(forKey: Keys.twoRingRows) == nil {
+            twoRingRows = false
+        } else {
+            twoRingRows = defaults.bool(forKey: Keys.twoRingRows)
+        }
+
+        ringOddRow = RingOddRow(rawValue: defaults.string(forKey: Keys.ringOddRow) ?? "") ?? .stagger
+
+        let enabled = Self.restoredRingOrder(from: defaults)
+        enabledRingSlots = Set(enabled)
+        if let storedCatalog = defaults.stringArray(forKey: Keys.ringCatalog)?.compactMap(RingSlot.init(rawValue:)),
+           !storedCatalog.isEmpty {
+            ringCatalog = Self.uniqueSlots(storedCatalog)
+        } else {
+            ringCatalog = enabled + RingSlot.allCases.filter { !enabled.contains($0) }
+        }
+
         if defaults.object(forKey: Keys.showEnergyFlow) == nil {
             showEnergyFlow = true
         } else {
@@ -375,6 +484,7 @@ final class AppSettings {
         persistTint()
         persistRingTint()
         persistFlowTint()
+        persistSavedTintLibrary()
         persistRingIcons()
         persistFlowIcons()
         if defaults.object(forKey: Keys.legacyEnergyMotion) != nil {

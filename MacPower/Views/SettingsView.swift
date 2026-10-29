@@ -54,17 +54,24 @@ private final class SettingsSizerView: NSView {
             (value * scale).rounded() / scale
         }
         // The content view fills the whole window (title strip included), so
-        // the measured height is the frame height.
-        let targetHeight = min(snap(height), 620)
-        // Keep the title-bar top on a pixel so the tab row does not drift by a pixel
-        // when the content height's fractional part changes.
+        // the measured height is the frame height. Never let that frame leave
+        // the visible screen: a height past the display pushes the title bar
+        // off the top and the window looks like it closed.
+        let visible = window.screen?.visibleFrame ?? NSScreen.main?.visibleFrame
+        let limit = visible?.height ?? height
+        let targetHeight = min(max(snap(height), 80), snap(limit))
         let top = snap(window.frame.maxY)
-        let frame = NSRect(
+        var frame = NSRect(
             x: snap(window.frame.minX),
             y: top - targetHeight,
             width: 440,
             height: targetHeight
         )
+        if let visible {
+            frame.size.height = min(frame.height, visible.height)
+            frame.origin.y = min(frame.origin.y, visible.maxY - frame.height)
+            frame.origin.y = max(frame.origin.y, visible.minY)
+        }
         let unchanged = abs(window.frame.width - frame.width) < 0.5
             && abs(window.frame.height - frame.height) < 0.5
             && abs(window.frame.origin.x - frame.origin.x) < 0.5
@@ -165,6 +172,13 @@ private struct SettingsWindowSizer: NSViewRepresentable {
     }
 }
 
+private struct SettingsContentHeightKey: PreferenceKey {
+    static let defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = max(value, nextValue())
+    }
+}
+
 struct SettingsView: View {
     private enum Pane: String, CaseIterable, Identifiable {
         case general, menuBar, rings, flow, about
@@ -173,7 +187,7 @@ struct SettingsView: View {
 
     @Bindable var appState: AppState
     @State private var pane: Pane = .general
-    @State private var ringEditorTarget: RingEditorTarget = .all
+    @State private var ringColorSelectionID: UUID?
     @State private var flowEditorTarget: FlowEditorTarget = .all
     @State private var saveDialog: SaveTintDialog?
 
@@ -196,50 +210,39 @@ struct SettingsView: View {
     @State private var menuBarTintEditorExpanded = false
     @State private var ringTintEditorExpanded = false
     @State private var flowTintEditorExpanded = false
+    @State private var ringDrag = RingDragState()
+    @State private var ringListExpanded = false
+    /// Uncapped height of the settings column, including the title-bar inset.
+    @State private var idealHeight: CGFloat = 0
+
+    private var screenLimit: CGFloat {
+        NSScreen.main?.visibleFrame.height ?? 900
+    }
+
+    /// Short panes hug their content. Taller ones stop at the screen and scroll.
+    private var displayHeight: CGFloat {
+        let ideal = idealHeight > 80 ? idealHeight : min(520, screenLimit)
+        return min(ideal, screenLimit)
+    }
 
     var body: some View {
-        let hugHeight = settingsHugsContentHeight
         VStack(spacing: 0) {
-            VStack(spacing: 0) {
-                settingsTabPicker
-                    .padding(.top, Self.titlebarHeight + 12)
-                    .padding(.bottom, 2)
-
-                Form {
-                    switch pane {
-                    case .general: generalSections
-                    case .menuBar: menuBarSections
-                    case .rings: ringsSections
-                    case .flow: flowSections
-                    case .about: aboutSections
-                    }
-                }
-                .formStyle(.grouped)
-                // The grouped form paints its own scroll fill, which on macOS 26+
-                // is a different shade than the window behind the tabs.
-                .scrollContentBackground(.hidden)
-                // Collapsed presets should hug the window; only scroll once editors expand.
-                .scrollDisabled(hugHeight)
-            }
-            .fixedSize(horizontal: false, vertical: hugHeight)
-            .background {
-                GeometryReader { proxy in
-                    SettingsWindowSizer(height: proxy.size.height)
-                        .frame(width: 0, height: 0)
-                }
-            }
+            settingsStack
+                .frame(width: 440, height: displayHeight, alignment: .top)
 
             // A pixel of slack from snapping the window height stays below the
             // tabs. Without this, AppKit centers that slack and the tab row shifts.
-            if hugHeight {
-                Spacer(minLength: 0)
-            }
+            Spacer(minLength: 0)
+        }
+        .background {
+            SettingsWindowSizer(height: displayHeight)
+                .frame(width: 0, height: 0)
         }
         .frame(width: 440, alignment: .top)
         // A zero minimum keeps NSHostingView from growing the window on its own to
         // fit a taller tab (and adding the title bar twice with a full-size content
         // view). SettingsWindowSizer is the only thing that sizes this window.
-        .frame(minHeight: 0, maxHeight: hugHeight ? .infinity : 620, alignment: .top)
+        .frame(minHeight: 0, maxHeight: .infinity, alignment: .top)
         .animation(nil, value: pane)
         .background(Color(nsColor: .windowBackgroundColor))
         // Full-size content view: the title-bar inset is padded in by hand above,
@@ -251,7 +254,6 @@ struct SettingsView: View {
             appState.refreshLocalizedChrome()
         }
         .onChange(of: pane) { _, _ in
-            // Drop editor expansion when leaving a tab so returning hugs again.
             menuBarTintEditorExpanded = false
             ringTintEditorExpanded = false
             ringIconsEditorExpanded = false
@@ -297,22 +299,67 @@ struct SettingsView: View {
         .labelsHidden()
         .fixedSize(horizontal: true, vertical: true)
         .frame(maxWidth: .infinity)
+        .padding(.horizontal, 16)
     }
 
-    /// Prefer an intrinsic window height until a preset editor is opened.
-    private var settingsHugsContentHeight: Bool {
-        switch pane {
-        case .general:
-            true
-        case .menuBar:
-            !menuBarTintEditorExpanded
-        case .rings:
-            !ringTintEditorExpanded && !ringIconsEditorExpanded
-        case .flow:
-            !flowTintEditorExpanded && !flowIconsEditorExpanded
-        case .about:
-            true
+    private var settingsStack: some View {
+        VStack(spacing: 0) {
+            settingsTabBar
+            settingsForm(scrolls: true)
+                .frame(maxHeight: .infinity, alignment: .top)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .background(alignment: .top) {
+            // The visible column is capped at the screen. This copy exists only
+            // to learn the uncapped height, so shorter panes still shrink the window.
+            VStack(spacing: 0) {
+                settingsTabBar
+                settingsForm(scrolls: false)
+            }
+            .fixedSize(horizontal: false, vertical: true)
+            .background {
+                GeometryReader { proxy in
+                    Color.clear.preference(key: SettingsContentHeightKey.self, value: proxy.size.height)
+                }
+            }
+            .frame(width: 440, height: 0, alignment: .top)
+            .clipped()
+            .opacity(0)
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
+        }
+        .onPreferenceChange(SettingsContentHeightKey.self) { newValue in
+            guard newValue > 80, abs(newValue - idealHeight) > 0.5 else { return }
+            var transaction = Transaction()
+            transaction.disablesAnimations = true
+            withTransaction(transaction) {
+                idealHeight = newValue
+            }
+        }
+    }
+
+    private var settingsTabBar: some View {
+        settingsTabPicker
+            .padding(.top, Self.titlebarHeight + 12)
+            .padding(.bottom, 2)
+    }
+
+    private func settingsForm(scrolls: Bool) -> some View {
+        Form {
+            switch pane {
+            case .general: generalSections
+            case .menuBar: menuBarSections
+            case .rings: ringsSections
+            case .flow: flowSections
+            case .about: aboutSections
+            }
+        }
+        .formStyle(.grouped)
+        // The grouped form paints its own scroll fill, which on macOS 26+
+        // is a different shade than the window behind the tabs.
+        .scrollContentBackground(.hidden)
+        .scrollBounceBehavior(.basedOnSize, axes: .vertical)
+        .scrollDisabled(!scrolls)
     }
 
     @ViewBuilder
@@ -352,12 +399,6 @@ struct SettingsView: View {
             .buttonStyle(.plain)
             .foregroundStyle(.red)
             .frame(maxWidth: .infinity)
-        } footer: {
-            Text(versionLabel)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .frame(maxWidth: .infinity)
-                .padding(.top, 2)
         }
     }
 
@@ -391,6 +432,12 @@ struct SettingsView: View {
                 }
             }
             .padding(.vertical, 4)
+        } footer: {
+            Text(versionLabel)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity)
+                .padding(.top, 2)
         }
     }
 
@@ -681,6 +728,22 @@ struct SettingsView: View {
     @ViewBuilder
     private var ringsSections: some View {
         Section {
+            Toggle("settings.rings.twoRows", isOn: $appState.settings.twoRingRows)
+            Picker("settings.rings.oddRow", selection: $appState.settings.ringOddRow) {
+                ForEach(RingOddRow.allCases) { layout in
+                    Text(LocalizedStringKey(layout.localizationKey)).tag(layout)
+                }
+            }
+            .disabled(!appState.settings.twoRingRows)
+            ringListToggle
+            if ringListExpanded {
+                ForEach(appState.settings.ringCatalog) { slot in
+                    ringOrderRow(slot)
+                }
+            }
+        }
+
+        Section {
             Picker("settings.icon.tint.preset", selection: ringPresetPickerBinding) {
                 ForEach(PopoverTintPreset.allCases) { preset in
                     Text(LocalizedStringKey(preset.localizationKey)).tag(PopoverPresetPickerItem.builtin(preset))
@@ -707,37 +770,11 @@ struct SettingsView: View {
                     )
                 }
             ) {
-                Picker("settings.tint.selection", selection: $ringEditorTarget) {
-                    ForEach(RingEditorTarget.allCases) { target in
-                        Text(LocalizedStringKey(target.localizationKey)).tag(target)
-                    }
-                }
-                if ringEditorTarget == .all {
-                    ForEach(TintSchemeMerge.bands(from: appState.settings.ringTint.allSchemes)) { band in
-                        mergedTintBandRow(
-                            band,
-                            apply: applyRingAllBand,
-                            onRemove: {
-                                appState.settings.ringTint = appState.settings.ringTint.mapAll { $0.removingBand(at: band.id) }
-                            }
-                        )
-                    }
-                    Button("settings.icon.tint.add") {
-                        appState.settings.ringTint = appState.settings.ringTint.mapAll { $0.addingBand() }
-                    }
-                } else if let ring = ringEditorTarget.ring {
-                    let scheme = appState.settings.ringTint.scheme(for: ring)
-                    ForEach(scheme.sortedBands) { band in
-                        editableValueTintBandRow(band, scheme: scheme) { next in
-                            appState.settings.ringTint = appState.settings.ringTint.replacing(ring, with: next)
-                        }
-                    }
-                    Button("settings.icon.tint.add") {
-                        appState.settings.ringTint = appState.settings.ringTint.replacing(ring, with: scheme.addingBand())
-                    }
-                }
+                ringColorCatalogEditor
             }
         }
+
+        ringAssignmentSection
 
         Section {
             Picker("settings.icons.preset", selection: ringIconPresetPickerBinding) {
@@ -767,7 +804,7 @@ struct SettingsView: View {
                 }
             ) {
                 HStack(spacing: 10) {
-                    ForEach(RingKind.allCases) { kind in
+                    ForEach(RingKind.customizable) { kind in
                         ringIconSlotControl(kind)
                     }
                 }
@@ -945,9 +982,9 @@ struct SettingsView: View {
     ) -> some View {
         HStack(alignment: .center, spacing: 8) {
             Button {
-                withAnimation(.snappy(duration: 0.2)) {
-                    expanded.wrappedValue.toggle()
-                }
+                // Resizing the window inside an animated layout pass drops the
+                // frame off the screen. Tab changes resize with no animation.
+                expanded.wrappedValue.toggle()
             } label: {
                 Text(
                     expanded.wrappedValue
@@ -1027,6 +1064,48 @@ struct SettingsView: View {
         }
         .frame(width: iconSlotColumnWidth)
         .help(Localization.string("settings.icons.zoom", language: appState.settings.language))
+    }
+
+    /// Same bordered button as “查看/编辑当前预设”, not a full-width disclosure row.
+    private var ringListToggle: some View {
+        HStack(alignment: .center, spacing: 8) {
+            Button {
+                ringListExpanded.toggle()
+            } label: {
+                Text(ringListExpanded ? "settings.rings.hideList" : "settings.rings.list")
+            }
+            Spacer(minLength: 0)
+        }
+    }
+
+    private func ringOrderRow(_ slot: RingSlot) -> some View {
+        HStack(spacing: 8) {
+            Toggle(LocalizedStringKey(slot.localizationKey), isOn: ringVisibilityBinding(slot))
+            Spacer(minLength: 8)
+            Image(systemName: "line.3.horizontal")
+                .font(.body)
+                .foregroundStyle(.secondary)
+                .frame(width: 28, height: 22)
+                .contentShape(Rectangle())
+                .onDrag {
+                    ringDrag.slot = slot
+                    return NSItemProvider(object: slot.rawValue as NSString)
+                }
+        }
+        .onDrop(of: [.plainText], delegate: RingSlotDropDelegate(
+            slot: slot,
+            drag: ringDrag,
+            move: { item, target in
+                appState.settings.moveRingCatalogItem(item, to: target)
+            }
+        ))
+    }
+
+    private func ringVisibilityBinding(_ slot: RingSlot) -> Binding<Bool> {
+        Binding(
+            get: { appState.settings.ringOrder.contains(slot) },
+            set: { appState.settings.setRingSlot(slot, visible: $0) }
+        )
     }
 
     @ViewBuilder
@@ -1581,10 +1660,124 @@ struct SettingsView: View {
         }
     }
 
-    private func applyRingAllBand(at index: Int, mutate: (inout MenuBarTintBand) -> Void) {
-        appState.settings.ringTint = appState.settings.ringTint.mapAll { scheme in
-            scheme.replacingBand(at: index, mutate: mutate)
+    private func selectedRingColor() -> RingColor? {
+        let colors = appState.settings.ringTint.colors
+        if let id = ringColorSelectionID, let color = colors.first(where: { $0.id == id }) {
+            return color
         }
+        return colors.first
+    }
+
+    private func ringColorTitle(_ index: Int) -> String {
+        Localization.string(
+            "settings.tint.color %lld",
+            language: appState.settings.language,
+            index + 1
+        )
+    }
+
+    private func ringColorMenuLabel(index: Int, color: RingColor) -> some View {
+        let pair = color.scheme.colors(percent: 80)
+        return HStack(spacing: 6) {
+            Capsule()
+                .fill(LinearGradient(colors: [pair.left, pair.right], startPoint: .leading, endPoint: .trailing))
+                .frame(width: 28, height: 10)
+            Text(ringColorTitle(index))
+        }
+    }
+
+    @ViewBuilder
+    private var ringColorCatalogEditor: some View {
+        let tint = appState.settings.ringTint
+        if let color = selectedRingColor() {
+            HStack(spacing: 8) {
+                Picker("settings.tint.colors", selection: Binding(
+                    get: { color.id },
+                    set: { ringColorSelectionID = $0 }
+                )) {
+                    ForEach(Array(tint.colors.enumerated()), id: \.element.id) { index, item in
+                        ringColorMenuLabel(index: index, color: item).tag(item.id)
+                    }
+                }
+                Button {
+                    appState.settings.ringTint = tint.addingColor(copying: color.id)
+                    ringColorSelectionID = appState.settings.ringTint.colors.last?.id
+                } label: {
+                    Image(systemName: "plus")
+                }
+                .help(LocalizedStringKey("settings.tint.addColor"))
+                Button {
+                    let fallback = tint.colors.first { $0.id != color.id }
+                    appState.settings.ringTint = tint.removingColor(id: color.id)
+                    ringColorSelectionID = fallback?.id
+                } label: {
+                    Image(systemName: "minus")
+                }
+                .disabled(tint.colors.count < 2)
+                .help(LocalizedStringKey("settings.tint.removeColor"))
+            }
+
+            let scheme = color.scheme
+            ForEach(scheme.sortedBands) { band in
+                editableValueTintBandRow(band, scheme: scheme) { next in
+                    appState.settings.ringTint = appState.settings.ringTint.updatingColor(id: color.id, scheme: next)
+                }
+            }
+            Button("settings.icon.tint.add") {
+                appState.settings.ringTint = appState.settings.ringTint.updatingColor(
+                    id: color.id,
+                    scheme: scheme.addingBand()
+                )
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var ringAssignmentSection: some View {
+        let colors = appState.settings.ringTint.colors
+        if let fallback = colors.first?.id {
+            let segments = Array(RingColorSegment.allCases)
+            let split = (segments.count + 1) / 2
+            // One row, so the grouped card keeps the same bottom inset as the
+            // preset sections. A section header drops that inset.
+            Section {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("settings.tint.assignments")
+                        .font(.body.weight(.semibold))
+                    HStack(alignment: .top, spacing: 16) {
+                        ringAssignmentColumn(segments: Array(segments.prefix(split)), colors: colors, fallback: fallback)
+                        ringAssignmentColumn(segments: Array(segments.suffix(from: split)), colors: colors, fallback: fallback)
+                    }
+                }
+                .padding(.vertical, 4)
+            }
+        }
+    }
+
+    private func ringAssignmentColumn(segments: [RingColorSegment], colors: [RingColor], fallback: UUID) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            ForEach(segments) { segment in
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(LocalizedStringKey(segment.localizationKey))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Picker(LocalizedStringKey(segment.localizationKey), selection: Binding(
+                        get: { appState.settings.ringTint.assignments[segment] ?? fallback },
+                        set: { id in
+                            appState.settings.ringTint = appState.settings.ringTint.assigning(segment, to: id)
+                        }
+                    )) {
+                        ForEach(Array(colors.enumerated()), id: \.element.id) { index, item in
+                            ringColorMenuLabel(index: index, color: item).tag(item.id)
+                        }
+                    }
+                    .labelsHidden()
+                    .pickerStyle(.menu)
+                    .controlSize(.small)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private func applyFlowAllBand(at index: Int, mutate: (inout MenuBarTintBand) -> Void) {
@@ -1886,6 +2079,30 @@ private struct CenteredPercentField: NSViewRepresentable {
             parent.onCommit()
             sender.window?.makeFirstResponder(nil)
         }
+    }
+}
+
+private final class RingDragState {
+    var slot: RingSlot?
+}
+
+private struct RingSlotDropDelegate: DropDelegate {
+    var slot: RingSlot
+    var drag: RingDragState
+    var move: (RingSlot, RingSlot) -> Void
+
+    func dropEntered(info: DropInfo) {
+        guard let item = drag.slot, item != slot else { return }
+        move(item, slot)
+    }
+
+    func dropUpdated(info: DropInfo) -> DropProposal? {
+        DropProposal(operation: .move)
+    }
+
+    func performDrop(info: DropInfo) -> Bool {
+        drag.slot = nil
+        return true
     }
 }
 

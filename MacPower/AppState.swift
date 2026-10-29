@@ -45,6 +45,7 @@ final class AppState {
         metricsService.start()
         launchAtLoginEnabled = SMAppService.mainApp.status == .enabled
         startAutomaticUpdateChecks()
+        presentWhatsNewIfNeeded()
     }
 
     func setPopoverOpen(_ open: Bool) {
@@ -125,12 +126,65 @@ final class AppState {
             language: language,
             currentVersion
         )
+        attachNotes(release.notes.text(for: language), to: alert)
         alert.addButton(withTitle: Localization.string("update.available.open", language: language))
         alert.addButton(withTitle: Localization.string("update.available.later", language: language))
         if alert.runModal() == .alertFirstButtonReturn {
             NSWorkspace.shared.open(release.htmlURL)
         }
     }
+
+    /// Shows this version's notes once after an update, including the first launch
+    /// of a build that did not record the previous version.
+    private func presentWhatsNewIfNeeded() {
+        guard !Self.isRunningTests else { return }
+        let current = Self.marketingVersion
+        let stored = UserDefaults.standard.string(forKey: Self.whatsNewKey)
+        guard ReleaseNotes.shouldPresentWhatsNew(stored: stored, current: current) else { return }
+        let notes = ReleaseNotes.current.text(for: settings.language)
+        UserDefaults.standard.set(current, forKey: Self.whatsNewKey)
+        guard !notes.isEmpty else { return }
+        DispatchQueue.main.async { [weak self] in
+            self?.presentWhatsNewAlert(version: current, notes: notes)
+        }
+    }
+
+    private func presentWhatsNewAlert(version: String, notes: String) {
+        let language = settings.language
+        NSApp.activate(ignoringOtherApps: true)
+        let alert = NSAlert()
+        alert.messageText = Localization.string(
+            "update.whatsNew.title %@",
+            language: language,
+            version
+        )
+        attachNotes(notes, to: alert)
+        alert.addButton(withTitle: Localization.string("update.whatsNew.ok", language: language))
+        alert.runModal()
+    }
+
+    private func attachNotes(_ notes: String, to alert: NSAlert) {
+        let trimmed = notes.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        let textView = NSTextView(frame: NSRect(x: 0, y: 0, width: 380, height: 160))
+        textView.string = trimmed
+        textView.isEditable = false
+        textView.isSelectable = true
+        textView.drawsBackground = false
+        textView.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
+        textView.textContainerInset = NSSize(width: 2, height: 4)
+        textView.isHorizontallyResizable = false
+        textView.isVerticallyResizable = true
+        textView.textContainer?.widthTracksTextView = true
+        let scroll = NSScrollView(frame: NSRect(x: 0, y: 0, width: 380, height: 160))
+        scroll.documentView = textView
+        scroll.hasVerticalScroller = true
+        scroll.drawsBackground = false
+        scroll.borderType = .noBorder
+        alert.accessoryView = scroll
+    }
+
+    private static let whatsNewKey = "lastLaunchedMarketingVersion"
 
     func openSettings() {
         // Accessory (menu-bar-only) apps on macOS 15 often create the window but

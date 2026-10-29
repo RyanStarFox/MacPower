@@ -31,8 +31,9 @@ enum FlowRibbon {
     /// Icons sit a bit inward of the rounded end, toward the ribbon middle.
     static let logoInset: CGFloat = 42
 
-    /// Keep rounded caps clear of the diagram’s clip edge.
-    static let edgePadding: CGFloat = 16
+    /// Visual gap outside the rounded caps. Zero keeps the caps flush with the
+    /// estimate and charger-rating labels above and below the ribbon.
+    static let edgePadding: CGFloat = 0
 
     /// Shared Liquid Glass tint so the battery bar and energy ribbon match.
     static let glassTintOpacity: Double = 0.42

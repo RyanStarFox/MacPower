@@ -1,11 +1,48 @@
 import SwiftUI
 
 enum PopoverLayout {
-    /// Fixed panel width shared with `StatusItemController` so NSPopover's
-    /// `contentSize` cannot drift narrower than the SwiftUI layout (macOS 15
-    /// was clipping both sides when intrinsic width failed to propagate).
+    /// Minimum panel width shared with `StatusItemController`. One row widens
+    /// to fit every cell. Two rows use the longer row. macOS 15 clips the panel
+    /// when this width and the SwiftUI frame disagree.
     static let width: CGFloat = 420
     static let padding: CGFloat = 14
+    static let ringSpacing: CGFloat = 6
+    /// Pitch of one cell when five of them fill the minimum panel. Rows of three
+    /// or more keep this pitch instead of stretching across the panel.
+    static var ringColumn: CGFloat {
+        (width - padding * 2 - 4 * ringSpacing) / 5
+    }
+
+    /// Three-across is a little roomier than the five-across pitch. Four or more stay on that pitch.
+    static func ringPitch(columns: Int) -> (column: CGFloat, spacing: CGFloat) {
+        if columns == 3 {
+            return (ringColumn * 1.25, ringSpacing * 1.25)
+        }
+        return (ringColumn, ringSpacing)
+    }
+
+    static func width(ringCount: Int, twoRows: Bool) -> CGFloat {
+        let count = columns(ringCount: ringCount, twoRows: twoRows)
+        let pitch = ringPitch(columns: count)
+        let columns = CGFloat(count)
+        let gaps = max(columns - 1, 0) * pitch.spacing
+        let natural = (padding * 2 + columns * pitch.column + gaps).rounded(.up)
+        // One or two cells stay on the wide panel so the battery section keeps
+        // its normal width. Three or more shrink the panel to the ring pitch.
+        if count >= 3 {
+            return natural
+        }
+        return max(width, natural)
+    }
+
+    /// Cells on the wider row. The settings button is one cell.
+    static func columns(ringCount: Int, twoRows: Bool) -> Int {
+        let total = max(ringCount, 0) + 1
+        if twoRows, total >= 2 {
+            return (total + 1) / 2
+        }
+        return total
+    }
 }
 
 struct PopoverRootView: View {
@@ -19,17 +56,23 @@ struct PopoverRootView: View {
                 let theme = AppTheme.resolved(palette: appState.settings.palette, colorScheme: colorScheme)
                 content(theme: theme)
                     .padding(PopoverLayout.padding)
-                    .frame(width: PopoverLayout.width)
+                    .frame(width: panelWidth)
                     .fixedSize(horizontal: false, vertical: true)
             } else {
                 // Keep the hosting graph mounted, but never build glass / TimelineView
                 // while the menu extra is idle. Interactive Liquid Glass in a hidden
                 // NSPopover was burning CPU and UAFing NSViewFocusProxy ~2s after launch.
-                Color.clear.frame(width: PopoverLayout.width, height: 1)
+                // Match the open width so the first real layout is not a resize.
+                Color.clear.frame(width: panelWidth, height: 1)
             }
         }
         .environment(\.locale, appState.settings.resolvedLocale)
         .id(appState.settings.language)
+    }
+
+    private var panelWidth: CGFloat {
+        guard appState.settings.showStatusRings else { return PopoverLayout.width }
+        return PopoverLayout.width(ringCount: appState.settings.ringOrder.count, twoRows: appState.settings.twoRingRows)
     }
 
     @ViewBuilder
@@ -48,14 +91,16 @@ struct PopoverRootView: View {
                 }
 
                 if showFlow {
-                    TimeEstimateRow(snapshot: appState.snapshot, language: appState.settings.language)
-                    if showRings {
-                        energyFlow(theme: theme)
-                    } else {
-                        // Gear-only layout height so HStack can center it on the
-                        // ribbon; caption is painted below without shifting alignment.
-                        energyFlow(theme: theme) {
-                            flowSideSettingsButton
+                    VStack(alignment: .leading, spacing: 4) {
+                        TimeEstimateRow(snapshot: appState.snapshot, language: appState.settings.language)
+                        if showRings {
+                            energyFlow(theme: theme)
+                        } else {
+                            // Gear-only layout height so HStack can center it on the
+                            // ribbon; caption is painted below without shifting alignment.
+                            energyFlow(theme: theme) {
+                                flowSideSettingsButton
+                            }
                         }
                     }
                 } else if !showRings {
@@ -67,51 +112,118 @@ struct PopoverRootView: View {
     }
 
     private var ringsHeader: some View {
-        let language = appState.settings.language
-        let ringTint = appState.settings.ringTint
-        let ringIcons = appState.settings.ringIcons
-        let battery = Int(appState.snapshot.percent.rounded())
-        let cpu = Int(appState.metrics.cpuPercent.rounded())
-        let gpu = Int(appState.metrics.gpuPercent.rounded())
-        let memory = Int(appState.metrics.memoryPercent.rounded())
-        let batteryColors = ringTint.scheme(for: .battery).colors(percent: appState.snapshot.percent)
-        let cpuColors = ringTint.scheme(for: .cpu).colors(percent: appState.metrics.cpuPercent)
-        let gpuColors = ringTint.scheme(for: .gpu).colors(percent: appState.metrics.gpuPercent)
-        let memoryColors = ringTint.scheme(for: .memory).colors(percent: appState.metrics.memoryPercent)
-        return HStack(alignment: .top, spacing: 8) {
-            StatusRingView(
-                percent: appState.snapshot.percent,
-                fillLeft: batteryColors.left,
-                fillRight: batteryColors.right,
-                caption: Localization.string("ring.caption.battery %lld", language: language, Int64(battery)),
-                accessibilityName: Localization.string("ring.battery", language: language),
-                glyph: ringIcons.slot(for: .battery)
-            )
-            StatusRingView(
-                percent: appState.metrics.cpuPercent,
-                fillLeft: cpuColors.left,
-                fillRight: cpuColors.right,
-                caption: Localization.string("ring.caption.cpu %lld", language: language, Int64(cpu)),
-                accessibilityName: Localization.string("ring.cpu", language: language),
-                glyph: ringIcons.slot(for: .cpu)
-            )
-            StatusRingView(
-                percent: appState.metrics.gpuPercent,
-                fillLeft: gpuColors.left,
-                fillRight: gpuColors.right,
-                caption: Localization.string("ring.caption.gpu %lld", language: language, Int64(gpu)),
-                accessibilityName: Localization.string("ring.gpu", language: language),
-                glyph: ringIcons.slot(for: .gpu)
-            )
-            StatusRingView(
-                percent: appState.metrics.memoryPercent,
-                fillLeft: memoryColors.left,
-                fillRight: memoryColors.right,
-                caption: Localization.string("ring.caption.memory %lld", language: language, Int64(memory)),
-                accessibilityName: Localization.string("ring.memory", language: language),
-                glyph: ringIcons.slot(for: .memory)
-            )
+        let slots = appState.settings.ringOrder
+        return RingHeaderLayout(
+            twoRows: appState.settings.twoRingRows,
+            staggerOdd: appState.settings.ringOddRow == .stagger
+        ) {
+            ForEach(slots) { slot in
+                ringCell(slot)
+            }
             settingsButton
+        }
+        // Opening used to lay the rings out once at the wrong pitch, then
+        // animate them into place. Placement itself should snap.
+        .animation(nil, value: panelWidth)
+        .animation(nil, value: appState.settings.twoRingRows)
+        .animation(nil, value: appState.settings.ringOddRow)
+        .animation(nil, value: slots.count)
+    }
+
+    @ViewBuilder
+    private func ringCell(_ slot: RingSlot) -> some View {
+        switch slot {
+        case .download:
+            speedRing(
+                segment: .download,
+                bytesPerSecond: appState.metrics.downloadBytesPerSecond,
+                glyph: "arrow.down",
+                nameKey: "settings.rings.download"
+            )
+        case .upload:
+            speedRing(
+                segment: .upload,
+                bytesPerSecond: appState.metrics.uploadBytesPerSecond,
+                glyph: "arrow.up",
+                nameKey: "settings.rings.upload"
+            )
+        case .speedPair:
+            speedPairRing
+        default:
+            if let kind = slot.metric {
+                metricRing(kind)
+            }
+        }
+    }
+
+    private func metricRing(_ kind: RingKind) -> some View {
+        let language = appState.settings.language
+        let percent = percent(for: kind)
+        let colors = appState.settings.ringTint.scheme(for: kind).colors(percent: percent)
+        return StatusRingView(
+            percent: percent,
+            fillLeft: colors.left,
+            fillRight: colors.right,
+            caption: Localization.string(kind.captionKey, language: language, Int64(percent.rounded())),
+            accessibilityName: Localization.string(kind.localizationKey, language: language),
+            glyph: appState.settings.ringIcons.slot(for: kind)
+        )
+    }
+
+    private func speedRing(
+        segment: RingColorSegment,
+        bytesPerSecond: Double,
+        glyph: String,
+        nameKey: String
+    ) -> some View {
+        let language = appState.settings.language
+        let percent = NetworkRateFormat.ringPercent(bytesPerSecond: bytesPerSecond)
+        let colors = appState.settings.ringTint.scheme(forSegment: segment).colors(percent: percent)
+        let rate = NetworkRateFormat.string(bytesPerSecond: bytesPerSecond)
+        let name = Localization.string(nameKey, language: language)
+        return StatusRingView(
+            percent: percent,
+            fillLeft: colors.left,
+            fillRight: colors.right,
+            caption: rate,
+            accessibilityName: name,
+            glyph: .system(glyph),
+            glyphTint: colors.left,
+            accessibilityValue: "\(name) \(rate)"
+        )
+    }
+
+    private var speedPairRing: some View {
+        let language = appState.settings.language
+        let downBytes = appState.metrics.downloadBytesPerSecond
+        let upBytes = appState.metrics.uploadBytesPerSecond
+        let down = NetworkRateFormat.string(bytesPerSecond: downBytes)
+        let up = NetworkRateFormat.string(bytesPerSecond: upBytes)
+        let name = Localization.string("settings.rings.speedPair", language: language)
+        let downloadColor = appState.settings.ringTint.scheme(forSegment: .download)
+            .colors(percent: NetworkRateFormat.ringPercent(bytesPerSecond: downBytes)).left
+        let uploadColor = appState.settings.ringTint.scheme(forSegment: .upload)
+            .colors(percent: NetworkRateFormat.ringPercent(bytesPerSecond: upBytes)).left
+        return SpeedPairRingView(
+            downloadProgress: NetworkRateFormat.ringPercent(bytesPerSecond: downBytes) / 100,
+            uploadProgress: NetworkRateFormat.ringPercent(bytesPerSecond: upBytes) / 100,
+            downloadCaption: down,
+            uploadCaption: up,
+            accessibilityValue: "\(name) ↓ \(down) ↑ \(up)",
+            downloadColor: downloadColor,
+            uploadColor: uploadColor
+        )
+    }
+
+    private func percent(for kind: RingKind) -> Double {
+        switch kind {
+        case .battery: appState.snapshot.percent
+        case .cpu: appState.metrics.cpuPercent
+        case .gpu: appState.metrics.gpuPercent
+        case .memory: appState.metrics.memoryPercent
+        case .disk: appState.metrics.diskPercent
+        case .memoryPressure: appState.metrics.memoryPressurePercent
+        case .swap: appState.metrics.swapPercent
         }
     }
 
@@ -200,6 +312,109 @@ struct PopoverRootView: View {
         .frame(maxWidth: .infinity)
         .help(Localization.string("settings.title", language: language))
         .accessibilityLabel(Localization.string("settings.title", language: language))
+    }
+}
+
+/// Rings and the settings button are one sequence. Two rows split an even
+/// count into n + n, and an odd count into n+1 over n, with the shorter row
+/// in the gaps of the row above.
+private struct RingHeaderLayout: Layout {
+    var twoRows: Bool
+    var staggerOdd: Bool
+    var rowSpacing: CGFloat = 10
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let width = proposal.width ?? (PopoverLayout.width - PopoverLayout.padding * 2)
+        let column = layoutMetrics(total: subviews.count, width: width).column
+        let rowHeight = rowHeight(fitting: column, subviews: subviews)
+        let rows: CGFloat = usesTwoRows(subviews.count) ? 2 : 1
+        return CGSize(width: width, height: rowHeight * rows + rowSpacing * (rows - 1))
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        let total = subviews.count
+        guard total > 0 else { return }
+        let metrics = layoutMetrics(total: total, width: bounds.width)
+        let column = metrics.column
+        let fitted = ProposedViewSize(width: column, height: nil)
+        let rowHeight = rowHeight(fitting: column, subviews: subviews)
+        let topCount = metrics.columns
+        let xOrigin = rowOrigin(
+            in: bounds.width,
+            columns: topCount,
+            column: column,
+            spacing: metrics.spacing,
+            minX: bounds.minX
+        )
+        for index in 0..<topCount {
+            place(
+                subviews[index],
+                column: column,
+                spacing: metrics.spacing,
+                xIndex: index,
+                y: bounds.minY,
+                xOrigin: xOrigin,
+                proposal: fitted
+            )
+        }
+        let bottomCount = total - topCount
+        guard bottomCount > 0 else { return }
+        let shift = staggerOdd && bottomCount < topCount ? (column + metrics.spacing) / 2 : 0
+        let y = bounds.minY + rowHeight + rowSpacing
+        for index in 0..<bottomCount {
+            place(
+                subviews[topCount + index],
+                column: column,
+                spacing: metrics.spacing,
+                xIndex: index,
+                y: y,
+                xOrigin: xOrigin,
+                proposal: fitted,
+                extraX: shift
+            )
+        }
+    }
+
+    private func place(
+        _ subview: LayoutSubview,
+        column: CGFloat,
+        spacing: CGFloat,
+        xIndex: Int,
+        y: CGFloat,
+        xOrigin: CGFloat,
+        proposal: ProposedViewSize,
+        extraX: CGFloat = 0
+    ) {
+        let x = xOrigin + extraX + CGFloat(xIndex) * (column + spacing)
+        subview.place(at: CGPoint(x: x, y: y), anchor: .topLeading, proposal: proposal)
+    }
+
+    private func usesTwoRows(_ total: Int) -> Bool {
+        twoRows && total >= 2
+    }
+
+    private func layoutMetrics(total: Int, width: CGFloat) -> (columns: Int, column: CGFloat, spacing: CGFloat) {
+        let columns = usesTwoRows(total) ? (total + 1) / 2 : max(total, 1)
+        let pitch = PopoverLayout.ringPitch(columns: columns)
+        // One or two cells keep stretching so the panel stays wide enough for
+        // the battery section. Three or more use a fixed pitch.
+        if columns >= 3 {
+            return (columns, pitch.column, pitch.spacing)
+        }
+        let gaps = pitch.spacing * CGFloat(max(columns - 1, 0))
+        let column = max(0, (width - gaps) / CGFloat(max(columns, 1)))
+        return (columns, column, pitch.spacing)
+    }
+
+    private func rowOrigin(in width: CGFloat, columns: Int, column: CGFloat, spacing: CGFloat, minX: CGFloat) -> CGFloat {
+        guard columns >= 3 else { return minX }
+        let group = CGFloat(columns) * column + spacing * CGFloat(columns - 1)
+        return minX + max(0, (width - group) / 2)
+    }
+
+    private func rowHeight(fitting column: CGFloat, subviews: Subviews) -> CGFloat {
+        let proposal = ProposedViewSize(width: column, height: nil)
+        return subviews.map { $0.sizeThatFits(proposal).height }.max() ?? 0
     }
 }
 

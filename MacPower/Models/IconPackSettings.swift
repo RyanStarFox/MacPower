@@ -204,6 +204,9 @@ struct RingIconSettings: Codable, Equatable, Sendable {
         case .cpu: cpu
         case .gpu: gpu
         case .memory: memory
+        case .disk: .system("internaldrive.fill")
+        case .memoryPressure: .system("gauge.with.dots.needle.67percent")
+        case .swap: .system("arrow.left.arrow.right")
         }
     }
 
@@ -214,6 +217,7 @@ struct RingIconSettings: Codable, Equatable, Sendable {
         case .cpu: copy.cpu = slot
         case .gpu: copy.gpu = slot
         case .memory: copy.memory = slot
+        case .disk, .memoryPressure, .swap: break
         }
         return copy
     }
@@ -579,6 +583,12 @@ extension RingKind {
                 .system("cylinder.fill"),
                 .system("externaldrive.fill")
             ]
+        case .disk:
+            [.system("internaldrive.fill")]
+        case .memoryPressure:
+            [.system("gauge.with.dots.needle.67percent")]
+        case .swap:
+            [.system("arrow.left.arrow.right")]
         }
     }
 }

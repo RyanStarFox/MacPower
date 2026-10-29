@@ -26,11 +26,21 @@ final class AppVersionTests: XCTestCase {
 final class GitHubLatestReleaseTests: XCTestCase {
     func testDecodesTagAndHTMLURL() throws {
         let json = """
-        {"tag_name":"v1.2.5","html_url":"https://github.com/RyanStarFox/MacPower/releases/tag/v1.2.5"}
+        {"tag_name":"v1.2.5","html_url":"https://github.com/RyanStarFox/MacPower/releases/tag/v1.2.5","body":"<!-- macpower-notes\\n{\\"en\\":\\"Hello\\",\\"zh-Hans\\":\\"你好\\"}\\n-->"}
         """
         let release = try GitHubLatestRelease.decode(Data(json.utf8))
         XCTAssertEqual(release.tagName, "v1.2.5")
         XCTAssertEqual(release.htmlURL.absoluteString, "https://github.com/RyanStarFox/MacPower/releases/tag/v1.2.5")
+        XCTAssertEqual(release.notes.text(for: .english), "Hello")
+        XCTAssertEqual(release.notes.text(for: .simplifiedChinese), "你好")
+    }
+
+    func testReleaseWithoutNotesStillDecodes() throws {
+        let json = """
+        {"tag_name":"v1.2.5","html_url":"https://github.com/RyanStarFox/MacPower/releases/tag/v1.2.5"}
+        """
+        let release = try GitHubLatestRelease.decode(Data(json.utf8))
+        XCTAssertEqual(release.notes.text(for: .english), "")
     }
 
     func testRejectsMissingURL() {
@@ -68,6 +78,34 @@ final class UpdateCheckPolicyTests: XCTestCase {
         let stale = now.addingTimeInterval(-UpdateCheckPolicy.interval)
         XCTAssertTrue(UpdateCheckPolicy.shouldCheck(enabled: true, reason: .periodic, lastCheck: stale, now: now))
         XCTAssertEqual(UpdateCheckPolicy.interval, 86_400)
+    }
+}
+
+final class ReleaseNotesTests: XCTestCase {
+    func testBundledNotesCoverEveryLanguage() throws {
+        let url = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .appendingPathComponent("MacPower/ReleaseNotes.json")
+        let data = try Data(contentsOf: url)
+        let notes = try JSONDecoder().decode([String: String].self, from: data)
+        let required = AppLanguage.allCases.compactMap(\.localeIdentifier)
+        for key in required {
+            let text = notes[key]?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            XCTAssertFalse(text.isEmpty, key)
+        }
+    }
+
+    func testUnknownLanguageFallsBackToEnglish() {
+        let notes = ReleaseNotes(sections: ["en": "Hello", "zh-Hans": "你好"])
+        XCTAssertEqual(notes.text(for: .korean), "Hello")
+        XCTAssertEqual(notes.text(for: .simplifiedChinese), "你好")
+    }
+
+    func testWhatsNewShowsWhenVersionChangesOrIsUnrecorded() {
+        XCTAssertTrue(ReleaseNotes.shouldPresentWhatsNew(stored: nil, current: "1.3.0"))
+        XCTAssertTrue(ReleaseNotes.shouldPresentWhatsNew(stored: "1.2.14", current: "1.3.0"))
+        XCTAssertFalse(ReleaseNotes.shouldPresentWhatsNew(stored: "1.3.0", current: "1.3.0"))
     }
 }
 

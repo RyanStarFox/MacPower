@@ -162,7 +162,7 @@ private struct EnergyFlowDiagram<Trailing: View>: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 4) {
             HStack(alignment: .center, spacing: 8) {
                 diagram
                     .frame(maxWidth: .infinity)
@@ -444,7 +444,7 @@ private struct EnergyFlowDiagram<Trailing: View>: View {
             flowIcons.mac.renderScale
         )
         let iconSide = 16 * glyph * flowIconScale * 1.16
-        return max(trunk + 24, iconSide + 8)
+        return max(trunk + 8, iconSide + 8)
     }
 
     @ViewBuilder
@@ -566,7 +566,7 @@ private struct EnergyFlowDiagram<Trailing: View>: View {
     private func layout(in size: CGSize, snapshot: PowerSnapshot) -> Layout {
         let trunk = FlowRibbon.trunkWidth(totalWatts: 1)
         let midY = size.height / 2
-        // Keep rounded end caps clear of the GeometryReader clip edge.
+        // Cap outer edge sits on the same inset as the labels above and below.
         let inset = FlowRibbon.capRadius(for: trunk) + FlowRibbon.edgePadding
         let logo = max(FlowRibbon.logoInset, inset + 10)
         let left = CGPoint(x: inset, y: midY)

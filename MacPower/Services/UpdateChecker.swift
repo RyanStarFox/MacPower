@@ -3,22 +3,29 @@ import Foundation
 struct GitHubLatestRelease: Equatable, Sendable {
     var tagName: String
     var htmlURL: URL
+    var notes: ReleaseNotes
 
     static func decode(_ data: Data) throws -> GitHubLatestRelease {
         let payload = try JSONDecoder().decode(Payload.self, from: data)
         guard let url = URL(string: payload.htmlURL) else {
             throw URLError(.badURL)
         }
-        return GitHubLatestRelease(tagName: payload.tagName, htmlURL: url)
+        return GitHubLatestRelease(
+            tagName: payload.tagName,
+            htmlURL: url,
+            notes: ReleaseNotes.parse(releaseBody: payload.body ?? "")
+        )
     }
 
     private struct Payload: Decodable {
         let tagName: String
         let htmlURL: String
+        let body: String?
 
         enum CodingKeys: String, CodingKey {
             case tagName = "tag_name"
             case htmlURL = "html_url"
+            case body
         }
     }
 }

@@ -30,7 +30,7 @@ final class StatusItemController: NSObject, NSPopoverDelegate {
         // frame, and SwiftUI then centered/clipped the 420pt panel on both sides.
         hosting.sizingOptions = []
         popover.contentViewController = hosting
-        popover.contentSize = NSSize(width: PopoverLayout.width, height: 1)
+        popover.contentSize = NSSize(width: popoverWidth, height: 1)
         applyAnchorPreference()
 
         if let button = statusItem.button {
@@ -69,7 +69,7 @@ final class StatusItemController: NSObject, NSPopoverDelegate {
         if popover.isShown {
             syncPopoverContentSize()
         } else {
-            popover.contentSize = NSSize(width: PopoverLayout.width, height: 1)
+            popover.contentSize = NSSize(width: popoverWidth, height: 1)
         }
         refreshIcon(force: true)
     }
@@ -217,6 +217,11 @@ final class StatusItemController: NSObject, NSPopoverDelegate {
         hugMenuBarIfArrowHidden()
     }
 
+    private var popoverWidth: CGFloat {
+        guard appState.settings.showStatusRings else { return PopoverLayout.width }
+        return PopoverLayout.width(ringCount: appState.settings.ringOrder.count, twoRows: appState.settings.twoRingRows)
+    }
+
     /// Lock width to the SwiftUI design width and take height from the hosting view.
     /// Must run while the open content graph is mounted, ideally before `show`.
     private func syncPopoverContentSize() {
@@ -224,13 +229,18 @@ final class StatusItemController: NSObject, NSPopoverDelegate {
             hosting.view.window?.updateConstraintsIfNeeded()
         }
         hosting.view.layoutSubtreeIfNeeded()
+        let width = popoverWidth
         let fitted = hosting.sizeThatFits(
-            in: NSSize(width: PopoverLayout.width, height: CGFloat.greatestFiniteMagnitude)
+            in: NSSize(width: width, height: CGFloat.greatestFiniteMagnitude)
         )
-        popover.contentSize = NSSize(
-            width: PopoverLayout.width,
-            height: max(ceil(fitted.height), 1)
-        )
+        let size = NSSize(width: width, height: max(ceil(fitted.height), 1))
+        // Animating this resize is what slides the rings from the previous
+        // pitch into the final grid. The popover can still fade in.
+        let animates = popover.animates
+        popover.animates = false
+        popover.contentSize = size
+        popover.animates = animates
+        hosting.view.layoutSubtreeIfNeeded()
     }
 
     func popoverDidClose(_ notification: Notification) {
