@@ -20,10 +20,10 @@ enum SettingsButtonPlacement: String, CaseIterable, Identifiable, Sendable {
         }
     }
 
-    /// Unknown or missing stored values keep the ring-cell control.
+    /// Unknown or missing stored values stay on the right-click menu.
     static func resolved(stored raw: String?) -> SettingsButtonPlacement {
         guard let raw, let placement = SettingsButtonPlacement(rawValue: raw) else {
-            return .insideBlock
+            return .rightClickOnly
         }
         return placement
     }
@@ -68,12 +68,12 @@ enum SettingsButtonHost: String, CaseIterable, Identifiable, Sendable {
 
     var localizationKey: String {
         switch self {
-        case .rings: "settings.popover.showRings"
-        case .flow: "settings.popover.showFlow"
-        case .topApps: "settings.popover.showTopApps"
-        case .lowPower: "settings.popover.showLowPower"
-        case .localIP: "settings.popover.showLocalIP"
-        case .batteryCycle: "settings.popover.showBatteryCycle"
+        case .rings: "settings.tab.rings"
+        case .flow: "settings.tab.flow"
+        case .topApps: "settings.tab.topApps"
+        case .lowPower: "settings.tab.lowPower"
+        case .localIP: "settings.tab.localIP"
+        case .batteryCycle: "settings.tab.batteryCycle"
         }
     }
 

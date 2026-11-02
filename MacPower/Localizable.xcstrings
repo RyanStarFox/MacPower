@@ -4343,6 +4343,54 @@
         }
       }
     },
+    "settings.popover.addDivider": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Trennlinie hinzufügen" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Add Divider" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Añadir separador" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Ajouter un séparateur" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Aggiungi separatore" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "区切り線を追加" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "구분선 추가" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Adicionar divisor" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Добавить разделитель" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "添加分割线" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "加入分割線" } }
+      }
+    },
+    "settings.popover.divider": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Trennlinie" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Divider" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Separador" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Séparateur" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Separatore" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "区切り線" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "구분선" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Divisor" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Разделитель" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "分割线" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "分割線" } }
+      }
+    },
+    "settings.popover.removeDivider": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Trennlinie entfernen" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Remove Divider" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Quitar separador" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Retirer le séparateur" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Rimuovi separatore" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "区切り線を削除" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "구분선 삭제" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Remover divisor" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Удалить разделитель" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "移除分割线" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "移除分割線" } }
+      }
+    },
     "settings.popover.order": {
       "extractionState": "manual",
       "localizations": {
@@ -14750,17 +14798,17 @@
     "tutorial.panel.blocks": {
       "extractionState": "manual",
       "localizations": {
-        "de": { "stringUnit": { "state": "translated", "value": "Der Griff links zieht die Reihenfolge, der Schalter blendet den Bereich ein oder aus, und mindestens ein Bereich bleibt sichtbar." } },
-        "en": { "stringUnit": { "state": "translated", "value": "The grip on the left drags the order, each switch shows or hides that block, and at least one block stays on." } },
-        "es": { "stringUnit": { "state": "translated", "value": "El asa de la izquierda arrastra el orden, cada interruptor muestra u oculta ese bloque, y al menos un bloque sigue visible." } },
-        "fr": { "stringUnit": { "state": "translated", "value": "La poignée à gauche fait glisser l’ordre, chaque interrupteur affiche ou masque le bloc, et au moins un bloc reste visible." } },
-        "it": { "stringUnit": { "state": "translated", "value": "La presa a sinistra trascina l’ordine, ogni interruttore mostra o nasconde il blocco, e almeno un blocco resta visibile." } },
-        "ja": { "stringUnit": { "state": "translated", "value": "左のグリップで並べ替え、スイッチでそのブロックを出します。少なくとも一つは表示したままにします。" } },
-        "ko": { "stringUnit": { "state": "translated", "value": "왼쪽 손잡이로 순서를 끌고, 스위치로 그 블록을 켜거나 끕니다. 최소한 한 블록은 켜 둡니다." } },
-        "pt-BR": { "stringUnit": { "state": "translated", "value": "A alça à esquerda arrasta a ordem, cada interruptor mostra ou oculta o bloco, e pelo menos um bloco continua visível." } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Ручка слева перетаскивает порядок, переключатель показывает или скрывает блок, и хотя бы один блок остаётся включённым." } },
-        "zh-Hans": { "stringUnit": { "state": "translated", "value": "左边的握把用来拖动排序，开关决定这一块出不出现。至少要留一块开着。" } },
-        "zh-Hant": { "stringUnit": { "state": "translated", "value": "左邊的握把用來拖動排序，開關決定這一塊出不出現。至少要留一塊開著。" } }
+        "de": { "stringUnit": { "state": "translated", "value": "Der Griff links zieht die Reihenfolge, der Schalter blendet den Bereich ein oder aus, und mindestens ein Bereich bleibt sichtbar. Standardmäßig liegt eine Linie zwischen je zwei eingeschalteten Bereichen; in der Reihenfolge kannst du eine Trennlinie ziehen, eine weitere hinzufügen oder eine entfernen." } },
+        "en": { "stringUnit": { "state": "translated", "value": "The grip on the left drags the order, each switch shows or hides that block, and at least one block stays on. By default there is a line between every two blocks that are on; in the panel order list you can drag a divider, add another, or remove one." } },
+        "es": { "stringUnit": { "state": "translated", "value": "El asa de la izquierda arrastra el orden, cada interruptor muestra u oculta ese bloque, y al menos un bloque sigue visible. De forma predeterminada hay una línea entre cada dos bloques activados; en la lista del orden puedes arrastrar un separador, añadir otro o quitar uno." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "La poignée à gauche fait glisser l’ordre, chaque interrupteur affiche ou masque le bloc, et au moins un bloc reste visible. Par défaut, une ligne sépare chaque paire de blocs activés ; dans la liste d’ordre, tu peux faire glisser un séparateur, en ajouter un ou en retirer un." } },
+        "it": { "stringUnit": { "state": "translated", "value": "La presa a sinistra trascina l’ordine, ogni interruttore mostra o nasconde il blocco, e almeno un blocco resta visibile. Per impostazione predefinita c’è una linea tra ogni due blocchi attivi; nell’elenco dell’ordine puoi trascinare un separatore, aggiungerne un altro o rimuoverne uno." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "左のグリップで並べ替え、スイッチでそのブロックを出します。少なくとも一つは表示したままにします。初期状態ではオンのブロックのあいだに区切り線があり、順序リストで区切り線をドラッグ、追加、削除できます。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "왼쪽 손잡이로 순서를 끌고, 스위치로 그 블록을 켜거나 끕니다. 최소한 한 블록은 켜 둡니다. 기본값은 켜진 블록 사이마다 구분선이 있고, 패널 순서 목록에서 구분선을 끌거나 추가하거나 지울 수 있습니다." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "A alça à esquerda arrasta a ordem, cada interruptor mostra ou oculta o bloco, e pelo menos um bloco continua visível. Por padrão há uma linha entre cada dois blocos ligados; na lista de ordem você pode arrastar um divisor, adicionar outro ou remover um." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Ручка слева перетаскивает порядок, переключатель показывает или скрывает блок, и хотя бы один блок остаётся включённым. По умолчанию линия стоит между каждыми двумя включёнными блоками; в списке порядка разделитель можно перетащить, добавить ещё один или удалить." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "左边的握把用来拖动排序，开关决定这一块出不出现。至少要留一块开着。默认每两个打开的板块之间都有一条分割线；在面板顺序列表里可以拖动分割线，也可以再加一条或删掉。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "左邊的握把用來拖動排序，開關決定這一塊出不出現。至少要留一塊開著。預設每兩個打開的板塊之間都有一條分割線；在面板順序清單裡可以拖動分割線，也可以再加一條或刪掉。" } }
       }
     },
     "tutorial.rings.body": {
@@ -14942,17 +14990,17 @@
     "tutorial.panel.body": {
       "extractionState": "manual",
       "localizations": {
-        "de": { "stringUnit": { "state": "translated", "value": "Öffne Bereiche in der Seitenleiste. Der Griff links zieht die Reihenfolge, der Schalter blendet den Bereich ein oder aus, und mindestens ein Bereich bleibt sichtbar. Pfeil, Position der Einstellungen-Schaltfläche (Eigener Block, In einem Block, Nur beim Rechtsklick) stehen auf derselben Seite." } },
-        "en": { "stringUnit": { "state": "translated", "value": "Open Panels in the sidebar. The grip on the left drags the order, each switch shows or hides that block, and at least one block stays on. The arrow and Settings button placement (its own block, inside a block, or only on right-click) are on this page too." } },
-        "es": { "stringUnit": { "state": "translated", "value": "Abre Paneles en la barra lateral. El asa de la izquierda arrastra el orden, cada interruptor muestra u oculta ese bloque, y al menos un bloque sigue visible. La flecha y la ubicación del botón de ajustes (bloque propio, dentro de un bloque o solo al hacer clic derecho) están en esta misma página." } },
-        "fr": { "stringUnit": { "state": "translated", "value": "Ouvre Panneaux dans la barre latérale. La poignée à gauche fait glisser l’ordre, chaque interrupteur affiche ou masque le bloc, et au moins un bloc reste visible. La flèche et l’emplacement du bouton Réglages (bloc séparé, dans un bloc, ou uniquement au clic droit) sont sur cette page." } },
-        "it": { "stringUnit": { "state": "translated", "value": "Apri Pannelli nella barra laterale. La presa a sinistra trascina l’ordine, ogni interruttore mostra o nasconde il blocco, e almeno un blocco resta visibile. La freccia e la posizione del pulsante Impostazioni (blocco dedicato, dentro un blocco, o solo con il clic destro) stanno in questa pagina." } },
-        "ja": { "stringUnit": { "state": "translated", "value": "サイドバーの「パネル」を開きます。左のグリップで並べ替え、スイッチで出すかを決め、少なくとも一つは表示したままにします。矢印と、設定ボタンの位置（独立したブロック、既存のブロック内、右クリック時のみ）もこのページにあります。" } },
-        "ko": { "stringUnit": { "state": "translated", "value": "사이드바에서 패널을 엽니다. 왼쪽 손잡이로 순서를 끌고, 스위치로 블록을 켜거나 끄며, 최소한 한 블록은 켜 둡니다. 화살표와 설정 버튼 위치(별도의 블록, 기존 블록 안, 오른쪽 클릭 때만)도 이 페이지에 있습니다." } },
-        "pt-BR": { "stringUnit": { "state": "translated", "value": "Abra Painéis na barra lateral. A alça à esquerda arrasta a ordem, cada interruptor mostra ou oculta o bloco, e pelo menos um bloco continua visível. A seta e a posição do botão de ajustes (bloco próprio, dentro de um bloco ou somente no clique direito) ficam nesta página." } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Откройте Панели на боковой панели. Ручка слева перетаскивает порядок, переключатель показывает или скрывает блок, и хотя бы один блок остаётся включённым. Стрелка и расположение кнопки настроек (отдельный блок, внутри блока или только по правому клику) тоже на этой странице." } },
-        "zh-Hans": { "stringUnit": { "state": "translated", "value": "在侧边栏打开「面板」。左边的握把用来拖动排序，开关决定这一块出不出现，至少要留一块开着。箭头和设置按钮出现位置也在这一页：可以单独一个区块、出现在某个区块里，或仅右键图标时出现。" } },
-        "zh-Hant": { "stringUnit": { "state": "translated", "value": "在側邊欄打開「面板」。左邊的握把用來拖動排序，開關決定這一塊出不出現，至少要留一塊開著。箭頭和設定按鈕出現位置也在這一頁：可以單獨一個區塊、出現在某個區塊裡，或僅右鍵圖示時出現。" } }
+        "de": { "stringUnit": { "state": "translated", "value": "Öffne Bereiche in der Seitenleiste. Der Griff links zieht die Reihenfolge, der Schalter blendet den Bereich ein oder aus, und mindestens ein Bereich bleibt sichtbar. Standardmäßig liegt eine Linie zwischen je zwei eingeschalteten Bereichen; in der Reihenfolge kannst du eine Trennlinie ziehen, eine weitere hinzufügen oder eine entfernen. Pfeil, Position der Einstellungen-Schaltfläche (Eigener Block, In einem Block, Nur beim Rechtsklick) stehen auf derselben Seite." } },
+        "en": { "stringUnit": { "state": "translated", "value": "Open Panels in the sidebar. The grip on the left drags the order, each switch shows or hides that block, and at least one block stays on. By default there is a line between every two blocks that are on; in the panel order list you can drag a divider, add another, or remove one. The arrow and Settings button placement (its own block, inside a block, or only on right-click) are on this page too." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Abre Paneles en la barra lateral. El asa de la izquierda arrastra el orden, cada interruptor muestra u oculta ese bloque, y al menos un bloque sigue visible. De forma predeterminada hay una línea entre cada dos bloques activados; en la lista del orden puedes arrastrar un separador, añadir otro o quitar uno. La flecha y la ubicación del botón de ajustes (bloque propio, dentro de un bloque o solo al hacer clic derecho) están en esta misma página." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Ouvre Panneaux dans la barre latérale. La poignée à gauche fait glisser l’ordre, chaque interrupteur affiche ou masque le bloc, et au moins un bloc reste visible. Par défaut, une ligne sépare chaque paire de blocs activés ; dans la liste d’ordre, tu peux faire glisser un séparateur, en ajouter un ou en retirer un. La flèche et l’emplacement du bouton Réglages (bloc séparé, dans un bloc, ou uniquement au clic droit) sont sur cette page." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Apri Pannelli nella barra laterale. La presa a sinistra trascina l’ordine, ogni interruttore mostra o nasconde il blocco, e almeno un blocco resta visibile. Per impostazione predefinita c’è una linea tra ogni due blocchi attivi; nell’elenco dell’ordine puoi trascinare un separatore, aggiungerne un altro o rimuoverne uno. La freccia e la posizione del pulsante Impostazioni (blocco dedicato, dentro un blocco, o solo con il clic destro) stanno in questa pagina." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "サイドバーの「パネル」を開きます。左のグリップで並べ替え、スイッチで出すかを決め、少なくとも一つは表示したままにします。初期状態ではオンのブロックのあいだに区切り線があり、順序リストで区切り線をドラッグ、追加、削除できます。矢印と、設定ボタンの位置（独立したブロック、既存のブロック内、右クリック時のみ）もこのページにあります。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "사이드바에서 패널을 엽니다. 왼쪽 손잡이로 순서를 끌고, 스위치로 블록을 켜거나 끄며, 최소한 한 블록은 켜 둡니다. 기본값은 켜진 블록 사이마다 구분선이 있고, 패널 순서 목록에서 구분선을 끌거나 추가하거나 지울 수 있습니다. 화살표와 설정 버튼 위치(별도의 블록, 기존 블록 안, 오른쪽 클릭 때만)도 이 페이지에 있습니다." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Abra Painéis na barra lateral. A alça à esquerda arrasta a ordem, cada interruptor mostra ou oculta o bloco, e pelo menos um bloco continua visível. Por padrão há uma linha entre cada dois blocos ligados; na lista de ordem você pode arrastar um divisor, adicionar outro ou remover um. A seta e a posição do botão de ajustes (bloco próprio, dentro de um bloco ou somente no clique direito) ficam nesta página." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Откройте Панели на боковой панели. Ручка слева перетаскивает порядок, переключатель показывает или скрывает блок, и хотя бы один блок остаётся включённым. По умолчанию линия стоит между каждыми двумя включёнными блоками; в списке порядка разделитель можно перетащить, добавить ещё один или удалить. Стрелка и расположение кнопки настроек (отдельный блок, внутри блока или только по правому клику) тоже на этой странице." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "在侧边栏打开「面板」。左边的握把用来拖动排序，开关决定这一块出不出现，至少要留一块开着。默认每两个打开的板块之间都有一条分割线；在面板顺序列表里可以拖动分割线，也可以再加一条或删掉。箭头和设置按钮出现位置也在这一页：可以单独一个区块、出现在某个区块里，或仅右键图标时出现。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "在側邊欄打開「面板」。左邊的握把用來拖動排序，開關決定這一塊出不出現，至少要留一塊開著。預設每兩個打開的板塊之間都有一條分割線；在面板順序清單裡可以拖動分割線，也可以再加一條或刪掉。箭頭和設定按鈕出現位置也在這一頁：可以單獨一個區塊、出現在某個區塊裡，或僅右鍵圖示時出現。" } }
       }
     },
     "tutorial.localIP.body": {

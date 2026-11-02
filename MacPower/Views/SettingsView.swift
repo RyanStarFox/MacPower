@@ -291,6 +291,7 @@ struct SettingsView: View {
     @State private var ringDrag = RingDragState()
     @State private var popoverDrag = PopoverBlockDragState()
     @State private var ringScaleSlot: RingSlot?
+    @State private var ringIconEditor: RingSlot?
 
     init(appState: AppState) {
         self.appState = appState
@@ -580,10 +581,12 @@ struct SettingsView: View {
                 tutorialNote(title: "settings.lowPower.layout", "tutorial.lowPower.layout")
             }
         case .panel:
-            VStack(alignment: .leading, spacing: 16) {
-                panelTutorialPreview
+            VStack(alignment: .leading, spacing: 18) {
+                panelArrowDiagram
                     .frame(maxWidth: .infinity, alignment: .center)
                 tutorialNote(title: "settings.popover.arrow", "tutorial.panel.arrow")
+                panelButtonDiagram
+                    .frame(maxWidth: .infinity, alignment: .center)
                 tutorialNote(title: "settings.button.placement", "tutorial.panel.button")
                 tutorialNote(title: "settings.popover.order", "tutorial.panel.blocks")
             }
@@ -870,7 +873,7 @@ struct SettingsView: View {
             fillRight: colors.right,
             caption: rate,
             accessibilityName: name,
-            glyph: .system(upload ? "arrow.up" : "arrow.down"),
+            glyph: appState.settings.ringIcons.slot(for: upload ? .upload : .download),
             glyphTint: colors.left,
             accessibilityValue: "\(name) \(rate)"
         )
@@ -892,7 +895,7 @@ struct SettingsView: View {
             fillRight: colors.right,
             caption: caption,
             accessibilityName: name,
-            glyph: .system("thermometer.medium"),
+            glyph: appState.settings.ringIcons.slot(for: .batteryTemperature),
             glyphTint: colors.left,
             accessibilityValue: "\(name) \(caption)"
         )
@@ -916,7 +919,7 @@ struct SettingsView: View {
             fillRight: colors.right,
             caption: caption,
             accessibilityName: name,
-            glyph: .system("thermometer.high"),
+            glyph: appState.settings.ringIcons.slot(for: .thermalState),
             glyphTint: colors.left,
             accessibilityValue: "\(name) \(caption)"
         )
@@ -1059,42 +1062,258 @@ struct SettingsView: View {
         .allowsHitTesting(false)
     }
 
-    private var panelTutorialPreview: some View {
-        Form {
-            Toggle("settings.popover.arrow", isOn: .constant(true))
-            LabeledContent("settings.button.placement") {
-                Text("settings.button.ownBlock")
-                    .foregroundStyle(.secondary)
-            }
-            Section {
-                ForEach(Array(appState.settings.popoverOrder.prefix(4))) { block in
-                    HStack(spacing: 8) {
-                        Image(systemName: "line.3.horizontal")
-                            .font(.body)
-                            .foregroundStyle(.secondary)
-                            .frame(width: 28, height: 22)
-                        Toggle(LocalizedStringKey(block.localizationKey), isOn: .constant(popoverShown(block)))
-                    }
-                }
-            } header: {
-                Text("settings.popover.order")
-            }
+    /// Open panel, with and without the menu-bar arrow. The arrow is the popover's
+    /// own triangle, sitting on the top edge and aimed at the status icon.
+    private var panelArrowDiagram: some View {
+        VStack(spacing: 22) {
+            panelArrowSample(showsArrow: true)
+            panelArrowSample(showsArrow: false)
         }
-        .formStyle(.grouped)
-        .frame(width: 440)
-        .fixedSize(horizontal: false, vertical: true)
         .allowsHitTesting(false)
+        .accessibilityHidden(true)
     }
 
-    private func popoverShown(_ block: PopoverBlock) -> Bool {
-        switch block {
-        case .rings: appState.settings.showStatusRings
-        case .flow: appState.settings.showEnergyFlow
-        case .topApps: appState.settings.showTopApps
-        case .lowPower: appState.settings.showLowPower
-        case .localIP: appState.settings.showLocalIP
-        case .batteryCycle: appState.settings.showBatteryCycle
-        case .settings: appState.settings.showSettingsBlock
+    private func panelArrowSample(showsArrow: Bool) -> some View {
+        VStack(spacing: showsArrow ? 2 : 10) {
+            menuBarStatusIcon
+                .padding(.horizontal, 8)
+                .padding(.vertical, 3)
+                .background {
+                    if showsArrow {
+                        Capsule(style: .continuous)
+                            .fill(Color(nsColor: .selectedContentBackgroundColor).opacity(0.22))
+                    }
+                }
+            panelPopoverCard(showsArrow: showsArrow) {
+                VStack(alignment: .leading, spacing: 4) {
+                    TimeEstimateRow(snapshot: appState.snapshot, language: appState.settings.language)
+                    tutorialEnergyFlow(showsFooter: true)
+                }
+            }
+        }
+    }
+
+    /// Where the settings control actually appears. Inside-a-block has two hosts:
+    /// a ring cell, and a corner gear on any other block.
+    private var panelButtonDiagram: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(alignment: .top, spacing: 12) {
+                panelButtonSample("settings.button.rightClickOnly", width: 220) {
+                    VStack(spacing: 4) {
+                        menuBarStatusIcon
+                        statusItemMenuCard
+                    }
+                }
+                panelButtonSample("settings.button.ownBlock", width: 220) {
+                    panelPlainCard {
+                        VStack(alignment: .leading, spacing: 12) {
+                            tutorialCycleSection(showsSettingsButton: false)
+                            tutorialOwnBlockButton
+                        }
+                    }
+                }
+            }
+            VStack(spacing: 8) {
+                HStack(alignment: .top, spacing: 12) {
+                    panelPlainCard {
+                        HStack(alignment: .top, spacing: PopoverLayout.ringSpacing) {
+                            tutorialMetricRing(.battery, percent: 100)
+                            tutorialMetricRing(.cpu, percent: 44)
+                            RingSettingsCell(
+                                title: Localization.string("settings.title", language: appState.settings.language)
+                            )
+                            .frame(width: 78)
+                        }
+                    }
+                    .frame(width: 266, alignment: .leading)
+                    panelPlainCard {
+                        VStack(alignment: .leading, spacing: 10) {
+                            tutorialEnergyFooter
+                            tutorialCycleSection(showsSettingsButton: true)
+                        }
+                    }
+                    .frame(minWidth: 168, maxWidth: .infinity, alignment: .leading)
+                }
+                Text("settings.button.insideBlock")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity)
+            }
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+
+    private func panelButtonSample<Picture: View>(
+        _ caption: LocalizedStringKey,
+        width: CGFloat,
+        @ViewBuilder picture: () -> Picture
+    ) -> some View {
+        VStack(spacing: 8) {
+            picture()
+            Text(caption)
+                .font(.system(size: 11))
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(width: width)
+        }
+        .frame(width: width, alignment: .top)
+    }
+
+    /// Same control the settings block draws at the bottom of the panel.
+    private var tutorialOwnBlockButton: some View {
+        let title = Localization.string("settings.title", language: appState.settings.language)
+        return EnergyModeButton(title: title, systemImage: "gearshape")
+            .accessibilityLabel(title)
+    }
+
+    private func tutorialCycleSection(showsSettingsButton: Bool) -> some View {
+        BatteryCycleSection(
+            hasBattery: appState.snapshot.hasBattery,
+            cycleCount: appState.snapshot.cycleCount,
+            fullChargeMilliAmpHours: appState.snapshot.fullChargeMilliAmpHours,
+            designCapacityMilliAmpHours: appState.snapshot.designCapacityMilliAmpHours,
+            capacityStyle: appState.settings.batteryCapacityStyle,
+            language: appState.settings.language,
+            showsSettingsButton: showsSettingsButton
+        )
+    }
+
+    /// Charger-rating line the energy ribbon draws under itself, so the corner
+    /// gear sits on the same trailing edge as that value.
+    private var tutorialEnergyFooter: some View {
+        let language = appState.settings.language
+        return Group {
+            switch EnergyFlowFooterPresentation.forSnapshot(appState.snapshot) {
+            case .unplugged:
+                Text(Localization.string("energy.noExternalPower", language: language))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            case .chargerRating(let watts):
+                HStack {
+                    Text(Localization.string("energy.chargerRating", language: language))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                    Spacer(minLength: 8)
+                    Text(watts > 0 ? String(format: "%.0f W", watts) : "—")
+                        .font(.caption.monospacedDigit().weight(.medium))
+                        .lineLimit(1)
+                }
+                .font(.caption)
+            }
+        }
+    }
+
+    private func tutorialEnergyFlow(showsFooter: Bool) -> some View {
+        EnergyFlowView(
+            snapshot: appState.snapshot,
+            theme: AppTheme.resolved(palette: appState.settings.palette, colorScheme: colorScheme),
+            flowTint: appState.settings.flowTint,
+            flowIcons: appState.settings.flowIcons,
+            isAnimating: false,
+            motion: appState.settings.motionStyle,
+            motionFrameRate: appState.settings.motionFrameRate,
+            pulseFlowIcons: appState.settings.pulseFlowIcons,
+            flowIconScale: appState.settings.flowIconScale,
+            language: appState.settings.language,
+            showsFooter: showsFooter
+        )
+    }
+
+    /// Popover body. The arrow, when shown, is part of the top edge and points at the icon above.
+    private func panelPopoverCard<Content: View>(showsArrow: Bool, @ViewBuilder content: () -> Content) -> some View {
+        let arrow: CGFloat = showsArrow ? PanelPopoverShape.arrowHeight : 0
+        return content()
+            .padding(.horizontal, PopoverLayout.padding)
+            .padding(.top, PopoverLayout.padding + arrow)
+            .padding(.bottom, PopoverLayout.padding)
+            .frame(width: PopoverLayout.width, alignment: .leading)
+            .background {
+                PanelPopoverShape(showsArrow: showsArrow)
+                    .fill(Color(nsColor: .controlBackgroundColor))
+                    .shadow(color: .black.opacity(0.16), radius: 16, y: 6)
+            }
+            .overlay {
+                PanelPopoverShape(showsArrow: showsArrow)
+                    .stroke(Color.primary.opacity(0.10), lineWidth: 1)
+            }
+    }
+
+    private func panelPlainCard<Content: View>(@ViewBuilder content: () -> Content) -> some View {
+        content()
+            .padding(10)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background {
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(Color(nsColor: .controlBackgroundColor))
+                    .shadow(color: .black.opacity(0.12), radius: 10, y: 4)
+            }
+            .overlay {
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .strokeBorder(Color.primary.opacity(0.10))
+            }
+    }
+
+    /// Menu-bar popover outline. The triangle is the top edge, centered, pointing up.
+    private struct PanelPopoverShape: Shape {
+        static let arrowWidth: CGFloat = 28
+        static let arrowHeight: CGFloat = 12
+        var showsArrow: Bool
+        var cornerRadius: CGFloat = 16
+
+        func path(in rect: CGRect) -> Path {
+            let radius = cornerRadius
+            let arrow = showsArrow ? Self.arrowHeight : 0
+            let body = CGRect(
+                x: rect.minX,
+                y: rect.minY + arrow,
+                width: rect.width,
+                height: max(rect.height - arrow, radius * 2)
+            )
+            guard showsArrow else {
+                return Path(roundedRect: body, cornerRadius: radius, style: .continuous)
+            }
+            let mid = rect.midX
+            let half = Self.arrowWidth / 2
+            let top = body.minY
+            let bottom = body.maxY
+            let left = body.minX
+            let right = body.maxX
+            var path = Path()
+            path.move(to: CGPoint(x: left + radius, y: top))
+            path.addLine(to: CGPoint(x: mid - half, y: top))
+            path.addLine(to: CGPoint(x: mid, y: rect.minY))
+            path.addLine(to: CGPoint(x: mid + half, y: top))
+            path.addLine(to: CGPoint(x: right - radius, y: top))
+            path.addArc(
+                tangent1End: CGPoint(x: right, y: top),
+                tangent2End: CGPoint(x: right, y: top + radius),
+                radius: radius
+            )
+            path.addLine(to: CGPoint(x: right, y: bottom - radius))
+            path.addArc(
+                tangent1End: CGPoint(x: right, y: bottom),
+                tangent2End: CGPoint(x: right - radius, y: bottom),
+                radius: radius
+            )
+            path.addLine(to: CGPoint(x: left + radius, y: bottom))
+            path.addArc(
+                tangent1End: CGPoint(x: left, y: bottom),
+                tangent2End: CGPoint(x: left, y: bottom - radius),
+                radius: radius
+            )
+            path.addLine(to: CGPoint(x: left, y: top + radius))
+            path.addArc(
+                tangent1End: CGPoint(x: left, y: top),
+                tangent2End: CGPoint(x: left + radius, y: top),
+                radius: radius
+            )
+            path.closeSubpath()
+            return path
         }
     }
 
@@ -1137,6 +1356,33 @@ struct SettingsView: View {
         .allowsHitTesting(false)
     }
 
+    /// Right-click menu under the status icon: Open Settings, then Quit.
+    private var statusItemMenuCard: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack {
+                Text("menu.openSettings")
+                Spacer(minLength: 8)
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
+            .background(Color.accentColor.opacity(0.18), in: RoundedRectangle(cornerRadius: 5, style: .continuous))
+            .padding(4)
+            Text("settings.quit")
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 14)
+                .padding(.bottom, 8)
+                .padding(.top, 2)
+        }
+        .font(.system(size: 13))
+        .frame(width: 220)
+        .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .strokeBorder(Color.primary.opacity(0.12))
+        }
+        .shadow(color: .black.opacity(0.14), radius: 14, y: 6)
+    }
+
     private var welcomeMenuPreview: some View {
         VStack(alignment: .trailing, spacing: 8) {
             VStack(spacing: 2) {
@@ -1150,33 +1396,7 @@ struct SettingsView: View {
             .padding(.vertical, 10)
             .background(Color.primary.opacity(0.05), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
 
-            VStack(alignment: .leading, spacing: 0) {
-                HStack {
-                    Text("menu.openSettings")
-                    Spacer(minLength: 8)
-                }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 5)
-                .background(Color.accentColor.opacity(0.18), in: RoundedRectangle(cornerRadius: 5, style: .continuous))
-                .padding(4)
-                HStack {
-                    Text("settings.quit")
-                    Spacer(minLength: 12)
-                    Text("⌘Q")
-                        .foregroundStyle(.secondary)
-                }
-                .padding(.horizontal, 14)
-                .padding(.bottom, 8)
-                .padding(.top, 2)
-            }
-            .font(.system(size: 13))
-            .frame(width: 220)
-            .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
-            .overlay {
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .strokeBorder(Color.primary.opacity(0.12))
-            }
-            .shadow(color: .black.opacity(0.14), radius: 14, y: 6)
+            statusItemMenuCard
         }
         .frame(maxWidth: .infinity, alignment: .center)
     }
@@ -1284,8 +1504,13 @@ struct SettingsView: View {
         }
 
         Section {
-            ForEach(appState.settings.popoverOrder) { block in
-                popoverOrderRow(block)
+            ForEach(appState.settings.popoverOrder) { entry in
+                popoverOrderEntry(entry)
+            }
+            Button {
+                appState.settings.addPopoverDivider()
+            } label: {
+                Label("settings.popover.addDivider", systemImage: "plus")
             }
         } header: {
             Text("settings.popover.order")
@@ -1808,10 +2033,11 @@ struct SettingsView: View {
                     )
                 }
             ) {
-                HStack(spacing: 10) {
-                    ForEach(RingKind.customizable) { kind in
-                        ringIconSlotControl(kind)
-                    }
+                let slots = RingSlot.iconSlots
+                VStack(spacing: 16) {
+                    ringIconSlotRow(Array(slots.prefix(4)))
+                    ringIconSlotRow(Array(slots.dropFirst(4).prefix(4)))
+                    ringIconSlotRow(Array(slots.dropFirst(8)))
                 }
             }
         }
@@ -2045,7 +2271,7 @@ struct SettingsView: View {
 
     private var iconSlotColumnWidth: CGFloat { 56 }
 
-    private func iconZoomSlider(value: Binding<Double>) -> some View {
+    private func iconZoomSlider(value: Binding<Double>, width: CGFloat? = nil) -> some View {
         let percent = Int((value.wrappedValue * 100).rounded())
         return VStack(spacing: 2) {
             Slider(value: value, in: GlyphSlot.minScale...GlyphSlot.maxScale, step: 0.01)
@@ -2057,31 +2283,74 @@ struct SettingsView: View {
                 .frame(maxWidth: .infinity)
                 .multilineTextAlignment(.center)
         }
-        .frame(width: iconSlotColumnWidth)
+        .frame(width: width ?? iconSlotColumnWidth)
         .help(Localization.string("settings.icons.zoom", language: appState.settings.language))
     }
 
+    @ViewBuilder
+    private func popoverOrderEntry(_ entry: PopoverEntry) -> some View {
+        switch entry {
+        case .block(let block):
+            if block != .settings || appState.settings.settingsButtonPlacement == .ownBlock {
+                popoverOrderRow(block)
+            }
+        case .divider(let id):
+            popoverDividerRow(id)
+        }
+    }
+
     private func popoverOrderRow(_ block: PopoverBlock) -> some View {
-        HStack(spacing: 8) {
-            Image(systemName: "line.3.horizontal")
-                .font(.body)
-                .foregroundStyle(.secondary)
-                .frame(width: 28, height: 22)
-                .contentShape(Rectangle())
-                .onDrag {
-                    popoverDrag.block = block
-                    return NSItemProvider(object: block.rawValue as NSString)
-                }
+        let entry = PopoverEntry.block(block)
+        return HStack(spacing: 8) {
+            popoverDragHandle {
+                popoverDrag.entry = entry
+                return NSItemProvider(object: entry.rawValue as NSString)
+            }
             Toggle(LocalizedStringKey(block.localizationKey), isOn: popoverVisibilityBinding(block))
                 .disabled(appState.settings.isSoleVisiblePopoverBlock(block))
         }
-        .onDrop(of: [.plainText], delegate: PopoverBlockDropDelegate(
-            block: block,
+        .onDrop(of: [.plainText], delegate: popoverDropDelegate(for: entry))
+    }
+
+    private func popoverDividerRow(_ id: UUID) -> some View {
+        let entry = PopoverEntry.divider(id)
+        return HStack(spacing: 8) {
+            popoverDragHandle {
+                popoverDrag.entry = entry
+                return NSItemProvider(object: entry.rawValue as NSString)
+            }
+            Text("settings.popover.divider")
+                .foregroundStyle(.secondary)
+            Spacer(minLength: 8)
+            Button {
+                appState.settings.removePopoverDivider(id: id)
+            } label: {
+                Image(systemName: "minus.circle.fill")
+                    .foregroundStyle(.secondary)
+            }
+            .buttonStyle(.borderless)
+            .help(LocalizedStringKey("settings.popover.removeDivider"))
+        }
+        .onDrop(of: [.plainText], delegate: popoverDropDelegate(for: entry))
+    }
+
+    private func popoverDragHandle(_ onDrag: @escaping () -> NSItemProvider) -> some View {
+        Image(systemName: "line.3.horizontal")
+            .font(.body)
+            .foregroundStyle(.secondary)
+            .frame(width: 28, height: 22)
+            .contentShape(Rectangle())
+            .onDrag(onDrag)
+    }
+
+    private func popoverDropDelegate(for entry: PopoverEntry) -> PopoverBlockDropDelegate {
+        PopoverBlockDropDelegate(
+            entry: entry,
             drag: popoverDrag,
             move: { item, target in
-                appState.settings.movePopoverBlock(item, to: target)
+                appState.settings.movePopoverEntry(item, to: target)
             }
-        ))
+        )
     }
 
     private func popoverVisibilityBinding(_ block: PopoverBlock) -> Binding<Bool> {
@@ -2266,53 +2535,47 @@ struct SettingsView: View {
         )
     }
 
+    private func ringIconSlotRow(_ rings: [RingSlot]) -> some View {
+        HStack(spacing: 18) {
+            ForEach(rings) { ring in
+                ringIconSlotControl(ring)
+            }
+        }
+        .frame(maxWidth: .infinity)
+    }
+
     @ViewBuilder
-    private func ringIconSlotControl(_ kind: RingKind) -> some View {
+    private func ringIconSlotControl(_ ring: RingSlot) -> some View {
         let language = appState.settings.language
-        let slot = appState.settings.ringIcons.slot(for: kind)
+        let slot = appState.settings.ringIcons.slot(for: ring)
+        let column = StatusRingView.diameter
         VStack(spacing: 6) {
-            Text(Localization.string(kind.localizationKey, language: language))
+            Text(Localization.string(ring.localizationKey, language: language))
                 .font(.caption2)
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
-                .frame(width: iconSlotColumnWidth)
+                .frame(width: column)
                 .multilineTextAlignment(.center)
-            iconSlotMenuPreview(slot: slot) {
-                Button(Localization.string("settings.icons.upload", language: language)) {
-                    uploadRingIcon(kind)
-                }
-                if slot.source == .custom {
-                    Toggle(
-                        Localization.string("settings.icons.template", language: language),
-                        isOn: ringTemplateBinding(kind)
-                    )
-                }
-                Divider()
-                ForEach(Array(kind.symbolChoices.enumerated()), id: \.offset) { _, choice in
-                    Button {
-                        appState.settings.ringIcons = appState.settings.ringIcons.replacing(
-                            kind,
-                            with: choice.withScale(slot.scale)
-                        )
-                    } label: {
-                        Label {
-                            Text(choice.name)
-                        } icon: {
-                            GlyphSlotView(slot: choice, systemPointSize: 13, assetSide: 14)
-                        }
-                    }
-                }
+            Button {
+                ringIconEditor = ring
+            } label: {
+                ringGlyphPlate(slot: slot, diameter: StatusRingView.diameter)
+            }
+            .buttonStyle(.plain)
+            .help(Localization.string("settings.icons.clickToChange", language: language))
+            .popover(isPresented: ringIconEditorPresented(ring), arrowEdge: .bottom) {
+                ringIconChoicePopover(ring)
             }
             iconZoomSlider(
                 value: Binding(
-                    get: { appState.settings.ringIcons.slot(for: kind).scale },
-                    set: { appState.settings.ringIcons = appState.settings.ringIcons.withScale($0, for: kind) }
-                )
+                    get: { appState.settings.ringIcons.slot(for: ring).scale },
+                    set: { appState.settings.ringIcons = appState.settings.ringIcons.withScale($0, for: ring) }
+                ),
+                width: column
             )
         }
-        .frame(width: iconSlotColumnWidth)
-        .frame(maxWidth: .infinity)
+        .frame(width: column)
     }
 
     @ViewBuilder
@@ -2365,21 +2628,108 @@ struct SettingsView: View {
         .frame(maxWidth: .infinity)
     }
 
+    private func ringIconEditorPresented(_ ring: RingSlot) -> Binding<Bool> {
+        Binding(
+            get: { ringIconEditor == ring },
+            set: { show in
+                if show {
+                    ringIconEditor = ring
+                } else if ringIconEditor == ring {
+                    ringIconEditor = nil
+                }
+            }
+        )
+    }
+
+    private func ringIconChoicePopover(_ ring: RingSlot) -> some View {
+        let language = appState.settings.language
+        let current = appState.settings.ringIcons.slot(for: ring)
+        let choices = ring.symbolChoices
+        let diameter = StatusRingView.diameter
+        let perRow = min(max(choices.count, 1), 4)
+        let columns = Array(repeating: GridItem(.fixed(diameter), spacing: 14), count: perRow)
+        return VStack(alignment: .leading, spacing: 12) {
+            Button(Localization.string("settings.icons.upload", language: language)) {
+                ringIconEditor = nil
+                uploadRingIcon(ring)
+            }
+            if current.source == .custom {
+                Toggle(
+                    Localization.string("settings.icons.template", language: language),
+                    isOn: ringTemplateBinding(ring)
+                )
+            }
+            LazyVGrid(columns: columns, alignment: .center, spacing: 14) {
+                ForEach(Array(choices.enumerated()), id: \.offset) { _, choice in
+                    let shown = choice.withScale(current.scale)
+                    Button {
+                        appState.settings.ringIcons = appState.settings.ringIcons.replacing(ring, with: shown)
+                        ringIconEditor = nil
+                    } label: {
+                        ringGlyphPlate(slot: shown, diameter: diameter)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+        .padding(16)
+        .frame(width: CGFloat(perRow) * diameter + 14 * CGFloat(max(perRow - 1, 0)) + 32)
+    }
+
+    /// Same diameter, stroke, and glyph size as a panel ring.
+    private func ringGlyphPlate(slot: GlyphSlot, diameter: CGFloat) -> some View {
+        let scale = diameter / StatusRingView.diameter
+        let zoom = CGFloat(slot.normalizedScale)
+        return ZStack {
+            Circle()
+                .stroke(Color.secondary.opacity(0.35), lineWidth: StatusRingView.lineWidth * scale)
+                .frame(
+                    width: diameter - StatusRingView.lineWidth * scale,
+                    height: diameter - StatusRingView.lineWidth * scale
+                )
+            GlyphSlotView(
+                slot: slot,
+                systemPointSize: StatusRingView.glyphPointSize * scale * zoom,
+                assetSide: StatusRingView.glyphAssetSide * scale * zoom,
+                prefersMonochrome: true
+            )
+        }
+        .frame(width: diameter, height: diameter)
+    }
+
     /// Fixed-size glyph preview; no chevron — caption says to click the icon.
     @ViewBuilder
     private func iconSlotMenuPreview<Content: View>(
         slot: GlyphSlot,
+        ringSized: Bool = false,
         @ViewBuilder content: () -> Content
     ) -> some View {
-        let side = iconSlotColumnWidth - 8
+        let scale = CGFloat(slot.normalizedScale)
+        let side = ringSized ? StatusRingView.diameter : iconSlotColumnWidth - 8
+        let pointSize = ringSized ? StatusRingView.glyphPointSize * scale : 17
+        let assetSide = ringSized ? StatusRingView.glyphAssetSide * scale : 20
         Menu(content: content) {
             ZStack {
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .fill(Color(nsColor: .controlBackgroundColor))
-                GlyphSlotView(slot: slot, systemPointSize: 17, assetSide: 20)
+                if ringSized {
+                    Circle()
+                        .stroke(Color.secondary.opacity(0.35), lineWidth: StatusRingView.lineWidth)
+                        .frame(
+                            width: StatusRingView.diameter - StatusRingView.lineWidth,
+                            height: StatusRingView.diameter - StatusRingView.lineWidth
+                        )
+                } else {
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .fill(Color(nsColor: .controlBackgroundColor))
+                }
+                GlyphSlotView(
+                    slot: slot,
+                    systemPointSize: pointSize,
+                    assetSide: assetSide,
+                    prefersMonochrome: ringSized
+                )
             }
             .frame(width: side, height: side)
-            .contentShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .contentShape(ringSized ? AnyShape(Circle()) : AnyShape(RoundedRectangle(cornerRadius: 10, style: .continuous)))
         }
         .menuStyle(.borderlessButton)
         .menuIndicator(.hidden)
@@ -2387,13 +2737,13 @@ struct SettingsView: View {
         .help(Localization.string("settings.icons.clickToChange", language: appState.settings.language))
     }
 
-    private func ringTemplateBinding(_ kind: RingKind) -> Binding<Bool> {
+    private func ringTemplateBinding(_ ring: RingSlot) -> Binding<Bool> {
         Binding(
-            get: { appState.settings.ringIcons.slot(for: kind).template },
+            get: { appState.settings.ringIcons.slot(for: ring).template },
             set: { enabled in
-                var slot = appState.settings.ringIcons.slot(for: kind)
+                var slot = appState.settings.ringIcons.slot(for: ring)
                 slot.template = enabled
-                appState.settings.ringIcons = appState.settings.ringIcons.replacing(kind, with: slot)
+                appState.settings.ringIcons = appState.settings.ringIcons.replacing(ring, with: slot)
             }
         )
     }
@@ -2410,13 +2760,13 @@ struct SettingsView: View {
         )
     }
 
-    private func uploadRingIcon(_ kind: RingKind) {
+    private func uploadRingIcon(_ ring: RingSlot) {
         let title = Localization.string("settings.icons.upload", language: appState.settings.language)
-        let slot = appState.settings.ringIcons.slot(for: kind)
+        let slot = appState.settings.ringIcons.slot(for: ring)
         guard let url = CustomIconStore.pickImage(title: title),
               let id = CustomIconStore.save(fromFile: url) else { return }
         appState.settings.ringIcons = appState.settings.ringIcons.replacing(
-            kind,
+            ring,
             with: .customFile(id, scale: slot.scale)
         )
     }
@@ -3241,17 +3591,17 @@ private struct CenteredPercentField: NSViewRepresentable {
 }
 
 private final class PopoverBlockDragState {
-    var block: PopoverBlock?
+    var entry: PopoverEntry?
 }
 
 private struct PopoverBlockDropDelegate: DropDelegate {
-    var block: PopoverBlock
+    var entry: PopoverEntry
     var drag: PopoverBlockDragState
-    var move: (PopoverBlock, PopoverBlock) -> Void
+    var move: (PopoverEntry, PopoverEntry) -> Void
 
     func dropEntered(info: DropInfo) {
-        guard let item = drag.block, item != block else { return }
-        move(item, block)
+        guard let item = drag.entry, item.id != entry.id else { return }
+        move(item, entry)
     }
 
     func dropUpdated(info: DropInfo) -> DropProposal? {
@@ -3259,7 +3609,7 @@ private struct PopoverBlockDropDelegate: DropDelegate {
     }
 
     func performDrop(info: DropInfo) -> Bool {
-        drag.block = nil
+        drag.entry = nil
         return true
     }
 }

@@ -61,7 +61,7 @@ enum TopAppsChartStyle: String, CaseIterable, Identifiable, Sendable {
 
     var id: String { rawValue }
     var localizationKey: String { "settings.topApps.chart.\(rawValue)" }
-    static let fallback = TopAppsChartStyle.list
+    static let fallback = TopAppsChartStyle.bars
 
     static func resolved(stored raw: String?) -> TopAppsChartStyle {
         guard let raw, let style = TopAppsChartStyle(rawValue: raw) else { return fallback }
@@ -187,7 +187,7 @@ enum TopAppRanker {
     /// How long a sample stays in the average.
     static let defaultWindow: Duration = .seconds(180)
     /// Background sample period. The average uses however many of these have arrived.
-    static let defaultSampleInterval: TimeInterval = 10
+    static let defaultSampleInterval: TimeInterval = 30
 
     static func collapse(_ ticks: [ProcessTick]) -> [AppEnergySample] {
         struct Bucket {

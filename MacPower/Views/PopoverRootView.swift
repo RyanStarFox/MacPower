@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 enum PopoverLayout {
@@ -119,9 +120,21 @@ struct PopoverRootView: View {
         } else {
             let showRings = appState.settings.showStatusRings
             let showFlow = appState.settings.showEnergyFlow
-            VStack(alignment: .leading, spacing: 14) {
-                ForEach(appState.settings.popoverOrder) { block in
-                    popoverBlock(block, theme: theme, showRings: showRings, showFlow: showFlow)
+            let entries = appState.settings.renderedPopoverEntries
+            VStack(alignment: .leading, spacing: 0) {
+                ForEach(Array(entries.enumerated()), id: \.element.id) { index, entry in
+                    switch entry {
+                    case .block(let block):
+                        popoverBlock(block, theme: theme, showRings: showRings, showFlow: showFlow)
+                            .padding(.top, index == 0 ? 0 : 14)
+                    case .divider:
+                        Rectangle()
+                            .fill(Color(nsColor: .separatorColor))
+                            .frame(height: 1)
+                            .frame(maxWidth: .infinity)
+                            .padding(.top, 14)
+                            .accessibilityHidden(true)
+                    }
                 }
             }
             .onChange(of: appState.settings.showTopApps) { _, _ in
@@ -271,14 +284,14 @@ struct PopoverRootView: View {
             speedRing(
                 segment: .download,
                 bytesPerSecond: appState.metrics.downloadBytesPerSecond,
-                glyph: "arrow.down",
+                glyph: appState.settings.ringIcons.slot(for: .download),
                 nameKey: "settings.rings.download"
             )
         case .upload:
             speedRing(
                 segment: .upload,
                 bytesPerSecond: appState.metrics.uploadBytesPerSecond,
-                glyph: "arrow.up",
+                glyph: appState.settings.ringIcons.slot(for: .upload),
                 nameKey: "settings.rings.upload"
             )
         case .speedPair:
@@ -312,7 +325,7 @@ struct PopoverRootView: View {
             fillRight: colors.right,
             caption: caption,
             accessibilityName: name,
-            glyph: .system("thermometer.medium"),
+            glyph: appState.settings.ringIcons.slot(for: .batteryTemperature),
             glyphTint: colors.left,
             accessibilityValue: "\(name) \(caption)"
         )
@@ -336,7 +349,7 @@ struct PopoverRootView: View {
             fillRight: colors.right,
             caption: caption,
             accessibilityName: name,
-            glyph: .system("thermometer.high"),
+            glyph: appState.settings.ringIcons.slot(for: .thermalState),
             glyphTint: colors.left,
             accessibilityValue: "\(name) \(caption)"
         )
@@ -369,7 +382,7 @@ struct PopoverRootView: View {
     private func speedRing(
         segment: RingColorSegment,
         bytesPerSecond: Double,
-        glyph: String,
+        glyph: GlyphSlot,
         nameKey: String
     ) -> some View {
         let language = appState.settings.language
@@ -383,7 +396,7 @@ struct PopoverRootView: View {
             fillRight: colors.right,
             caption: rate,
             accessibilityName: name,
-            glyph: .system(glyph),
+            glyph: glyph,
             glyphTint: colors.left,
             accessibilityValue: "\(name) \(rate)"
         )
@@ -501,27 +514,38 @@ struct PopoverRootView: View {
 
     private var settingsButton: some View {
         let language = appState.settings.language
+        let title = Localization.string("settings.title", language: language)
         return Button {
             appState.openSettings()
         } label: {
-            VStack(spacing: 6) {
-                Image(systemName: "gearshape.fill")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundStyle(.primary)
-                    .frame(width: 58, height: 58)
-                    .modifier(SettingsGlassChrome(capture: readmeGalleryCapture))
-                Text(Localization.string("settings.title", language: language))
-                    .font(.system(size: 11, weight: .semibold, design: .rounded))
-                    .foregroundStyle(.primary)
-                    .autoFittingCaption(minimumScale: 0.55)
-                    .multilineTextAlignment(.center)
-            }
-            .frame(maxWidth: .infinity)
+            RingSettingsCell(title: title)
         }
         .buttonStyle(.plain)
         .frame(maxWidth: .infinity)
-        .help(Localization.string("settings.title", language: language))
-        .accessibilityLabel(Localization.string("settings.title", language: language))
+        .help(title)
+        .accessibilityLabel(title)
+    }
+}
+
+/// Gear cell in the ring grid. Same diameter and caption rhythm as `StatusRingView`.
+struct RingSettingsCell: View {
+    var title: String
+    @Environment(\.readmeGalleryCapture) private var readmeGalleryCapture
+
+    var body: some View {
+        VStack(spacing: 6) {
+            Image(systemName: "gearshape.fill")
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundStyle(.primary)
+                .frame(width: StatusRingView.diameter, height: StatusRingView.diameter)
+                .modifier(SettingsGlassChrome(capture: readmeGalleryCapture))
+            Text(title)
+                .font(.system(size: 11, weight: .semibold, design: .rounded))
+                .foregroundStyle(.primary)
+                .autoFittingCaption(minimumScale: 0.55)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
     }
 }
 
@@ -634,7 +658,7 @@ private struct RingHeaderLayout: Layout {
 
 /// README bitmaps cannot sample Liquid Glass (it comes back as a solid dark
 /// disc). Draw a light rimmed circle that survives `cacheDisplay`.
-private struct SettingsGlassChrome: ViewModifier {
+struct SettingsGlassChrome: ViewModifier {
     var capture: Bool
 
     func body(content: Content) -> some View {

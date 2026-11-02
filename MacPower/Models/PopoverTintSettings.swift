@@ -269,9 +269,6 @@ enum RingKind: String, CaseIterable, Identifiable, Codable, Sendable {
 
     var id: String { rawValue }
 
-    /// Kinds whose glyph can be edited. Extra rings keep the memory glyph.
-    static let customizable: [RingKind] = [.battery, .cpu, .gpu, .memory]
-
     var localizationKey: String {
         switch self {
         case .battery: "ring.battery"

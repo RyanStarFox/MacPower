@@ -39,7 +39,7 @@ struct TopAppsSection: View {
     var list: TopAppList
     var language: AppLanguage
     var rowCount: Int
-    var chart: TopAppsChartStyle = .list
+    var chart: TopAppsChartStyle = .bars
     var showsSettingsButton: Bool = false
     var onOpenSettings: () -> Void = {}
 

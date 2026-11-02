@@ -10,12 +10,32 @@ final class StatusItemController: NSObject, NSPopoverDelegate, NSMenuDelegate {
     private var defaultArrowHeight: CGFloat?
     private var appearanceObservation: NSKeyValueObservation?
     private var themeChangeObserver: NSObjectProtocol?
+    private var scrollObserver: NSObjectProtocol?
+    /// Clip-view origin from the last time the panel was scrolled. `NSClipView` is flipped, so 0 is the top.
+    private var savedScrollOffset: CGFloat = 0
+    private var isAdjustingScroll = false
     private var lastRenderedKey: MenuBarIconKey?
     private var lastAppearanceName: NSAppearance.Name?
     private var lastTitle: String?
     private var lastTooltip: String?
     private var isRefreshingIcon = false
     private var isShowingStatusMenu = false
+    /// Holds the SwiftUI panel so a taller-than-screen layout can scroll
+    /// instead of extending past the Dock.
+    private let contentScrollView: NSScrollView = {
+        let scroll = NSScrollView()
+        scroll.drawsBackground = false
+        scroll.hasVerticalScroller = false
+        scroll.hasHorizontalScroller = false
+        scroll.autohidesScrollers = true
+        scroll.scrollerStyle = .overlay
+        scroll.borderType = .noBorder
+        scroll.automaticallyAdjustsContentInsets = false
+        scroll.contentInsets = NSEdgeInsetsZero
+        scroll.horizontalScrollElasticity = .none
+        scroll.usesPredominantAxisScrolling = true
+        return scroll
+    }()
 
     init(appState: AppState) {
         self.appState = appState
@@ -30,7 +50,18 @@ final class StatusItemController: NSObject, NSPopoverDelegate, NSMenuDelegate {
         // Relying on intrinsicContentSize alone left Sequoia with a too-narrow
         // frame, and SwiftUI then centered/clipped the 420pt panel on both sides.
         configureHosting(hosting)
-        popover.contentViewController = hosting
+        contentScrollView.contentView.drawsBackground = false
+        contentScrollView.contentView.postsBoundsChangedNotifications = true
+        scrollObserver = NotificationCenter.default.addObserver(
+            forName: NSView.boundsDidChangeNotification,
+            object: contentScrollView.contentView,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in
+                self?.rememberScrollOffset()
+            }
+        }
+        installHosting(hosting)
         popover.contentSize = NSSize(width: popoverWidth, height: 1)
         applyAnchorPreference()
 
@@ -65,8 +96,8 @@ final class StatusItemController: NSObject, NSPopoverDelegate, NSMenuDelegate {
     func applyLocalization() {
         let replacement = NSHostingController(rootView: PopoverRootView(appState: appState))
         configureHosting(replacement)
-        popover.contentViewController = replacement
         hosting = replacement
+        installHosting(replacement)
         if popover.isShown {
             syncPopoverContentSize()
         } else {
@@ -188,7 +219,11 @@ final class StatusItemController: NSObject, NSPopoverDelegate, NSMenuDelegate {
         popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
         hugMenuBarIfArrowHidden()
         hosting.view.layoutSubtreeIfNeeded()
+        restoreScrollFromCurrentFrames()
         popover.contentViewController?.view.window?.makeKey()
+        DispatchQueue.main.async { [weak self] in
+            self?.restoreScrollFromCurrentFrames()
+        }
     }
 
     private func showStatusMenu() {
@@ -210,7 +245,7 @@ final class StatusItemController: NSObject, NSPopoverDelegate, NSMenuDelegate {
         let quitItem = NSMenuItem(
             title: Localization.string("settings.quit", language: language),
             action: #selector(quitApp),
-            keyEquivalent: "q"
+            keyEquivalent: ""
         )
         quitItem.target = self
         menu.addItem(quitItem)
@@ -278,20 +313,70 @@ final class StatusItemController: NSObject, NSPopoverDelegate, NSMenuDelegate {
         let fitted = hosting.sizeThatFits(
             in: NSSize(width: width, height: CGFloat.greatestFiniteMagnitude)
         )
-        let size = NSSize(width: width, height: max(ceil(fitted.height), 1))
+        let contentHeight = max(ceil(fitted.height), 1)
+        let visibleHeight = min(contentHeight, maximumPopoverHeight())
+        let scrolls = contentHeight > visibleHeight + 0.5
+        hosting.view.frame = NSRect(x: 0, y: 0, width: width, height: contentHeight)
+        contentScrollView.hasVerticalScroller = scrolls
+        contentScrollView.verticalScrollElasticity = scrolls ? .automatic : .none
+        let size = NSSize(width: width, height: visibleHeight)
         // Animating this resize slides the ring block up from the previous
         // (often shorter) frame. Keep the popover's own fade for show/close,
         // but commit this size with motion disabled, then lay out before any
         // later caller turns animation back on.
         let animates = popover.animates
         popover.animates = false
+        isAdjustingScroll = true
         NSAnimationContext.beginGrouping()
         NSAnimationContext.current.duration = 0
         NSAnimationContext.current.allowsImplicitAnimation = false
         popover.contentSize = size
-        hosting.view.layoutSubtreeIfNeeded()
+        contentScrollView.layoutSubtreeIfNeeded()
+        restoreScroll(documentHeight: contentHeight, visibleHeight: visibleHeight)
         NSAnimationContext.endGrouping()
+        isAdjustingScroll = false
         popover.animates = animates
+    }
+
+    private func installHosting(_ hosting: NSHostingController<PopoverRootView>) {
+        hosting.view.translatesAutoresizingMaskIntoConstraints = true
+        contentScrollView.documentView = hosting.view
+        guard popover.contentViewController?.view !== contentScrollView else { return }
+        let controller = NSViewController()
+        controller.view = contentScrollView
+        popover.contentViewController = controller
+    }
+
+    /// Room under the menu bar and above the Dock. The arrow, when shown, sits outside the content.
+    private func maximumPopoverHeight() -> CGFloat {
+        let screen = statusItem.button?.window?.screen ?? NSScreen.main
+        let visible = screen?.visibleFrame.height ?? 800
+        let arrow: CGFloat = appState.settings.showPopoverArrow ? (defaultArrowHeight ?? 13) : 0
+        return max(280, visible - arrow - 10)
+    }
+
+    private func rememberScrollOffset() {
+        guard !isAdjustingScroll else { return }
+        let clip = contentScrollView.contentView
+        let documentHeight = contentScrollView.documentView?.frame.height ?? 0
+        guard documentHeight > clip.bounds.height + 0.5 else { return }
+        savedScrollOffset = clip.bounds.origin.y
+    }
+
+    private func restoreScrollFromCurrentFrames() {
+        let documentHeight = contentScrollView.documentView?.frame.height ?? 0
+        let visibleHeight = contentScrollView.contentView.bounds.height
+        guard documentHeight > 1, visibleHeight > 1 else { return }
+        isAdjustingScroll = true
+        restoreScroll(documentHeight: documentHeight, visibleHeight: visibleHeight)
+        isAdjustingScroll = false
+    }
+
+    private func restoreScroll(documentHeight: CGFloat, visibleHeight: CGFloat) {
+        let clip = contentScrollView.contentView
+        let maxOffset = max(0, documentHeight - visibleHeight)
+        clip.scroll(to: NSPoint(x: 0, y: min(max(0, savedScrollOffset), maxOffset)))
+        contentScrollView.reflectScrolledClipView(clip)
     }
 
     private func configureHosting(_ hosting: NSHostingController<PopoverRootView>) {
@@ -318,6 +403,7 @@ final class StatusItemController: NSObject, NSPopoverDelegate, NSMenuDelegate {
     }
 
     func popoverDidClose(_ notification: Notification) {
+        rememberScrollOffset()
         setStatusItemHighlighted(false)
         var transaction = Transaction()
         transaction.disablesAnimations = true

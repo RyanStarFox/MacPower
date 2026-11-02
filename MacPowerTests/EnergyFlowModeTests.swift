@@ -522,7 +522,7 @@ final class EnergyMotionStyleTests: XCTestCase {
         let defaults = UserDefaults(suiteName: suite)!
         defaults.removePersistentDomain(forName: suite)
         let first = AppSettings(defaults: defaults)
-        XCTAssertTrue(first.showPopoverArrow)
+        XCTAssertFalse(first.showPopoverArrow)
         first.showPopoverArrow = false
         let second = AppSettings(defaults: defaults)
         XCTAssertFalse(second.showPopoverArrow)
@@ -534,10 +534,10 @@ final class EnergyMotionStyleTests: XCTestCase {
         let defaults = UserDefaults(suiteName: suite)!
         defaults.removePersistentDomain(forName: suite)
         let first = AppSettings(defaults: defaults)
-        XCTAssertEqual(first.settingsButtonPlacement, .insideBlock)
+        XCTAssertEqual(first.settingsButtonPlacement, .rightClickOnly)
         XCTAssertEqual(first.settingsButtonHost, .rings)
         XCTAssertTrue(first.showSettingsBlock)
-        XCTAssertTrue(first.settingsButtonPlacement.drawsRingGear(host: first.settingsButtonHost, ringsVisible: true))
+        XCTAssertFalse(first.settingsButtonPlacement.drawsRingGear(host: first.settingsButtonHost, ringsVisible: true))
         XCTAssertFalse(first.settingsButtonPlacement.drawsRingGear(host: .rings, ringsVisible: false))
         XCTAssertFalse(first.settingsButtonPlacement.drawsFlowGear(host: .flow, flowVisible: false))
         XCTAssertFalse(SettingsButtonPlacement.rightClickOnly.drawsOwnBlock(blockVisible: true))
@@ -554,7 +554,7 @@ final class EnergyMotionStyleTests: XCTestCase {
         defaults.set("nope", forKey: "settingsButtonPlacement")
         defaults.set("also-nope", forKey: "settingsButtonHost")
         let fallback = AppSettings(defaults: defaults)
-        XCTAssertEqual(fallback.settingsButtonPlacement, .insideBlock)
+        XCTAssertEqual(fallback.settingsButtonPlacement, .rightClickOnly)
         XCTAssertEqual(fallback.settingsButtonHost, .rings)
         defaults.removePersistentDomain(forName: suite)
     }
@@ -576,6 +576,7 @@ final class EnergyMotionStyleTests: XCTestCase {
         let defaults = UserDefaults(suiteName: suite)!
         defaults.removePersistentDomain(forName: suite)
         let settings = AppSettings(defaults: defaults)
+        settings.settingsButtonPlacement = .insideBlock
         settings.showEnergyFlow = false
         XCTAssertFalse(settings.visibleSettingsHosts.contains(.flow))
         XCTAssertEqual(settings.settingsButtonHost, .rings)
@@ -1410,8 +1411,8 @@ final class RingColorTests: XCTestCase {
         defaults.removePersistentDomain(forName: suite)
         defaults.set(ThemePalette.highContrast.rawValue, forKey: "palette")
         let settings = AppSettings(defaults: defaults)
-        XCTAssertEqual(settings.ringTint.preset, .highContrast)
-        XCTAssertEqual(settings.flowTint.preset, .highContrast)
+        XCTAssertEqual(settings.ringTint.preset, .system)
+        XCTAssertEqual(settings.flowTint.preset, .system)
         XCTAssertEqual(settings.ringTint.battery.bands.count, 4)
         XCTAssertEqual(settings.flowTint.charging.bands.count, 1)
         defaults.removePersistentDomain(forName: suite)

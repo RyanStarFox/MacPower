@@ -89,9 +89,9 @@ final class PopoverExtrasTests: XCTestCase {
         XCTAssertEqual(fractions[0], 0.25, accuracy: 0.001)
         XCTAssertEqual(fractions[1], 1, accuracy: 0.001)
         XCTAssertEqual(fractions[2], 0, accuracy: 0.001)
-        XCTAssertEqual(TopAppsChartStyle.resolved(stored: nil), .list)
+        XCTAssertEqual(TopAppsChartStyle.resolved(stored: nil), .bars)
         XCTAssertEqual(TopAppsChartStyle.resolved(stored: "columns"), .columns)
-        XCTAssertEqual(TopAppsChartStyle.resolved(stored: "nope"), .list)
+        XCTAssertEqual(TopAppsChartStyle.resolved(stored: "nope"), .bars)
     }
 
     func testProcessGroupingUsesTheOuterApp() {
@@ -171,13 +171,177 @@ final class PopoverExtrasTests: XCTestCase {
         let defaults = UserDefaults(suiteName: suite)!
         defaults.removePersistentDomain(forName: suite)
         let first = AppSettings(defaults: defaults)
-        XCTAssertEqual(first.popoverOrder, [.rings, .flow, .topApps, .lowPower, .localIP, .batteryCycle, .settings])
+        assertDividersBetweenEveryBlock(first.popoverOrder)
+        let visible = first.renderedPopoverEntries
+        XCTAssertEqual(visible.compactMap(\.block), [.rings, .flow, .topApps, .lowPower, .localIP, .batteryCycle])
+        assertSingleDividerBetweenVisibleBlocks(visible)
         first.movePopoverBlock(.lowPower, to: .rings)
-        XCTAssertEqual(first.popoverOrder, [.lowPower, .rings, .flow, .topApps, .localIP, .batteryCycle, .settings])
+        XCTAssertEqual(
+            first.popoverOrder.compactMap(\.block),
+            [.lowPower, .rings, .flow, .topApps, .localIP, .batteryCycle, .settings]
+        )
         defaults.set(["rings"], forKey: "popoverOrder")
         let restored = AppSettings(defaults: defaults)
-        XCTAssertEqual(restored.popoverOrder, [.rings, .flow, .topApps, .lowPower, .localIP, .batteryCycle, .settings])
+        XCTAssertEqual(restored.popoverOrder, PopoverBlock.allCases.map(PopoverEntry.block))
         defaults.removePersistentDomain(forName: suite)
+    }
+
+    func testPopoverDividersRoundTripAndCollapse() throws {
+        let suite = "MacPower.PopoverDividers.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suite)!
+        defaults.removePersistentDomain(forName: suite)
+        let fresh = AppSettings(defaults: defaults)
+        assertDividersBetweenEveryBlock(fresh.popoverOrder)
+        fresh.showEnergyFlow = false
+        fresh.showLowPower = false
+        assertSingleDividerBetweenVisibleBlocks(fresh.renderedPopoverEntries)
+        XCTAssertEqual(
+            fresh.renderedPopoverEntries.compactMap(\.block),
+            [.rings, .topApps, .localIP, .batteryCycle]
+        )
+
+        let leading = UUID()
+        let between = UUID()
+        let stacked = UUID()
+        let trailing = UUID()
+        defaults.set(
+            [
+                PopoverEntry.divider(leading).rawValue,
+                PopoverBlock.rings.rawValue,
+                PopoverEntry.divider(between).rawValue,
+                PopoverEntry.divider(stacked).rawValue,
+                PopoverBlock.flow.rawValue,
+                PopoverEntry.divider(trailing).rawValue,
+            ],
+            forKey: "popoverOrder"
+        )
+        let restored = AppSettings(defaults: defaults)
+        XCTAssertEqual(
+            Array(restored.popoverOrder.prefix(6)),
+            [.divider(leading), .block(.rings), .divider(between), .divider(stacked), .block(.flow), .divider(trailing)]
+        )
+        XCTAssertEqual(restored.popoverOrder.compactMap(\.block), PopoverBlock.allCases)
+        XCTAssertEqual(
+            defaults.stringArray(forKey: "popoverOrder")?.prefix(2).map { $0 },
+            [PopoverEntry.divider(leading).rawValue, PopoverBlock.rings.rawValue]
+        )
+
+        restored.showStatusRings = true
+        restored.showEnergyFlow = true
+        restored.showTopApps = false
+        restored.showLowPower = false
+        restored.showLocalIP = false
+        restored.showBatteryCycle = false
+        let rendered = restored.renderedPopoverEntries
+        XCTAssertEqual(rendered, [.block(.rings), .divider(stacked), .block(.flow)])
+        XCTAssertFalse(rendered.first?.isDivider == true)
+        XCTAssertFalse(rendered.last?.isDivider == true)
+
+        restored.showEnergyFlow = false
+        XCTAssertEqual(restored.renderedPopoverEntries, [.block(.rings)])
+
+        restored.addPopoverDivider()
+        let saved = defaults.stringArray(forKey: "popoverOrder") ?? []
+        XCTAssertEqual(saved.filter { PopoverBlock(rawValue: $0) != nil }.count, PopoverBlock.allCases.count)
+        XCTAssertTrue(saved.contains { $0.hasPrefix(PopoverEntry.dividerPrefix) })
+        let reloaded = AppSettings(defaults: defaults)
+        XCTAssertEqual(reloaded.popoverOrder, restored.popoverOrder)
+
+        if case .divider(let added) = reloaded.popoverOrder.last {
+            reloaded.movePopoverEntry(.divider(added), to: .block(.flow))
+            let flowIndex = try XCTUnwrap(reloaded.popoverOrder.firstIndex(of: .block(.flow)))
+            XCTAssertGreaterThan(flowIndex, 0)
+            XCTAssertEqual(reloaded.popoverOrder[flowIndex - 1], .divider(added))
+        } else {
+            XCTFail("Expected a divider at the end of the order")
+        }
+        reloaded.removePopoverDivider(id: stacked)
+        XCTAssertFalse(reloaded.popoverOrder.contains(.divider(stacked)))
+        defaults.removePersistentDomain(forName: suite)
+    }
+
+    func testPreviousDefaultPopoverOrderGainsDividersOnce() {
+        let suite = "MacPower.PopoverDividerMigration.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suite)!
+        defaults.removePersistentDomain(forName: suite)
+        defaults.set(AppSettings.previousDefaultPopoverOrder, forKey: "popoverOrder")
+        defaults.set(3, forKey: "settingsDefaultsRevision")
+        let migrated = AppSettings(defaults: defaults)
+        assertDividersBetweenEveryBlock(migrated.popoverOrder)
+        XCTAssertEqual(defaults.integer(forKey: "settingsDefaultsRevision"), 4)
+
+        let dividerIDs = migrated.popoverOrder.compactMap { entry -> UUID? in
+            if case .divider(let id) = entry { return id }
+            return nil
+        }
+        for id in dividerIDs {
+            migrated.removePopoverDivider(id: id)
+        }
+        XCTAssertEqual(migrated.popoverOrder.map(\.rawValue), AppSettings.previousDefaultPopoverOrder)
+        let again = AppSettings(defaults: defaults)
+        XCTAssertEqual(again.popoverOrder.map(\.rawValue), AppSettings.previousDefaultPopoverOrder)
+        XCTAssertFalse(again.popoverOrder.contains(where: \.isDivider))
+        defaults.removePersistentDomain(forName: suite)
+    }
+
+    func testCustomPopoverOrderKeepsItsDividers() {
+        let suite = "MacPower.PopoverDividerCustom.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suite)!
+        defaults.removePersistentDomain(forName: suite)
+        let reordered = ["flow", "rings", "topApps", "lowPower", "localIP", "batteryCycle", "settings"]
+        defaults.set(reordered, forKey: "popoverOrder")
+        defaults.set(3, forKey: "settingsDefaultsRevision")
+        let custom = AppSettings(defaults: defaults)
+        XCTAssertEqual(custom.popoverOrder.map(\.rawValue), reordered)
+        XCTAssertEqual(defaults.integer(forKey: "settingsDefaultsRevision"), 4)
+
+        let kept = UUID()
+        defaults.removePersistentDomain(forName: suite)
+        defaults.set(3, forKey: "settingsDefaultsRevision")
+        defaults.set(
+            [PopoverBlock.rings.rawValue, PopoverEntry.divider(kept).rawValue]
+                + PopoverBlock.allCases.dropFirst().map(\.rawValue),
+            forKey: "popoverOrder"
+        )
+        let withDivider = AppSettings(defaults: defaults)
+        XCTAssertEqual(withDivider.popoverOrder.filter(\.isDivider).count, 1)
+        XCTAssertTrue(withDivider.popoverOrder.contains(.divider(kept)))
+        defaults.removePersistentDomain(forName: suite)
+    }
+
+    private func assertDividersBetweenEveryBlock(
+        _ order: [PopoverEntry],
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        XCTAssertEqual(order.count, PopoverBlock.allCases.count * 2 - 1, file: file, line: line)
+        for (index, block) in PopoverBlock.allCases.enumerated() {
+            XCTAssertEqual(order[index * 2], .block(block), file: file, line: line)
+            if index > 0 {
+                XCTAssertTrue(order[index * 2 - 1].isDivider, file: file, line: line)
+            }
+        }
+    }
+
+    private func assertSingleDividerBetweenVisibleBlocks(
+        _ rendered: [PopoverEntry],
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        XCTAssertFalse(rendered.first?.isDivider == true, file: file, line: line)
+        XCTAssertFalse(rendered.last?.isDivider == true, file: file, line: line)
+        var previousWasDivider = false
+        for entry in rendered {
+            if entry.isDivider {
+                XCTAssertFalse(previousWasDivider, file: file, line: line)
+                previousWasDivider = true
+            } else {
+                previousWasDivider = false
+            }
+        }
+        let blocks = rendered.filter { !$0.isDivider }.count
+        let dividers = rendered.filter(\.isDivider).count
+        XCTAssertEqual(dividers, max(blocks - 1, 0), file: file, line: line)
     }
 
     func testTopAppSamplingSettingsPersistAndClamp() {
@@ -186,8 +350,8 @@ final class PopoverExtrasTests: XCTestCase {
         defaults.removePersistentDomain(forName: suite)
         let first = AppSettings(defaults: defaults)
         XCTAssertEqual(first.topAppWindowMinutes, 3)
-        XCTAssertEqual(first.topAppIntervalSeconds, 10)
-        XCTAssertEqual(first.topAppLimit, 5)
+        XCTAssertEqual(first.topAppIntervalSeconds, 30)
+        XCTAssertEqual(first.topAppLimit, 3)
         first.topAppWindowMinutes = 12
         first.topAppIntervalSeconds = 30
         first.topAppLimit = 8
@@ -507,8 +671,8 @@ final class PopoverExtrasTests: XCTestCase {
         defaults.removePersistentDomain(forName: suite)
         let first = AppSettings(defaults: defaults)
         XCTAssertTrue(first.showLocalIP)
-        XCTAssertEqual(first.ipScopes, [.local])
-        XCTAssertEqual(first.ipFamilies, [.ipv4, .ipv6])
+        XCTAssertEqual(first.ipScopes, Set(IPAddressScope.allCases))
+        XCTAssertEqual(first.ipFamilies, [.ipv4])
         first.showLocalIP = false
         first.ipScopes = [.publicAddress, .loopback]
         first.ipFamilies = [.ipv6]

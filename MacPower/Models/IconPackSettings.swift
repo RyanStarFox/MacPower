@@ -156,6 +156,21 @@ struct RingIconSettings: Codable, Equatable, Sendable {
     var cpu: GlyphSlot
     var gpu: GlyphSlot
     var memory: GlyphSlot
+    var disk: GlyphSlot
+    var memoryPressure: GlyphSlot
+    var swap: GlyphSlot
+    var download: GlyphSlot
+    var upload: GlyphSlot
+    var batteryTemperature: GlyphSlot
+    var thermalState: GlyphSlot
+
+    static let diskGlyph = GlyphSlot.system("internaldrive.fill")
+    static let memoryPressureGlyph = GlyphSlot.system("gauge.with.dots.needle.67percent")
+    static let swapGlyph = GlyphSlot.system("arrow.left.arrow.right")
+    static let downloadGlyph = GlyphSlot.system("arrow.down")
+    static let uploadGlyph = GlyphSlot.system("arrow.up")
+    static let batteryTemperatureGlyph = GlyphSlot.system("thermometer.medium")
+    static let thermalStateGlyph = GlyphSlot.system("thermometer.high")
 
     static let classic = RingIconSettings.preset(.classic)
 
@@ -164,38 +179,96 @@ struct RingIconSettings: Codable, Equatable, Sendable {
         case .custom:
             return classic.markedCustom()
         case .classic:
-            return RingIconSettings(
+            return make(
                 preset: .classic,
                 battery: .system("laptopcomputer"),
                 cpu: .system("cpu.fill"),
                 gpu: .asset("GPUMark"),
-                memory: .system("memorychip.fill")
+                memory: .system("memorychip.fill"),
+                disk: diskGlyph,
+                memoryPressure: memoryPressureGlyph,
+                swap: swapGlyph,
+                download: downloadGlyph,
+                upload: uploadGlyph,
+                batteryTemperature: batteryTemperatureGlyph,
+                thermalState: thermalStateGlyph
             )
         case .devices:
-            return RingIconSettings(
+            return make(
                 preset: .devices,
                 battery: .system("macbook"),
                 cpu: .system("cpu"),
                 gpu: .system("gamecontroller.fill"),
-                memory: .system("internaldrive.fill")
+                memory: .system("internaldrive.fill"),
+                disk: .system("externaldrive.fill"),
+                memoryPressure: .system("speedometer"),
+                swap: .system("arrow.triangle.2.circlepath"),
+                download: .system("arrow.down.to.line"),
+                upload: .system("arrow.up.to.line"),
+                batteryTemperature: .system("thermometer.variable"),
+                thermalState: .system("fan.fill")
             )
         case .outlined:
-            return RingIconSettings(
+            return make(
                 preset: .outlined,
                 battery: .system("laptopcomputer"),
                 cpu: .system("cpu"),
                 gpu: .system("square.3.layers.3d"),
-                memory: .system("memorychip")
+                memory: .system("memorychip"),
+                disk: .system("internaldrive"),
+                memoryPressure: .system("gauge.with.dots.needle.33percent"),
+                swap: .system("arrow.up.arrow.down"),
+                download: .system("square.and.arrow.down"),
+                upload: .system("square.and.arrow.up"),
+                batteryTemperature: .system("thermometer.low"),
+                thermalState: .system("thermometer")
             )
         case .circles:
-            return RingIconSettings(
+            return make(
                 preset: .circles,
                 battery: .system("bolt.circle.fill"),
                 cpu: .system("gauge.with.dots.needle.67percent"),
                 gpu: .system("circle.hexagongrid.fill"),
-                memory: .system("cylinder.fill")
+                memory: .system("cylinder.fill"),
+                disk: .system("opticaldisc.fill"),
+                memoryPressure: .system("gauge.with.dots.needle.bottom.50percent"),
+                swap: .system("arrow.2.squarepath"),
+                download: .system("arrow.down.circle.fill"),
+                upload: .system("arrow.up.circle.fill"),
+                batteryTemperature: .system("thermometer.medium.slash"),
+                thermalState: .system("thermometer.sun.fill")
             )
         }
+    }
+
+    private static func make(
+        preset: RingIconPreset,
+        battery: GlyphSlot,
+        cpu: GlyphSlot,
+        gpu: GlyphSlot,
+        memory: GlyphSlot,
+        disk: GlyphSlot,
+        memoryPressure: GlyphSlot,
+        swap: GlyphSlot,
+        download: GlyphSlot,
+        upload: GlyphSlot,
+        batteryTemperature: GlyphSlot,
+        thermalState: GlyphSlot
+    ) -> RingIconSettings {
+        RingIconSettings(
+            preset: preset,
+            battery: battery,
+            cpu: cpu,
+            gpu: gpu,
+            memory: memory,
+            disk: disk,
+            memoryPressure: memoryPressure,
+            swap: swap,
+            download: download,
+            upload: upload,
+            batteryTemperature: batteryTemperature,
+            thermalState: thermalState
+        )
     }
 
     func slot(for kind: RingKind) -> GlyphSlot {
@@ -204,26 +277,51 @@ struct RingIconSettings: Codable, Equatable, Sendable {
         case .cpu: cpu
         case .gpu: gpu
         case .memory: memory
-        case .disk: .system("internaldrive.fill")
-        case .memoryPressure: .system("gauge.with.dots.needle.67percent")
-        case .swap: .system("arrow.left.arrow.right")
+        case .disk: disk
+        case .memoryPressure: memoryPressure
+        case .swap: swap
         }
     }
 
-    func replacing(_ kind: RingKind, with slot: GlyphSlot) -> RingIconSettings {
+    func slot(for slot: RingSlot) -> GlyphSlot {
+        switch slot {
+        case .battery: battery
+        case .cpu: cpu
+        case .gpu: gpu
+        case .memory: memory
+        case .disk: disk
+        case .memoryPressure: memoryPressure
+        case .swap: swap
+        case .download: download
+        case .upload: upload
+        case .speedPair: download
+        case .batteryTemperature: batteryTemperature
+        case .thermalState: thermalState
+        }
+    }
+
+    func replacing(_ ring: RingSlot, with slot: GlyphSlot) -> RingIconSettings {
+        guard ring != .speedPair else { return self }
         var copy = markedCustom()
-        switch kind {
+        switch ring {
         case .battery: copy.battery = slot
         case .cpu: copy.cpu = slot
         case .gpu: copy.gpu = slot
         case .memory: copy.memory = slot
-        case .disk, .memoryPressure, .swap: break
+        case .disk: copy.disk = slot
+        case .memoryPressure: copy.memoryPressure = slot
+        case .swap: copy.swap = slot
+        case .download: copy.download = slot
+        case .upload: copy.upload = slot
+        case .speedPair: break
+        case .batteryTemperature: copy.batteryTemperature = slot
+        case .thermalState: copy.thermalState = slot
         }
         return copy
     }
 
-    func withScale(_ scale: Double, for kind: RingKind) -> RingIconSettings {
-        replacing(kind, with: slot(for: kind).withScale(scale))
+    func withScale(_ scale: Double, for ring: RingSlot) -> RingIconSettings {
+        replacing(ring, with: slot(for: ring).withScale(scale))
     }
 
     func markedCustom() -> RingIconSettings {
@@ -236,17 +334,23 @@ struct RingIconSettings: Codable, Equatable, Sendable {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         preset = try container.decode(RingIconPreset.self, forKey: .preset)
-        battery = try container.decode(GlyphSlot.self, forKey: .battery)
-        cpu = try container.decode(GlyphSlot.self, forKey: .cpu)
-        gpu = try container.decode(GlyphSlot.self, forKey: .gpu)
-        memory = try container.decode(GlyphSlot.self, forKey: .memory)
-        if let legacy = try container.decodeIfPresent(Double.self, forKey: .legacyPackScale),
-           abs(legacy - 1) > 0.001 {
-            battery = battery.withScale(battery.scale * legacy)
-            cpu = cpu.withScale(cpu.scale * legacy)
-            gpu = gpu.withScale(gpu.scale * legacy)
-            memory = memory.withScale(memory.scale * legacy)
-        }
+        let legacy = try container.decodeIfPresent(Double.self, forKey: .legacyPackScale)
+        battery = Self.scaled(try container.decode(GlyphSlot.self, forKey: .battery), legacy: legacy)
+        cpu = Self.scaled(try container.decode(GlyphSlot.self, forKey: .cpu), legacy: legacy)
+        gpu = Self.scaled(try container.decode(GlyphSlot.self, forKey: .gpu), legacy: legacy)
+        memory = Self.scaled(try container.decode(GlyphSlot.self, forKey: .memory), legacy: legacy)
+        disk = Self.scaled(try container.decodeIfPresent(GlyphSlot.self, forKey: .disk) ?? Self.diskGlyph, legacy: legacy)
+        memoryPressure = Self.scaled(try container.decodeIfPresent(GlyphSlot.self, forKey: .memoryPressure) ?? Self.memoryPressureGlyph, legacy: legacy)
+        swap = Self.scaled(try container.decodeIfPresent(GlyphSlot.self, forKey: .swap) ?? Self.swapGlyph, legacy: legacy)
+        download = Self.scaled(try container.decodeIfPresent(GlyphSlot.self, forKey: .download) ?? Self.downloadGlyph, legacy: legacy)
+        upload = Self.scaled(try container.decodeIfPresent(GlyphSlot.self, forKey: .upload) ?? Self.uploadGlyph, legacy: legacy)
+        batteryTemperature = Self.scaled(try container.decodeIfPresent(GlyphSlot.self, forKey: .batteryTemperature) ?? Self.batteryTemperatureGlyph, legacy: legacy)
+        thermalState = Self.scaled(try container.decodeIfPresent(GlyphSlot.self, forKey: .thermalState) ?? Self.thermalStateGlyph, legacy: legacy)
+    }
+
+    private static func scaled(_ slot: GlyphSlot, legacy: Double?) -> GlyphSlot {
+        guard let legacy, abs(legacy - 1) > 0.001 else { return slot }
+        return slot.withScale(slot.scale * legacy)
     }
 
     func encode(to encoder: Encoder) throws {
@@ -256,19 +360,47 @@ struct RingIconSettings: Codable, Equatable, Sendable {
         try container.encode(cpu, forKey: .cpu)
         try container.encode(gpu, forKey: .gpu)
         try container.encode(memory, forKey: .memory)
+        try container.encode(disk, forKey: .disk)
+        try container.encode(memoryPressure, forKey: .memoryPressure)
+        try container.encode(swap, forKey: .swap)
+        try container.encode(download, forKey: .download)
+        try container.encode(upload, forKey: .upload)
+        try container.encode(batteryTemperature, forKey: .batteryTemperature)
+        try container.encode(thermalState, forKey: .thermalState)
     }
 
     private enum CodingKeys: String, CodingKey {
-        case preset, battery, cpu, gpu, memory
+        case preset, battery, cpu, gpu, memory, disk, memoryPressure, swap
+        case download, upload, batteryTemperature, thermalState
         case legacyPackScale = "scale"
     }
 
-    init(preset: RingIconPreset, battery: GlyphSlot, cpu: GlyphSlot, gpu: GlyphSlot, memory: GlyphSlot) {
+    init(
+        preset: RingIconPreset,
+        battery: GlyphSlot,
+        cpu: GlyphSlot,
+        gpu: GlyphSlot,
+        memory: GlyphSlot,
+        disk: GlyphSlot,
+        memoryPressure: GlyphSlot,
+        swap: GlyphSlot,
+        download: GlyphSlot,
+        upload: GlyphSlot,
+        batteryTemperature: GlyphSlot,
+        thermalState: GlyphSlot
+    ) {
         self.preset = preset
         self.battery = battery
         self.cpu = cpu
         self.gpu = gpu
         self.memory = memory
+        self.disk = disk
+        self.memoryPressure = memoryPressure
+        self.swap = swap
+        self.download = download
+        self.upload = upload
+        self.batteryTemperature = batteryTemperature
+        self.thermalState = thermalState
     }
 }
 
@@ -584,11 +716,74 @@ extension RingKind {
                 .system("externaldrive.fill")
             ]
         case .disk:
-            [.system("internaldrive.fill")]
+            [
+                .system("internaldrive.fill"),
+                .system("externaldrive.fill"),
+                .system("opticaldisc.fill"),
+                .system("internaldrive")
+            ]
         case .memoryPressure:
-            [.system("gauge.with.dots.needle.67percent")]
+            [
+                .system("gauge.with.dots.needle.67percent"),
+                .system("gauge.with.dots.needle.33percent"),
+                .system("speedometer"),
+                .system("waveform.path.ecg"),
+                .system("gauge.with.dots.needle.bottom.50percent")
+            ]
         case .swap:
-            [.system("arrow.left.arrow.right")]
+            [
+                .system("arrow.left.arrow.right"),
+                .system("arrow.up.arrow.down"),
+                .system("arrow.triangle.2.circlepath"),
+                .system("memorychip"),
+                .system("arrow.2.squarepath")
+            ]
+        }
+    }
+}
+
+extension RingSlot {
+    /// Rings that draw a center glyph. The combined up/down ring has none.
+    static let iconSlots: [RingSlot] = allCases.filter { $0 != .speedPair }
+
+    var symbolChoices: [GlyphSlot] {
+        if let kind = RingKind(rawValue: rawValue) {
+            return kind.symbolChoices
+        }
+        return switch self {
+        case .download:
+            [
+                .system("arrow.down"),
+                .system("arrow.down.circle.fill"),
+                .system("arrow.down.to.line"),
+                .system("square.and.arrow.down"),
+                .system("icloud.and.arrow.down")
+            ]
+        case .upload:
+            [
+                .system("arrow.up"),
+                .system("arrow.up.circle.fill"),
+                .system("arrow.up.to.line"),
+                .system("square.and.arrow.up"),
+                .system("icloud.and.arrow.up")
+            ]
+        case .batteryTemperature:
+            [
+                .system("thermometer.medium"),
+                .system("thermometer.low"),
+                .system("thermometer.variable"),
+                .system("thermometer.medium.slash")
+            ]
+        case .thermalState:
+            [
+                .system("thermometer.high"),
+                .system("thermometer"),
+                .system("thermometer.sun.fill"),
+                .system("fan.fill"),
+                .system("exclamationmark.triangle.fill")
+            ]
+        default:
+            []
         }
     }
 }

@@ -1036,9 +1036,9 @@ private struct EnergyFlowDiagram<Trailing: View>: View {
         let body = filamentSpindle(lane: lane, from: from, to: to, lateral: lateral, thickness: thickness)
         switch pigment {
         case .gradient:
-            let head = travelingColor(base: baseColor, t: from)
-            let mid = travelingColor(base: baseColor, t: (from + to) / 2)
-            let tail = travelingColor(base: baseColor, t: to)
+            let head = travelingColor(base: baseColor, t: horizontalUnit(lane, t: from))
+            let mid = travelingColor(base: baseColor, t: horizontalUnit(lane, t: (from + to) / 2))
+            let tail = travelingColor(base: baseColor, t: horizontalUnit(lane, t: to))
             context.fill(
                 body,
                 with: .linearGradient(
@@ -1184,9 +1184,10 @@ private struct EnergyFlowDiagram<Trailing: View>: View {
         let alpha = fade * brightness
         switch pigment {
         case .gradient:
-            let traveling = travelingColor(base: baseColor, t: t)
+            let along = horizontalUnit(lane, t: t)
+            let traveling = travelingColor(base: baseColor, t: along)
             context.fill(Path(ellipseIn: rect), with: .color(traveling.opacity(alpha)))
-            let spark = t < 0.28 ? 0.92 : 0.55
+            let spark = abs(along - 0.5) < 0.13 ? 0.92 : 0.55
             context.fill(
                 Path(ellipseIn: rect.insetBy(dx: radius * 0.32, dy: radius * 0.32)),
                 with: .color(Color.white.opacity(alpha * spark))
@@ -1199,16 +1200,30 @@ private struct EnergyFlowDiagram<Trailing: View>: View {
         }
     }
 
+    /// 0 at the left end of the lane, 1 at the right, so the color change stays
+    /// on the horizontal middle even when the cubic parameter is not uniform.
+    private func horizontalUnit(_ lane: Lane, t: Double) -> Double {
+        let start = min(lane.cubic.p0.x, lane.cubic.p1.x)
+        let end = max(lane.cubic.p0.x, lane.cubic.p1.x)
+        let span = end - start
+        guard span > 0.5 else { return min(1, max(0, t)) }
+        let x = lane.cubic.point(CGFloat(t)).x
+        return Double(min(1, max(0, (x - start) / span)))
+    }
+
+    /// Bright at the left, darker at the right. The switch itself is centered.
     private func travelingColor(base: Color, t: Double) -> Color {
         let head = Color.white.mixed(with: base, by: 0.06)
         let tail = base.mixed(with: .black, by: 0.18)
-        if t < 0.22 {
-            return Color.white.mixed(with: head, by: t / 0.22)
+        let changeStart = 0.37
+        let changeEnd = 0.63
+        if t < changeStart {
+            return Color.white.mixed(with: head, by: t / changeStart)
         }
-        if t < 0.48 {
-            return head.mixed(with: base, by: (t - 0.22) / 0.26)
+        if t < changeEnd {
+            return head.mixed(with: base, by: (t - changeStart) / (changeEnd - changeStart))
         }
-        return base.mixed(with: tail, by: (t - 0.48) / 0.52)
+        return base.mixed(with: tail, by: (t - changeEnd) / (1 - changeEnd))
     }
 
     private func drawWattLabel(context: inout GraphicsContext, body: Path, lane: Lane) {

@@ -15,8 +15,13 @@ struct StatusRingView: View {
     /// on that frame drags the whole ring into place.
     @State private var animateProgress = false
 
-    private let diameter: CGFloat = 58
-    private let lineWidth: CGFloat = 7
+    static let diameter: CGFloat = 58
+    static let lineWidth: CGFloat = 7
+    static let glyphPointSize: CGFloat = 17
+    static let glyphAssetSide: CGFloat = 20
+
+    private var diameter: CGFloat { Self.diameter }
+    private var lineWidth: CGFloat { Self.lineWidth }
 
     /// Match caption ink; hierarchical SF battery fills go white on glass.
     private var glyphInk: Color {
@@ -45,8 +50,8 @@ struct StatusRingView: View {
 
                 GlyphSlotView(
                     slot: glyph,
-                    systemPointSize: 17 * scale,
-                    assetSide: 20 * scale,
+                    systemPointSize: Self.glyphPointSize * scale,
+                    assetSide: Self.glyphAssetSide * scale,
                     prefersMonochrome: true,
                     ink: glyphInk
                 )

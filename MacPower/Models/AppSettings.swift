@@ -14,12 +14,12 @@ enum PopoverBlock: String, CaseIterable, Identifiable, Codable, Sendable {
 
     var localizationKey: String {
         switch self {
-        case .rings: "settings.popover.showRings"
-        case .flow: "settings.popover.showFlow"
-        case .topApps: "settings.popover.showTopApps"
-        case .lowPower: "settings.popover.showLowPower"
-        case .localIP: "settings.popover.showLocalIP"
-        case .batteryCycle: "settings.popover.showBatteryCycle"
+        case .rings: "settings.tab.rings"
+        case .flow: "settings.tab.flow"
+        case .topApps: "settings.tab.topApps"
+        case .lowPower: "settings.tab.lowPower"
+        case .localIP: "settings.tab.localIP"
+        case .batteryCycle: "settings.tab.batteryCycle"
         case .settings: "settings.title"
         }
     }
@@ -37,12 +37,56 @@ enum PopoverBlock: String, CaseIterable, Identifiable, Codable, Sendable {
     }
 }
 
+/// One row in the panel order. Dividers are separate values so several lines can sit in the list.
+/// Block names stay the existing raw values; a divider is `divider:` plus its own id.
+enum PopoverEntry: Identifiable, Equatable, Hashable, Sendable {
+    case block(PopoverBlock)
+    case divider(UUID)
+
+    static let dividerPrefix = "divider:"
+
+    var id: String { rawValue }
+
+    var block: PopoverBlock? {
+        guard case .block(let block) = self else { return nil }
+        return block
+    }
+
+    var isDivider: Bool {
+        if case .divider = self { return true }
+        return false
+    }
+
+    var rawValue: String {
+        switch self {
+        case .block(let block):
+            block.rawValue
+        case .divider(let id):
+            Self.dividerPrefix + id.uuidString
+        }
+    }
+
+    init?(rawValue: String) {
+        if let block = PopoverBlock(rawValue: rawValue) {
+            self = .block(block)
+            return
+        }
+        guard rawValue.hasPrefix(Self.dividerPrefix) else { return nil }
+        let token = String(rawValue.dropFirst(Self.dividerPrefix.count))
+        guard let id = UUID(uuidString: token) else { return nil }
+        self = .divider(id)
+    }
+}
+
 @Observable
 final class AppSettings {
-    static let defaultRingOrder: [RingSlot] = [.battery, .cpu, .gpu, .memory, .disk, .download, .upload, .thermalState]
+    static let defaultRingOrder: [RingSlot] = [.battery, .cpu, .gpu, .memory, .disk, .speedPair]
 
     private static func restoredRingOrder(from defaults: UserDefaults) -> [RingSlot] {
         let stored = defaults.stringArray(forKey: Keys.visibleRings)?.compactMap(RingSlot.init(rawValue:)) ?? []
+        if stored.isEmpty {
+            return defaultRingOrder
+        }
         var seen = Set<RingSlot>()
         var order = stored.filter { seen.insert($0).inserted }
         if order.isEmpty {
@@ -148,8 +192,8 @@ final class AppSettings {
     var onLocalIPChange: (() -> Void)?
 
     static let defaultTopAppWindowMinutes = 3
-    static let defaultTopAppIntervalSeconds = 10
-    static let defaultTopAppLimit = 5
+    static let defaultTopAppIntervalSeconds = 30
+    static let defaultTopAppLimit = 3
     static let topAppWindowRange = 1...30
     static let topAppIntervalRange = 5...120
     static let topAppLimitRange = 1...12
@@ -421,7 +465,7 @@ final class AppSettings {
         }
     }
 
-    var popoverOrder: [PopoverBlock] {
+    var popoverOrder: [PopoverEntry] {
         didSet { store.set(popoverOrder.map(\.rawValue), forKey: Keys.popoverOrder) }
     }
 
@@ -474,13 +518,52 @@ final class AppSettings {
     }
 
     func movePopoverBlock(_ block: PopoverBlock, to target: PopoverBlock) {
-        guard block != target,
-              let from = popoverOrder.firstIndex(of: block),
-              let destination = popoverOrder.firstIndex(of: target)
+        movePopoverEntry(.block(block), to: .block(target))
+    }
+
+    func movePopoverEntry(_ entry: PopoverEntry, to target: PopoverEntry) {
+        guard entry.id != target.id,
+              let from = popoverOrder.firstIndex(where: { $0.id == entry.id }),
+              let destination = popoverOrder.firstIndex(where: { $0.id == target.id })
         else { return }
         var items = popoverOrder
         items.move(fromOffsets: IndexSet(integer: from), toOffset: destination > from ? destination + 1 : destination)
         popoverOrder = items
+    }
+
+    /// New lines start at the end of the order. Dragging is how they land between blocks.
+    func addPopoverDivider() {
+        popoverOrder.append(.divider(UUID()))
+    }
+
+    func removePopoverDivider(id: UUID) {
+        guard popoverOrder.contains(where: { $0 == .divider(id) }) else { return }
+        popoverOrder.removeAll { $0 == .divider(id) }
+    }
+
+    /// Lines that do not actually separate visible blocks are left out.
+    /// Leading, trailing, and consecutive dividers collapse so the panel never stacks empty rules.
+    var renderedPopoverEntries: [PopoverEntry] {
+        var rendered: [PopoverEntry] = []
+        var pendingDivider: PopoverEntry?
+        var emittedVisible = false
+        for entry in popoverOrder {
+            switch entry {
+            case .block(let block):
+                guard isPopoverBlockVisible(block) else { continue }
+                if emittedVisible, let pendingDivider {
+                    rendered.append(pendingDivider)
+                }
+                pendingDivider = nil
+                emittedVisible = true
+                rendered.append(entry)
+            case .divider:
+                if emittedVisible {
+                    pendingDivider = entry
+                }
+            }
+        }
+        return rendered
     }
 
     func isPopoverBlockVisible(_ block: PopoverBlock) -> Bool {
@@ -491,25 +574,32 @@ final class AppSettings {
         case .lowPower: showLowPower
         case .localIP: showLocalIP
         case .batteryCycle: showBatteryCycle
-        case .settings: showSettingsBlock
+        case .settings: settingsButtonPlacement == .ownBlock && showSettingsBlock
         }
     }
 
     /// Hosts the settings picker may offer. Hidden blocks and the settings block are left out.
     var visibleSettingsHosts: [SettingsButtonHost] {
-        popoverOrder.compactMap { block in
-            guard let host = block.settingsHost, isPopoverBlockVisible(block) else { return nil }
+        popoverOrder.compactMap { entry in
+            guard let block = entry.block, let host = block.settingsHost, isPopoverBlockVisible(block) else { return nil }
             return host
         }
     }
 
     /// True when this block is shown and it is the only one. Its toggle stays on.
+    /// Dividers are not content blocks, so they never satisfy the “one block stays on” rule.
     func isSoleVisiblePopoverBlock(_ block: PopoverBlock) -> Bool {
-        isPopoverBlockVisible(block) && !popoverOrder.contains { $0 != block && isPopoverBlockVisible($0) }
+        isPopoverBlockVisible(block) && !popoverOrder.contains { entry in
+            guard let other = entry.block, other != block else { return false }
+            return isPopoverBlockVisible(other)
+        }
     }
 
     private func commitPopoverVisibility(_ block: PopoverBlock, key: String, sideEffect: (() -> Void)? = nil) {
-        if !isPopoverBlockVisible(block), !popoverOrder.contains(where: isPopoverBlockVisible) {
+        if !isPopoverBlockVisible(block), !popoverOrder.contains(where: { entry in
+            guard let other = entry.block else { return false }
+            return isPopoverBlockVisible(other)
+        }) {
             revealPopoverBlock(block)
             return
         }
@@ -520,8 +610,11 @@ final class AppSettings {
 
     /// Stored panels with every block off come back with the first block in order (rings if the order is empty).
     private func ensureOnePopoverBlockVisible() {
-        if popoverOrder.contains(where: isPopoverBlockVisible) { return }
-        let target = popoverOrder.first ?? .rings
+        if popoverOrder.contains(where: { entry in
+            guard let block = entry.block else { return false }
+            return isPopoverBlockVisible(block)
+        }) { return }
+        let target = popoverOrder.compactMap(\.block).first ?? .rings
         revealPopoverBlock(target)
         store.set(true, forKey: visibilityKey(for: target))
     }
@@ -556,7 +649,7 @@ final class AppSettings {
         guard !isPopoverBlockVisible(settingsButtonHost.popoverBlock) else { return }
         if let next = SettingsButtonHost.nextVisible(
             after: settingsButtonHost,
-            order: popoverOrder,
+            order: popoverOrder.compactMap(\.block),
             isVisible: isPopoverBlockVisible
         ) {
             settingsButtonHost = next
@@ -587,12 +680,38 @@ final class AppSettings {
         onTopAppSamplingChange?()
     }
 
-    private static func restoredPopoverOrder(from defaults: UserDefaults) -> [PopoverBlock] {
-        let stored = defaults.stringArray(forKey: Keys.popoverOrder)?.compactMap(PopoverBlock.init(rawValue:)) ?? []
-        var seen = Set<PopoverBlock>()
-        var order = stored.filter { seen.insert($0).inserted }
-        for block in PopoverBlock.allCases where !seen.contains(block) {
-            order.append(block)
+    /// Built-in order: one divider between each pair of blocks. Hidden blocks collapse
+    /// those lines, so the panel shows a single line between blocks that are on.
+    static func defaultPopoverOrder() -> [PopoverEntry] {
+        PopoverBlock.allCases.enumerated().flatMap { index, block in
+            index == 0 ? [PopoverEntry.block(block)] : [.divider(UUID()), .block(block)]
+        }
+    }
+
+    /// Block sequence saved before dividers were part of the built-in default.
+    static let previousDefaultPopoverOrder: [String] = PopoverBlock.allCases.map(\.rawValue)
+
+    private static func restoredPopoverOrder(from defaults: UserDefaults) -> [PopoverEntry] {
+        let stored = defaults.stringArray(forKey: Keys.popoverOrder) ?? []
+        if stored.isEmpty {
+            return defaultPopoverOrder()
+        }
+        var seenBlocks = Set<PopoverBlock>()
+        var seenDividers = Set<UUID>()
+        var order: [PopoverEntry] = []
+        for raw in stored {
+            guard let entry = PopoverEntry(rawValue: raw) else { continue }
+            switch entry {
+            case .block(let block):
+                guard seenBlocks.insert(block).inserted else { continue }
+                order.append(entry)
+            case .divider(let id):
+                guard seenDividers.insert(id).inserted else { continue }
+                order.append(entry)
+            }
+        }
+        for block in PopoverBlock.allCases where !seenBlocks.contains(block) {
+            order.append(.block(block))
         }
         return order
     }
@@ -607,12 +726,15 @@ final class AppSettings {
         return min(range.upperBound, max(range.lowerBound, defaults.integer(forKey: key)))
     }
 
-    /// Ring cell unless the user picks another placement. Unknown stored values read as the ring cell.
+    /// Right-click unless the user picks another placement. Unknown stored values stay on the right-click menu.
     var settingsButtonPlacement: SettingsButtonPlacement {
         didSet {
             store.set(settingsButtonPlacement.rawValue, forKey: Keys.settingsButtonPlacement)
             if settingsButtonPlacement == .insideBlock {
                 keepSettingsButtonOffHiddenHost()
+            }
+            if settingsButtonPlacement != .ownBlock {
+                ensureOnePopoverBlockVisible()
             }
         }
     }
@@ -664,18 +786,17 @@ final class AppSettings {
         let resolvedPalette = ThemePalette(rawValue: paletteRaw) ?? .semantic
         palette = resolvedPalette
 
-        let seededPreset = PopoverTintPreset(palette: resolvedPalette)
         if let data = defaults.data(forKey: Keys.ringTint),
            let decoded = try? JSONDecoder().decode(RingTintSettings.self, from: data) {
             ringTint = decoded.withRoundedDefaultStops()
         } else {
-            ringTint = .preset(seededPreset)
+            ringTint = .preset(.system)
         }
         if let data = defaults.data(forKey: Keys.flowTint),
            let decoded = try? JSONDecoder().decode(FlowTintSettings.self, from: data) {
             flowTint = decoded
         } else {
-            flowTint = .preset(seededPreset)
+            flowTint = .preset(.system)
         }
 
         if let data = defaults.data(forKey: Keys.ringIcons),
@@ -776,7 +897,7 @@ final class AppSettings {
         }
 
         if defaults.object(forKey: Keys.showPopoverArrow) == nil {
-            showPopoverArrow = true
+            showPopoverArrow = false
         } else {
             showPopoverArrow = defaults.bool(forKey: Keys.showPopoverArrow)
         }
@@ -849,12 +970,12 @@ final class AppSettings {
             stored: defaults.string(forKey: Keys.batteryCapacityStyle)
         )
         if defaults.object(forKey: Keys.ipScopes) == nil {
-            ipScopes = [.local]
+            ipScopes = Set(IPAddressScope.allCases)
         } else {
             ipScopes = Set(defaults.stringArray(forKey: Keys.ipScopes)?.compactMap(IPAddressScope.init(rawValue:)) ?? [])
         }
         if defaults.object(forKey: Keys.ipFamilies) == nil {
-            ipFamilies = [.ipv4, .ipv6]
+            ipFamilies = [.ipv4]
         } else {
             ipFamilies = Set(defaults.stringArray(forKey: Keys.ipFamilies)?.compactMap(IPAddressFamily.init(rawValue:)) ?? [])
         }
@@ -947,6 +1068,7 @@ final class AppSettings {
         language = AppLanguage.resolved(stored: defaults.string(forKey: Keys.language))
         ensureOnePopoverBlockVisible()
         keepSettingsButtonOffHiddenHost()
+        alignPreviousDefaults()
 
         store.set(resolvedMotion.rawValue, forKey: Keys.motionStyle)
         store.set(settingsButtonPlacement.rawValue, forKey: Keys.settingsButtonPlacement)
@@ -1216,6 +1338,69 @@ final class AppSettings {
         savedIconLibrary = savedIconLibrary.removingFlow(id: id)
         if flowActiveSavedIconID == id {
             flowActiveSavedIconID = nil
+        }
+    }
+
+    /// One pass for installs that already saved the previous built-in defaults.
+    private func alignPreviousDefaults() {
+        let revisionKey = "settingsDefaultsRevision"
+        if store.integer(forKey: revisionKey) < 2 {
+        if store.object(forKey: Keys.showPopoverArrow) != nil, showPopoverArrow {
+            showPopoverArrow = false
+            store.set(false, forKey: Keys.showPopoverArrow)
+        }
+        if settingsButtonPlacement == .insideBlock {
+            settingsButtonPlacement = .rightClickOnly
+        }
+        let previousRings: [RingSlot] = [.battery, .cpu, .gpu, .memory, .disk, .download, .upload, .thermalState]
+        if ringOrder == previousRings {
+            ringCatalog = Self.uniqueSlots(Self.defaultRingOrder)
+            enabledRingSlots = Set(Self.defaultRingOrder)
+            store.set(ringCatalog.map(\.rawValue), forKey: Keys.ringCatalog)
+            storeVisibleRings()
+        }
+        if ringActiveSavedID == nil, ringTint.preset == .semantic {
+            ringTint = .preset(.system)
+            persistRingTint()
+        }
+        if flowActiveSavedID == nil, flowTint.preset == .semantic {
+            flowTint = .preset(.system)
+            persistFlowTint()
+        }
+        if topAppLimit == 5 {
+            topAppLimit = Self.defaultTopAppLimit
+            store.set(topAppLimit, forKey: Keys.topAppLimit)
+        }
+        if topAppsChart == .list {
+            topAppsChart = .bars
+            store.set(topAppsChart.rawValue, forKey: Keys.topAppsChart)
+        }
+        if ipScopes == [.local] {
+            ipScopes = Set(IPAddressScope.allCases)
+            store.set(ipScopes.map(\.rawValue).sorted(), forKey: Keys.ipScopes)
+        }
+        if ipFamilies == [.ipv4, .ipv6] {
+            ipFamilies = [.ipv4]
+            store.set([IPAddressFamily.ipv4.rawValue], forKey: Keys.ipFamilies)
+        }
+        store.set(2, forKey: revisionKey)
+        }
+        if store.integer(forKey: revisionKey) < 3 {
+            if topAppIntervalSeconds == 10 {
+                topAppIntervalSeconds = Self.defaultTopAppIntervalSeconds
+                store.set(topAppIntervalSeconds, forKey: Keys.topAppIntervalSeconds)
+            }
+            store.set(3, forKey: revisionKey)
+        }
+        if store.integer(forKey: revisionKey) < 4 {
+            if store.stringArray(forKey: Keys.popoverOrder) == Self.previousDefaultPopoverOrder {
+                let order = Self.defaultPopoverOrder()
+                popoverOrder = order
+                store.set(order.map(\.rawValue), forKey: Keys.popoverOrder)
+            } else if store.object(forKey: Keys.popoverOrder) == nil {
+                store.set(popoverOrder.map(\.rawValue), forKey: Keys.popoverOrder)
+            }
+            store.set(4, forKey: revisionKey)
         }
     }
 
