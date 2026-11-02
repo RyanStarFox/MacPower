@@ -5703,6 +5703,70 @@
         }
       }
     },
+    "settings.updates.check": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Check for Updates" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "检查更新" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "檢查更新" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "更新を確認" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "업데이트 확인" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Rechercher des mises à jour" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Nach Updates suchen" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Buscar actualizaciones" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Verificar atualizações" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Verifica aggiornamenti" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Проверить обновления" } }
+      }
+    },
+    "update.upToDate.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "You're up to date" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "已是最新版本" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "已是最新版本" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "最新です" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "최신 버전입니다" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Vous êtes à jour" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Sie sind auf dem neuesten Stand" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Estás al día" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Você está em dia" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Sei aggiornato" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "У вас последняя версия" } }
+      }
+    },
+    "update.upToDate.message %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "The current version is %@." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "当前版本是 %@。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "目前版本是 %@。" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "現在のバージョンは %@ です。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "현재 버전은 %@입니다." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "La version actuelle est %@." } },
+        "de": { "stringUnit": { "state": "translated", "value": "Die aktuelle Version ist %@." } },
+        "es": { "stringUnit": { "state": "translated", "value": "La versión actual es %@." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "A versão atual é %@." } },
+        "it": { "stringUnit": { "state": "translated", "value": "La versione attuale è %@." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Текущая версия — %@." } }
+      }
+    },
+    "update.check.failed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Couldn't check for updates. Try again later." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "暂时无法检查更新。请稍后再试。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "暫時無法檢查更新。請稍後再試。" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "更新を確認できませんでした。しばらくしてからもう一度試してください。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "업데이트를 확인하지 못했습니다. 나중에 다시 시도하세요." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Impossible de vérifier les mises à jour. Réessayez plus tard." } },
+        "de": { "stringUnit": { "state": "translated", "value": "Updates konnten nicht geprüft werden. Versuchen Sie es später erneut." } },
+        "es": { "stringUnit": { "state": "translated", "value": "No se han podido buscar actualizaciones. Inténtalo más tarde." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Não foi possível verificar as atualizações. Tente de novo mais tarde." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Impossibile controllare gli aggiornamenti. Riprova più tardi." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Не удалось проверить обновления. Попробуйте позже." } }
+      }
+    },
     "settings.about.version %@": {
       "extractionState": "manual",
       "localizations": {

@@ -1464,12 +1464,17 @@ struct SettingsView: View {
                 Text("settings.language") + Text("（文/A）")
             }
             Toggle("settings.launchAtLogin", isOn: launchAtLoginBinding)
-            Toggle("settings.updates.automatic", isOn: $appState.settings.automaticallyCheckForUpdates)
-                .onChange(of: appState.settings.automaticallyCheckForUpdates) { _, enabled in
-                    if enabled {
-                        appState.checkForUpdates(reason: .userEnabled)
-                    }
-                }
+            Toggle(
+                "settings.updates.automatic",
+                isOn: Binding(
+                    get: { appState.settings.automaticallyCheckForUpdates },
+                    set: { appState.setAutomaticUpdateChecking($0, checkNow: true) }
+                )
+            )
+            Button("settings.updates.check") {
+                appState.checkForUpdates(reason: .manual)
+            }
+            .disabled(appState.isCheckingForUpdates)
         }
 
         Section {

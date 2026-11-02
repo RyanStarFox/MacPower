@@ -59,6 +59,7 @@ final class UpdateCheckPolicyTests: XCTestCase {
         XCTAssertFalse(UpdateCheckPolicy.shouldCheck(enabled: false, reason: .launch, lastCheck: nil, now: now))
         XCTAssertFalse(UpdateCheckPolicy.shouldCheck(enabled: false, reason: .periodic, lastCheck: nil, now: now))
         XCTAssertFalse(UpdateCheckPolicy.shouldCheck(enabled: false, reason: .userEnabled, lastCheck: nil, now: now))
+        XCTAssertTrue(UpdateCheckPolicy.shouldCheck(enabled: false, reason: .manual, lastCheck: nil, now: now))
     }
 
     func testLaunchAndToggleAlwaysCheckWhenEnabled() {
@@ -68,11 +69,32 @@ final class UpdateCheckPolicyTests: XCTestCase {
         XCTAssertTrue(UpdateCheckPolicy.shouldCheck(enabled: true, reason: .userEnabled, lastCheck: recent, now: now))
     }
 
-    func testPeriodicSkipsInsideTwentyFourHours() {
-        let now = Date(timeIntervalSince1970: 1_000_000)
-        let recent = now.addingTimeInterval(-3_600)
-        XCTAssertFalse(UpdateCheckPolicy.shouldCheck(enabled: true, reason: .periodic, lastCheck: recent, now: now))
-        XCTAssertTrue(UpdateCheckPolicy.shouldCheck(enabled: true, reason: .periodic, lastCheck: nil, now: now))
+    func testPeriodicChecksOncePerClockHour() {
+        let calendar = Calendar.current
+        let checked = calendar.date(from: DateComponents(year: 2026, month: 11, day: 2, hour: 14, minute: 5))!
+        let laterSameHour = calendar.date(from: DateComponents(year: 2026, month: 11, day: 2, hour: 14, minute: 50))!
+        let nextHour = calendar.date(from: DateComponents(year: 2026, month: 11, day: 2, hour: 15, minute: 0))!
+        XCTAssertFalse(UpdateCheckPolicy.shouldCheck(
+            enabled: true, reason: .periodic, lastCheck: checked, now: laterSameHour, calendar: calendar
+        ))
+        XCTAssertTrue(UpdateCheckPolicy.shouldCheck(
+            enabled: true, reason: .periodic, lastCheck: checked, now: nextHour, calendar: calendar
+        ))
+        XCTAssertTrue(UpdateCheckPolicy.shouldCheck(
+            enabled: true, reason: .periodic, lastCheck: nil, now: nextHour, calendar: calendar
+        ))
+    }
+
+    func testNextCheckLandsOnTheFollowingHour() {
+        let calendar = Calendar.current
+        let now = calendar.date(from: DateComponents(year: 2026, month: 11, day: 2, hour: 14, minute: 5, second: 30))!
+        let next = UpdateCheckPolicy.nextHourlyCheck(after: now, calendar: calendar)
+        XCTAssertEqual(calendar.component(.hour, from: next), 15)
+        XCTAssertEqual(calendar.component(.minute, from: next), 0)
+        XCTAssertEqual(calendar.component(.second, from: next), 0)
+        let onTheHour = calendar.date(from: DateComponents(year: 2026, month: 11, day: 2, hour: 15, minute: 0, second: 0))!
+        let afterExactHour = UpdateCheckPolicy.nextHourlyCheck(after: onTheHour, calendar: calendar)
+        XCTAssertEqual(calendar.component(.hour, from: afterExactHour), 16)
     }
 
     func testDeferredUpdateStaysQuietUntilANewerRelease() {
@@ -82,12 +104,6 @@ final class UpdateCheckPolicyTests: XCTestCase {
         XCTAssertTrue(UpdateCheckPolicy.shouldPresentUpdate(latest: "1.3.1", deferred: nil))
     }
 
-    func testPeriodicChecksAfterTwentyFourHours() {
-        let now = Date(timeIntervalSince1970: 1_000_000)
-        let stale = now.addingTimeInterval(-UpdateCheckPolicy.interval)
-        XCTAssertTrue(UpdateCheckPolicy.shouldCheck(enabled: true, reason: .periodic, lastCheck: stale, now: now))
-        XCTAssertEqual(UpdateCheckPolicy.interval, 86_400)
-    }
 }
 
 final class ReleaseNotesTests: XCTestCase {

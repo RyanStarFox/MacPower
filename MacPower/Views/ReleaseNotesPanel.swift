@@ -13,7 +13,10 @@ enum ReleaseNotesPanel {
         onPrimary: @escaping () -> Void = {},
         onAlternate: @escaping () -> Void = {},
         onLater: @escaping () -> Void = {},
-        install: UpdateInstallController? = nil
+        install: UpdateInstallController? = nil,
+        automaticTitle: String? = nil,
+        automaticOn: Bool = true,
+        onAutomatic: @escaping (Bool) -> Void = { _ in }
     ) {
         let dismiss = ReleaseNotesDismissBox()
         let hosting = NSHostingView(rootView: ReleaseNotesCard(
@@ -24,7 +27,10 @@ enum ReleaseNotesPanel {
             secondary: secondary,
             alternate: alternate,
             dismiss: dismiss,
-            install: install
+            install: install,
+            automaticTitle: automaticTitle,
+            automaticOn: automaticOn,
+            onAutomatic: onAutomatic
         ))
         let window = ReleaseNotesWindow(
             contentRect: NSRect(x: 0, y: 0, width: 460, height: 360),
@@ -125,6 +131,35 @@ private struct ReleaseNotesCard: View {
     let alternate: String?
     let dismiss: ReleaseNotesDismissBox
     let install: UpdateInstallController?
+    let automaticTitle: String?
+    @State private var automaticOn: Bool
+    let onAutomatic: (Bool) -> Void
+
+    init(
+        title: String,
+        message: String?,
+        items: [String],
+        primary: String,
+        secondary: String?,
+        alternate: String?,
+        dismiss: ReleaseNotesDismissBox,
+        install: UpdateInstallController?,
+        automaticTitle: String?,
+        automaticOn: Bool,
+        onAutomatic: @escaping (Bool) -> Void
+    ) {
+        self.title = title
+        self.message = message
+        self.items = items
+        self.primary = primary
+        self.secondary = secondary
+        self.alternate = alternate
+        self.dismiss = dismiss
+        self.install = install
+        self.automaticTitle = automaticTitle
+        self.onAutomatic = onAutomatic
+        _automaticOn = State(initialValue: automaticOn)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -137,6 +172,12 @@ private struct ReleaseNotesCard: View {
                     .font(.system(size: 12))
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
+            }
+            if let automaticTitle {
+                Toggle(automaticTitle, isOn: $automaticOn)
+                    .onChange(of: automaticOn) { _, enabled in
+                        onAutomatic(enabled)
+                    }
             }
             buttons
         }

@@ -62,33 +62,49 @@ struct GitHubLatestRelease: Equatable, Sendable {
 enum UpdateCheckReason: Sendable {
     /// App launch: always query GitHub if the setting is on.
     case launch
-    /// Background: at most once per `interval` while the app stays open.
+    /// Background: once at each clock hour while the app stays open.
     case periodic
     /// User turned the setting on: check immediately.
     case userEnabled
+    /// User asked from Settings. Runs even when automatic checks are off.
+    case manual
+}
+
+enum UpdateCheckResult: Equatable, Sendable {
+    case skipped
+    case failed
+    case current
+    case available(GitHubLatestRelease)
 }
 
 enum UpdateCheckPolicy {
-    static let interval: TimeInterval = 86_400
-
     static func shouldPresentUpdate(latest: String, deferred: String?) -> Bool {
         guard let deferred else { return true }
         return AppVersion.isNewer(latest, than: deferred)
+    }
+
+    /// The next :00 after `now`. A check that lands exactly on the hour waits for the following one.
+    static func nextHourlyCheck(after now: Date, calendar: Calendar = .current) -> Date {
+        let parts = calendar.dateComponents([.year, .month, .day, .hour], from: now)
+        let thisHour = calendar.date(from: parts) ?? now
+        return calendar.date(byAdding: .hour, value: 1, to: thisHour) ?? now.addingTimeInterval(3600)
     }
 
     static func shouldCheck(
         enabled: Bool,
         reason: UpdateCheckReason,
         lastCheck: Date?,
-        now: Date
+        now: Date,
+        calendar: Calendar = .current
     ) -> Bool {
+        if reason == .manual { return true }
         guard enabled else { return false }
         switch reason {
-        case .launch, .userEnabled:
+        case .launch, .userEnabled, .manual:
             return true
         case .periodic:
             guard let lastCheck else { return true }
-            return now.timeIntervalSince(lastCheck) >= interval
+            return !calendar.isDate(lastCheck, equalTo: now, toGranularity: .hour)
         }
     }
 }
@@ -132,14 +148,14 @@ final class UpdateChecker {
         enabled: Bool,
         reason: UpdateCheckReason,
         currentVersion: String
-    ) async -> GitHubLatestRelease? {
+    ) async -> UpdateCheckResult {
         guard UpdateCheckPolicy.shouldCheck(
             enabled: enabled,
             reason: reason,
             lastCheck: defaults.object(forKey: Keys.lastCheck) as? Date,
             now: now()
         ) else {
-            return nil
+            return .skipped
         }
         do {
             var request = URLRequest(url: Self.latestReleaseURL)
@@ -147,14 +163,14 @@ final class UpdateChecker {
             request.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
             let (data, response) = try await session.data(for: request)
             if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
-                return nil
+                return .failed
             }
             let release = try GitHubLatestRelease.decode(data)
             defaults.set(now(), forKey: Keys.lastCheck)
-            guard AppVersion.isNewer(release.tagName, than: currentVersion) else { return nil }
-            return release
+            guard AppVersion.isNewer(release.tagName, than: currentVersion) else { return .current }
+            return .available(release)
         } catch {
-            return nil
+            return .failed
         }
     }
 }

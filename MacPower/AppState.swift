@@ -305,21 +305,69 @@ final class AppState {
         }
     }
 
+    var isCheckingForUpdates = false
+
+    func setAutomaticUpdateChecking(_ enabled: Bool, checkNow: Bool) {
+        settings.automaticallyCheckForUpdates = enabled
+        if enabled {
+            startUpdateCheckLoop()
+            if checkNow {
+                checkForUpdates(reason: .userEnabled)
+            }
+        } else {
+            stopAutomaticUpdateChecks()
+        }
+    }
+
     func checkForUpdates(reason: UpdateCheckReason) {
         guard !Self.isRunningTests else { return }
+        if reason == .manual, isCheckingForUpdates { return }
         let enabled = settings.automaticallyCheckForUpdates
         let version = Self.marketingVersion
         let language = settings.language
+        if reason == .manual {
+            isCheckingForUpdates = true
+        }
         Task { [weak self] in
             guard let self else { return }
-            guard let release = await updateChecker.checkIfNeeded(
+            let result = await updateChecker.checkIfNeeded(
                 enabled: enabled,
                 reason: reason,
                 currentVersion: version
-            ) else { return }
-            let deferred = UserDefaults.standard.string(forKey: Self.deferredUpdateKey)
-            guard UpdateCheckPolicy.shouldPresentUpdate(latest: release.tagName, deferred: deferred) else { return }
-            presentUpdateAlert(release: release, currentVersion: version, language: language)
+            )
+            if reason == .manual {
+                isCheckingForUpdates = false
+            }
+            switch result {
+            case .skipped:
+                return
+            case .failed:
+                if reason == .manual {
+                    presentCheckNotice(
+                        title: Localization.string("update.check.failed", language: language),
+                        message: nil,
+                        language: language
+                    )
+                }
+            case .current:
+                if reason == .manual {
+                    presentCheckNotice(
+                        title: Localization.string("update.upToDate.title", language: language),
+                        message: Localization.string(
+                            "update.upToDate.message %@",
+                            language: language,
+                            version
+                        ),
+                        language: language
+                    )
+                }
+            case .available(let release):
+                if reason != .manual {
+                    let deferred = UserDefaults.standard.string(forKey: Self.deferredUpdateKey)
+                    guard UpdateCheckPolicy.shouldPresentUpdate(latest: release.tagName, deferred: deferred) else { return }
+                }
+                presentUpdateAlert(release: release, currentVersion: version, language: language)
+            }
         }
     }
 
@@ -327,10 +375,16 @@ final class AppState {
         if !launchedAtLogin {
             checkForUpdates(reason: .launch)
         }
+        startUpdateCheckLoop()
+    }
+
+    private func startUpdateCheckLoop() {
         updateCheckLoop?.cancel()
         updateCheckLoop = Task { [weak self] in
             while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(UpdateCheckPolicy.interval))
+                let next = UpdateCheckPolicy.nextHourlyCheck(after: Date())
+                let delay = max(1, next.timeIntervalSinceNow)
+                try? await Task.sleep(for: .seconds(delay))
                 guard !Task.isCancelled else { return }
                 self?.checkForUpdates(reason: .periodic)
             }
@@ -382,7 +436,21 @@ final class AppState {
             onPrimary: { NSWorkspace.shared.open(release.htmlURL) },
             onAlternate: { NSWorkspace.shared.open(UpdateChecker.giteeReleaseURL(tag: release.tagName)) },
             onLater: { UserDefaults.standard.set(release.tagName, forKey: Self.deferredUpdateKey) },
-            install: install
+            install: install,
+            automaticTitle: Localization.string("settings.updates.automatic", language: language),
+            automaticOn: settings.automaticallyCheckForUpdates,
+            onAutomatic: { [weak self] enabled in
+                self?.setAutomaticUpdateChecking(enabled, checkNow: false)
+            }
+        )
+    }
+
+    private func presentCheckNotice(title: String, message: String?, language: AppLanguage) {
+        ReleaseNotesPanel.present(
+            title: title,
+            message: message,
+            notes: "",
+            primary: Localization.string("update.whatsNew.ok", language: language)
         )
     }
 
