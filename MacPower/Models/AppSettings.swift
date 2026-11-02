@@ -1,25 +1,68 @@
 import Foundation
 import Observation
 
+enum PopoverBlock: String, CaseIterable, Identifiable, Codable, Sendable {
+    case rings
+    case flow
+    case topApps
+    case lowPower
+    case localIP
+    case batteryCycle
+    case settings
+
+    var id: String { rawValue }
+
+    var localizationKey: String {
+        switch self {
+        case .rings: "settings.popover.showRings"
+        case .flow: "settings.popover.showFlow"
+        case .topApps: "settings.popover.showTopApps"
+        case .lowPower: "settings.popover.showLowPower"
+        case .localIP: "settings.popover.showLocalIP"
+        case .batteryCycle: "settings.popover.showBatteryCycle"
+        case .settings: "settings.title"
+        }
+    }
+
+    var settingsHost: SettingsButtonHost? {
+        switch self {
+        case .rings: .rings
+        case .flow: .flow
+        case .topApps: .topApps
+        case .lowPower: .lowPower
+        case .localIP: .localIP
+        case .batteryCycle: .batteryCycle
+        case .settings: nil
+        }
+    }
+}
+
 @Observable
 final class AppSettings {
-    static let defaultRingOrder: [RingSlot] = [.battery, .cpu, .gpu, .memory, .disk, .download, .upload]
+    static let defaultRingOrder: [RingSlot] = [.battery, .cpu, .gpu, .memory, .disk, .download, .upload, .thermalState]
 
     private static func restoredRingOrder(from defaults: UserDefaults) -> [RingSlot] {
         let stored = defaults.stringArray(forKey: Keys.visibleRings)?.compactMap(RingSlot.init(rawValue:)) ?? []
         var seen = Set<RingSlot>()
         var order = stored.filter { seen.insert($0).inserted }
         if order.isEmpty {
-            return defaultRingOrder
-        }
-        guard defaults.bool(forKey: Keys.ringOrderMigrated) else {
+            order = defaultRingOrder
+        } else if !defaults.bool(forKey: Keys.ringOrderMigrated) {
             let showDownload = defaults.object(forKey: Keys.showDownloadSpeed) == nil
                 || defaults.bool(forKey: Keys.showDownloadSpeed)
             let showUpload = defaults.object(forKey: Keys.showUploadSpeed) == nil
                 || defaults.bool(forKey: Keys.showUploadSpeed)
             if showDownload, !order.contains(.download) { order.append(.download) }
             if showUpload, !order.contains(.upload) { order.append(.upload) }
-            return order
+        }
+        // One-shot: existing saved orders predate this ring, so show it once.
+        // A later hide is stored without the slot and is left alone.
+        if !defaults.bool(forKey: Keys.thermalStateRingMigrated) {
+            if !order.contains(.thermalState) {
+                order.append(.thermalState)
+            }
+            defaults.set(order.map(\.rawValue), forKey: Keys.visibleRings)
+            defaults.set(true, forKey: Keys.thermalStateRingMigrated)
         }
         return order
     }
@@ -54,9 +97,34 @@ final class AppSettings {
         static let showDownloadSpeed = "showDownloadSpeed"
         static let showUploadSpeed = "showUploadSpeed"
         static let ringOrderMigrated = "ringOrderMigrated"
+        static let thermalStateRingMigrated = "thermalStateRingMigrated"
         static let ringCatalog = "ringCatalog"
         static let showEnergyFlow = "showEnergyFlow"
-        static let menuBarRightClickAction = "menuBarRightClickAction"
+        static let showTopApps = "showTopApps"
+        static let showLowPower = "showLowPower"
+        static let lowPowerStrategy = "lowPowerStrategy"
+        static let lowPowerButtonLayout = "lowPowerButtonLayout"
+        static let lowPowerButtonVisibility = "lowPowerButtonVisibility"
+        static let showLocalIP = "showLocalIP"
+        static let showBatteryCycle = "showBatteryCycle"
+        static let batteryCapacityStyle = "batteryCapacityStyle"
+        static let ipScopes = "ipScopes"
+        static let ipFamilies = "ipFamilies"
+        static let popoverOrder = "popoverOrder"
+        static let topAppWindowMinutes = "topAppWindowMinutes"
+        static let topAppIntervalSeconds = "topAppIntervalSeconds"
+        static let topAppLimit = "topAppLimit"
+        static let topAppsChart = "topAppsChart"
+        static let downloadHalfKilobytes = "downloadHalfKilobytes"
+        static let uploadHalfKilobytes = "uploadHalfKilobytes"
+        static let temperatureHalfCelsius = "temperatureHalfCelsius"
+        static let thermalNominalPercent = "thermalNominalPercent"
+        static let thermalFairPercent = "thermalFairPercent"
+        static let thermalSeriousPercent = "thermalSeriousPercent"
+        static let thermalCriticalPercent = "thermalCriticalPercent"
+        static let settingsButtonPlacement = "settingsButtonPlacement"
+        static let settingsButtonHost = "settingsButtonHost"
+        static let showSettingsBlock = "showSettingsBlock"
         static let automaticallyCheckForUpdates = "automaticallyCheckForUpdates"
         static let language = "appLanguage"
         static let appleLanguages = "AppleLanguages"
@@ -70,6 +138,26 @@ final class AppSettings {
     /// Wired by `AppState` so we never need a polling snapshot watch.
     @ObservationIgnored
     var onMenuBarChromeChange: (() -> Void)?
+
+    /// Sampling window, interval, count, or the top-apps switch changed.
+    @ObservationIgnored
+    var onTopAppSamplingChange: (() -> Void)?
+
+    /// Local IP block visibility or which address kinds to show.
+    @ObservationIgnored
+    var onLocalIPChange: (() -> Void)?
+
+    static let defaultTopAppWindowMinutes = 3
+    static let defaultTopAppIntervalSeconds = 10
+    static let defaultTopAppLimit = 5
+    static let topAppWindowRange = 1...30
+    static let topAppIntervalRange = 5...120
+    static let topAppLimitRange = 1...12
+    static let halfSpeedRange = 64...102_400
+    static let defaultHalfSpeedKilobytes = 1024
+    static let temperatureHalfRange = 10...80
+    static let defaultTemperatureHalfCelsius = 30
+    static let thermalPercentRange = 0...100
 
     var iconOutlined: Bool {
         didSet {
@@ -196,7 +284,7 @@ final class AppSettings {
     }
 
     var showStatusRings: Bool {
-        didSet { store.set(showStatusRings, forKey: Keys.showStatusRings) }
+        didSet { commitPopoverVisibility(.rings, key: Keys.showStatusRings) }
     }
 
     /// When set, rings and the settings button split into two rows.
@@ -265,11 +353,278 @@ final class AppSettings {
     }
 
     var showEnergyFlow: Bool {
-        didSet { store.set(showEnergyFlow, forKey: Keys.showEnergyFlow) }
+        didSet { commitPopoverVisibility(.flow, key: Keys.showEnergyFlow) }
     }
 
-    var menuBarRightClickAction: MenuBarRightClickAction {
-        didSet { store.set(menuBarRightClickAction.rawValue, forKey: Keys.menuBarRightClickAction) }
+    var showTopApps: Bool {
+        didSet {
+            commitPopoverVisibility(.topApps, key: Keys.showTopApps) {
+                self.onTopAppSamplingChange?()
+            }
+        }
+    }
+
+    var showLowPower: Bool {
+        didSet { commitPopoverVisibility(.lowPower, key: Keys.showLowPower) }
+    }
+
+    var showBatteryCycle: Bool {
+        didSet { commitPopoverVisibility(.batteryCycle, key: Keys.showBatteryCycle) }
+    }
+
+    /// Percent, milliamp-hour ratio, or both, for the cycle block's capacity line.
+    var batteryCapacityStyle: BatteryCapacityStyle {
+        didSet { store.set(batteryCapacityStyle.rawValue, forKey: Keys.batteryCapacityStyle) }
+    }
+
+    /// Saved plug-in / battery policy. Nil until the user sets it or overrides the current mode.
+    var lowPowerStrategy: LowPowerPreset? {
+        didSet {
+            if let lowPowerStrategy {
+                store.set(lowPowerStrategy.rawValue, forKey: Keys.lowPowerStrategy)
+            } else {
+                store.removeObject(forKey: Keys.lowPowerStrategy)
+            }
+        }
+    }
+
+    /// Side by side when the labels fit, or always one button per row.
+    var lowPowerButtonLayout: LowPowerButtonLayout {
+        didSet { store.set(lowPowerButtonLayout.rawValue, forKey: Keys.lowPowerButtonLayout) }
+    }
+
+    /// Both energy-mode buttons, or exactly one of them.
+    var lowPowerButtonVisibility: LowPowerButtonVisibility {
+        didSet { store.set(lowPowerButtonVisibility.rawValue, forKey: Keys.lowPowerButtonVisibility) }
+    }
+
+    var showLocalIP: Bool {
+        didSet {
+            commitPopoverVisibility(.localIP, key: Keys.showLocalIP) {
+                self.onLocalIPChange?()
+            }
+        }
+    }
+
+    /// Which address kinds the IP block lists. More than one can be on.
+    var ipScopes: Set<IPAddressScope> {
+        didSet {
+            store.set(ipScopes.map(\.rawValue).sorted(), forKey: Keys.ipScopes)
+            onLocalIPChange?()
+        }
+    }
+
+    var ipFamilies: Set<IPAddressFamily> {
+        didSet {
+            store.set(ipFamilies.map(\.rawValue).sorted(), forKey: Keys.ipFamilies)
+            onLocalIPChange?()
+        }
+    }
+
+    var popoverOrder: [PopoverBlock] {
+        didSet { store.set(popoverOrder.map(\.rawValue), forKey: Keys.popoverOrder) }
+    }
+
+    var topAppWindowMinutes: Int {
+        didSet { storeClamped(\.topAppWindowMinutes, range: Self.topAppWindowRange, key: Keys.topAppWindowMinutes) }
+    }
+
+    var topAppIntervalSeconds: Int {
+        didSet { storeClamped(\.topAppIntervalSeconds, range: Self.topAppIntervalRange, key: Keys.topAppIntervalSeconds) }
+    }
+
+    var topAppLimit: Int {
+        didSet { storeClamped(\.topAppLimit, range: Self.topAppLimitRange, key: Keys.topAppLimit) }
+    }
+
+    /// List, horizontal bars, or vertical columns for the energy-impact block.
+    var topAppsChart: TopAppsChartStyle {
+        didSet { store.set(topAppsChart.rawValue, forKey: Keys.topAppsChart) }
+    }
+
+    /// Download rate that fills the ring to 50%.
+    var downloadHalfKilobytes: Int {
+        didSet { storeRingScale(\.downloadHalfKilobytes, range: Self.halfSpeedRange, key: Keys.downloadHalfKilobytes) }
+    }
+
+    /// Upload rate that fills the ring to 50%.
+    var uploadHalfKilobytes: Int {
+        didSet { storeRingScale(\.uploadHalfKilobytes, range: Self.halfSpeedRange, key: Keys.uploadHalfKilobytes) }
+    }
+
+    /// Battery temperature that fills the ring to 50%.
+    var temperatureHalfCelsius: Int {
+        didSet { storeRingScale(\.temperatureHalfCelsius, range: Self.temperatureHalfRange, key: Keys.temperatureHalfCelsius) }
+    }
+
+    var thermalNominalPercent: Int {
+        didSet { storeRingScale(\.thermalNominalPercent, range: Self.thermalPercentRange, key: Keys.thermalNominalPercent) }
+    }
+
+    var thermalFairPercent: Int {
+        didSet { storeRingScale(\.thermalFairPercent, range: Self.thermalPercentRange, key: Keys.thermalFairPercent) }
+    }
+
+    var thermalSeriousPercent: Int {
+        didSet { storeRingScale(\.thermalSeriousPercent, range: Self.thermalPercentRange, key: Keys.thermalSeriousPercent) }
+    }
+
+    var thermalCriticalPercent: Int {
+        didSet { storeRingScale(\.thermalCriticalPercent, range: Self.thermalPercentRange, key: Keys.thermalCriticalPercent) }
+    }
+
+    func movePopoverBlock(_ block: PopoverBlock, to target: PopoverBlock) {
+        guard block != target,
+              let from = popoverOrder.firstIndex(of: block),
+              let destination = popoverOrder.firstIndex(of: target)
+        else { return }
+        var items = popoverOrder
+        items.move(fromOffsets: IndexSet(integer: from), toOffset: destination > from ? destination + 1 : destination)
+        popoverOrder = items
+    }
+
+    func isPopoverBlockVisible(_ block: PopoverBlock) -> Bool {
+        switch block {
+        case .rings: showStatusRings
+        case .flow: showEnergyFlow
+        case .topApps: showTopApps
+        case .lowPower: showLowPower
+        case .localIP: showLocalIP
+        case .batteryCycle: showBatteryCycle
+        case .settings: showSettingsBlock
+        }
+    }
+
+    /// Hosts the settings picker may offer. Hidden blocks and the settings block are left out.
+    var visibleSettingsHosts: [SettingsButtonHost] {
+        popoverOrder.compactMap { block in
+            guard let host = block.settingsHost, isPopoverBlockVisible(block) else { return nil }
+            return host
+        }
+    }
+
+    /// True when this block is shown and it is the only one. Its toggle stays on.
+    func isSoleVisiblePopoverBlock(_ block: PopoverBlock) -> Bool {
+        isPopoverBlockVisible(block) && !popoverOrder.contains { $0 != block && isPopoverBlockVisible($0) }
+    }
+
+    private func commitPopoverVisibility(_ block: PopoverBlock, key: String, sideEffect: (() -> Void)? = nil) {
+        if !isPopoverBlockVisible(block), !popoverOrder.contains(where: isPopoverBlockVisible) {
+            revealPopoverBlock(block)
+            return
+        }
+        store.set(isPopoverBlockVisible(block), forKey: key)
+        sideEffect?()
+        keepSettingsButtonOffHiddenHost()
+    }
+
+    /// Stored panels with every block off come back with the first block in order (rings if the order is empty).
+    private func ensureOnePopoverBlockVisible() {
+        if popoverOrder.contains(where: isPopoverBlockVisible) { return }
+        let target = popoverOrder.first ?? .rings
+        revealPopoverBlock(target)
+        store.set(true, forKey: visibilityKey(for: target))
+    }
+
+    private func visibilityKey(for block: PopoverBlock) -> String {
+        switch block {
+        case .rings: Keys.showStatusRings
+        case .flow: Keys.showEnergyFlow
+        case .topApps: Keys.showTopApps
+        case .lowPower: Keys.showLowPower
+        case .localIP: Keys.showLocalIP
+        case .batteryCycle: Keys.showBatteryCycle
+        case .settings: Keys.showSettingsBlock
+        }
+    }
+
+    private func revealPopoverBlock(_ block: PopoverBlock) {
+        switch block {
+        case .rings: showStatusRings = true
+        case .flow: showEnergyFlow = true
+        case .topApps: showTopApps = true
+        case .lowPower: showLowPower = true
+        case .localIP: showLocalIP = true
+        case .batteryCycle: showBatteryCycle = true
+        case .settings: showSettingsBlock = true
+        }
+    }
+
+    /// A hidden host does not keep the button. Move forward through the panel order, then wrap once.
+    private func keepSettingsButtonOffHiddenHost() {
+        guard settingsButtonPlacement == .insideBlock else { return }
+        guard !isPopoverBlockVisible(settingsButtonHost.popoverBlock) else { return }
+        if let next = SettingsButtonHost.nextVisible(
+            after: settingsButtonHost,
+            order: popoverOrder,
+            isVisible: isPopoverBlockVisible
+        ) {
+            settingsButtonHost = next
+        } else {
+            settingsButtonPlacement = .ownBlock
+            if !showSettingsBlock {
+                showSettingsBlock = true
+            }
+        }
+    }
+
+    private func storeRingScale(_ keyPath: ReferenceWritableKeyPath<AppSettings, Int>, range: ClosedRange<Int>, key: String) {
+        let clamped = min(range.upperBound, max(range.lowerBound, self[keyPath: keyPath]))
+        if clamped != self[keyPath: keyPath] {
+            self[keyPath: keyPath] = clamped
+            return
+        }
+        store.set(clamped, forKey: key)
+    }
+
+    private func storeClamped(_ keyPath: ReferenceWritableKeyPath<AppSettings, Int>, range: ClosedRange<Int>, key: String) {
+        let clamped = min(range.upperBound, max(range.lowerBound, self[keyPath: keyPath]))
+        if clamped != self[keyPath: keyPath] {
+            self[keyPath: keyPath] = clamped
+            return
+        }
+        store.set(clamped, forKey: key)
+        onTopAppSamplingChange?()
+    }
+
+    private static func restoredPopoverOrder(from defaults: UserDefaults) -> [PopoverBlock] {
+        let stored = defaults.stringArray(forKey: Keys.popoverOrder)?.compactMap(PopoverBlock.init(rawValue:)) ?? []
+        var seen = Set<PopoverBlock>()
+        var order = stored.filter { seen.insert($0).inserted }
+        for block in PopoverBlock.allCases where !seen.contains(block) {
+            order.append(block)
+        }
+        return order
+    }
+
+    private static func clampedStoredInteger(
+        _ defaults: UserDefaults,
+        key: String,
+        fallback: Int,
+        range: ClosedRange<Int>
+    ) -> Int {
+        guard defaults.object(forKey: key) != nil else { return fallback }
+        return min(range.upperBound, max(range.lowerBound, defaults.integer(forKey: key)))
+    }
+
+    /// Ring cell unless the user picks another placement. Unknown stored values read as the ring cell.
+    var settingsButtonPlacement: SettingsButtonPlacement {
+        didSet {
+            store.set(settingsButtonPlacement.rawValue, forKey: Keys.settingsButtonPlacement)
+            if settingsButtonPlacement == .insideBlock {
+                keepSettingsButtonOffHiddenHost()
+            }
+        }
+    }
+
+    /// Host block used when the button sits inside an existing block.
+    var settingsButtonHost: SettingsButtonHost {
+        didSet { store.set(settingsButtonHost.rawValue, forKey: Keys.settingsButtonHost) }
+    }
+
+    /// Show or hide the standalone settings block in the panel list.
+    var showSettingsBlock: Bool {
+        didSet { commitPopoverVisibility(.settings, key: Keys.showSettingsBlock) }
     }
 
     var automaticallyCheckForUpdates: Bool {
@@ -455,8 +810,123 @@ final class AppSettings {
             showEnergyFlow = defaults.bool(forKey: Keys.showEnergyFlow)
         }
 
-        menuBarRightClickAction = MenuBarRightClickAction.resolved(
-            stored: defaults.string(forKey: Keys.menuBarRightClickAction)
+        if defaults.object(forKey: Keys.showTopApps) == nil {
+            showTopApps = true
+        } else {
+            showTopApps = defaults.bool(forKey: Keys.showTopApps)
+        }
+
+        if defaults.object(forKey: Keys.showLowPower) == nil {
+            showLowPower = true
+        } else {
+            showLowPower = defaults.bool(forKey: Keys.showLowPower)
+        }
+        lowPowerStrategy = defaults.string(forKey: Keys.lowPowerStrategy).flatMap(LowPowerPreset.init(rawValue:))
+        lowPowerButtonLayout = LowPowerButtonLayout.resolved(
+            stored: defaults.string(forKey: Keys.lowPowerButtonLayout)
+        )
+        lowPowerButtonVisibility = LowPowerButtonVisibility.resolved(
+            stored: defaults.string(forKey: Keys.lowPowerButtonVisibility)
+        )
+
+        if defaults.object(forKey: Keys.showLocalIP) == nil {
+            showLocalIP = true
+        } else {
+            showLocalIP = defaults.bool(forKey: Keys.showLocalIP)
+        }
+
+        if defaults.object(forKey: Keys.showBatteryCycle) == nil {
+            showBatteryCycle = true
+        } else {
+            showBatteryCycle = defaults.bool(forKey: Keys.showBatteryCycle)
+        }
+        if defaults.object(forKey: Keys.showSettingsBlock) == nil {
+            showSettingsBlock = true
+        } else {
+            showSettingsBlock = defaults.bool(forKey: Keys.showSettingsBlock)
+        }
+        batteryCapacityStyle = BatteryCapacityStyle.resolved(
+            stored: defaults.string(forKey: Keys.batteryCapacityStyle)
+        )
+        if defaults.object(forKey: Keys.ipScopes) == nil {
+            ipScopes = [.local]
+        } else {
+            ipScopes = Set(defaults.stringArray(forKey: Keys.ipScopes)?.compactMap(IPAddressScope.init(rawValue:)) ?? [])
+        }
+        if defaults.object(forKey: Keys.ipFamilies) == nil {
+            ipFamilies = [.ipv4, .ipv6]
+        } else {
+            ipFamilies = Set(defaults.stringArray(forKey: Keys.ipFamilies)?.compactMap(IPAddressFamily.init(rawValue:)) ?? [])
+        }
+
+        popoverOrder = Self.restoredPopoverOrder(from: defaults)
+        topAppWindowMinutes = Self.clampedStoredInteger(
+            defaults,
+            key: Keys.topAppWindowMinutes,
+            fallback: Self.defaultTopAppWindowMinutes,
+            range: Self.topAppWindowRange
+        )
+        topAppIntervalSeconds = Self.clampedStoredInteger(
+            defaults,
+            key: Keys.topAppIntervalSeconds,
+            fallback: Self.defaultTopAppIntervalSeconds,
+            range: Self.topAppIntervalRange
+        )
+        topAppLimit = Self.clampedStoredInteger(
+            defaults,
+            key: Keys.topAppLimit,
+            fallback: Self.defaultTopAppLimit,
+            range: Self.topAppLimitRange
+        )
+        topAppsChart = TopAppsChartStyle.resolved(stored: defaults.string(forKey: Keys.topAppsChart))
+        downloadHalfKilobytes = Self.clampedStoredInteger(
+            defaults,
+            key: Keys.downloadHalfKilobytes,
+            fallback: Self.defaultHalfSpeedKilobytes,
+            range: Self.halfSpeedRange
+        )
+        uploadHalfKilobytes = Self.clampedStoredInteger(
+            defaults,
+            key: Keys.uploadHalfKilobytes,
+            fallback: Self.defaultHalfSpeedKilobytes,
+            range: Self.halfSpeedRange
+        )
+        temperatureHalfCelsius = Self.clampedStoredInteger(
+            defaults,
+            key: Keys.temperatureHalfCelsius,
+            fallback: Self.defaultTemperatureHalfCelsius,
+            range: Self.temperatureHalfRange
+        )
+        thermalNominalPercent = Self.clampedStoredInteger(
+            defaults,
+            key: Keys.thermalNominalPercent,
+            fallback: 25,
+            range: Self.thermalPercentRange
+        )
+        thermalFairPercent = Self.clampedStoredInteger(
+            defaults,
+            key: Keys.thermalFairPercent,
+            fallback: 50,
+            range: Self.thermalPercentRange
+        )
+        thermalSeriousPercent = Self.clampedStoredInteger(
+            defaults,
+            key: Keys.thermalSeriousPercent,
+            fallback: 75,
+            range: Self.thermalPercentRange
+        )
+        thermalCriticalPercent = Self.clampedStoredInteger(
+            defaults,
+            key: Keys.thermalCriticalPercent,
+            fallback: 100,
+            range: Self.thermalPercentRange
+        )
+
+        settingsButtonPlacement = SettingsButtonPlacement.resolved(
+            stored: defaults.string(forKey: Keys.settingsButtonPlacement)
+        )
+        settingsButtonHost = SettingsButtonHost.resolved(
+            stored: defaults.string(forKey: Keys.settingsButtonHost)
         )
 
         if defaults.object(forKey: Keys.automaticallyCheckForUpdates) == nil {
@@ -475,9 +945,16 @@ final class AppSettings {
             motionFrameRate = EnergyMotionFrameRate.resolved(stored: defaults.integer(forKey: Keys.motionFrameRate))
         }
         language = AppLanguage.resolved(stored: defaults.string(forKey: Keys.language))
+        ensureOnePopoverBlockVisible()
+        keepSettingsButtonOffHiddenHost()
 
         store.set(resolvedMotion.rawValue, forKey: Keys.motionStyle)
-        store.set(menuBarRightClickAction.rawValue, forKey: Keys.menuBarRightClickAction)
+        store.set(settingsButtonPlacement.rawValue, forKey: Keys.settingsButtonPlacement)
+        store.set(settingsButtonHost.rawValue, forKey: Keys.settingsButtonHost)
+        store.set(showSettingsBlock, forKey: Keys.showSettingsBlock)
+        store.set(lowPowerButtonLayout.rawValue, forKey: Keys.lowPowerButtonLayout)
+        store.set(lowPowerButtonVisibility.rawValue, forKey: Keys.lowPowerButtonVisibility)
+        store.set(batteryCapacityStyle.rawValue, forKey: Keys.batteryCapacityStyle)
         store.set(MenuBarIconStyle.from(outlined: outlined, digits: digits).rawValue, forKey: Keys.iconStyle)
         store.set(outlined, forKey: Keys.iconOutlined)
         store.set(digits.rawValue, forKey: Keys.digitPlacement)

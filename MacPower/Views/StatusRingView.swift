@@ -59,7 +59,7 @@ struct StatusRingView: View {
                 .autoFittingCaption()
         }
         .frame(maxWidth: .infinity)
-        .onAppear { DispatchQueue.main.async { animateProgress = true } }
+        .onAppear { armProgressAnimation($animateProgress) }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(accessibilityValue ?? "\(accessibilityName) \(Int(clamped.rounded()))%"))
     }
@@ -144,15 +144,18 @@ struct SpeedPairRingView: View {
             }
             .frame(width: diameter, height: diameter)
 
-            VStack(spacing: 0) {
+            VStack(spacing: 1) {
                 Text("↓ \(downloadCaption)").autoFittingCaption(minimumScale: 0.7)
                 Text("↑ \(uploadCaption)").autoFittingCaption(minimumScale: 0.7)
             }
             .font(.system(size: 9, weight: .semibold, design: .rounded).monospacedDigit())
             .foregroundStyle(.primary)
+            // Two lines. A flexible text measurement can report one line, and the
+            // second line then draws over the time estimate under the rings.
+            .frame(height: 24, alignment: .top)
         }
-        .frame(maxWidth: .infinity)
-        .onAppear { DispatchQueue.main.async { animateProgress = true } }
+        .frame(maxWidth: .infinity, alignment: .top)
+        .onAppear { armProgressAnimation($animateProgress) }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(accessibilityValue))
     }
@@ -187,6 +190,17 @@ struct SpeedPairRingView: View {
                 .stroke(.ultraThinMaterial, style: StrokeStyle(lineWidth: lineWidth, lineCap: .butt))
                 .rotationEffect(.degrees(-90))
                 .frame(width: diameter - lineWidth, height: diameter - lineWidth)
+        }
+    }
+}
+
+private func armProgressAnimation(_ flag: Binding<Bool>) {
+    // One turn is not enough: the popover's second layout still moves the
+    // ring after the first appear. Arming .smooth on that frame eases the
+    // whole ring up into its slot. Wait until that placement has committed.
+    DispatchQueue.main.async {
+        DispatchQueue.main.async {
+            flag.wrappedValue = true
         }
     }
 }

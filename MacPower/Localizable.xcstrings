@@ -2557,6 +2557,230 @@
         }
       }
     },
+    "settings.lowPower.layout": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Anordnung" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Layout" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Disposición" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Disposition" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Disposizione" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "並び" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "배치" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Disposição" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Расположение" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "排列" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "排列" } }
+      }
+    },
+    "settings.lowPower.layout.fit": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Zwei in einer Zeile, wenn die Länge reicht" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Two per row when the length fits" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Dos en una fila si la longitud lo permite" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Deux par ligne si la longueur le permet" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Due per riga se la lunghezza lo consente" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "長さが足りれば二つを一行" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "길이가 되면 한 줄에 둘" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Dois por linha se o comprimento permitir" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Два в ряд, если длина позволяет" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "长度允许下两个一行" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "長度允許下兩個一行" } }
+      }
+    },
+    "settings.lowPower.layout.stack": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Immer eines pro Zeile" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Always one per row" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Siempre uno por fila" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Toujours un par ligne" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Sempre uno per riga" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "常に一つを一行" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "항상 한 줄에 하나" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Sempre um por linha" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Всегда по одному в ряд" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "永远一个一行" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "永遠一個一行" } }
+      }
+    },
+    "settings.lowPower.buttons": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Tasten" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Buttons" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Botones" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Boutons" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Pulsanti" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ボタン" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "버튼" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Botões" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Кнопки" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "按钮" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "按鈕" } }
+      }
+    },
+    "settings.lowPower.buttons.both": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Beide" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Both" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Ambos" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Les deux" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Entrambi" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "両方" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "둘 다" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Ambos" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Оба" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "都出现" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "都出現" } }
+      }
+    },
+    "settings.lowPower.buttons.strategy": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Nur Regel" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Rule only" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Solo regla" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Règle seule" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Solo regola" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "方針のみ" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "전략만" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Só a regra" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Только план" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "仅策略" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "僅策略" } }
+      }
+    },
+    "settings.lowPower.buttons.now": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Nur Niedrig" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Low only" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Solo baja" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Faible seul" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Solo bassa" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "低電力のみ" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "저전력만" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Só baixa" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Только экономия" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "仅低电量" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "僅低電量" } }
+      }
+    },
+    "settings.batteryCycle.format": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Kapazität" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Capacity" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Capacidad" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Capacité" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Capacità" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "容量" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "용량" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Capacidade" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Ёмкость" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "容量格式" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "容量格式" } }
+      }
+    },
+    "settings.batteryCycle.format.percent": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Prozent" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Percent" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Porcentaje" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Pourcentage" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Percentuale" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "パーセント" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "백분율" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Porcentagem" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Проценты" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "百分比" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "百分比" } }
+      }
+    },
+    "settings.batteryCycle.format.milliampHours": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "mAh" } },
+        "en": { "stringUnit": { "state": "translated", "value": "mAh" } },
+        "es": { "stringUnit": { "state": "translated", "value": "mAh" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "mAh" } },
+        "it": { "stringUnit": { "state": "translated", "value": "mAh" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "mAh" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "mAh" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "mAh" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "мА·ч" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "mAh" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "mAh" } }
+      }
+    },
+    "settings.batteryCycle.format.both": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Beides" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Both" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Ambos" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Les deux" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Entrambi" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "両方" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "둘 다" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Ambos" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Оба" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "两个都要" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "兩個都要" } }
+      }
+    },
+    "settings.tab.batteryCycle": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Zyklen" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Cycles" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Ciclos" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Cycles" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Cicli" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "サイクル" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "사이클" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Ciclos" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Циклы" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "电池循环" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "電池循環" } }
+      }
+    },
+    "settings.tab.localIP": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "IP-Adresse" } },
+        "en": { "stringUnit": { "state": "translated", "value": "IP Address" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Dirección IP" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Adresse IP" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Indirizzo IP" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "IP アドレス" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "IP 주소" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Endereço IP" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "IP-адрес" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "IP 地址" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "IP 位址" } }
+      }
+    },
+    "settings.tab.lowPower": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Modus" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Power" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Modo" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Mode" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Modo" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "省エネ" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "절전" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Modo" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Режим" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "能耗模式" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "能耗模式" } }
+      }
+    },
     "settings.motion.filaments": {
       "extractionState": "manual",
       "localizations": {
@@ -4117,6 +4341,182 @@
             "value": "Движение энергии"
           }
         }
+      }
+    },
+    "settings.popover.order": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Bereiche" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Panels" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Paneles" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Panneaux" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Pannelli" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "パネル" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "패널" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Painéis" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Панели" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "面板" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "面板" } }
+      }
+    },
+    "settings.tab.topApps": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Apps" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Apps" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Apps" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Apps" } },
+        "it": { "stringUnit": { "state": "translated", "value": "App" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "消費" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "소비" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Apps" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Топ" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "耗电" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "耗電" } }
+      }
+    },
+    "settings.topApps.chart": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Ansicht" } },
+        "en": { "stringUnit": { "state": "translated", "value": "View" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Vista" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Affichage" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Vista" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "表示" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "보기" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Visualização" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Вид" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "视图" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "檢視" } }
+      }
+    },
+    "settings.topApps.chart.list": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Liste" } },
+        "en": { "stringUnit": { "state": "translated", "value": "List" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Lista" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Liste" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Elenco" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "リスト" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "목록" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Lista" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Список" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "文字" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "文字" } }
+      }
+    },
+    "settings.topApps.chart.bars": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Balken" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Bar chart" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Barras" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Barres" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Barre" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "横棒" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "가로 막대" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Barras" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Полосы" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "条形图" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "橫條圖" } }
+      }
+    },
+    "settings.topApps.chart.columns": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Säulen" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Column chart" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Columnas" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Colonnes" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Colonne" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "縦棒" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "세로 막대" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Colunas" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Столбцы" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "柱状图" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "柱狀圖" } }
+      }
+    },
+    "settings.topApps.interval": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Abtastintervall" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Sample interval" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Intervalo de muestreo" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Intervalle d’échantillonnage" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Intervallo di campionamento" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "サンプリング間隔" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "샘플링 간격" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Intervalo de amostragem" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Интервал выборки" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "采样间隔" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "採樣間隔" } }
+      }
+    },
+    "settings.topApps.limit": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Angezeigte Apps" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Apps shown" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Apps mostradas" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Apps affichées" } },
+        "it": { "stringUnit": { "state": "translated", "value": "App mostrate" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "表示する数" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "표시 개수" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Apps exibidos" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Число приложений" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "显示个数" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "顯示個數" } }
+      }
+    },
+    "settings.topApps.minutes": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Min." } },
+        "en": { "stringUnit": { "state": "translated", "value": "min" } },
+        "es": { "stringUnit": { "state": "translated", "value": "min" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "min" } },
+        "it": { "stringUnit": { "state": "translated", "value": "min" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "分" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "분" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "min" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "мин" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "分钟" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "分鐘" } }
+      }
+    },
+    "settings.topApps.seconds": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Sek." } },
+        "en": { "stringUnit": { "state": "translated", "value": "sec" } },
+        "es": { "stringUnit": { "state": "translated", "value": "s" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "s" } },
+        "it": { "stringUnit": { "state": "translated", "value": "s" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "秒" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "초" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "s" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "с" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "秒" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "秒" } }
+      }
+    },
+    "settings.topApps.window": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Zeitfenster" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Sample window" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Ventana de muestreo" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Fenêtre d’échantillonnage" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Finestra di campionamento" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "サンプリング時間" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "샘플링 시간" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Janela de amostragem" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Окно выборки" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "采样时间" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "採樣時間" } }
       }
     },
     "settings.tab.about": {
@@ -11347,6 +11747,470 @@
         }
       }
     },
+    "popover.lowPower.alwaysPerformance": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Leistung" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Performance" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Rendimiento" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Performance" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Prestazioni" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "性能" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "성능" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Desempenho" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Производительность" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "性能" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "效能" } }
+      }
+    },
+    "popover.lowPower.alwaysSave": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Energiesparen" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Low Power" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Ahorro de energía" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Économie d’énergie" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Risparmio energetico" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "省エネ" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "절전" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Economia de energia" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Энергосбережение" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "节能" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "節能" } }
+      }
+    },
+    "popover.lowPower.failed": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Die Änderung wurde nicht übernommen. Der Energiesparmodus braucht ein Administratorpasswort." } },
+        "en": { "stringUnit": { "state": "translated", "value": "The change did not apply. Low Power Mode needs an administrator password." } },
+        "es": { "stringUnit": { "state": "translated", "value": "No se aplicó el cambio. El modo de bajo consumo necesita la contraseña de un administrador." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "La modification n’a pas été appliquée. Le mode économie d’énergie demande un mot de passe administrateur." } },
+        "it": { "stringUnit": { "state": "translated", "value": "La modifica non è stata applicata. Il risparmio energetico richiede la password di un amministratore." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "変更できませんでした。低電力モードの変更には管理者パスワードが必要です。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "변경되지 않았습니다. 저전력 모드를 바꾸려면 관리자 암호가 필요합니다." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "A alteração não foi aplicada. O modo de baixo consumo precisa da senha de um administrador." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Изменение не применилось. Для режима энергосбережения нужен пароль администратора." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "没有改成功。更改节能模式需要输入管理员密码。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "沒有改成功。更改節能模式需要輸入管理者密碼。" } }
+      }
+    },
+    "popover.lowPower.onlyBattery": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Nur bei Batterie sparen" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Low Power on battery" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Ahorro solo con batería" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Économie sur batterie" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Risparmio solo a batteria" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "電池使用時のみ省エネ" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "배터리일 때만 절전" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Economia só na bateria" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Экономия только от батареи" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "仅使用电池时节能" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "僅使用電池時節能" } }
+      }
+    },
+    "popover.lowPower.onlyPower": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Nur am Netz sparen" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Low Power when plugged in" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Ahorro solo con corriente" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Économie sur secteur" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Risparmio solo da rete" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "電源接続時のみ省エネ" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "전원 연결 시만 절전" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Economia só na tomada" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Экономия только от сети" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "仅接通电源时节能" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "僅接通電源時節能" } }
+      }
+    },
+    "popover.lowPower.reading": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Wird gelesen" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Reading" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Leyendo" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Lecture" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Lettura" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "読み取り中" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "읽는 중" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Lendo" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Чтение" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "正在读取" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "正在讀取" } }
+      }
+    },
+    "popover.lowPower.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Energiemodus" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Energy Mode" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Modo de energía" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Mode d’énergie" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Modalità energia" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "エネルギーモード" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "에너지 모드" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Modo de energia" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Режим энергии" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "能耗模式" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "能耗模式" } }
+      }
+    },
+    "popover.lowPower.now": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Niedrig" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Low" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Baja" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Faible" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Bassa" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "低電力" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "저전력" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Baixa" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Экономия" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "低电量" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "低電量" } }
+      }
+    },
+    "popover.lowPower.strategy": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Regel" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Rule" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Regla" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Règle" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Regola" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "方針" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "전략" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Regra" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "План" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "策略" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "策略" } }
+      }
+    },
+    "ip.family.ipv4": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "IPv4" } },
+        "en": { "stringUnit": { "state": "translated", "value": "IPv4" } },
+        "es": { "stringUnit": { "state": "translated", "value": "IPv4" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "IPv4" } },
+        "it": { "stringUnit": { "state": "translated", "value": "IPv4" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "IPv4" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "IPv4" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "IPv4" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "IPv4" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "IPv4" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "IPv4" } }
+      }
+    },
+    "ip.family.ipv6": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "IPv6" } },
+        "en": { "stringUnit": { "state": "translated", "value": "IPv6" } },
+        "es": { "stringUnit": { "state": "translated", "value": "IPv6" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "IPv6" } },
+        "it": { "stringUnit": { "state": "translated", "value": "IPv6" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "IPv6" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "IPv6" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "IPv6" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "IPv6" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "IPv6" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "IPv6" } }
+      }
+    },
+    "ip.scope.linkLocal": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Link-lokal" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Link-local" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Enlace local" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Lien local" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Link-local" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "リンクローカル" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "링크 로컬" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Link local" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Канальный" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "链路" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "鏈路" } }
+      }
+    },
+    "ip.scope.local": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Lokal" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Local" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Local" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Locale" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Locale" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ローカル" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "로컬" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Local" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Локальный" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "本地" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "本地" } }
+      }
+    },
+    "ip.scope.loopback": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Loopback" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Loopback" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Bucle local" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Boucle locale" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Loopback" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ループバック" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "루프백" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Loopback" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Петлевой" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "回环" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "迴環" } }
+      }
+    },
+    "ip.scope.public": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Öffentlich" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Public" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Pública" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Publique" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Pubblico" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "パブリック" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "공인" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Pública" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Публичный" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "公网" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "公網" } }
+      }
+    },
+    "popover.localIP.empty": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Nicht verbunden" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Not connected" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Sin conexión" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Non connecté" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Non connesso" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "未接続" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "연결되지 않음" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Sem conexão" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Нет подключения" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "未连接" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "未連線" } }
+      }
+    },
+    "popover.localIP.failed": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Nicht verfügbar" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Unavailable" } },
+        "es": { "stringUnit": { "state": "translated", "value": "No disponible" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Indisponible" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Non disponibile" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "取得できません" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "가져오지 못함" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Indisponível" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Недоступно" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "获取失败" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "取得失敗" } }
+      }
+    },
+    "popover.localIP.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Lokale IP" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Local IP" } },
+        "es": { "stringUnit": { "state": "translated", "value": "IP local" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "IP locale" } },
+        "it": { "stringUnit": { "state": "translated", "value": "IP locale" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ローカル IP" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "로컬 IP" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "IP local" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Локальный IP" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "本地 IP" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "本地 IP" } }
+      }
+    },
+    "settings.localIP.options": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "IP-Adresse" } },
+        "en": { "stringUnit": { "state": "translated", "value": "IP Address" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Dirección IP" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Adresse IP" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Indirizzo IP" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "IP アドレス" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "IP 주소" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Endereço IP" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "IP-адрес" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "IP 地址" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "IP 位址" } }
+      }
+    },
+    "settings.popover.showLocalIP": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "IP anzeigen" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Show IP" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Mostrar IP" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Afficher l’IP" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Mostra IP" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "IP を表示" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "IP 표시" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Mostrar IP" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Показывать IP" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "展示 IP" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "顯示 IP" } }
+      }
+    },
+    "popover.lowPower.short.alwaysPerformance": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Leistung" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Performance" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Rendimiento" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Performance" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Prestazioni" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "性能" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "성능" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Desempenho" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Производительность" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "性能" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "效能" } }
+      }
+    },
+    "popover.lowPower.short.alwaysSave": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Energiesparen" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Low Power" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Ahorro de energía" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Économie d’énergie" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Risparmio energetico" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "省エネ" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "절전" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Economia de energia" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Энергосбережение" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "节能" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "節能" } }
+      }
+    },
+    "popover.lowPower.short.onlyBattery": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Nur bei Batterie sparen" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Low Power on battery" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Ahorro solo con batería" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Économie sur batterie" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Risparmio solo a batteria" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "電池使用時のみ省エネ" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "배터리일 때만 절전" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Economia só na bateria" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Экономия только от батареи" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "仅电池节能" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "僅電池節能" } }
+      }
+    },
+    "popover.lowPower.short.onlyPower": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Nur am Netz sparen" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Low Power when plugged in" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Ahorro solo con corriente" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Économie sur secteur" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Risparmio solo da rete" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "電源接続時のみ省エネ" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "전원 연결 시만 절전" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Economia só na tomada" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Экономия только от сети" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "仅电源节能" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "僅電源節能" } }
+      }
+    },
+    "popover.topApps.empty": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "In diesem Intervall kein nennenswerter Energieverbrauch" } },
+        "en": { "stringUnit": { "state": "translated", "value": "No noticeable energy use in this interval" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Sin consumo de energía notable en este intervalo" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Pas de consommation notable sur cet intervalle" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Nessun consumo energetico evidente in questo intervallo" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "この間、目立ったエネルギー消費はありません" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "이 구간에는 눈에 띄는 에너지 사용이 없습니다" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Sem consumo de energia perceptível neste intervalo" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "За этот интервал заметного энергопотребления нет" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "这段时间没有明显的能耗" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "這段時間沒有明顯的能耗" } }
+      }
+    },
+    "popover.topApps.measuring": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Wird gemessen" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Measuring" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Midiendo" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Mesure" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Misurazione" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "計測中" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "측정 중" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Medindo" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Измерение" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "正在统计" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "正在統計" } }
+      }
+    },
+    "popover.topApps.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Energieauswirkung" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Energy Impact" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Impacto energético" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Impact énergétique" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Impatto energetico" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "エネルギー影響" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "에너지 영향" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Impacto de energia" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Влияние на энергию" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "对能耗的影响" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "對能耗的影響" } }
+      }
+    },
+    "settings.popover.showLowPower": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Energiesparmodus anzeigen" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Show Low Power Mode" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Mostrar modo de bajo consumo" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Afficher le mode économie d’énergie" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Mostra il risparmio energetico" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "低電力モードを表示" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "저전력 모드 표시" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Mostrar modo de baixo consumo" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Показывать режим энергосбережения" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "展示能耗模式" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "顯示能耗模式" } }
+      }
+    },
+    "settings.popover.showTopApps": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Höchsten Energieverbrauch anzeigen" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Show highest energy use" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Mostrar el mayor consumo de energía" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Afficher la plus forte consommation" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Mostra il consumo energetico più alto" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "エネルギー消費の高いアプリを表示" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "에너지 사용량이 높은 앱 표시" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Mostrar o maior consumo de energia" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Показывать наибольшее энергопотребление" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "展示能耗影响最高的应用" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "顯示能耗影響最高的 App" } }
+      }
+    },
     "settings.popover.showRings": {
       "extractionState": "manual",
       "localizations": {
@@ -13092,6 +13956,70 @@
         "ru": { "stringUnit": { "state": "translated", "value": "Список колец" } }
       }
     },
+    "settings.rings.half.download": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Download bei 50 %" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Download at 50%" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Descarga al 50 %" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Débit descendant à 50 %" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Download al 50%" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ダウンロード 50%" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "다운로드 50%" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Download em 50%" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Загрузка на 50%" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "下载 50%" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "下載 50%" } }
+      }
+    },
+    "settings.rings.half.upload": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Upload bei 50 %" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Upload at 50%" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Subida al 50 %" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Débit montant à 50 %" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Upload al 50%" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "アップロード 50%" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "업로드 50%" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Upload em 50%" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Отдача на 50%" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "上传 50%" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "上傳 50%" } }
+      }
+    },
+    "settings.rings.scale": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Skala" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Scale" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Escala" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Échelle" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Scala" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "目盛り" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "눈금" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Escala" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Шкала" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "刻度" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "刻度" } }
+      }
+    },
+    "settings.rings.half.temperature": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Temperatur bei 50 %" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Temperature at 50%" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Temperatura al 50 %" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Température à 50 %" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Temperatura al 50%" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "温度 50%" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "온도 50%" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Temperatura em 50%" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Температура на 50%" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "温度 50%" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "溫度 50%" } }
+      }
+    },
     "settings.rings.twoRows": {
       "extractionState": "manual",
       "localizations": {
@@ -13225,6 +14153,838 @@
             "value": "Обмен"
           }
         }
+      }
+    },
+    "popover.batteryCycle.capacity": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Maximale Kapazität" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Maximum Capacity" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Capacidad máxima" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Capacité maximale" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Capacità massima" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "最大容量" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "최대 용량" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Capacidade máxima" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Максимальная ёмкость" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "最大容量" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "最大容量" } }
+      }
+    },
+    "popover.batteryCycle.cycles": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Ladezyklen" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Cycle Count" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Número de ciclos" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Nombre de cycles" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Numero di cicli" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "サイクル数" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "사이클 수" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Contagem de ciclos" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Число циклов" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "循环次数" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "循環次數" } }
+      }
+    },
+    "popover.batteryCycle.empty": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Kein Akku" } },
+        "en": { "stringUnit": { "state": "translated", "value": "No battery" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Sin batería" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Pas de batterie" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Nessuna batteria" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "バッテリーなし" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "배터리 없음" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Sem bateria" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Нет аккумулятора" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "没有电池" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "沒有電池" } }
+      }
+    },
+    "popover.batteryCycle.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Akkuzyklen" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Battery Cycles" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Ciclos de la batería" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Cycles de batterie" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Cicli della batteria" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "バッテリーサイクル" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "배터리 사이클" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Ciclos da bateria" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Циклы аккумулятора" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "电池循环" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "電池循環" } }
+      }
+    },
+    "settings.popover.showBatteryCycle": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Akkuzyklen" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Battery Cycles" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Ciclos de la batería" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Cycles de batterie" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Cicli della batteria" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "バッテリーサイクル" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "배터리 사이클" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Ciclos da bateria" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Циклы аккумулятора" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "电池循环" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "電池循環" } }
+      }
+    },
+    "settings.rings.batteryTemperature": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Akkutemperatur" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Battery Temperature" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Temperatura de la batería" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Température de la batterie" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Temperatura della batteria" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "バッテリー温度" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "배터리 온도" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Temperatura da bateria" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Температура аккумулятора" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "电池温度" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "電池溫度" } }
+      }
+    },
+    "settings.rings.thermalState": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Wärmestatus" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Thermal State" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Estado térmico" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "État thermique" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Stato termico" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "熱状態" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "열 상태" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Estado térmico" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Тепловой статус" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "热状态" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "熱狀態" } }
+      }
+    },
+    "ring.thermal.nominal": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Normal" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Nominal" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Normal" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Normal" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Normale" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "正常" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "정상" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Normal" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Норма" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "正常" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "正常" } }
+      }
+    },
+    "ring.thermal.fair": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Erhöht" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Fair" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Elevado" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Élevé" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Elevato" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "高め" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "높음" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Elevado" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Повышен" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "偏高" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "偏高" } }
+      }
+    },
+    "ring.thermal.serious": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Ernst" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Serious" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Grave" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Grave" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Grave" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "深刻" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "심각" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Grave" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Серьёзно" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "严重" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "嚴重" } }
+      }
+    },
+    "ring.thermal.critical": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Kritisch" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Critical" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Crítico" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Critique" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Critico" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "危険" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "위험" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Crítico" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Критично" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "危急" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "危急" } }
+      }
+    },
+    "settings.button.placement": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Position der Einstellungen-Schaltfläche" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Settings button placement" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Ubicación del botón de ajustes" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Emplacement du bouton Réglages" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Posizione del pulsante Impostazioni" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "設定ボタンの位置" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "설정 버튼 위치" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Posição do botão de ajustes" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Расположение кнопки настроек" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "设置按钮出现位置" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "設定按鈕出現位置" } }
+      }
+    },
+    "settings.button.ownBlock": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Eigener Block" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Its own block" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Bloque propio" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Bloc séparé" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Blocco dedicato" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "独立したブロック" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "별도의 블록" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Bloco próprio" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Отдельный блок" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "单独一个区块" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "單獨一個區塊" } }
+      }
+    },
+    "settings.button.insideBlock": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "In einem Block" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Inside a block" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Dentro de un bloque" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Dans un bloc" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Dentro un blocco" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "既存のブロック内" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "기존 블록 안" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Dentro de um bloco" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Внутри блока" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "出现在某个区块里" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "出現在某個區塊裡" } }
+      }
+    },
+    "settings.button.rightClickOnly": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Nur beim Rechtsklick" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Only when right-clicking the icon" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Solo al hacer clic derecho" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Uniquement au clic droit" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Solo con il clic destro" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "右クリック時のみ" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "오른쪽 클릭 때만" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Somente no clique direito" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Только по правому клику" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "仅右键图标时出现" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "僅右鍵圖示時出現" } }
+      }
+    },
+    "settings.button.host": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Block" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Host block" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Bloque" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Bloc hôte" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Blocco" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "表示するブロック" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "호스트 블록" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Bloco" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Блок" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "所在区块" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "所在區塊" } }
+      }
+    },
+    "menu.openSettings": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Einstellungen öffnen" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Open Settings" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Abrir ajustes" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Ouvrir les réglages" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Apri Impostazioni" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "設定を開く" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "설정 열기" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Abrir Ajustes" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Открыть настройки" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "打开设置" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "打開設定" } }
+      }
+    },
+    "welcome.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Willkommen bei MacPower" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Welcome to MacPower" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Te damos la bienvenida a MacPower" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Bienvenue dans MacPower" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Benvenuto in MacPower" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "MacPower へようこそ" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "MacPower에 오신 것을 환영합니다" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Bem-vindo ao MacPower" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Добро пожаловать в MacPower" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "欢迎使用 MacPower" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "歡迎使用 MacPower" } }
+      }
+    },
+    "welcome.subtitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "MacPower sitzt in der Menüleiste, nicht im Dock. Schalte das Symbol ein, danach geht alles von dort aus." } },
+        "en": { "stringUnit": { "state": "translated", "value": "MacPower lives in the menu bar, not the Dock. Turn the icon on, then everything starts from there." } },
+        "es": { "stringUnit": { "state": "translated", "value": "MacPower vive en la barra de menús, no en el Dock. Activa el icono y, a partir de ahí, todo empieza en él." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "MacPower reste dans la barre des menus, pas dans le Dock. Activez l’icône, puis tout se passe depuis là." } },
+        "it": { "stringUnit": { "state": "translated", "value": "MacPower sta nella barra dei menu, non nel Dock. Attiva l’icona: da lì si fa tutto." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "MacPower は Dock ではなくメニューバーにあります。アイコンをオンにすれば、そこからすべて操作できます。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "MacPower는 Dock이 아니라 메뉴 막대에 있습니다. 아이콘을 켜 두면 이후에는 거기서 시작합니다." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "O MacPower fica na barra de menus, não no Dock. Ative o ícone e, depois disso, tudo começa por ele." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "MacPower живёт в строке меню, а не в Dock. Включите значок — дальше всё начинается оттуда." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "MacPower 待在菜单栏里，不会出现在程序坞。先把图标打开，以后就从这里进出。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "MacPower 待在選單列裡，不會出現在程式塢。先把圖示打開，之後就從這裡進出。" } }
+      }
+    },
+    "welcome.preview.icon": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "MacPower" } },
+        "en": { "stringUnit": { "state": "translated", "value": "MacPower" } },
+        "es": { "stringUnit": { "state": "translated", "value": "MacPower" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "MacPower" } },
+        "it": { "stringUnit": { "state": "translated", "value": "MacPower" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "MacPower" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "MacPower" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "MacPower" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "MacPower" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "菜单栏图标" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "選單列圖示" } }
+      }
+    },
+    "welcome.icon.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Menüleistensymbol einschalten" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Turn on the menu bar icon" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Activar el icono de la barra de menús" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Activer l’icône de la barre des menus" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Attiva l’icona nella barra dei menu" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "メニューバーのアイコンをオンにする" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "메뉴 막대 아이콘 켜기" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Ativar o ícone da barra de menus" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Включите значок в строке меню" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "打开菜单栏图标" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "打開選單列圖示" } }
+      }
+    },
+    "welcome.icon.body": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Öffne Systemeinstellungen → Menüleiste und schalte MacPower unter „In Menüleiste erlauben“ ein. Ist der Schalter aus, bleibt das Symbol verborgen." } },
+        "en": { "stringUnit": { "state": "translated", "value": "Open System Settings → Menu Bar, and switch on MacPower under “Allow in the Menu Bar”. While that switch is off, the icon stays hidden." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Abre Ajustes del Sistema → Barra de menús y activa MacPower en «Permitir en la barra de menús». Si está desactivado, el icono no aparece." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Ouvrez Réglages Système → Barre des menus, puis activez MacPower sous « Autoriser dans la barre des menus ». Si l’interrupteur est coupé, l’icône reste cachée." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Apri Impostazioni di Sistema → Barra dei menu e attiva MacPower in «Consenti nella barra dei menu». Se l’interruttore è spento, l’icona non compare." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "「システム設定」→「メニューバー」を開き、「メニューバーに追加することを許可」で MacPower をオンにしてください。オフのあいだ、アイコンは表示されません。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "시스템 설정 → 메뉴 막대에서 «메뉴 막대에서 허용»의 MacPower를 켜세요. 꺼져 있으면 아이콘이 나타나지 않습니다." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Abra Ajustes do Sistema → Barra de Menus e ative o MacPower em “Permitir na Barra de Menus”. Com o interruptor desligado, o ícone não aparece." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Откройте «Системные настройки» → «Строка меню» и включите MacPower в разделе «Разрешить в строке меню». Пока переключатель выключен, значка нет." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "打开「系统设置 → 菜单栏」，在「允许在菜单栏显示」里打开 MacPower。这一项关掉时，图标不会出现。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "打開「系統設定 → 選單列」，在「在選單列中允許」裡打開 MacPower。這一項關掉時，圖示不會出現。" } }
+      }
+    },
+    "welcome.icon.button": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Menüleisten-Einstellungen öffnen" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Open Menu Bar settings" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Abrir los ajustes de la barra de menús" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Ouvrir les réglages de la barre des menus" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Apri le impostazioni della barra dei menu" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "「メニューバー」設定を開く" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "메뉴 막대 설정 열기" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Abrir os ajustes da Barra de Menus" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Открыть настройки строки меню" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "打开「菜单栏」设置" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "打開「選單列」設定" } }
+      }
+    },
+    "welcome.menu.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Symbol rechtsklicken" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Right-click the icon" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Clic derecho en el icono" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Clic droit sur l’icône" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Fai clic destro sull’icona" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "アイコンを右クリック" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "아이콘 우클릭" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Clique com o botão direito no ícone" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Щёлкните значок правой кнопкой" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "右键图标" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "右鍵圖示" } }
+      }
+    },
+    "welcome.menu.body": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Ein Rechtsklick auf das Menüleistensymbol öffnet die Einstellungen oder beendet MacPower. Ein Klick öffnet die Batterieanzeige." } },
+        "en": { "stringUnit": { "state": "translated", "value": "Right-click the menu bar icon to open Settings or quit MacPower. Click it to open the battery panel." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Un clic derecho abre los ajustes o sale de MacPower. Un clic abre el panel de la batería." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Un clic droit sur l’icône ouvre les réglages ou quitte MacPower. Un clic ouvre le panneau de batterie." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Un clic destro apre le impostazioni o esce da MacPower. Un clic apre il pannello della batteria." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "メニューバーのアイコンを右クリックすると、設定を開くか MacPower を終了できます。左クリックで電池パネルが開きます。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "메뉴 막대 아이콘을 우클릭하면 설정을 열거나 MacPower를 종료할 수 있습니다. 클릭하면 배터리 패널이 열립니다." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "O clique com o botão direito abre os Ajustes ou encerra o MacPower. O clique abre o painel da bateria." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Правый щелчок открывает настройки или завершает MacPower. Обычный щелчок открывает панель батареи." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "右键菜单栏图标可以打开设置，也可以退出 MacPower。左键用来打开电量面板。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "右鍵選單列圖示可以打開設定，也可以結束 MacPower。左鍵用來打開電量面板。" } }
+      }
+    },
+    "welcome.done": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Verstanden" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Continue" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Entendido" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Continuer" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Ho capito" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "はじめる" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "알겠습니다" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Entendi" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Понятно" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "知道了" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "知道了" } }
+      }
+    },
+    "settings.tab.tutorial": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Anleitung" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Tutorial" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Tutorial" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Tutoriel" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Tutorial" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "チュートリアル" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "사용법" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Tutorial" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Учебник" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "教程" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "教程" } }
+      }
+    },
+    "tutorial.page.start": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Start" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Start" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Inicio" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Début" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Inizio" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "はじめに" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "시작" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Início" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Старт" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "开始" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "開始" } }
+      }
+    },
+    "tutorial.page.network": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "IP & Zyklen" } },
+        "en": { "stringUnit": { "state": "translated", "value": "IP & cycles" } },
+        "es": { "stringUnit": { "state": "translated", "value": "IP y ciclos" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "IP et cycles" } },
+        "it": { "stringUnit": { "state": "translated", "value": "IP e cicli" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "IP とサイクル" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "IP와 사이클" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "IP e ciclos" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "IP и циклы" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "IP 与循环" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "IP 與循環" } }
+      }
+    },
+    "tutorial.menuBar.body": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Öffne Menü in der Seitenleiste. Farbvorlage wählt eine Palette, oder du fügst Farbbereiche hinzu und stellst die Farben selbst ein. Rahmen wechselt zwischen Ohne und Mit Rahmen. Prozent kann Aus, Innen oder Daneben sein. Ladesymbol anzeigen setzt beim Laden einen Blitz auf das Symbol." } },
+        "en": { "stringUnit": { "state": "translated", "value": "Open Menu in the sidebar. Color preset picks a palette, or you add bands and set the colors yourself. Border switches between None and Outline. Percentage can be Hidden, Inside, or Beside. Show charging mark puts a bolt on the icon while charging." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Abre Menús en la barra lateral. Ajuste de color elige una paleta, o añades bandas y pones tú los colores. Contorno cambia entre Ninguno y Con contorno. Porcentaje puede ser Oculto, Dentro o Al lado. Mostrar marca de carga pone un rayo en el icono mientras carga." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Ouvre Menus dans la barre latérale. Préréglage de couleur choisit une palette, ou tu ajoutes des bandes et règles les couleurs. Contour passe de Aucun à Oui. Pourcentage peut être Masqué, Intérieur ou À côté. Afficher le symbole de charge met un éclair sur l’icône pendant la charge." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Apri Menu nella barra laterale. Preimpostazione colore sceglie una tavolozza, oppure aggiungi fasce e imposti i colori. Contorno passa tra Nessuno e Con contorno. Percentuale può essere Nascosto, Dentro o Accanto. Mostra il simbolo di carica mette un fulmine sull’icona durante la carica." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "サイドバーの「メニュー」を開きます。色のプリセットで一式を選ぶか、帯を足して自分で色を決めます。枠線は「なし」と「あり」。数字の位置は「非表示」「内側」「横」です。「充電マークを表示」をオンにすると、充電中のアイコンに稲妻が出ます。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "사이드바에서 메뉴를 엽니다. 색상 프리셋으로 팔레트를 고르거나, 구간을 추가해 색을 직접 맞춥니다. 테두리는 없음과 있음입니다. 숫자 위치는 숨김, 배터리 안, 옆입니다. 충전 표시 보이기를 켜면 충전 중 아이콘에 번개가 나타납니다." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Abra Menus na barra lateral. Predefinição de cor escolhe uma paleta, ou você adiciona faixas e define as cores. Contorno alterna entre Nenhum e Com contorno. Porcentagem pode ser Oculto, Dentro ou Ao lado. Mostrar indicador de carga coloca um raio no ícone enquanto carrega." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Откройте Меню на боковой панели. Цветовой пресет выбирает палитру, либо вы добавляете полосы и задаёте цвета сами. Контур переключается между Нет и С контуром. Проценты могут быть Скрыть, Внутри или Сбоку. Показывать знак зарядки ставит молнию на значок во время зарядки." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "在侧边栏打开「菜单栏」。变色预设用来选一套颜色，也可以自己加色带并调颜色。边框在「无边框」和「有边框」之间切换。数字位置可以是「不显示」「电池内」或「旁注」。打开「显示充电标志」后，充电时图标上会出现闪电。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "在側邊欄打開「選單列」。變色預設用來選一套顏色，也可以自己加色帶並調顏色。邊框在「無邊框」和「有邊框」之間切換。數字位置可以是「不顯示」「電池內」或「旁註」。打開「顯示充電標誌」後，充電時圖示上會出現閃電。" } }
+      }
+    },
+    "tutorial.menuBar.current": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Dein Symbol" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Your icon" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Tu icono" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Votre icône" } },
+        "it": { "stringUnit": { "state": "translated", "value": "La tua icona" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "いまのアイコン" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "현재 아이콘" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Seu ícone" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Ваш значок" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "你现在的图标" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "你現在的圖示" } }
+      }
+    },
+    "tutorial.rings.rows": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Der Griff links zieht die Reihenfolge, der Schalter blendet den Ring ein oder aus. Zwei Reihen verteilt die Ringe auf zwei Zeilen." } },
+        "en": { "stringUnit": { "state": "translated", "value": "The grip on the left drags the order, and the switch shows or hides that ring. Two rows splits the rings onto two lines." } },
+        "es": { "stringUnit": { "state": "translated", "value": "El asa de la izquierda arrastra el orden, y el interruptor muestra u oculta ese anillo. Dos filas reparte los anillos en dos líneas." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "La poignée à gauche fait glisser l’ordre, et l’interrupteur affiche ou masque l’anneau. Deux rangées répartit les anneaux sur deux lignes." } },
+        "it": { "stringUnit": { "state": "translated", "value": "La presa a sinistra trascina l’ordine, e l’interruttore mostra o nasconde l’anello. Due righe divide gli anelli su due linee." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "行の左にあるグリップで並べ替え、スイッチでそのリングを出します。「2行にする」を開くと、リングは二段になります。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "줄 왼쪽 손잡이로 순서를 끌고, 스위치로 그 링을 켜거나 끕니다. 두 줄로를 켜면 링이 두 줄로 나뉩니다." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "A alça à esquerda arrasta a ordem, e o interruptor mostra ou oculta o anel. Duas linhas reparte os anéis em duas linhas." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Ручка слева перетаскивает порядок, а переключатель показывает или скрывает кольцо. Два ряда раскладывает кольца в две строки." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "每行左边的握把用来拖动排序，开关决定这一项出不出现。打开「分成两行」后，圆环会排成两排。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "每行左邊的握把用來拖動排序，開關決定這一項出不出現。打開「分成兩行」後，圓環會排成兩排。" } }
+      }
+    },
+    "tutorial.rings.colors": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Farbvorlage ändert die Farben der Ringe. Akku, Tempo und Temperatur lassen sich auch getrennt einstellen." } },
+        "en": { "stringUnit": { "state": "translated", "value": "Color preset changes the ring colors. Battery, speed, and temperature can also be set separately." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Ajuste de color cambia los colores de los anillos. Batería, velocidad y temperatura también se pueden ajustar por separado." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Préréglage de couleur change les couleurs des anneaux. Batterie, débit et température se règlent aussi séparément." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Preimpostazione colore cambia i colori degli anelli. Batteria, velocità e temperatura si possono regolare anche separatamente." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "色のプリセットでリングの色を変えます。バッテリー、速度、温度は分けて調整することもできます。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "색상 프리셋으로 링 색을 바꿉니다. 배터리, 속도, 온도는 따로 맞출 수도 있습니다." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Predefinição de cor muda as cores dos anéis. Bateria, velocidade e temperatura também podem ser ajustadas separadamente." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Цветовой пресет меняет цвета колец. Батарею, скорость и температуру можно задать по отдельности." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "变色预设用来改圆环的颜色。电量、速度和温度也可以分开调。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "變色預設用來改圓環的顏色。電量、速度和溫度也可以分開調。" } }
+      }
+    },
+    "tutorial.rings.scale": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Download, Upload, Up/Down und Akkutemperatur gehen von 0 bis unendlich, der Ring nur von 0 bis 100. Erst wenn feststeht, welche Zahl 50 % ist, ist die Zuordnung bestimmt." } },
+        "en": { "stringUnit": { "state": "translated", "value": "Download, Upload, Up/Down, and Battery Temperature run from 0 to infinity, while the ring only runs from 0 to 100. Setting which number is 50% is what fixes that mapping." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Descarga, Subida, Subida/Bajada y Temperatura van de 0 a infinito, y el anillo solo de 0 a 100. Hay que fijar qué número es el 50 % para determinar esa correspondencia." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Téléchargement, Envoi, Débit et Température vont de 0 à l’infini, l’anneau seulement de 0 à 100. Il faut choisir quel nombre vaut 50 % pour fixer cette correspondance." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Download, Upload, Invio/Ricezione e Temperatura vanno da 0 a infinito, l’anello solo da 0 a 100. Bisogna stabilire quale numero è il 50% per fissare questa corrispondenza." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ダウンロード、アップロード、送受信、バッテリー温度は 0 から無限大、リングは 0 から 100 です。50% がどの数字かを決めて、この対応を定めます。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "다운로드, 업로드, 송수신, 배터리 온도는 0에서 무한대이고, 링은 0에서 100입니다. 50%가 어느 숫자인지 정해야 이 대응이 정해집니다." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Download, Upload, Envio/Recebimento e Temperatura vão de 0 ao infinito, e o anel só de 0 a 100. É preciso definir qual número é 50% para determinar essa correspondência." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Загрузка, Отдача, Обмен и Температура идут от 0 до бесконечности, а кольцо только от 0 до 100. Нужно задать, какое число соответствует 50%, чтобы определить это соответствие." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "下载、上传、上传下载和电池温度是 0 到正无穷，圆环是 0 到 100，所以要规定 50% 对应哪一个数字，才能确定 0 到正无穷和 0 到 100 的对应关系。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "下載、上傳、上傳下載和電池溫度是 0 到正無窮，圓環是 0 到 100，所以要規定 50% 對應哪一個數字，才能確定 0 到正無窮和 0 到 100 的對應關係。" } }
+      }
+    },
+    "tutorial.rings.thermal": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Das System liefert keinen fortlaufenden Prozentwert für den Wärmestatus, nur vier Stufen: Normal, Erhöht, Ernst und Kritisch. Wie viel des Rings jede Stufe füllt, legst du selbst fest. Voreingestellt sind 25 %, 50 %, 75 % und 100 %." } },
+        "en": { "stringUnit": { "state": "translated", "value": "The system does not report a continuous thermal percentage. It only provides four levels: Nominal, Fair, Serious, and Critical. You choose how much of the ring each level fills. The defaults are 25%, 50%, 75%, and 100%." } },
+        "es": { "stringUnit": { "state": "translated", "value": "El sistema no da un porcentaje continuo del estado térmico. Solo ofrece cuatro niveles: Normal, Elevado, Grave y Crítico. Tú decides cuánto del anillo ocupa cada nivel. Por defecto son 25 %, 50 %, 75 % y 100 %." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Le système ne donne pas un pourcentage continu pour l’état thermique. Il ne fournit que quatre niveaux : Normal, Élevé, Grave et Critique. Tu choisis la part de l’anneau pour chaque niveau. Par défaut : 25 %, 50 %, 75 % et 100 %." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Il sistema non fornisce una percentuale continua per lo stato termico. Offre solo quattro livelli: Normale, Elevato, Grave e Critico. Decidi tu quanta parte dell’anello occupa ciascun livello. I valori predefiniti sono 25%, 50%, 75% e 100%." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "システムは熱状態の連続した割合を渡しません。正常、高め、深刻、危険の四段階だけです。各段階がリングのどれだけを占めるかは自分で決めます。初期値は 25%、50%、75%、100% です。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "시스템은 열 상태의 연속된 백분율을 주지 않습니다. 정상, 높음, 심각, 위험 네 단계만 제공합니다. 각 단계가 링의 얼마를 채울지는 직접 정합니다. 기본값은 25%, 50%, 75%, 100%입니다." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "O sistema não informa uma porcentagem contínua do estado térmico. Ele só oferece quatro níveis: Normal, Elevado, Grave e Crítico. Você escolhe quanto do anel cada nível ocupa. O padrão é 25%, 50%, 75% e 100%." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Система не сообщает непрерывный процент теплового состояния. Она даёт только четыре уровня: Норма, Повышен, Серьёзно и Критично. Вы сами задаёте, какую часть кольца занимает каждый уровень. По умолчанию это 25%, 50%, 75% и 100%." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "系统没有给出连续的热状态百分比，只提供四个档位：正常、偏高、严重、危急。每一档占圆环的多少要自己定。默认是 25%、50%、75%、100%。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "系統沒有給出連續的熱狀態百分比，只提供四個檔位：正常、偏高、嚴重、危急。每一檔占圓環的多少要自己定。預設是 25%、50%、75%、100%。" } }
+      }
+    },
+    "tutorial.panel.arrow": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Eingeschaltet zeigt der Bereich einen Pfeil auf das Symbol in der Menüleiste. Ausgeschaltet ist das Fenster nur abgerundet, ohne Pfeil." } },
+        "en": { "stringUnit": { "state": "translated", "value": "On, the panel has an arrow pointing at the menu-bar icon. Off, the panel is a rounded window with no arrow." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Activado, el panel tiene una flecha hacia el icono de la barra de menús. Desactivado, el panel es una ventana redondeada sin flecha." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Activé, le panneau a une flèche vers l’icône de la barre des menus. Désactivé, c’est une fenêtre arrondie sans flèche." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Attivo, il pannello ha una freccia verso l’icona della barra dei menu. Disattivo, è una finestra arrotondata senza freccia." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "オンにすると、パネルの上にメニューバーのアイコンを指す矢印が出ます。オフにすると、矢印のない角丸のパネルになります。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "켜면 패널 위에 메뉴 막대 아이콘을 가리키는 화살표가 나옵니다. 끄면 화살표 없는 둥근 패널이 됩니다." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Ligado, o painel tem uma seta apontando para o ícone na barra de menus. Desligado, o painel é uma janela arredondada sem seta." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Включённая стрелка указывает на значок в строке меню. Выключенная убирает стрелку, и панель остаётся скруглённым окном." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "打开后，面板上方会有一个箭头指向菜单栏图标。关掉之后，面板是没有箭头的圆角窗口。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "打開後，面板上方會有一個箭頭指向選單列圖示。關掉之後，面板是沒有箭頭的圓角視窗。" } }
+      }
+    },
+    "tutorial.panel.button": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Eigener Block fügt einen Bereich nur mit der Einstellungen-Schaltfläche hinzu. In einem Block legt sie in den Bereich, den du unter Block wählst. Nur beim Rechtsklick lässt die Schaltfläche aus dem Fenster weg; ein Rechtsklick auf das Symbol öffnet die Einstellungen." } },
+        "en": { "stringUnit": { "state": "translated", "value": "Its own block adds a block that contains only the Settings button. Inside a block places the button in the block you pick with Host block. Only when right-clicking the icon leaves the button out of the panel; right-click the menu-bar icon to open Settings." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Bloque propio añade un bloque solo con el botón de ajustes. Dentro de un bloque lo pone en el bloque que eliges en Bloque. Solo al hacer clic derecho lo quita del panel; el clic derecho en el icono abre los ajustes." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Bloc séparé ajoute un bloc qui ne contient que le bouton Réglages. Dans un bloc le place dans le bloc choisi avec Bloc hôte. Uniquement au clic droit le retire du panneau ; un clic droit sur l’icône ouvre Réglages." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Blocco dedicato aggiunge un blocco con solo il pulsante Impostazioni. Dentro un blocco lo mette nel blocco scelto con Blocco. Solo con il clic destro lo toglie dal pannello; il clic destro sull’icona apre Impostazioni." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "独立したブロックは、設定ボタンだけのブロックを足します。既存のブロック内は、表示するブロックで選んだ場所にボタンを置きます。右クリック時のみでは、左クリックのパネルに設定ボタンは出ず、メニューバーのアイコンを右クリックすると設定を開けます。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "별도의 블록은 설정 버튼만 있는 블록을 추가합니다. 기존 블록 안은 호스트 블록에서 고른 곳에 버튼을 둡니다. 오른쪽 클릭 때만은 왼쪽 클릭 패널에 설정 버튼을 두지 않고, 메뉴 막대 아이콘을 오른쪽 클릭하면 설정을 엽니다." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Bloco próprio acrescenta um bloco só com o botão de ajustes. Dentro de um bloco coloca o botão no bloco escolhido em Bloco. Somente no clique direito tira o botão do painel; o clique direito no ícone abre os ajustes." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Отдельный блок добавляет блок только с кнопкой настроек. Внутри блока ставит кнопку в блок, выбранный в Блок. Только по правому клику убирает кнопку из панели; правый клик по значку открывает настройки." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "单独一个区块会在面板里多出一块，上面只有设置按钮。出现在某个区块里时，按钮放进你选的那一块，再用「所在区块」指定位置。仅右键图标时出现：左键打开的面板里没有设置按钮，右键菜单栏图标可以打开设置。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "單獨一個區塊會在面板裡多出一塊，上面只有設定按鈕。出現在某個區塊裡時，按鈕放進你選的那一塊，再用「所在區塊」指定位置。僅右鍵圖示時出現：左鍵打開的面板裡沒有設定按鈕，右鍵選單列圖示可以打開設定。" } }
+      }
+    },
+    "tutorial.panel.blocks": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Der Griff links zieht die Reihenfolge, der Schalter blendet den Bereich ein oder aus, und mindestens ein Bereich bleibt sichtbar." } },
+        "en": { "stringUnit": { "state": "translated", "value": "The grip on the left drags the order, each switch shows or hides that block, and at least one block stays on." } },
+        "es": { "stringUnit": { "state": "translated", "value": "El asa de la izquierda arrastra el orden, cada interruptor muestra u oculta ese bloque, y al menos un bloque sigue visible." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "La poignée à gauche fait glisser l’ordre, chaque interrupteur affiche ou masque le bloc, et au moins un bloc reste visible." } },
+        "it": { "stringUnit": { "state": "translated", "value": "La presa a sinistra trascina l’ordine, ogni interruttore mostra o nasconde il blocco, e almeno un blocco resta visibile." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "左のグリップで並べ替え、スイッチでそのブロックを出します。少なくとも一つは表示したままにします。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "왼쪽 손잡이로 순서를 끌고, 스위치로 그 블록을 켜거나 끕니다. 최소한 한 블록은 켜 둡니다." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "A alça à esquerda arrasta a ordem, cada interruptor mostra ou oculta o bloco, e pelo menos um bloco continua visível." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Ручка слева перетаскивает порядок, переключатель показывает или скрывает блок, и хотя бы один блок остаётся включённым." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "左边的握把用来拖动排序，开关决定这一块出不出现。至少要留一块开着。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "左邊的握把用來拖動排序，開關決定這一塊出不出現。至少要留一塊開著。" } }
+      }
+    },
+    "tutorial.rings.body": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Öffne Ringe in der Seitenleiste. Der Griff links in der Zeile zieht die Reihenfolge, der Schalter blendet den Ring ein oder aus. Zwei Reihen verteilt sie. Farbvorlage ändert die Farben. Die Schiebe-Taste bei Download, Upload, Up/Down und Akkutemperatur öffnet die Hälfte, etwa Download bei 50 % oder Temperatur bei 50 %. Beim Wärmestatus setzt dieselbe Taste die Prozentwerte für Normal, Erhöht, Ernst und Kritisch." } },
+        "en": { "stringUnit": { "state": "translated", "value": "Open Rings in the sidebar. The grip on the left of a row drags the order, and the switch shows or hides that ring. Two rows splits them. Color preset changes the colors. The slider button on Download, Upload, Up/Down, and Battery Temperature opens the halfway scale, such as Download at 50% or Temperature at 50%. On Thermal State, the same button sets the ring percent for Nominal, Fair, Serious, and Critical." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Abre Anillos en la barra lateral. El asa de la izquierda arrastra el orden, y el interruptor muestra u oculta ese anillo. Dos filas los reparte. Ajuste de color cambia los colores. El botón del control en Descarga, Subida, Subida/Bajada y Temperatura de la batería abre la escala de la mitad, como Descarga al 50 % o Temperatura al 50 %. En Estado térmico, el mismo botón fija el porcentaje del anillo para Normal, Elevado, Grave y Crítico." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Ouvre Anneaux dans la barre latérale. La poignée à gauche fait glisser l’ordre, et l’interrupteur affiche ou masque l’anneau. Deux rangées les répartit. Préréglage de couleur change les couleurs. Le bouton du curseur sur Téléchargement, Envoi, Débit et Température de la batterie ouvre l’échelle de moitié, par exemple Débit descendant à 50 % ou Température à 50 %. Pour État thermique, le même bouton fixe le pourcentage de l’anneau pour Normal, Élevé, Grave et Critique." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Apri Anelli nella barra laterale. La presa a sinistra trascina l’ordine, e l’interruttore mostra o nasconde l’anello. Due righe li divide. Preimpostazione colore cambia i colori. Il pulsante del cursore su Download, Upload, Invio/Ricezione e Temperatura della batteria apre la scala a metà, per esempio Download al 50% o Temperatura al 50%. Per Stato termico, lo stesso pulsante imposta la percentuale dell’anello per Normale, Elevato, Grave e Critico." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "サイドバーの「リング」を開きます。行の左にあるグリップで並べ替え、スイッチで表示を切り替えます。「2行にする」で二段に分かれます。色のプリセットで色を変えます。ダウンロード、アップロード、送受信、バッテリー温度の行にあるスライダーボタンは、半分の目盛りを開きます。ダウンロード 50% や温度 50% です。熱状態の同じボタンでは、正常、高め、深刻、危険がリング上で何パーセントになるかを決めます。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "사이드바에서 링을 엽니다. 줄 왼쪽의 손잡이로 순서를 끌고, 스위치로 그 링을 켜거나 끕니다. 두 줄로는 링을 두 줄로 나눕니다. 색상 프리셋으로 색을 바꿉니다. 다운로드, 업로드, 송수신, 배터리 온도 줄의 슬라이더 버튼은 절반 눈금을 엽니다. 다운로드 50%나 온도 50%입니다. 열 상태의 같은 버튼에서는 정상, 높음, 심각, 위험이 링에서 몇 퍼센트인지 정합니다." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Abra Anéis na barra lateral. A alça à esquerda arrasta a ordem, e o interruptor mostra ou oculta o anel. Duas linhas reparte os anéis. Predefinição de cor muda as cores. O botão do controle em Download, Upload, Envio/Recebimento e Temperatura da bateria abre a escala da metade, como Download em 50% ou Temperatura em 50%. Em Estado térmico, o mesmo botão define a porcentagem do anel para Normal, Elevado, Grave e Crítico." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Откройте Кольца на боковой панели. Ручка слева перетаскивает порядок, а переключатель показывает или скрывает кольцо. Два ряда делит их на два ряда. Цветовой пресет меняет цвета. Кнопка ползунка в строках Загрузка, Отдача, Обмен и Температура аккумулятора открывает шкалу половины, например Загрузка на 50% или Температура на 50%. Для Тепловой статус та же кнопка задаёт проценты кольца для Норма, Повышен, Серьёзно и Критично." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "在侧边栏打开「圆环」。每行左边的握把用来拖动排序，开关决定这一项出不出现；「分成两行」会把圆环排成两排。变色预设用来改颜色。下载速度、上传速度、上传下载和电池温度这几行上的滑杆按钮，会打开一半刻度，例如「下载 50%」或「温度 50%」。热状态的同一个按钮用来设定正常、偏高、严重、危急各占的百分比。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "在側邊欄打開「圓環」。每行左邊的握把用來拖動排序，開關決定這一項出不出現；「分成兩行」會把圓環排成兩排。變色預設用來改顏色。下載速度、上傳速度、上傳下載和電池溫度這幾行上的滑桿按鈕，會打開一半刻度，例如「下載 50%」或「溫度 50%」。熱狀態的同一個按鈕用來設定正常、偏高、嚴重、危急各占的百分比。" } }
+      }
+    },
+    "tutorial.flow.body": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Öffne Energie in der Seitenleiste. Farbvorlage färbt alle Zustände auf einmal, oder du stellst Laden, Akku, Netzteil halten und Unterversorgt einzeln ein. Eigene Bewegungsfarbe ändert nur die laufende Farbe. Icon-Paket tauscht die Symbole an den beiden Enden, Icons atmen lässt sie pulsieren. Stil wählt die Bewegung. Ist sie aus, lässt sich Bildrate (Partikel / Linien) nicht ändern." } },
+        "en": { "stringUnit": { "state": "translated", "value": "Open Energy in the sidebar. Color preset tints every state at once, or you edit Charging, On battery, Adapter hold, and Underpowered separately. Custom motion color changes only the moving color. Icon Pack replaces the icons on the two ends, and Pulse icons breathes them. Style chooses the motion. While it is off, Particle / line frame rate cannot be changed." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Abre Energía en la barra lateral. Ajuste de color tiñe todos los estados a la vez, o editas Cargando, Con batería, Adaptador en espera y Potencia insuficiente por separado. Color de animación cambia solo el color que se mueve. Paquete de iconos sustituye los iconos de los dos extremos, y Pulsación de iconos los hace latir. Estilo elige el movimiento. Si está apagado, Frecuencia (partículas / líneas) no se puede cambiar." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Ouvre Énergie dans la barre latérale. Préréglage de couleur teinte tous les états d’un coup, ou tu règles Charge, Sur batterie, Maintien adaptateur et Sous-alimenté un par un. Couleur d’animation ne change que la couleur en mouvement. Pack d’icônes remplace les icônes aux deux bouts, et Pulsation des icônes les fait respirer. Style choisit le mouvement. S’il est arrêté, Fréquence (particules / lignes) ne se règle pas." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Apri Energia nella barra laterale. Preimpostazione colore colora tutti gli stati insieme, oppure regoli In carica, A batteria, Adattatore in attesa e Potenza insufficiente uno per uno. Colore del movimento cambia solo il colore che scorre. Pacchetto icone sostituisce le icone alle due estremità, e Pulsazione delle icone le fa respirare. Stile sceglie il movimento. Se è spento, Frequenza (particelle / linee) non si può cambiare." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "サイドバーの「エネルギー」を開きます。色のプリセットですべての状態をまとめて塗るか、充電中、バッテリー駆動、アダプタ維持、電力不足を別々に調整します。モーション色を指定は、流れている色だけを変えます。アイコンパックは両端のアイコンを替え、アイコンの脈動はそれらを一緒に拡縮します。スタイルで動きを選びます。動きを切っているあいだ、粒子/細線のフレームレートは変更できません。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "사이드바에서 에너지를 엽니다. 색상 프리셋으로 모든 상태를 한 번에 칠하거나, 충전 중, 배터리 사용, 어댑터 유지, 전력 부족을 따로 조정합니다. 모션 색상 지정은 흐르는 색만 바꿉니다. 아이콘 팩은 양끝 아이콘을 바꾸고, 아이콘 호흡은 그 아이콘을 함께 커졌다 작아지게 합니다. 스타일로 움직임을 고릅니다. 움직임을 끄면 입자/선 프레임 레이트는 바꿀 수 없습니다." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Abra Energia na barra lateral. Predefinição de cor pinta todos os estados de uma vez, ou você ajusta Carregando, Na bateria, Adaptador em espera e Potência insuficiente um a um. Cor do movimento muda só a cor que se move. Pacote de ícones troca os ícones das duas pontas, e Pulsação dos ícones faz com que respirem. Estilo escolhe o movimento. Enquanto estiver desligado, Taxa de quadros (partículas / linhas) não pode ser alterada." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Откройте Энергия на боковой панели. Цветовой пресет красит все состояния сразу, либо вы правите Зарядка, От батареи, Удержание от сети и Нехватка мощности по отдельности. Свой цвет анимации меняет только цвет движения. Набор значков заменяет значки на двух концах, а Пульсация значков заставляет их дышать. Стиль выбирает движение. Пока оно выключено, Частота кадров (частицы / линии) не меняется." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "在侧边栏打开「能量流」。变色预设可以一次给所有状态上色，也可以分别调充电中、使用电池、电源维持和功率不足。自定义动效颜色只改流动的颜色。图标套装更换两端的图标，图标呼吸让它们一起缩放。样式用来选择动效；设为关闭后，粒子/细线帧率不能改。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "在側邊欄打開「能量流」。變色預設可以一次給所有狀態上色，也可以分別調充電中、使用電池、電源維持和功率不足。自訂動效顏色只改流動的顏色。圖示套裝更換兩端的圖示，圖示呼吸讓它們一起縮放。樣式用來選擇動效；設為關閉後，粒子/細線幀率不能改。" } }
+      }
+    },
+    "tutorial.topApps.view": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Ansicht kann Liste, Balken oder Säulen sein. Die Länge von Balken und Säulen bezieht sich auf die App mit dem höchsten Wert in dieser Gruppe. Die Zahl selbst bleibt die Energieauswirkung." } },
+        "en": { "stringUnit": { "state": "translated", "value": "View can be List, Bar chart, or Column chart. Bar and column length is relative to the highest app in the group. The number itself is still the energy impact." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Vista puede ser Lista, Barras o Columnas. La longitud de barras y columnas es relativa a la app más alta del grupo. El número sigue siendo el impacto energético." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Affichage peut être Liste, Barres ou Colonnes. La longueur des barres et des colonnes est relative à l’app la plus haute du groupe. Le nombre reste l’impact énergétique." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Vista può essere Elenco, Barre o Colonne. La lunghezza di barre e colonne è relativa all’app più alta del gruppo. Il numero resta l’impatto energetico." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "表示はリスト、横棒、縦棒から選べます。棒の長さはこの中で一番大きいアプリに対する割合です。数字そのものはエネルギー影響のままです。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "보기는 목록, 가로 막대, 세로 막대 중에서 고릅니다. 막대 길이는 이 묶음에서 가장 높은 앱에 대한 비율입니다. 숫자 자체는 에너지 영향입니다." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Visualização pode ser Lista, Barras ou Colunas. O comprimento das barras e colunas é relativo ao app mais alto do grupo. O número em si continua sendo o impacto de energia." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Вид может быть Список, Полосы или Столбцы. Длина полос и столбцов считается от самого высокого приложения в группе. Само число остаётся влиянием на энергию." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "视图可以是文字、条形图或柱状图。条和柱的长度是相对这一组里最高的应用。数字本身仍是对能耗的影响。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "檢視可以是文字、橫條圖或柱狀圖。條和柱的長度是相對這一組裡最高的 App。數字本身仍是對能耗的影響。" } }
+      }
+    },
+    "tutorial.topApps.window": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Abtastintervall legt fest, wie oft gemessen wird. Zeitfenster legt fest, über welche Dauer gemittelt wird. Angezeigte Apps legt fest, wie viele Einträge erscheinen." } },
+        "en": { "stringUnit": { "state": "translated", "value": "Sample interval is how often it measures. Sample window is how long a stretch is averaged. Apps shown is how many entries appear." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Intervalo de muestreo decide cada cuánto se mide. Ventana de muestreo decide cuánto tiempo se promedia. Apps mostradas decide cuántas entradas aparecen." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Intervalle d’échantillonnage décide de la fréquence des mesures. Fenêtre d’échantillonnage décide de la durée moyennée. Apps affichées décide du nombre de lignes." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Intervallo di campionamento decide ogni quanto si misura. Finestra di campionamento decide quanto tempo viene mediato. App mostrate decide quante voci compaiono." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "サンプリング間隔は、どれくらいの頻度で測るかを決めます。サンプリング時間は、どれだけの長さを平均するかを決めます。表示する数は、何件出すかを決めます。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "샘플링 간격은 얼마나 자주 측정할지를 정합니다. 샘플링 시간은 얼마만큼의 구간을 평균낼지를 정합니다. 표시 개수는 몇 개를 보여줄지를 정합니다." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Intervalo de amostragem define de quanto em quanto ela mede. Janela de amostragem define quanto tempo entra na média. Apps exibidos define quantas linhas aparecem." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Интервал выборки задаёт, как часто идёт измерение. Окно выборки задаёт, за какой отрезок берётся среднее. Число приложений задаёт, сколько строк показывать." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "采样间隔决定多久统计一次。采样时间决定拿多长的一段来平均。显示个数决定列出前几名。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "採樣間隔決定多久統計一次。採樣時間決定拿多長的一段來平均。顯示個數決定列出前幾名。" } }
+      }
+    },
+    "tutorial.topApps.impact": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Die Zahl ist dieselbe Energieauswirkung wie im Aktivitätsmonitor: CPU, Weckrufe, GPU, Festplatte und Netzwerk der Prozesse dieser App werden addiert und durch die Sekunden dieses Abtastintervalls geteilt. Angezeigt wird der Mittelwert dieser Raten über das Zeitfenster. Fehlt die App in einem Intervall, zählt das Intervall als 0. Der Aktivitätsmonitor nutzt sein eigenes kurzes Fenster und einen anderen Takt, deshalb liegen die Zahlen nah beieinander, sind aber nicht gleich." } },
+        "en": { "stringUnit": { "state": "translated", "value": "The number is the same energy impact Activity Monitor uses. It adds CPU, wakeups, GPU, disk, and network across that app’s processes, then divides by the seconds in that sample to get a rate. What you see is the average of those rates over the sample window. If the app is missing from a sample, that sample counts as 0. Activity Monitor uses its own short window and a different refresh, so the two numbers stay close without matching exactly." } },
+        "es": { "stringUnit": { "state": "translated", "value": "El número es el mismo impacto energético que usa Monitor de Actividad. Suma CPU, despertares, GPU, disco y red de los procesos de esa app, y lo divide por los segundos de esa muestra para obtener una tasa. Lo que ves es el promedio de esas tasas en la ventana de muestreo. Si la app no aparece en una muestra, esa muestra cuenta como 0. Monitor de Actividad usa su propia ventana corta y otro ritmo de actualización, así que los dos números se acercan sin coincidir del todo." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Le nombre est le même impact énergétique que celui du Moniteur d’activité. Il additionne CPU, réveils, GPU, disque et réseau des processus de l’app, puis divise par les secondes de cet échantillon pour obtenir un débit. Ce qui s’affiche est la moyenne de ces débits sur la fenêtre. Si l’app manque dans un échantillon, celui-ci compte pour 0. Le Moniteur d’activité utilise sa propre fenêtre courte et un autre rythme, donc les deux nombres restent proches sans être identiques." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Il numero è lo stesso impatto energetico di Monitoraggio Attività. Somma CPU, risvegli, GPU, disco e rete dei processi di quell’app, poi divide per i secondi di quel campione e ottiene un tasso. Quello che vedi è la media di questi tassi nella finestra di campionamento. Se l’app manca in un campione, quel campione conta come 0. Monitoraggio Attività usa una finestra breve propria e un altro aggiornamento, quindi i due numeri restano vicini senza coincidere." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "数字はアクティビティモニタと同じエネルギー影響です。そのアプリの各プロセスについて、CPU、起動、GPU、ディスク、ネットワークを合計し、そのサンプルの秒数で割って速度にします。表示されるのは、サンプリング時間のあいだのこの速度の平均です。あるサンプルにそのアプリがいないときは、その回を 0 として平均します。アクティビティモニタは自分の短い区間と別の更新間隔を見るので、二つの数字は近くなりますが、まったく同じにはなりません。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "숫자는 활성 상태 보기와 같은 에너지 영향입니다. 그 앱의 프로세스들에 대해 CPU, 깨우기, GPU, 디스크, 네트워크를 더한 뒤, 그 샘플의 초로 나눠 속도를 냅니다. 보이는 값은 샘플링 시간 동안 이 속도의 평균입니다. 어떤 샘플에 그 앱이 없으면 그 회는 0으로 평균에 넣습니다. 활성 상태 보기는 자기 짧은 구간과 다른 갱신 주기를 보므로, 두 숫자는 가깝지만 완전히 같지는 않습니다." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "O número é o mesmo impacto de energia do Monitor de Atividade. Ele soma CPU, ativações, GPU, disco e rede dos processos desse app e divide pelos segundos daquela amostra, gerando uma taxa. O que aparece é a média dessas taxas na janela de amostragem. Se o app não aparece numa amostra, essa amostra conta como 0. O Monitor de Atividade usa a própria janela curta e outro ritmo de atualização, então os dois números ficam próximos sem serem idênticos." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Число — то же влияние на энергию, что и в Мониторинге системы. Оно складывает CPU, пробуждения, GPU, диск и сеть по процессам приложения и делит на секунды этой выборки, получая скорость. На экране среднее этих скоростей за окно выборки. Если в какой-то выборке приложения не было, она считается как 0. Мониторинг системы смотрит своё короткое окно и обновляется в другом ритме, поэтому числа близки, но не совпадают точно." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "数字用的是和活动监视器同一套「对能耗的影响」：把这个应用各个进程在 CPU、唤醒、GPU、磁盘和网络上的消耗加起来，再除以这一段采样的秒数，得到一个速率。这里显示的是采样时间里这些速率的平均值。某一段采样里这个应用没出现，这一段就按 0 计入。活动监视器看的是它自己的短窗口，刷新时间也不一样，所以两个数字接近，但不会完全相同。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "數字用的是和活動監視器同一套「對能耗的影響」：把這個 App 各個行程在 CPU、喚醒、GPU、磁碟和網路上的消耗加起來，再除以這一段採樣的秒數，得到一個速率。這裡顯示的是採樣時間裡這些速率的平均值。某一段採樣裡這個 App 沒出現，這一段就按 0 計入。活動監視器看的是它自己的短視窗，重新整理時間也不一樣，所以兩個數字接近，但不會完全相同。" } }
+      }
+    },
+    "tutorial.topApps.body": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Öffne Apps in der Seitenleiste. Ansicht kann Liste, Balken oder Säulen sein. Abtastintervall legt fest, wie oft gemessen wird. Zeitfenster und Angezeigte Apps stehen auf derselben Seite." } },
+        "en": { "stringUnit": { "state": "translated", "value": "Open Apps in the sidebar. View can be List, Bar chart, or Column chart. Sample interval is how often it measures. Sample window and Apps shown are on the same page." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Abre Apps en la barra lateral. Vista puede ser Lista, Barras o Columnas. Intervalo de muestreo decide cada cuánto se mide. Ventana de muestreo y Apps mostradas están en la misma página." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Ouvre Apps dans la barre latérale. Affichage peut être Liste, Barres ou Colonnes. Intervalle d’échantillonnage décide de la fréquence des mesures. Fenêtre d’échantillonnage et Apps affichées sont sur la même page." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Apri App nella barra laterale. Vista può essere Elenco, Barre o Colonne. Intervallo di campionamento decide ogni quanto si misura. Finestra di campionamento e App mostrate sono nella stessa pagina." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "サイドバーの「消費」を開きます。表示はリスト、横棒、縦棒から選べます。サンプリング間隔は、どれくらいの頻度で測るかを決めます。サンプリング時間と表示する数も同じページにあります。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "사이드바에서 소비를 엽니다. 보기는 목록, 가로 막대, 세로 막대 중에서 고릅니다. 샘플링 간격은 얼마나 자주 측정할지를 정합니다. 샘플링 시간과 표시 개수도 같은 페이지에 있습니다." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Abra Apps na barra lateral. Visualização pode ser Lista, Barras ou Colunas. Intervalo de amostragem define de quanto em quanto ela mede. Janela de amostragem e Apps exibidos ficam na mesma página." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Откройте Топ на боковой панели. Вид может быть Список, Полосы или Столбцы. Интервал выборки задаёт, как часто идёт измерение. Окно выборки и Число приложений находятся на той же странице." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "在侧边栏打开「耗电」。视图可以是文字、条形图或柱状图。采样间隔决定多久统计一次。采样时间和显示个数也在这一页。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "在側邊欄打開「耗電」。檢視可以是文字、橫條圖或柱狀圖。採樣間隔決定多久統計一次。採樣時間和顯示個數也在這一頁。" } }
+      }
+    },
+    "tutorial.lowPower.strategy": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Die linke Taste zeigt den Kurznamen der aktuellen Regel. Darüber lassen sich Leistung, Energiesparen, Nur bei Batterie sparen und Nur am Netz sparen wählen." } },
+        "en": { "stringUnit": { "state": "translated", "value": "The left button shows the short name of the current rule. Open it to choose Performance, Low Power, Low Power on battery, or Low Power when plugged in." } },
+        "es": { "stringUnit": { "state": "translated", "value": "El botón de la izquierda muestra el nombre corto de la regla actual. Ábrelo para elegir Rendimiento, Ahorro de energía, Ahorro solo con batería o Ahorro solo con corriente." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Le bouton de gauche affiche le nom court de la règle en cours. Ouvre-le pour choisir Performance, Économie d’énergie, Économie sur batterie ou Économie sur secteur." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Il pulsante a sinistra mostra il nome breve della regola attuale. Aprilo per scegliere Prestazioni, Risparmio energetico, Risparmio solo a batteria o Risparmio solo da rete." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "左のボタンには、いまの方針の短い名前が出ます。開くと、性能、省エネ、電池使用時のみ省エネ、電源接続時のみ省エネから選べます。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "왼쪽 버튼에는 현재 전략의 짧은 이름이 나옵니다. 열면 성능, 절전, 배터리일 때만 절전, 전원 연결 시만 절전 중에서 고릅니다." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "O botão da esquerda mostra o nome curto da regra atual. Abra para escolher Desempenho, Economia de energia, Economia só na bateria ou Economia só na tomada." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "На левой кнопке короткое имя текущего плана. Откройте её, чтобы выбрать Производительность, Энергосбережение, Экономия только от батареи или Экономия только от сети." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "左边按钮上是当前策略的短名。点开可以选择性能、节能、仅使用电池时节能、仅接通电源时节能。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "左邊按鈕上是目前策略的短名。點開可以選擇效能、節能、僅使用電池時節能、僅接通電源時節能。" } }
+      }
+    },
+    "tutorial.lowPower.now": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Die Taste zeigt, ob das Sparen gerade an ist. Ein Klick schaltet es um. Ein gelbes Symbol bedeutet, dass es an ist." } },
+        "en": { "stringUnit": { "state": "translated", "value": "This button shows whether saving is on right now. Click it to toggle. A yellow icon means it is on." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Este botón indica si el ahorro está activo ahora. Un clic lo enciende o apaga. El icono amarillo significa que está activo." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Ce bouton indique si l’économie est active maintenant. Un clic la bascule. Une icône jaune signifie qu’elle est active." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Questo pulsante indica se il risparmio è attivo adesso. Un clic lo commuta. L’icona gialla significa che è attivo." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "このボタンは、いま省エネがオンかを示します。点で切り替えます。アイコンが黄色ならオンです。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "이 버튼은 지금 절전이 켜져 있는지 보여 줍니다. 누르면 전환됩니다. 아이콘이 노란 색이면 켜진 상태입니다." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Este botão mostra se a economia está ligada agora. Um clique alterna. O ícone amarelo significa que está ligada." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Эта кнопка показывает, включено ли сбережение сейчас. Нажатие переключает его. Жёлтый значок значит, что оно включено." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "这个按钮表示现在开没开节能。点一下就切换。图标是黄色时，表示已经打开。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "這個按鈕表示現在開沒開節能。點一下就切換。圖示是黃色時，表示已經打開。" } }
+      }
+    },
+    "tutorial.lowPower.buttons": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Es können beide Tasten erscheinen, nur die Regel oder nur Niedrig." } },
+        "en": { "stringUnit": { "state": "translated", "value": "You can show both buttons, the rule only, or Low only." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Pueden aparecer los dos botones, solo la regla o solo Baja." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Les deux boutons peuvent apparaître, ou seulement la règle, ou seulement Faible." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Possono comparire entrambi i pulsanti, solo la regola o solo Bassa." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "両方を出すか、方針だけ、低電力だけにできます。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "둘 다 보이거나, 전략만, 또는 저전력만 보이게 할 수 있습니다." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Os dois botões podem aparecer, só a regra ou só Baixa." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Можно показать обе кнопки, только план или только экономию." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "可以两个都出现，也可以只留策略，或只留低电量。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "可以兩個都出現，也可以只留策略，或只留低電量。" } }
+      }
+    },
+    "tutorial.lowPower.layout": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Wenn beide Tasten sichtbar sind, stehen sie nebeneinander, sobald die Länge reicht, oder immer einzeln untereinander. Bleibt nur eine Taste, lässt sich die Anordnung nicht ändern." } },
+        "en": { "stringUnit": { "state": "translated", "value": "When both buttons are shown, they sit side by side once the length fits, or each one always takes its own row. With only one button, Layout cannot be changed." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Si aparecen los dos, se ponen en la misma fila cuando la longitud lo permite, o cada uno en su fila. Si solo queda un botón, Disposición no se puede cambiar." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Quand les deux boutons sont visibles, ils se placent côte à côte si la longueur le permet, ou chacun sur sa ligne. S’il n’en reste qu’un, Disposition ne se règle pas." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Se compaiono entrambi, stanno sulla stessa riga quando la lunghezza lo consente, oppure ognuno sulla propria. Se ne resta uno solo, Disposizione non si può cambiare." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "両方出すときは、長さが足りれば横に並べるか、常に一つずつ縦に並べます。ボタンが一つのときは、並びは変更できません。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "둘 다 보일 때는 길이가 되면 한 줄에 두거나, 항상 하나씩 한 줄에 둡니다. 버튼이 하나뿐이면 배치는 바꿀 수 없습니다." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Quando os dois aparecem, ficam na mesma linha se o comprimento permitir, ou cada um na sua. Com um só botão, Disposição não pode ser alterada." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Когда видны обе кнопки, они стоят в один ряд, если длина позволяет, или каждая всегда на своей строке. Если кнопка одна, Расположение нельзя изменить." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "两个都出现时，可以在长度够的时候并排，也可以永远各占一行。只留一个按钮时，排列不能改。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "兩個都出現時，可以在長度夠的時候並排，也可以永遠各占一行。只留一個按鈕時，排列不能改。" } }
+      }
+    },
+    "tutorial.lowPower.body": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Öffne Modus in der Seitenleiste. Die linke Taste zeigt den Namen der aktuellen Regel und öffnet das Menü. Niedrig zeigt, ob das Sparen gerade an ist, und schaltet es um. Tasten kann Beide, Nur Regel oder Nur Niedrig sein. Anordnung ist Zwei in einer Zeile, wenn die Länge reicht oder Immer eines pro Zeile. Bleibt nur eine Taste, lässt sich die Anordnung nicht ändern." } },
+        "en": { "stringUnit": { "state": "translated", "value": "Open Power in the sidebar. The left button shows the current rule’s name and opens the rule menu. Low shows whether saving is on right now and toggles it. Buttons can be Both, Rule only, or Low only. Layout is Two per row when the length fits or Always one per row. With only one button shown, Layout cannot be changed." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Abre Modo en la barra lateral. El botón de la izquierda muestra el nombre de la regla actual y abre el menú. Baja indica si el ahorro está activo ahora y lo enciende o apaga. Botones puede ser Ambos, Solo regla o Solo baja. Disposición es Dos en una fila si la longitud lo permite o Siempre uno por fila. Si solo queda un botón, Disposición no se puede cambiar." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Ouvre Mode dans la barre latérale. Le bouton de gauche montre le nom de la règle en cours et ouvre le menu. Faible indique si l’économie est active maintenant et la bascule. Boutons peut être Les deux, Règle seule ou Faible seul. Disposition est Deux par ligne si la longueur le permet ou Toujours un par ligne. S’il ne reste qu’un bouton, Disposition ne se règle pas." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Apri Modo nella barra laterale. Il pulsante a sinistra mostra il nome della regola attuale e apre il menu. Bassa indica se il risparmio è attivo adesso e lo commuta. Pulsanti può essere Entrambi, Solo regola o Solo bassa. Disposizione è Due per riga se la lunghezza lo consente o Sempre uno per riga. Se resta un solo pulsante, Disposizione non si può cambiare." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "サイドバーの「省エネ」を開きます。左のボタンは現在の方針の名前を示し、方針のメニューを開きます。「低電力」はいま省エネ中かどうかを示し、点でオンとオフを切り替えます。ボタンは両方、方針のみ、低電力のみから選べます。並びは「長さが足りれば二つを一行」か「常に一つを一行」です。ボタンが一つだけのとき、並びは変更できません。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "사이드바에서 절전을 엽니다. 왼쪽 버튼은 현재 전략 이름을 보여주고 전략 메뉴를 엽니다. 저전력은 지금 절전 중인지 보여 주고, 누르면 켜거나 끕니다. 버튼은 둘 다, 전략만, 저전력만 중에서 고릅니다. 배치는 길이가 되면 한 줄에 둘, 또는 항상 한 줄에 하나입니다. 버튼이 하나만 남으면 배치는 바꿀 수 없습니다." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Abra Modo na barra lateral. O botão da esquerda mostra o nome da regra atual e abre o menu. Baixa mostra se a economia está ligada agora e a alterna. Botões pode ser Ambos, Só a regra ou Só baixa. Disposição é Dois por linha se o comprimento permitir ou Sempre um por linha. Com um só botão visível, Disposição não pode ser alterada." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Откройте Режим на боковой панели. Левая кнопка показывает имя текущего плана и открывает меню. Экономия показывает, включено ли сбережение сейчас, и переключает его. Кнопки могут быть Оба, Только план или Только экономия. Расположение — Два в ряд, если длина позволяет или Всегда по одному в ряд. Когда видна только одна кнопка, Расположение нельзя изменить." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "在侧边栏打开「能耗模式」。左边的按钮显示当前策略的名字，点开是策略菜单。右边的「低电量」表示现在开没开，点一下就切换。按钮可以是都出现、仅策略或仅低电量。排列在「长度允许下两个一行」和「永远一个一行」之间选；只留一个按钮时，排列不能改。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "在側邊欄打開「能耗模式」。左邊的按鈕顯示目前策略的名字，點開是策略選單。右邊的「低電量」表示現在開沒開，點一下就切換。按鈕可以是都出現、僅策略或僅低電量。排列在「長度允許下兩個一行」和「永遠一個一行」之間選；只留一個按鈕時，排列不能改。" } }
+      }
+    },
+    "tutorial.panel.body": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Öffne Bereiche in der Seitenleiste. Der Griff links zieht die Reihenfolge, der Schalter blendet den Bereich ein oder aus, und mindestens ein Bereich bleibt sichtbar. Pfeil, Position der Einstellungen-Schaltfläche (Eigener Block, In einem Block, Nur beim Rechtsklick) stehen auf derselben Seite." } },
+        "en": { "stringUnit": { "state": "translated", "value": "Open Panels in the sidebar. The grip on the left drags the order, each switch shows or hides that block, and at least one block stays on. The arrow and Settings button placement (its own block, inside a block, or only on right-click) are on this page too." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Abre Paneles en la barra lateral. El asa de la izquierda arrastra el orden, cada interruptor muestra u oculta ese bloque, y al menos un bloque sigue visible. La flecha y la ubicación del botón de ajustes (bloque propio, dentro de un bloque o solo al hacer clic derecho) están en esta misma página." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Ouvre Panneaux dans la barre latérale. La poignée à gauche fait glisser l’ordre, chaque interrupteur affiche ou masque le bloc, et au moins un bloc reste visible. La flèche et l’emplacement du bouton Réglages (bloc séparé, dans un bloc, ou uniquement au clic droit) sont sur cette page." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Apri Pannelli nella barra laterale. La presa a sinistra trascina l’ordine, ogni interruttore mostra o nasconde il blocco, e almeno un blocco resta visibile. La freccia e la posizione del pulsante Impostazioni (blocco dedicato, dentro un blocco, o solo con il clic destro) stanno in questa pagina." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "サイドバーの「パネル」を開きます。左のグリップで並べ替え、スイッチで出すかを決め、少なくとも一つは表示したままにします。矢印と、設定ボタンの位置（独立したブロック、既存のブロック内、右クリック時のみ）もこのページにあります。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "사이드바에서 패널을 엽니다. 왼쪽 손잡이로 순서를 끌고, 스위치로 블록을 켜거나 끄며, 최소한 한 블록은 켜 둡니다. 화살표와 설정 버튼 위치(별도의 블록, 기존 블록 안, 오른쪽 클릭 때만)도 이 페이지에 있습니다." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Abra Painéis na barra lateral. A alça à esquerda arrasta a ordem, cada interruptor mostra ou oculta o bloco, e pelo menos um bloco continua visível. A seta e a posição do botão de ajustes (bloco próprio, dentro de um bloco ou somente no clique direito) ficam nesta página." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Откройте Панели на боковой панели. Ручка слева перетаскивает порядок, переключатель показывает или скрывает блок, и хотя бы один блок остаётся включённым. Стрелка и расположение кнопки настроек (отдельный блок, внутри блока или только по правому клику) тоже на этой странице." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "在侧边栏打开「面板」。左边的握把用来拖动排序，开关决定这一块出不出现，至少要留一块开着。箭头和设置按钮出现位置也在这一页：可以单独一个区块、出现在某个区块里，或仅右键图标时出现。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "在側邊欄打開「面板」。左邊的握把用來拖動排序，開關決定這一塊出不出現，至少要留一塊開著。箭頭和設定按鈕出現位置也在這一頁：可以單獨一個區塊、出現在某個區塊裡，或僅右鍵圖示時出現。" } }
+      }
+    },
+    "tutorial.localIP.body": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Öffne IP-Adresse in der Seitenleiste. Schalte die Bereiche ein, die du sehen willst: Lokal, Öffentlich, Loopback und Link-lokal. IPv4 und IPv6 lassen sich einzeln einschalten. Jede Zeile zeigt Bereich, Schnittstelle und Adresse. Schlägt die öffentliche Abfrage fehl, steht dort Nicht verfügbar." } },
+        "en": { "stringUnit": { "state": "translated", "value": "Open IP Address in the sidebar. Turn on the scopes you want: Local, Public, Loopback, and Link-local. IPv4 and IPv6 can each be turned on. Each row shows the scope, the interface name, and the address. If a public lookup fails, that row says Unavailable." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Abre Dirección IP en la barra lateral. Activa los rangos que quieras ver: Local, Pública, Bucle local y Enlace local. IPv4 e IPv6 se activan por separado. Cada fila muestra el rango, el nombre de la interfaz y la dirección. Si la consulta pública falla, esa fila dice No disponible." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Ouvre Adresse IP dans la barre latérale. Active les plages à afficher : Locale, Publique, Boucle locale et Lien local. IPv4 et IPv6 s’activent séparément. Chaque ligne montre la plage, le nom de l’interface et l’adresse. Si la recherche publique échoue, la ligne indique Indisponible." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Apri Indirizzo IP nella barra laterale. Attiva gli intervalli da mostrare: Locale, Pubblico, Loopback e Link-local. IPv4 e IPv6 si attivano separatamente. Ogni riga mostra l’intervallo, il nome dell’interfaccia e l’indirizzo. Se la ricerca pubblica fallisce, la riga dice Non disponibile." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "サイドバーの「IP アドレス」を開きます。表示する範囲はローカル、パブリック、ループバック、リンクローカルから選びます。IPv4 と IPv6 もそれぞれ切り替えられます。パネルの各行は、範囲、インターフェース名、アドレスです。パブリックアドレスが取れないときは「取得できません」と出ます。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "사이드바에서 IP 주소를 엽니다. 표시할 범위는 로컬, 공인, 루프백, 링크 로컬 중에서 고릅니다. IPv4와 IPv6도 각각 켤 수 있습니다. 패널의 각 줄은 범위, 인터페이스 이름, 주소입니다. 공인 주소를 가져오지 못하면 그 줄은 가져오지 못함으로 나옵니다." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Abra Endereço IP na barra lateral. Ative as faixas que quer ver: Local, Pública, Loopback e Link local. IPv4 e IPv6 podem ser ligados separadamente. Cada linha mostra a faixa, o nome da interface e o endereço. Se a consulta pública falhar, essa linha mostra Indisponível." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Откройте IP-адрес на боковой панели. Включите нужные диапазоны: Локальный, Публичный, Петлевой и Канальный. IPv4 и IPv6 включаются по отдельности. Каждая строка показывает диапазон, имя интерфейса и адрес. Если публичный адрес не удалось получить, в строке будет Недоступно." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "在侧边栏打开「IP 地址」。范围可以勾选本地、公网、回环和链路。IPv4 和 IPv6 也可以分别勾选。面板里每一行是范围、网卡名和地址。公网查不到时，这一行会写成「获取失败」。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "在側邊欄打開「IP 位址」。範圍可以勾選本地、公網、迴環和鏈路。IPv4 和 IPv6 也可以分別勾選。面板裡每一行是範圍、網卡名和位址。公網查不到時，這一列會寫成「取得失敗」。" } }
+      }
+    },
+    "tutorial.batteryCycle.body": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Öffne Zyklen in der Seitenleiste. Kapazität legt fest, ob die maximale Kapazität als Prozent, in mAh oder als Beides erscheint." } },
+        "en": { "stringUnit": { "state": "translated", "value": "Open Cycles in the sidebar. Capacity sets whether maximum capacity is written as Percent, as mAh, or as Both." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Abre Ciclos en la barra lateral. Capacidad decide si la capacidad máxima se escribe como Porcentaje, en mAh o como Ambos." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Ouvre Cycles dans la barre latérale. Capacité décide si la capacité maximale s’écrit en Pourcentage, en mAh, ou Les deux." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Apri Cicli nella barra laterale. Capacità decide se la capacità massima compare come Percentuale, in mAh o come Entrambi." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "サイドバーの「サイクル」を開きます。容量は、最大容量をパーセント、mAh、または両方のどれで書くかを決めます。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "사이드바에서 사이클을 엽니다. 용량은 최대 용량을 백분율, mAh, 또는 둘 다 중 무엇으로 쓸지 정합니다." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Abra Ciclos na barra lateral. Capacidade define se a capacidade máxima aparece como Porcentagem, em mAh ou como Ambos." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Откройте Циклы на боковой панели. Ёмкость задаёт, как писать максимальную ёмкость: Проценты, мА·ч или Оба." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "在侧边栏打开「电池循环」。容量格式决定最大容量写成百分比、mAh，或两个都要。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "在側邊欄打開「電池循環」。容量格式決定最大容量寫成百分比、mAh，或兩個都要。" } }
       }
     }
   },

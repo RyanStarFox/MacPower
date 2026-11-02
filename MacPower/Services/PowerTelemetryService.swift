@@ -17,6 +17,10 @@ struct BatteryReading: Equatable, Sendable {
     var systemTimeToEmptyMinutes: Int?
     var systemTimeToFullMinutes: Int?
     var instantAmperageMilli: Int
+    var batteryTemperatureCelsius: Double? = nil
+    var cycleCount: Int? = nil
+    var fullChargeMilliAmpHours: Int? = nil
+    var designCapacityMilliAmpHours: Int? = nil
 }
 
 enum BatteryTimeFallback {
@@ -28,8 +32,9 @@ enum BatteryTimeFallback {
 }
 
 enum BatteryReader: Sendable {
-    static func read(cachedService: inout io_service_t) -> BatteryReading? {
-        readSmartBattery(cachedService: &cachedService) ?? readPowerSources()
+    static func read(cachedService: inout io_service_t, includePackTemperature: Bool = false) -> BatteryReading? {
+        readSmartBattery(cachedService: &cachedService, includePackTemperature: includePackTemperature)
+            ?? readPowerSources()
     }
 
     static func release(_ service: inout io_service_t) {
@@ -38,7 +43,10 @@ enum BatteryReader: Sendable {
         service = 0
     }
 
-    private static func readSmartBattery(cachedService: inout io_service_t) -> BatteryReading? {
+    private static func readSmartBattery(
+        cachedService: inout io_service_t,
+        includePackTemperature: Bool
+    ) -> BatteryReading? {
         guard let nsProps = smartBatteryProperties(cachedService: &cachedService) else {
             return nil
         }
@@ -109,6 +117,17 @@ enum BatteryReader: Sendable {
             timeToFull = iops.full
         }
 
+        let designCapacity = positiveInt(batteryData?["DesignCapacity"]) ?? positiveInt(nsProps["DesignCapacity"])
+        let fullCharge = BatteryCapacityFormat.fullChargeMilliAmpHours(
+            nominal: positiveInt(batteryData?["NominalChargeCapacity"]) ?? positiveInt(nsProps["NominalChargeCapacity"]),
+            appleRawMax: positiveInt(batteryData?["AppleRawMaxCapacity"]) ?? positiveInt(nsProps["AppleRawMaxCapacity"]),
+            fullCharge: positiveInt(batteryData?["FullChargeCapacity"]) ?? positiveInt(nsProps["FullChargeCapacity"])
+        )
+        var temperature = temperatureCelsius(in: nsProps)
+        if temperature == nil, includePackTemperature {
+            temperature = packTemperatureCelsius(service: cachedService)
+        }
+
         return BatteryReading(
             hasBattery: hasBattery,
             percent: min(100, max(0, percent)),
@@ -123,7 +142,11 @@ enum BatteryReader: Sendable {
             missingCapacityWh: missingWh,
             systemTimeToEmptyMinutes: timeToEmpty,
             systemTimeToFullMinutes: timeToFull,
-            instantAmperageMilli: instantAmperage
+            instantAmperageMilli: instantAmperage,
+            batteryTemperatureCelsius: temperature,
+            cycleCount: int(nsProps["CycleCount"]) ?? int(batteryData?["CycleCount"]),
+            fullChargeMilliAmpHours: fullCharge,
+            designCapacityMilliAmpHours: designCapacity
         )
     }
 
@@ -179,6 +202,39 @@ enum BatteryReader: Sendable {
         cachedService = IOServiceGetMatchingService(kIOMainPortDefault, IOServiceMatching("AppleSmartBattery"))
         guard cachedService != 0 else { return nil }
         return copyProperties(cachedService)
+    }
+
+    /// Temperature lives on the pack's BatteryData on this machine, not the parent
+    /// dictionary. Only walk children when the temperature ring is showing.
+    private static func packTemperatureCelsius(service: io_service_t) -> Double? {
+        guard service != 0 else { return nil }
+        var iterator: io_iterator_t = 0
+        guard IORegistryEntryGetChildIterator(service, kIOServicePlane, &iterator) == KERN_SUCCESS else {
+            return nil
+        }
+        defer { IOObjectRelease(iterator) }
+        while case let child = IOIteratorNext(iterator), child != 0 {
+            defer { IOObjectRelease(child) }
+            guard let props = copyProperties(child) else { continue }
+            if let celsius = temperatureCelsius(in: props) {
+                return celsius
+            }
+        }
+        return nil
+    }
+
+    private static func temperatureCelsius(in props: [String: Any]) -> Double? {
+        let data = props["BatteryData"] as? [String: Any]
+        let raw = double(props["Temperature"])
+            ?? double(data?["Temperature"])
+            ?? double(props["VirtualTemperature"])
+            ?? double(data?["VirtualTemperature"])
+        return raw.flatMap(BatteryTemperatureFormat.celsius(raw:))
+    }
+
+    private static func positiveInt(_ value: Any?) -> Int? {
+        guard let number = int(value), number > 0 else { return nil }
+        return number
     }
 
     private static func copyProperties(_ service: io_service_t) -> [String: Any]? {
@@ -289,6 +345,9 @@ final class PowerTelemetryService {
     private var batteryService: io_service_t = 0
 
     var onChange: ((PowerSnapshot) -> Void)?
+    /// True only while the battery-temperature ring is on the popover. The pack
+    /// walk is extra IOKit; the parent dictionary is already copied either way.
+    var wantsPackTemperature: () -> Bool = { false }
 
     func start() {
         refresh(smooth: false)
@@ -367,8 +426,14 @@ final class PowerTelemetryService {
     }
 
     private func refresh(smooth: Bool) {
-        guard let reading = BatteryReader.read(cachedService: &batteryService) else {
-            onChange?(.empty)
+        let includePackTemperature = popoverOpen && wantsPackTemperature()
+        guard let reading = BatteryReader.read(
+            cachedService: &batteryService,
+            includePackTemperature: includePackTemperature
+        ) else {
+            var empty = PowerSnapshot.empty
+            empty.thermalState = thermalStateWhilePopoverOpen()
+            onChange?(empty)
             return
         }
 
@@ -396,7 +461,12 @@ final class PowerTelemetryService {
             systemTimeToFullMinutes: reading.systemTimeToFullMinutes,
             timeToEmptyMinutes: nil,
             timeToFullMinutes: nil,
-            flowMode: mode
+            flowMode: mode,
+            batteryTemperatureCelsius: reading.batteryTemperatureCelsius,
+            thermalState: thermalStateWhilePopoverOpen(),
+            cycleCount: reading.cycleCount,
+            fullChargeMilliAmpHours: reading.fullChargeMilliAmpHours,
+            designCapacityMilliAmpHours: reading.designCapacityMilliAmpHours
         )
 
         let instantEstimateLoad = max(snapshot.systemLoadWatts, snapshot.dischargeWatts)
@@ -445,6 +515,12 @@ final class PowerTelemetryService {
 
         smoothed = snapshot
         onChange?(snapshot)
+    }
+
+    /// Same 1s popover read as the battery sample. Cheap, and unused while the panel is closed.
+    private func thermalStateWhilePopoverOpen() -> MacThermalState? {
+        guard popoverOpen else { return nil }
+        return MacThermalState(ProcessInfo.processInfo.thermalState)
     }
 
     private static func menuBarEqual(_ a: PowerSnapshot, _ b: PowerSnapshot) -> Bool {

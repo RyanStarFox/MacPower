@@ -17,6 +17,14 @@ struct PowerSnapshot: Equatable, Sendable {
     var timeToEmptyMinutes: Int?
     var timeToFullMinutes: Int?
     var flowMode: EnergyFlowMode
+    /// Battery temperature in °C when AppleSmartBattery publishes a sane reading.
+    var batteryTemperatureCelsius: Double? = nil
+    /// System thermal pressure while the popover is open. A level, not degrees.
+    var thermalState: MacThermalState? = nil
+    var cycleCount: Int? = nil
+    /// Normalized full charge (mAh) and design capacity, when both keys exist.
+    var fullChargeMilliAmpHours: Int? = nil
+    var designCapacityMilliAmpHours: Int? = nil
 
     var chargeWatts: Double { max(0, batteryWatts) }
     var dischargeWatts: Double { max(0, -batteryWatts) }

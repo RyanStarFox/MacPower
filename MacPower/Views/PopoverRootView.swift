@@ -21,8 +21,8 @@ enum PopoverLayout {
         return (ringColumn, ringSpacing)
     }
 
-    static func width(ringCount: Int, twoRows: Bool) -> CGFloat {
-        let count = columns(ringCount: ringCount, twoRows: twoRows)
+    static func width(ringCount: Int, twoRows: Bool, includesSettings: Bool = true) -> CGFloat {
+        let count = columns(ringCount: ringCount, twoRows: twoRows, includesSettings: includesSettings)
         let pitch = ringPitch(columns: count)
         let columns = CGFloat(count)
         let gaps = max(columns - 1, 0) * pitch.spacing
@@ -35,9 +35,9 @@ enum PopoverLayout {
         return max(width, natural)
     }
 
-    /// Cells on the wider row. The settings button is one cell.
-    static func columns(ringCount: Int, twoRows: Bool) -> Int {
-        let total = max(ringCount, 0) + 1
+    /// Cells on the wider row. The settings gear is one cell only while it lives in the ring grid.
+    static func columns(ringCount: Int, twoRows: Bool, includesSettings: Bool = true) -> Int {
+        let total = max(ringCount, 0) + (includesSettings ? 1 : 0)
         if twoRows, total >= 2 {
             return (total + 1) / 2
         }
@@ -49,6 +49,10 @@ struct PopoverRootView: View {
     @Bindable var appState: AppState
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.readmeGalleryCapture) private var readmeGalleryCapture
+    /// Stays false through the open layout. The ring block used to ease up
+    /// from the short placeholder frame; arming progress animation on that
+    /// same turn is what floats both rows into the grid.
+    @State private var ringPlacementSettled = false
 
     var body: some View {
         Group {
@@ -56,23 +60,53 @@ struct PopoverRootView: View {
                 let theme = AppTheme.resolved(palette: appState.settings.palette, colorScheme: colorScheme)
                 content(theme: theme)
                     .padding(PopoverLayout.padding)
-                    .frame(width: panelWidth)
+                    .frame(width: panelWidth, alignment: .top)
                     .fixedSize(horizontal: false, vertical: true)
+                    .transition(.identity)
             } else {
                 // Keep the hosting graph mounted, but never build glass / TimelineView
                 // while the menu extra is idle. Interactive Liquid Glass in a hidden
                 // NSPopover was burning CPU and UAFing NSViewFocusProxy ~2s after launch.
                 // Match the open width so the first real layout is not a resize.
-                Color.clear.frame(width: panelWidth, height: 1)
+                Color.clear
+                    .frame(width: panelWidth, height: 1)
+                    .transition(.identity)
             }
         }
+        .animation(nil, value: appState.isPopoverOpen)
         .environment(\.locale, appState.settings.resolvedLocale)
         .id(appState.settings.language)
     }
 
     private var panelWidth: CGFloat {
         guard appState.settings.showStatusRings else { return PopoverLayout.width }
-        return PopoverLayout.width(ringCount: appState.settings.ringOrder.count, twoRows: appState.settings.twoRingRows)
+        return PopoverLayout.width(
+            ringCount: appState.settings.ringOrder.count,
+            twoRows: appState.settings.twoRingRows,
+            includesSettings: settingsGearInRings
+        )
+    }
+
+    private var settingsGearInRings: Bool {
+        appState.settings.settingsButtonPlacement.drawsRingGear(
+            host: appState.settings.settingsButtonHost,
+            ringsVisible: appState.settings.showStatusRings
+        )
+    }
+
+    private var settingsGearBesideFlow: Bool {
+        appState.settings.settingsButtonPlacement.drawsFlowGear(
+            host: appState.settings.settingsButtonHost,
+            flowVisible: appState.settings.showEnergyFlow
+        )
+    }
+
+    private func showsHeaderSettings(on section: SettingsButtonHost) -> Bool {
+        appState.settings.settingsButtonPlacement.drawsHeader(
+            host: appState.settings.settingsButtonHost,
+            section: section,
+            sectionVisible: true
+        )
     }
 
     @ViewBuilder
@@ -86,27 +120,104 @@ struct PopoverRootView: View {
             let showRings = appState.settings.showStatusRings
             let showFlow = appState.settings.showEnergyFlow
             VStack(alignment: .leading, spacing: 14) {
-                if showRings {
-                    ringsHeader
+                ForEach(appState.settings.popoverOrder) { block in
+                    popoverBlock(block, theme: theme, showRings: showRings, showFlow: showFlow)
                 }
+            }
+            .onChange(of: appState.settings.showTopApps) { _, _ in
+                appState.syncPopoverExtras()
+            }
+            .onChange(of: appState.settings.showLowPower) { _, _ in
+                appState.syncPopoverExtras()
+            }
+        }
+    }
 
-                if showFlow {
-                    VStack(alignment: .leading, spacing: 4) {
-                        TimeEstimateRow(snapshot: appState.snapshot, language: appState.settings.language)
-                        if showRings {
-                            energyFlow(theme: theme)
-                        } else {
-                            // Gear-only layout height so HStack can center it on the
-                            // ribbon; caption is painted below without shifting alignment.
-                            energyFlow(theme: theme) {
-                                flowSideSettingsButton
-                            }
+    @ViewBuilder
+    private func popoverBlock(_ block: PopoverBlock, theme: AppTheme, showRings: Bool, showFlow: Bool) -> some View {
+        switch block {
+        case .rings:
+            if showRings {
+                ringsHeader
+            }
+        case .flow:
+            if showFlow {
+                VStack(alignment: .leading, spacing: 4) {
+                    TimeEstimateRow(snapshot: appState.snapshot, language: appState.settings.language)
+                    if settingsGearBesideFlow {
+                        // Gear-only layout height so HStack can center it on the
+                        // ribbon; caption is painted below without shifting alignment.
+                        energyFlow(theme: theme) {
+                            flowSideSettingsButton
                         }
+                    } else {
+                        energyFlow(theme: theme)
                     }
-                } else if !showRings {
-                    settingsButton
-                        .frame(maxWidth: .infinity)
                 }
+            }
+        case .topApps:
+            if appState.settings.showTopApps {
+                TopAppsSection(
+                    list: appState.topApps,
+                    language: appState.settings.language,
+                    rowCount: appState.settings.topAppLimit,
+                    chart: appState.settings.topAppsChart,
+                    showsSettingsButton: showsHeaderSettings(on: .topApps),
+                    onOpenSettings: { appState.openSettings() }
+                )
+            }
+        case .lowPower:
+            if appState.settings.showLowPower {
+                LowPowerSection(
+                    strategy: appState.settings.lowPowerStrategy ?? appState.lowPowerPreset,
+                    lowPowerOn: appState.lowPowerNow,
+                    failed: appState.lowPowerChangeFailed,
+                    language: appState.settings.language,
+                    panelWidth: panelWidth,
+                    layout: appState.settings.lowPowerButtonLayout,
+                    visibility: appState.settings.lowPowerButtonVisibility,
+                    onStrategy: { appState.setLowPowerStrategy($0) },
+                    onToggleNow: { appState.toggleLowPowerNow() },
+                    showsSettingsButton: showsHeaderSettings(on: .lowPower),
+                    onOpenSettings: { appState.openSettings() }
+                )
+            }
+        case .localIP:
+            if appState.settings.showLocalIP {
+                LocalIPSection(
+                    rows: LocalIPFilter.rows(
+                        interfaces: appState.localIPInterfaces,
+                        scopes: appState.settings.ipScopes,
+                        families: appState.settings.ipFamilies,
+                        publicIPv4: appState.publicIPv4,
+                        publicIPv6: appState.publicIPv6,
+                        publicIPv4Failed: appState.publicIPv4Failed,
+                        publicIPv6Failed: appState.publicIPv6Failed
+                    ),
+                    language: appState.settings.language,
+                    panelWidth: panelWidth,
+                    showsSettingsButton: showsHeaderSettings(on: .localIP),
+                    onOpenSettings: { appState.openSettings() }
+                )
+            }
+        case .batteryCycle:
+            if appState.settings.showBatteryCycle {
+                BatteryCycleSection(
+                    hasBattery: appState.snapshot.hasBattery,
+                    cycleCount: appState.snapshot.cycleCount,
+                    fullChargeMilliAmpHours: appState.snapshot.fullChargeMilliAmpHours,
+                    designCapacityMilliAmpHours: appState.snapshot.designCapacityMilliAmpHours,
+                    capacityStyle: appState.settings.batteryCapacityStyle,
+                    language: appState.settings.language,
+                    showsSettingsButton: showsHeaderSettings(on: .batteryCycle),
+                    onOpenSettings: { appState.openSettings() }
+                )
+            }
+        case .settings:
+            if appState.settings.settingsButtonPlacement.drawsOwnBlock(
+                blockVisible: appState.settings.showSettingsBlock
+            ) {
+                standaloneSettingsRow
             }
         }
     }
@@ -120,14 +231,37 @@ struct PopoverRootView: View {
             ForEach(slots) { slot in
                 ringCell(slot)
             }
-            settingsButton
+            if settingsGearInRings {
+                settingsButton
+            }
         }
-        // Opening used to lay the rings out once at the wrong pitch, then
-        // animate them into place. Placement itself should snap.
+        // Opening lays this block out in the short placeholder, then the
+        // popover animation eases both rows up into the final grid. Snap.
+        .animation(nil, value: appState.isPopoverOpen)
         .animation(nil, value: panelWidth)
         .animation(nil, value: appState.settings.twoRingRows)
         .animation(nil, value: appState.settings.ringOddRow)
         .animation(nil, value: slots.count)
+        .transaction { transaction in
+            if !ringPlacementSettled {
+                transaction.animation = nil
+                transaction.disablesAnimations = true
+            }
+        }
+        .onAppear {
+            DispatchQueue.main.async {
+                DispatchQueue.main.async {
+                    ringPlacementSettled = true
+                }
+            }
+        }
+        .onDisappear {
+            var transaction = Transaction()
+            transaction.disablesAnimations = true
+            withTransaction(transaction) {
+                ringPlacementSettled = false
+            }
+        }
     }
 
     @ViewBuilder
@@ -149,11 +283,63 @@ struct PopoverRootView: View {
             )
         case .speedPair:
             speedPairRing
+        case .batteryTemperature:
+            temperatureRing
+        case .thermalState:
+            thermalRing
         default:
             if let kind = slot.metric {
                 metricRing(kind)
             }
         }
+    }
+
+    private var temperatureRing: some View {
+        let language = appState.settings.language
+        let celsius = appState.snapshot.batteryTemperatureCelsius
+        let percent = celsius.map {
+            BatteryTemperatureFormat.ringPercent(
+                celsius: $0,
+                centerCelsius: Double(appState.settings.temperatureHalfCelsius)
+            )
+        } ?? 0
+        let colors = appState.settings.ringTint.scheme(forSegment: .batteryTemperature).colors(percent: percent)
+        let caption = celsius.map { BatteryTemperatureFormat.caption(celsius: $0) } ?? "—"
+        let name = Localization.string("settings.rings.batteryTemperature", language: language)
+        return StatusRingView(
+            percent: percent,
+            fillLeft: colors.left,
+            fillRight: colors.right,
+            caption: caption,
+            accessibilityName: name,
+            glyph: .system("thermometer.medium"),
+            glyphTint: colors.left,
+            accessibilityValue: "\(name) \(caption)"
+        )
+    }
+
+    private var thermalRing: some View {
+        let language = appState.settings.language
+        let level = appState.snapshot.thermalState
+        let percent = level?.ringPercent(
+            nominal: appState.settings.thermalNominalPercent,
+            fair: appState.settings.thermalFairPercent,
+            serious: appState.settings.thermalSeriousPercent,
+            critical: appState.settings.thermalCriticalPercent
+        ) ?? 0
+        let colors = appState.settings.ringTint.scheme(forSegment: .thermalState).colors(percent: percent)
+        let caption = level.map { Localization.string($0.captionKey, language: language) } ?? "—"
+        let name = Localization.string("settings.rings.thermalState", language: language)
+        return StatusRingView(
+            percent: percent,
+            fillLeft: colors.left,
+            fillRight: colors.right,
+            caption: caption,
+            accessibilityName: name,
+            glyph: .system("thermometer.high"),
+            glyphTint: colors.left,
+            accessibilityValue: "\(name) \(caption)"
+        )
     }
 
     private func metricRing(_ kind: RingKind) -> some View {
@@ -170,6 +356,16 @@ struct PopoverRootView: View {
         )
     }
 
+    private func networkPercent(bytesPerSecond: Double, segment: RingColorSegment) -> Double {
+        let kilobytes = segment == .upload
+            ? appState.settings.uploadHalfKilobytes
+            : appState.settings.downloadHalfKilobytes
+        return NetworkRateFormat.ringPercent(
+            bytesPerSecond: bytesPerSecond,
+            centerBytesPerSecond: Double(kilobytes) * 1024
+        )
+    }
+
     private func speedRing(
         segment: RingColorSegment,
         bytesPerSecond: Double,
@@ -177,7 +373,7 @@ struct PopoverRootView: View {
         nameKey: String
     ) -> some View {
         let language = appState.settings.language
-        let percent = NetworkRateFormat.ringPercent(bytesPerSecond: bytesPerSecond)
+        let percent = networkPercent(bytesPerSecond: bytesPerSecond, segment: segment)
         let colors = appState.settings.ringTint.scheme(forSegment: segment).colors(percent: percent)
         let rate = NetworkRateFormat.string(bytesPerSecond: bytesPerSecond)
         let name = Localization.string(nameKey, language: language)
@@ -200,13 +396,15 @@ struct PopoverRootView: View {
         let down = NetworkRateFormat.string(bytesPerSecond: downBytes)
         let up = NetworkRateFormat.string(bytesPerSecond: upBytes)
         let name = Localization.string("settings.rings.speedPair", language: language)
+        let downloadPercent = networkPercent(bytesPerSecond: downBytes, segment: .download)
+        let uploadPercent = networkPercent(bytesPerSecond: upBytes, segment: .upload)
         let downloadColor = appState.settings.ringTint.scheme(forSegment: .download)
-            .colors(percent: NetworkRateFormat.ringPercent(bytesPerSecond: downBytes)).left
+            .colors(percent: downloadPercent).left
         let uploadColor = appState.settings.ringTint.scheme(forSegment: .upload)
-            .colors(percent: NetworkRateFormat.ringPercent(bytesPerSecond: upBytes)).left
+            .colors(percent: uploadPercent).left
         return SpeedPairRingView(
-            downloadProgress: NetworkRateFormat.ringPercent(bytesPerSecond: downBytes) / 100,
-            uploadProgress: NetworkRateFormat.ringPercent(bytesPerSecond: upBytes) / 100,
+            downloadProgress: downloadPercent / 100,
+            uploadProgress: uploadPercent / 100,
             downloadCaption: down,
             uploadCaption: up,
             accessibilityValue: "\(name) ↓ \(down) ↑ \(up)",
@@ -289,6 +487,18 @@ struct PopoverRootView: View {
         .accessibilityLabel(title)
     }
 
+    private var standaloneSettingsRow: some View {
+        let language = appState.settings.language
+        let title = Localization.string("settings.title", language: language)
+        return Button {
+            appState.openSettings()
+        } label: {
+            EnergyModeButton(title: title, systemImage: "gearshape")
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(title)
+    }
+
     private var settingsButton: some View {
         let language = appState.settings.language
         return Button {
@@ -325,10 +535,10 @@ private struct RingHeaderLayout: Layout {
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
         let width = proposal.width ?? (PopoverLayout.width - PopoverLayout.padding * 2)
-        let column = layoutMetrics(total: subviews.count, width: width).column
-        let rowHeight = rowHeight(fitting: column, subviews: subviews)
-        let rows: CGFloat = usesTwoRows(subviews.count) ? 2 : 1
-        return CGSize(width: width, height: rowHeight * rows + rowSpacing * (rows - 1))
+        let metrics = layoutMetrics(total: subviews.count, width: width)
+        let heights = rowHeights(column: metrics.column, subviews: subviews, topCount: metrics.columns)
+        let height = heights.bottom > 0 ? heights.top + rowSpacing + heights.bottom : heights.top
+        return CGSize(width: width, height: height)
     }
 
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
@@ -337,7 +547,7 @@ private struct RingHeaderLayout: Layout {
         let metrics = layoutMetrics(total: total, width: bounds.width)
         let column = metrics.column
         let fitted = ProposedViewSize(width: column, height: nil)
-        let rowHeight = rowHeight(fitting: column, subviews: subviews)
+        let heights = rowHeights(column: column, subviews: subviews, topCount: metrics.columns)
         let topCount = metrics.columns
         let xOrigin = rowOrigin(
             in: bounds.width,
@@ -360,7 +570,7 @@ private struct RingHeaderLayout: Layout {
         let bottomCount = total - topCount
         guard bottomCount > 0 else { return }
         let shift = staggerOdd && bottomCount < topCount ? (column + metrics.spacing) / 2 : 0
-        let y = bounds.minY + rowHeight + rowSpacing
+        let y = bounds.minY + heights.top + rowSpacing
         for index in 0..<bottomCount {
             place(
                 subviews[topCount + index],
@@ -412,9 +622,13 @@ private struct RingHeaderLayout: Layout {
         return minX + max(0, (width - group) / 2)
     }
 
-    private func rowHeight(fitting column: CGFloat, subviews: Subviews) -> CGFloat {
+    /// Each row is as tall as its own tallest cell, so the up/down ring's
+    /// second caption stays inside the second row.
+    private func rowHeights(column: CGFloat, subviews: Subviews, topCount: Int) -> (top: CGFloat, bottom: CGFloat) {
         let proposal = ProposedViewSize(width: column, height: nil)
-        return subviews.map { $0.sizeThatFits(proposal).height }.max() ?? 0
+        let top = subviews.prefix(topCount).map { $0.sizeThatFits(proposal).height }.max() ?? 0
+        let bottom = subviews.dropFirst(topCount).map { $0.sizeThatFits(proposal).height }.max() ?? 0
+        return (top, bottom)
     }
 }
 

@@ -529,15 +529,89 @@ final class EnergyMotionStyleTests: XCTestCase {
         defaults.removePersistentDomain(forName: suite)
     }
 
-    func testMenuBarRightClickDefaultsToStatusMenuAndPersists() {
-        let suite = "MacPower.RightClickActionTests"
+    func testSettingsButtonPlacementDefaultsToRingHostAndPersists() {
+        let suite = "MacPower.SettingsButtonPlacement.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suite)!
         defaults.removePersistentDomain(forName: suite)
         let first = AppSettings(defaults: defaults)
-        XCTAssertEqual(first.menuBarRightClickAction, .statusMenu)
-        first.menuBarRightClickAction = .openPanel
+        XCTAssertEqual(first.settingsButtonPlacement, .insideBlock)
+        XCTAssertEqual(first.settingsButtonHost, .rings)
+        XCTAssertTrue(first.showSettingsBlock)
+        XCTAssertTrue(first.settingsButtonPlacement.drawsRingGear(host: first.settingsButtonHost, ringsVisible: true))
+        XCTAssertFalse(first.settingsButtonPlacement.drawsRingGear(host: .rings, ringsVisible: false))
+        XCTAssertFalse(first.settingsButtonPlacement.drawsFlowGear(host: .flow, flowVisible: false))
+        XCTAssertFalse(SettingsButtonPlacement.rightClickOnly.drawsOwnBlock(blockVisible: true))
+        XCTAssertFalse(SettingsButtonPlacement.insideBlock.drawsHeader(host: .topApps, section: .topApps, sectionVisible: false))
+        XCTAssertTrue(SettingsButtonPlacement.ownBlock.drawsOwnBlock(blockVisible: true))
+        XCTAssertFalse(SettingsButtonPlacement.ownBlock.drawsOwnBlock(blockVisible: false))
+        first.settingsButtonPlacement = .rightClickOnly
+        first.settingsButtonHost = .localIP
+        first.showSettingsBlock = false
         let second = AppSettings(defaults: defaults)
-        XCTAssertEqual(second.menuBarRightClickAction, .openPanel)
+        XCTAssertEqual(second.settingsButtonPlacement, .rightClickOnly)
+        XCTAssertEqual(second.settingsButtonHost, .localIP)
+        XCTAssertFalse(second.showSettingsBlock)
+        defaults.set("nope", forKey: "settingsButtonPlacement")
+        defaults.set("also-nope", forKey: "settingsButtonHost")
+        let fallback = AppSettings(defaults: defaults)
+        XCTAssertEqual(fallback.settingsButtonPlacement, .insideBlock)
+        XCTAssertEqual(fallback.settingsButtonHost, .rings)
+        defaults.removePersistentDomain(forName: suite)
+    }
+
+    func testHiddenHostMovesToNextVisibleBlockAndLastBlockStays() {
+        let order: [PopoverBlock] = [.rings, .flow, .topApps, .lowPower, .localIP, .batteryCycle, .settings]
+        XCTAssertEqual(
+            SettingsButtonHost.nextVisible(after: .rings, order: order, isVisible: { $0 != .flow && $0 != .rings && $0 != .settings }),
+            .topApps
+        )
+        XCTAssertEqual(
+            SettingsButtonHost.nextVisible(after: .batteryCycle, order: order, isVisible: { $0 == .rings || $0 == .settings }),
+            .rings
+        )
+        XCTAssertNil(SettingsButtonHost.nextVisible(after: .rings, order: order, isVisible: { $0 == .settings }))
+        XCTAssertEqual(SettingsButtonPlacement.standaloneRowTitle("设置"), "设置…")
+
+        let suite = "MacPower.SettingsHostMove.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suite)!
+        defaults.removePersistentDomain(forName: suite)
+        let settings = AppSettings(defaults: defaults)
+        settings.showEnergyFlow = false
+        XCTAssertFalse(settings.visibleSettingsHosts.contains(.flow))
+        XCTAssertEqual(settings.settingsButtonHost, .rings)
+        settings.showStatusRings = false
+        XCTAssertEqual(settings.settingsButtonPlacement, .insideBlock)
+        XCTAssertEqual(settings.settingsButtonHost, .topApps)
+        XCTAssertFalse(settings.visibleSettingsHosts.contains(.rings))
+        XCTAssertEqual(settings.visibleSettingsHosts.first, .topApps)
+
+        settings.showTopApps = false
+        XCTAssertEqual(settings.settingsButtonHost, .lowPower)
+        settings.showLowPower = false
+        settings.showLocalIP = false
+        settings.showBatteryCycle = false
+        XCTAssertEqual(settings.settingsButtonPlacement, .ownBlock)
+        XCTAssertTrue(settings.showSettingsBlock)
+        XCTAssertTrue(settings.isSoleVisiblePopoverBlock(.settings))
+        settings.showSettingsBlock = false
+        XCTAssertTrue(settings.showSettingsBlock)
+        XCTAssertFalse(settings.showStatusRings)
+
+        defaults.set(false, forKey: "showStatusRings")
+        defaults.set(false, forKey: "showEnergyFlow")
+        defaults.set(false, forKey: "showTopApps")
+        defaults.set(false, forKey: "showLowPower")
+        defaults.set(false, forKey: "showLocalIP")
+        defaults.set(false, forKey: "showBatteryCycle")
+        defaults.set(false, forKey: "showSettingsBlock")
+        defaults.set(["lowPower", "rings"], forKey: "popoverOrder")
+        defaults.set("flow", forKey: "settingsButtonHost")
+        defaults.set("insideBlock", forKey: "settingsButtonPlacement")
+        let restored = AppSettings(defaults: defaults)
+        XCTAssertTrue(restored.showLowPower)
+        XCTAssertFalse(restored.showStatusRings)
+        XCTAssertFalse(restored.visibleSettingsHosts.contains(.flow))
+        XCTAssertEqual(restored.settingsButtonHost, .lowPower)
         defaults.removePersistentDomain(forName: suite)
     }
 

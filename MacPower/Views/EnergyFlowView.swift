@@ -190,9 +190,8 @@ private struct EnergyFlowDiagram<Trailing: View>: View {
             .equatable()
             .overlay {
                 ZStack {
-                    motionOverlay(layout: layout)
+                    motionOverlay(layout: layout, size: geo.size)
                     wattLabels(layout: layout)
-                    iconLayer(layout: layout, size: geo.size)
                 }
             }
         }
@@ -200,32 +199,50 @@ private struct EnergyFlowDiagram<Trailing: View>: View {
     }
 
     @ViewBuilder
-    private func motionOverlay(layout: Layout) -> some View {
-        if isAnimating, motion.usesCanvasTimeline {
-            TimelineView(.periodic(from: .now, by: 1.0 / motionFrameRate.framesPerSecond)) { timeline in
-                let phase = timeline.date.timeIntervalSinceReferenceDate / 4.6
-                Canvas { context, _ in
-                    context.clip(to: layout.body, style: FillStyle(eoFill: false, antialiased: true))
-                    drawMotion(
-                        context: &context,
-                        body: layout.body,
-                        lanes: layout.outgoingLanes,
-                        fill: layout.fillLeft,
-                        opacity: layout.outgoingOverlayOpacity,
-                        phase: phase
+    private func motionOverlay(layout: Layout, size: CGSize) -> some View {
+        let animateMotion = isAnimating && motion.usesCanvasTimeline
+        let animateIcons = isAnimating && pulseFlowIcons
+        if animateMotion || animateIcons {
+            // One clock for the ribbon and the icon pulse. Two timelines were waking the popover twice.
+            let frames = animateMotion ? motionFrameRate.framesPerSecond : 30
+            TimelineView(.periodic(from: .now, by: 1.0 / frames)) { timeline in
+                ZStack {
+                    if animateMotion {
+                        let phase = timeline.date.timeIntervalSinceReferenceDate / 4.6
+                        Canvas { context, _ in
+                            context.clip(to: layout.body, style: FillStyle(eoFill: false, antialiased: true))
+                            drawMotion(
+                                context: &context,
+                                body: layout.body,
+                                lanes: layout.outgoingLanes,
+                                fill: layout.fillLeft,
+                                opacity: layout.outgoingOverlayOpacity,
+                                phase: phase
+                            )
+                            drawMotion(
+                                context: &context,
+                                body: layout.body,
+                                lanes: layout.incomingLanes,
+                                fill: layout.fillLeft,
+                                opacity: layout.incomingOverlayOpacity,
+                                phase: phase
+                            )
+                        }
+                        .drawingGroup(opaque: false)
+                    }
+                    bubbleStack(
+                        layout.bubbles,
+                        breath: animateIcons ? iconBreath(at: timeline.date) : 0
                     )
-                    drawMotion(
-                        context: &context,
-                        body: layout.body,
-                        lanes: layout.incomingLanes,
-                        fill: layout.fillLeft,
-                        opacity: layout.incomingOverlayOpacity,
-                        phase: phase
-                    )
+                    .opacity(layout.bubbleOpacity)
                 }
-                .drawingGroup(opaque: false)
             }
+            .frame(width: size.width, height: size.height)
             .allowsHitTesting(false)
+        } else {
+            bubbleStack(layout.bubbles, breath: 0)
+                .opacity(layout.bubbleOpacity)
+                .allowsHitTesting(false)
         }
     }
 
@@ -308,27 +325,6 @@ private struct EnergyFlowDiagram<Trailing: View>: View {
             drawWattLabel(context: &context, body: body, lane: lane)
         }
         context.opacity = previous
-    }
-
-    @ViewBuilder
-    private func iconLayer(layout: Layout, size: CGSize) -> some View {
-        if isAnimating, pulseFlowIcons {
-            TimelineView(.periodic(from: .now, by: 1.0 / 30.0)) { timeline in
-                let breath = iconBreath(at: timeline.date)
-                ZStack {
-                    bubbleStack(layout.bubbles, breath: breath)
-                }
-                .opacity(layout.bubbleOpacity)
-            }
-            .frame(width: size.width, height: size.height)
-            .allowsHitTesting(false)
-        } else {
-            ZStack {
-                bubbleStack(layout.bubbles, breath: 0)
-            }
-            .opacity(layout.bubbleOpacity)
-            .allowsHitTesting(false)
-        }
     }
 
     private func bubbleStack(_ bubbles: [Bubble], breath: CGFloat) -> some View {

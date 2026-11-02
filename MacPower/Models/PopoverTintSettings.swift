@@ -312,7 +312,7 @@ enum RingOddRow: String, CaseIterable, Identifiable, Sendable {
 }
 
 enum RingSlot: String, CaseIterable, Identifiable, Codable, Sendable {
-    case battery, cpu, gpu, memory, disk, memoryPressure, swap, download, upload, speedPair
+    case battery, cpu, gpu, memory, disk, memoryPressure, swap, download, upload, speedPair, batteryTemperature, thermalState
 
     var id: String { rawValue }
 
@@ -323,6 +323,8 @@ enum RingSlot: String, CaseIterable, Identifiable, Codable, Sendable {
         case .download: "settings.rings.download"
         case .upload: "settings.rings.upload"
         case .speedPair: "settings.rings.speedPair"
+        case .batteryTemperature: "settings.rings.batteryTemperature"
+        case .thermalState: "settings.rings.thermalState"
         default: metric?.localizationKey ?? rawValue
         }
     }
@@ -385,7 +387,7 @@ struct RingColor: Codable, Equatable, Identifiable, Sendable {
 
 /// Which catalog color a ring segment paints with.
 enum RingColorSegment: String, Codable, CaseIterable, Identifiable, Sendable {
-    case battery, cpu, gpu, memory, disk, memoryPressure, swap, download, upload
+    case battery, cpu, gpu, memory, disk, memoryPressure, swap, download, upload, batteryTemperature, thermalState
 
     var id: String { rawValue }
 
@@ -404,6 +406,8 @@ enum RingColorSegment: String, Codable, CaseIterable, Identifiable, Sendable {
         case .swap: "ring.swap"
         case .download: "settings.rings.download"
         case .upload: "settings.rings.upload"
+        case .batteryTemperature: "settings.rings.batteryTemperature"
+        case .thermalState: "settings.rings.thermalState"
         }
     }
 }
@@ -424,7 +428,7 @@ struct RingTintSettings: Codable, Equatable, Sendable {
     static let glide = RingTintSettings.preset(.glide)
 
     private static let editableSegments: [RingColorSegment] = [.battery, .cpu, .gpu, .memory]
-    private static let memoryFollowers: [RingColorSegment] = [.disk, .memoryPressure, .swap]
+    private static let memoryFollowers: [RingColorSegment] = [.disk, .memoryPressure, .swap, .batteryTemperature, .thermalState]
 
     var battery: ValueTintScheme { scheme(forSegment: .battery) }
     var cpu: ValueTintScheme { scheme(forSegment: .cpu) }
@@ -506,6 +510,8 @@ struct RingTintSettings: Codable, Equatable, Sendable {
             .disk: memoryID,
             .memoryPressure: memoryID,
             .swap: memoryID,
+            .batteryTemperature: memoryID,
+            .thermalState: memoryID,
             .download: downloadID,
             .upload: uploadID,
         ]

@@ -16,7 +16,29 @@ final class SystemMetricsService {
     private var lastUpload: Double = 0
     private var lastNetworkBytes: (rx: UInt64, tx: UInt64, time: TimeInterval)?
     private var lastPublished: SystemSnapshot?
-    private var heavySampling = false
+    private var lastDiskRead: ContinuousClock.Instant?
+    private var gpuEntries: [io_object_t] = []
+    private var gpuResolvedAt: ContinuousClock.Instant?
+
+    struct Needs: Equatable, Sendable {
+        var cpu = false
+        var gpu = false
+        var memory = false
+        var disk = false
+        var pressure = false
+        var swap = false
+        var network = false
+
+        var samplesAnything: Bool {
+            cpu || gpu || memory || disk || pressure || swap || network
+        }
+
+        static let all = Needs(
+            cpu: true, gpu: true, memory: true, disk: true, pressure: true, swap: true, network: true
+        )
+    }
+
+    var needs: () -> Needs = { .all }
 
     var onChange: ((SystemSnapshot) -> Void)?
 
@@ -28,19 +50,19 @@ final class SystemMetricsService {
     func setPopoverOpen(_ open: Bool) {
         timer?.invalidate()
         timer = nil
-        if open {
-            refresh(heavy: true)
-            schedule(heavy: true)
-        }
+        guard open, needs().samplesAnything else { return }
+        lastDiskRead = nil
+        refresh()
+        schedule()
     }
 
     func stop() {
         timer?.invalidate()
         timer = nil
+        releaseGPUEntries()
     }
 
-    private func schedule(heavy: Bool) {
-        heavySampling = heavy
+    private func schedule() {
         let interval: TimeInterval = 1
         let timer = Timer(
             timeInterval: interval,
@@ -56,37 +78,53 @@ final class SystemMetricsService {
 
     @objc
     private func handleTimer() {
-        refresh(heavy: heavySampling)
+        guard needs().samplesAnything else { return }
+        refresh()
     }
 
-    private func refresh(heavy: Bool) {
-        let cpuTicks = Self.cpuTicks()
-        if let resolved = CPUTickSample.resolvedPercent(
-            previous: previousCPU,
-            current: cpuTicks,
-            lastPublished: lastCPU
-        ) {
-            lastCPU = resolved
-        }
-        if let cpuTicks {
-            previousCPU = cpuTicks
-        }
-
-        if heavy {
-            lastGPU = Self.gpuUtilization() ?? lastGPU
-            lastMemory = Self.memoryPercent()
-            lastDisk = Self.diskPercent() ?? lastDisk
-            lastPressure = Self.memoryPressurePercent()
-            lastSwap = Self.swapPercent()
-            if let rates = Self.networkRates(since: &lastNetworkBytes) {
-                lastDownload = rates.download
-                lastUpload = rates.upload
+    private func refresh() {
+        let wanted = needs()
+        if wanted.cpu {
+            let cpuTicks = Self.cpuTicks()
+            if let resolved = CPUTickSample.resolvedPercent(
+                previous: previousCPU,
+                current: cpuTicks,
+                lastPublished: lastCPU
+            ) {
+                lastCPU = resolved
+            }
+            if let cpuTicks {
+                previousCPU = cpuTicks
             }
         }
 
-        guard let lastCPU else { return }
+        if wanted.gpu {
+            lastGPU = gpuUtilization() ?? lastGPU
+        }
+        if wanted.memory {
+            lastMemory = Self.memoryPercent()
+        }
+        if wanted.disk {
+            let now = ContinuousClock.now
+            if lastDiskRead == nil || now - (lastDiskRead ?? now) > .seconds(60) {
+                lastDisk = Self.diskPercent() ?? lastDisk
+                lastDiskRead = now
+            }
+        }
+        if wanted.pressure {
+            lastPressure = Self.memoryPressurePercent()
+        }
+        if wanted.swap {
+            lastSwap = Self.swapPercent()
+        }
+        if wanted.network, let rates = Self.networkRates(since: &lastNetworkBytes) {
+            lastDownload = rates.download
+            lastUpload = rates.upload
+        }
+
+        if wanted.cpu, lastCPU == nil { return }
         let next = SystemSnapshot(
-            cpuPercent: lastCPU,
+            cpuPercent: lastCPU ?? 0,
             gpuPercent: lastGPU,
             memoryPercent: lastMemory,
             diskPercent: lastDisk,
@@ -204,8 +242,40 @@ final class SystemMetricsService {
         return (rx, tx)
     }
 
-    private static func gpuUtilization() -> Double? {
+    /// Walks the accelerator tree once, then reads only `PerformanceStatistics` from the entries that have it.
+    private func gpuUtilization() -> Double? {
+        let now = ContinuousClock.now
+        if gpuEntries.isEmpty {
+            if let gpuResolvedAt, now - gpuResolvedAt < .seconds(30) { return nil }
+            resolveGPUEntries()
+            gpuResolvedAt = now
+        }
         var best: Double?
+        var dead = 0
+        for entry in gpuEntries {
+            switch readUtilization(from: entry) {
+            case .value(let value):
+                best = max(best ?? 0, value)
+            case .missing:
+                break
+            case .dead:
+                dead += 1
+            }
+        }
+        if dead == gpuEntries.count, !gpuEntries.isEmpty {
+            resolveGPUEntries()
+            gpuResolvedAt = now
+            for entry in gpuEntries {
+                if case .value(let value) = readUtilization(from: entry) {
+                    best = max(best ?? 0, value)
+                }
+            }
+        }
+        return best.map { min(100, max(0, $0)) }
+    }
+
+    private func resolveGPUEntries() {
+        releaseGPUEntries()
         for className in ["AGXAccelerator", "IOAccelerator", "IOGPU"] {
             var iterator: io_iterator_t = 0
             guard IOServiceGetMatchingServices(
@@ -216,54 +286,67 @@ final class SystemMetricsService {
             defer { IOObjectRelease(iterator) }
             var service = IOIteratorNext(iterator)
             while service != 0 {
-                if let value = utilization(from: service) {
-                    best = max(best ?? 0, value)
-                }
-                let child = childUtilization(service)
-                if let child {
-                    best = max(best ?? 0, child)
-                }
-                IOObjectRelease(service)
+                keepGPUEntry(service)
                 service = IOIteratorNext(iterator)
             }
-            if best != nil { break }
+            if !gpuEntries.isEmpty { break }
         }
-        return best.map { min(100, max(0, $0)) }
     }
 
-    private static func childUtilization(_ service: io_object_t) -> Double? {
+    private func keepGPUEntry(_ service: io_object_t) {
+        var keptService = false
+        if case .value = readUtilization(from: service) {
+            gpuEntries.append(service)
+            keptService = true
+        }
         var iterator: io_iterator_t = 0
         guard IORegistryEntryGetChildIterator(service, kIOServicePlane, &iterator) == KERN_SUCCESS else {
-            return nil
+            if !keptService { IOObjectRelease(service) }
+            return
         }
         defer { IOObjectRelease(iterator) }
-        var best: Double?
         var child = IOIteratorNext(iterator)
         while child != 0 {
-            if let value = utilization(from: child) {
-                best = max(best ?? 0, value)
+            if case .value = readUtilization(from: child) {
+                gpuEntries.append(child)
+            } else {
+                IOObjectRelease(child)
             }
-            IOObjectRelease(child)
             child = IOIteratorNext(iterator)
         }
-        return best
+        if !keptService { IOObjectRelease(service) }
     }
 
-    private static func utilization(from service: io_object_t) -> Double? {
-        var propsRef: Unmanaged<CFMutableDictionary>?
-        guard IORegistryEntryCreateCFProperties(service, &propsRef, kCFAllocatorDefault, 0) == KERN_SUCCESS,
-              let props = propsRef?.takeRetainedValue() as? [String: Any]
-        else {
-            return nil
+    private func releaseGPUEntries() {
+        for entry in gpuEntries {
+            IOObjectRelease(entry)
         }
-        let stats = props["PerformanceStatistics"] as? [String: Any]
+        gpuEntries = []
+    }
+
+    private enum GPURead {
+        case value(Double)
+        case missing
+        case dead
+    }
+
+    private func readUtilization(from service: io_object_t) -> GPURead {
+        guard let property = IORegistryEntryCreateCFProperty(
+            service,
+            "PerformanceStatistics" as CFString,
+            kCFAllocatorDefault,
+            0
+        )?.takeRetainedValue() else {
+            return .dead
+        }
+        guard let stats = property as? [String: Any] else { return .missing }
         let keys = ["Device Utilization %", "Renderer Utilization %", "Tiler Utilization %"]
         var best: Double?
         for key in keys {
-            if let number = stats?[key] as? NSNumber {
+            if let number = stats[key] as? NSNumber {
                 best = max(best ?? 0, number.doubleValue)
             }
         }
-        return best
+        return best.map { .value($0) } ?? .missing
     }
 }

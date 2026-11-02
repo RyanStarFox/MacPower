@@ -21,6 +21,12 @@
 		5C3C597B1BFA1822FD09B878 /* Compatibility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ED65D999AA01B5F39EEF59A /* Compatibility.swift */; };
 		5F595B872BFAA1196FE69194 /* UpdateChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0BE273AFEFD0F7B157013AE /* UpdateChecker.swift */; };
 		E4A18C0D9B2F47A6C5D81F33 /* UpdateInstaller.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7E2C91A4D6F4088A1C35E70 /* UpdateInstaller.swift */; };
+		A8F31C6E2B904D7A91E5F440 /* LowPowerPreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A70E5B9D4F4A2E8B6C3D11 /* LowPowerPreset.swift */; };
+		7E5C9A04B1D84F62A8C3E915 /* TopAppSampler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D8B2A17C6E54F09B3A1D772 /* TopAppSampler.swift */; };
+		9B4A7C21E8F64D05A3B2C197 /* LowPowerModeController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F6E8D14A9C54B70E1D3A886 /* LowPowerModeController.swift */; };
+		6C9D3B80E1A74F25B8D4A061 /* PopoverExtrasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1C8E73D2B44F96A0E7C358 /* PopoverExtrasView.swift */; };
+		F8D52B0C3E7A4D19B6C4F2E1 /* LocalIPAddresses.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7C41A9B2D6F4C08A5B3E1D0 /* LocalIPAddresses.swift */; };
+		1A9E6C3B7D5F40A8B2E4C671 /* PopoverExtrasTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7C4A1E08B2F49A6C5D31E90 /* PopoverExtrasTests.swift */; };
 		683634EED54AA3FB20C4DBC6 /* EnergyFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A5D8AFD1B7F1B45F51B583B /* EnergyFlowView.swift */; };
 		6A4700B5CC53C0C3E8118460 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 88590B5A04281A553757B0B3 /* AppIcon.icon */; };
 		6F9C22DA2FCF1138F03E58BD /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4989CA67625E8BAE3ED36794 /* AppTheme.swift */; };
@@ -88,6 +94,12 @@
 		9E3AC898FC0E9E06A6F67EF0 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		A0BE273AFEFD0F7B157013AE /* UpdateChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateChecker.swift; sourceTree = "<group>"; };
 		B7E2C91A4D6F4088A1C35E70 /* UpdateInstaller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateInstaller.swift; sourceTree = "<group>"; };
+		C1A70E5B9D4F4A2E8B6C3D11 /* LowPowerPreset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LowPowerPreset.swift; sourceTree = "<group>"; };
+		4D8B2A17C6E54F09B3A1D772 /* TopAppSampler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopAppSampler.swift; sourceTree = "<group>"; };
+		2F6E8D14A9C54B70E1D3A886 /* LowPowerModeController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LowPowerModeController.swift; sourceTree = "<group>"; };
+		5A1C8E73D2B44F96A0E7C358 /* PopoverExtrasView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverExtrasView.swift; sourceTree = "<group>"; };
+		E7C41A9B2D6F4C08A5B3E1D0 /* LocalIPAddresses.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalIPAddresses.swift; sourceTree = "<group>"; };
+		D7C4A1E08B2F49A6C5D31E90 /* PopoverExtrasTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverExtrasTests.swift; sourceTree = "<group>"; };
 		A37FA8D0166A96191F3B552B /* PowerTelemetryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowerTelemetryService.swift; sourceTree = "<group>"; };
 		AA21DF4EFAFE0D26294AD728 /* MenuBarBatteryIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarBatteryIcon.swift; sourceTree = "<group>"; };
 		B07D3EE64903A4F05FF797FF /* EnergyMotionFrameRate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnergyMotionFrameRate.swift; sourceTree = "<group>"; };
@@ -138,6 +150,9 @@
 				C2AFE15BB6E2593BA442FDA8 /* TimeEstimateService.swift */,
 				A0BE273AFEFD0F7B157013AE /* UpdateChecker.swift */,
 				B7E2C91A4D6F4088A1C35E70 /* UpdateInstaller.swift */,
+				2F6E8D14A9C54B70E1D3A886 /* LowPowerModeController.swift */,
+				4D8B2A17C6E54F09B3A1D772 /* TopAppSampler.swift */,
+				E7C41A9B2D6F4C08A5B3E1D0 /* LocalIPAddresses.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -150,6 +165,7 @@
 				0ADCA90FA9D5D89AE86F9600 /* GlyphSlotView.swift */,
 				AA21DF4EFAFE0D26294AD728 /* MenuBarBatteryIcon.swift */,
 				567E626D5987780BEB24265E /* PopoverRootView.swift */,
+				5A1C8E73D2B44F96A0E7C358 /* PopoverExtrasView.swift */,
 				7F32418AF410C0C43E82CEC2 /* SettingsView.swift */,
 				3F7A2D18C6B54E90A1D8C4E6 /* ReleaseNotesPanel.swift */,
 				2A87ED6CEDCC37BA32FEFD25 /* StatusRingView.swift */,
@@ -163,6 +179,7 @@
 			children = (
 				F9B0E2FB7D8D2AA02DDF0C93 /* EnergyFlowModeTests.swift */,
 				D09AF92F89E2A37C369790FB /* UpdateCheckTests.swift */,
+				D7C4A1E08B2F49A6C5D31E90 /* PopoverExtrasTests.swift */,
 			);
 			path = MacPowerTests;
 			sourceTree = "<group>";
@@ -201,6 +218,7 @@
 				454450EE2CEBB979127C313E /* AppLanguage.swift */,
 				3968B1F4514587C19DC9E189 /* AppSettings.swift */,
 				F95C96E9DDFF3C8713B85B2C /* AppVersion.swift */,
+				C1A70E5B9D4F4A2E8B6C3D11 /* LowPowerPreset.swift */,
 				EBEE380CB6A3631813F77B9B /* EnergyFlowMode.swift */,
 				B07D3EE64903A4F05FF797FF /* EnergyMotionFrameRate.swift */,
 				67BAA20C54FB8A583F882002 /* EnergyMotionStyle.swift */,
@@ -325,6 +343,7 @@
 			files = (
 				1F38AC8223B7A29811F3B13E /* EnergyFlowModeTests.swift in Sources */,
 				9E659D7B3BD2BA25A30E6A45 /* UpdateCheckTests.swift in Sources */,
+				1A9E6C3B7D5F40A8B2E4C671 /* PopoverExtrasTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -367,6 +386,11 @@
 				85D69FE970F34B47739CA0BD /* TimeEstimateService.swift in Sources */,
 				5F595B872BFAA1196FE69194 /* UpdateChecker.swift in Sources */,
 				E4A18C0D9B2F47A6C5D81F33 /* UpdateInstaller.swift in Sources */,
+				A8F31C6E2B904D7A91E5F440 /* LowPowerPreset.swift in Sources */,
+				7E5C9A04B1D84F62A8C3E915 /* TopAppSampler.swift in Sources */,
+				9B4A7C21E8F64D05A3B2C197 /* LowPowerModeController.swift in Sources */,
+				6C9D3B80E1A74F25B8D4A061 /* PopoverExtrasView.swift in Sources */,
+				F8D52B0C3E7A4D19B6C4F2E1 /* LocalIPAddresses.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -391,6 +415,10 @@
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = MacPower/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
+				OTHER_LDFLAGS = (
+					"-lpmenergy",
+					"-lpmsample",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = app.macpower.MacPower;
 				PRODUCT_NAME = MacPower;
 				SDKROOT = macosx;
@@ -573,6 +601,10 @@
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = MacPower/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
+				OTHER_LDFLAGS = (
+					"-lpmenergy",
+					"-lpmsample",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = app.macpower.MacPower;
 				PRODUCT_NAME = MacPower;
 				SDKROOT = macosx;

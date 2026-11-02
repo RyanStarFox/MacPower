@@ -1,3 +1,5 @@
+import AppKit
+import CoreServices
 import XCTest
 @testable import MacPower
 
@@ -176,5 +178,42 @@ final class AutoUpdateSettingsTests: XCTestCase {
         let second = AppSettings(defaults: defaults)
         XCTAssertFalse(second.automaticallyCheckForUpdates)
         defaults.removePersistentDomain(forName: suite)
+    }
+}
+
+final class LoginLaunchTests: XCTestCase {
+    func testPlainOpenIsNotLogin() {
+        XCTAssertFalse(LoginLaunch.isLoginLaunch(nil))
+        XCTAssertFalse(LoginLaunch.isLoginLaunch(openEvent()))
+    }
+
+    func testNestedLoginFlag() {
+        let event = openEvent()
+        let record = NSAppleEventDescriptor.record()
+        record.setParam(NSAppleEventDescriptor(boolean: true), forKeyword: keyAELaunchedAsLogInItem)
+        event.setParam(record, forKeyword: keyAEPropData)
+        XCTAssertTrue(LoginLaunch.isLoginLaunch(event))
+    }
+
+    func testDirectLoginFlag() {
+        let event = openEvent()
+        event.setParam(NSAppleEventDescriptor(boolean: true), forKeyword: keyAELaunchedAsLogInItem)
+        XCTAssertTrue(LoginLaunch.isLoginLaunch(event))
+    }
+
+    func testExplicitFalseIsNotLogin() {
+        let event = openEvent()
+        event.setParam(NSAppleEventDescriptor(boolean: false), forKeyword: keyAELaunchedAsLogInItem)
+        XCTAssertFalse(LoginLaunch.isLoginLaunch(event))
+    }
+
+    private func openEvent() -> NSAppleEventDescriptor {
+        NSAppleEventDescriptor(
+            eventClass: kCoreEventClass,
+            eventID: kAEOpenApplication,
+            targetDescriptor: nil,
+            returnID: AEReturnID(kAutoGenerateReturnID),
+            transactionID: AETransactionID(kAnyTransactionID)
+        )
     }
 }

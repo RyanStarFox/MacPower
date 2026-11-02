@@ -2,7 +2,7 @@ import AppKit
 import SwiftUI
 
 @MainActor
-final class StatusItemController: NSObject, NSPopoverDelegate {
+final class StatusItemController: NSObject, NSPopoverDelegate, NSMenuDelegate {
     private let appState: AppState
     private let statusItem: NSStatusItem
     private let popover = NSPopover()
@@ -15,6 +15,7 @@ final class StatusItemController: NSObject, NSPopoverDelegate {
     private var lastTitle: String?
     private var lastTooltip: String?
     private var isRefreshingIcon = false
+    private var isShowingStatusMenu = false
 
     init(appState: AppState) {
         self.appState = appState
@@ -28,7 +29,7 @@ final class StatusItemController: NSObject, NSPopoverDelegate {
         // Empty options: we set `popover.contentSize` ourselves before each show.
         // Relying on intrinsicContentSize alone left Sequoia with a too-narrow
         // frame, and SwiftUI then centered/clipped the 420pt panel on both sides.
-        hosting.sizingOptions = []
+        configureHosting(hosting)
         popover.contentViewController = hosting
         popover.contentSize = NSSize(width: popoverWidth, height: 1)
         applyAnchorPreference()
@@ -63,7 +64,7 @@ final class StatusItemController: NSObject, NSPopoverDelegate {
 
     func applyLocalization() {
         let replacement = NSHostingController(rootView: PopoverRootView(appState: appState))
-        replacement.sizingOptions = []
+        configureHosting(replacement)
         popover.contentViewController = replacement
         hosting = replacement
         if popover.isShown {
@@ -150,7 +151,8 @@ final class StatusItemController: NSObject, NSPopoverDelegate {
     @objc
     private func handleStatusItemClick(_ sender: Any?) {
         let isRightClick = NSApp.currentEvent?.type == .rightMouseUp
-        if isRightClick, appState.settings.menuBarRightClickAction == .statusMenu {
+        if isRightClick {
+            guard !isShowingStatusMenu else { return }
             showStatusMenu()
             return
         }
@@ -165,16 +167,27 @@ final class StatusItemController: NSObject, NSPopoverDelegate {
             popover.performClose(sender)
             return
         }
-        appState.setPopoverOpen(true)
-        setStatusItemHighlighted(true)
-        // Re-assign so SwiftUI builds the open layout before we measure; Observation
-        // alone can defer the swap past the first sizeThatFits on macOS 15.
-        hosting.rootView = PopoverRootView(appState: appState)
-        applyAnchorPreference()
-        applyArrowHeight(hidden: !appState.settings.showPopoverArrow)
-        syncPopoverContentSize()
+        // Build the open layout without motion so the rings do not slide up.
+        // `show` itself must run after that transaction: disabling Core Animation
+        // actions around `show` drops the popover window and the panel never appears.
+        performWithoutMotion {
+            var transaction = Transaction()
+            transaction.disablesAnimations = true
+            withTransaction(transaction) {
+                appState.setPopoverOpen(true)
+                // Re-assign so SwiftUI builds the open layout before we measure.
+                // Observation alone can defer the swap past the first sizeThatFits.
+                hosting.rootView = PopoverRootView(appState: appState)
+            }
+            setStatusItemHighlighted(true)
+            applyAnchorPreference()
+            applyArrowHeight(hidden: !appState.settings.showPopoverArrow)
+            syncPopoverContentSize()
+        }
+        popover.animates = false
         popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
         hugMenuBarIfArrowHidden()
+        hosting.view.layoutSubtreeIfNeeded()
         popover.contentViewController?.view.window?.makeKey()
     }
 
@@ -186,25 +199,48 @@ final class StatusItemController: NSObject, NSPopoverDelegate {
         }
 
         let menu = NSMenu()
-        let quitTitle = Localization.string("settings.quit", language: appState.settings.language)
+        let language = appState.settings.language
+        let settingsItem = NSMenuItem(
+            title: Localization.string("menu.openSettings", language: language),
+            action: #selector(openSettingsFromMenu),
+            keyEquivalent: ""
+        )
+        settingsItem.target = self
+        menu.addItem(settingsItem)
         let quitItem = NSMenuItem(
-            title: quitTitle,
+            title: Localization.string("settings.quit", language: language),
             action: #selector(quitApp),
             keyEquivalent: "q"
         )
         quitItem.target = self
         menu.addItem(quitItem)
+        menu.delegate = self
+        // A context menu popped from the status button picks up the icon's
+        // drawing appearance, so the labels stay white on a light menu bar.
+        // Assigning the menu to the status item makes AppKit use the menu bar's
+        // light or dark appearance instead.
+        isShowingStatusMenu = true
+        statusItem.menu = menu
+        button.performClick(nil)
+        statusItem.menu = nil
+        isShowingStatusMenu = false
+    }
 
-        if let event = NSApp.currentEvent {
-            NSMenu.popUpContextMenu(menu, with: event, for: button)
-        } else {
-            menu.popUp(positioning: nil, at: NSPoint(x: 0, y: button.bounds.height), in: button)
-        }
+    @objc
+    private func openSettingsFromMenu(_ sender: Any?) {
+        appState.openSettings()
     }
 
     @objc
     private func quitApp(_ sender: Any?) {
         NSApp.terminate(sender)
+    }
+
+    func menuDidClose(_ menu: NSMenu) {
+        if statusItem.menu === menu {
+            statusItem.menu = nil
+        }
+        isShowingStatusMenu = false
     }
 
     func popoverDidShow(_ notification: Notification) {
@@ -219,7 +255,16 @@ final class StatusItemController: NSObject, NSPopoverDelegate {
 
     private var popoverWidth: CGFloat {
         guard appState.settings.showStatusRings else { return PopoverLayout.width }
-        return PopoverLayout.width(ringCount: appState.settings.ringOrder.count, twoRows: appState.settings.twoRingRows)
+        let settings = appState.settings
+        let includesSettings = settings.settingsButtonPlacement.drawsRingGear(
+            host: settings.settingsButtonHost,
+            ringsVisible: true
+        )
+        return PopoverLayout.width(
+            ringCount: settings.ringOrder.count,
+            twoRows: settings.twoRingRows,
+            includesSettings: includesSettings
+        )
     }
 
     /// Lock width to the SwiftUI design width and take height from the hosting view.
@@ -234,18 +279,51 @@ final class StatusItemController: NSObject, NSPopoverDelegate {
             in: NSSize(width: width, height: CGFloat.greatestFiniteMagnitude)
         )
         let size = NSSize(width: width, height: max(ceil(fitted.height), 1))
-        // Animating this resize is what slides the rings from the previous
-        // pitch into the final grid. The popover can still fade in.
+        // Animating this resize slides the ring block up from the previous
+        // (often shorter) frame. Keep the popover's own fade for show/close,
+        // but commit this size with motion disabled, then lay out before any
+        // later caller turns animation back on.
         let animates = popover.animates
         popover.animates = false
+        NSAnimationContext.beginGrouping()
+        NSAnimationContext.current.duration = 0
+        NSAnimationContext.current.allowsImplicitAnimation = false
         popover.contentSize = size
-        popover.animates = animates
         hosting.view.layoutSubtreeIfNeeded()
+        NSAnimationContext.endGrouping()
+        popover.animates = animates
+    }
+
+    private func configureHosting(_ hosting: NSHostingController<PopoverRootView>) {
+        hosting.sizingOptions = []
+    }
+
+    /// Content size, show, and the menu-bar hug all change the window frame.
+    /// Any one of them, inside the popover's implicit animation, moves the rings.
+    /// `animates` stays off until the next turn so a show() scheduled after this
+    /// call returns cannot pick the flag back up and slide the ring block.
+    private func performWithoutMotion(_ work: () -> Void) {
+        popover.animates = false
+        NSAnimationContext.beginGrouping()
+        NSAnimationContext.current.duration = 0
+        NSAnimationContext.current.allowsImplicitAnimation = false
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        work()
+        CATransaction.commit()
+        NSAnimationContext.endGrouping()
+        DispatchQueue.main.async { [weak self] in
+            self?.popover.animates = true
+        }
     }
 
     func popoverDidClose(_ notification: Notification) {
         setStatusItemHighlighted(false)
-        appState.setPopoverOpen(false)
+        var transaction = Transaction()
+        transaction.disablesAnimations = true
+        withTransaction(transaction) {
+            appState.setPopoverOpen(false)
+        }
     }
 
     /// macOS 27 draws the selected menu-bar item with its native Liquid Glass
@@ -329,6 +407,6 @@ final class StatusItemController: NSObject, NSPopoverDelegate {
         let contentOnScreen = window.convertToScreen(content.convert(content.bounds, to: nil))
         let delta = screen.visibleFrame.maxY - contentOnScreen.maxY
         guard delta > 0.5 else { return }
-        window.setFrame(window.frame.offsetBy(dx: 0, dy: delta), display: true)
+        window.setFrame(window.frame.offsetBy(dx: 0, dy: delta), display: true, animate: false)
     }
 }

@@ -8,6 +8,14 @@ extension Notification.Name {
     static let macPowerReapplySettingsFrame = Notification.Name("MacPowerReapplySettingsFrame")
 }
 
+/// Sidebar plus a wider detail column. The window keeps this size and the detail scrolls.
+enum SettingsColumn {
+    static let sidebarWidth: CGFloat = 212
+    static let contentWidth: CGFloat = 520
+    static let width: CGFloat = sidebarWidth + contentWidth
+    static let preferredHeight: CGFloat = 680
+}
+
 /// macOS 15's hosting controller grows this window but will not shrink it when a
 /// shorter tab is shown. Apply the measured height with the title bar held still.
 private final class SettingsSizerView: NSView {
@@ -64,7 +72,7 @@ private final class SettingsSizerView: NSView {
         var frame = NSRect(
             x: snap(window.frame.minX),
             y: top - targetHeight,
-            width: 440,
+            width: SettingsColumn.width,
             height: targetHeight
         )
         if let visible {
@@ -172,21 +180,96 @@ private struct SettingsWindowSizer: NSViewRepresentable {
     }
 }
 
-private struct SettingsContentHeightKey: PreferenceKey {
-    static let defaultValue: CGFloat = 0
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = max(value, nextValue())
+/// Keeps a grouped form from scrolling sideways and hiding its labels.
+private struct SettingsFormWidthLock: NSViewRepresentable {
+    func makeNSView(context: Context) -> NSView {
+        SettingsFormWidthLockView(frame: .zero)
+    }
+
+    func updateNSView(_ nsView: NSView, context: Context) {
+        (nsView as? SettingsFormWidthLockView)?.pin()
     }
 }
 
+private final class SettingsFormWidthLockView: NSView {
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        pin()
+    }
+
+    override func layout() {
+        super.layout()
+        pin()
+    }
+
+    func pin() {
+        guard let scroll = nearestScrollView() else { return }
+        scroll.hasHorizontalScroller = false
+        scroll.horizontalScrollElasticity = .none
+        let clip = scroll.contentView
+        guard clip.bounds.origin.x != 0 else { return }
+        clip.setBoundsOrigin(NSPoint(x: 0, y: clip.bounds.origin.y))
+        scroll.reflectScrolledClipView(clip)
+    }
+
+    private func nearestScrollView() -> NSScrollView? {
+        var ancestor: NSView? = superview
+        for _ in 0..<8 {
+            guard let view = ancestor else { return nil }
+            if let scroll = view as? NSScrollView { return scroll }
+            if let found = Self.findScroll(in: view) { return found }
+            ancestor = view.superview
+        }
+        return nil
+    }
+
+    private static func findScroll(in view: NSView) -> NSScrollView? {
+        if let scroll = view as? NSScrollView { return scroll }
+        for subview in view.subviews {
+            if let found = findScroll(in: subview) { return found }
+        }
+        return nil
+    }
+}
+
+private struct SettingsSidebarEntry: Identifiable {
+    var pane: SettingsView.Pane
+    var title: String
+    var symbol: String
+    var tint: Color
+    var id: SettingsView.Pane { pane }
+}
+
 struct SettingsView: View {
-    private enum Pane: String, CaseIterable, Identifiable {
-        case general, menuBar, rings, flow, about
+    fileprivate enum Pane: String, CaseIterable, Identifiable {
+        case general, panel, tutorial, menuBar, rings, flow, topApps, lowPower, localIP, batteryCycle, about
         var id: String { rawValue }
     }
 
+    /// Pages inside the Tutorial sidebar tab. Titles reuse settings names when they match.
+    private enum TutorialPage: String, CaseIterable, Identifiable {
+        case start, panel, menuBar, rings, flow, topApps, lowPower, localIP, batteryCycle
+        var id: String { rawValue }
+
+        var titleKey: String {
+            switch self {
+            case .start: "tutorial.page.start"
+            case .menuBar: "settings.section.icon"
+            case .rings: "settings.tab.rings"
+            case .flow: "settings.tab.flow"
+            case .topApps: "settings.tab.topApps"
+            case .lowPower: "settings.tab.lowPower"
+            case .panel: "settings.popover.order"
+            case .localIP: "settings.tab.localIP"
+            case .batteryCycle: "settings.tab.batteryCycle"
+            }
+        }
+    }
+
     @Bindable var appState: AppState
-    @State private var pane: Pane = .general
+    @Environment(\.colorScheme) private var colorScheme
+    @State private var pane: Pane
+    @State private var tutorialPage: TutorialPage = .start
     @State private var ringColorSelectionID: UUID?
     @State private var flowEditorTarget: FlowEditorTarget = .all
     @State private var saveDialog: SaveTintDialog?
@@ -205,40 +288,37 @@ struct SettingsView: View {
     }
 
     @State private var savePresetName = ""
-    @State private var ringIconsEditorExpanded = false
-    @State private var flowIconsEditorExpanded = false
-    @State private var menuBarTintEditorExpanded = false
-    @State private var ringTintEditorExpanded = false
-    @State private var flowTintEditorExpanded = false
     @State private var ringDrag = RingDragState()
-    @State private var ringListExpanded = false
-    /// Uncapped height of the settings column, including the title-bar inset.
-    @State private var idealHeight: CGFloat = 0
+    @State private var popoverDrag = PopoverBlockDragState()
+    @State private var ringScaleSlot: RingSlot?
+
+    init(appState: AppState) {
+        self.appState = appState
+        // First interactive launch lands on Tutorial. Later opens keep the default pane.
+        _pane = State(initialValue: appState.showsWelcomeGuide ? .tutorial : .general)
+    }
 
     private var screenLimit: CGFloat {
         NSScreen.main?.visibleFrame.height ?? 900
     }
 
-    /// Short panes hug their content. Taller ones stop at the screen and scroll.
+    /// One window size for every page. The detail column scrolls instead of resizing.
     private var displayHeight: CGFloat {
-        let ideal = idealHeight > 80 ? idealHeight : min(520, screenLimit)
-        return min(ideal, screenLimit)
+        min(SettingsColumn.preferredHeight, screenLimit)
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            settingsStack
-                .frame(width: 440, height: displayHeight, alignment: .top)
-
-            // A pixel of slack from snapping the window height stays below the
-            // tabs. Without this, AppKit centers that slack and the tab row shifts.
-            Spacer(minLength: 0)
+        HStack(spacing: 0) {
+            settingsSidebar
+            settingsDetail
         }
+        .padding(.top, Self.titlebarHeight)
+        .frame(width: SettingsColumn.width, height: displayHeight, alignment: .topLeading)
         .background {
             SettingsWindowSizer(height: displayHeight)
                 .frame(width: 0, height: 0)
         }
-        .frame(width: 440, alignment: .top)
+        .frame(width: SettingsColumn.width, alignment: .topLeading)
         // A zero minimum keeps NSHostingView from growing the window on its own to
         // fit a taller tab (and adding the title bar twice with a full-size content
         // view). SettingsWindowSizer is the only thing that sizes this window.
@@ -252,13 +332,6 @@ struct SettingsView: View {
         .id(appState.settings.language)
         .onChange(of: appState.settings.language) { _, _ in
             appState.refreshLocalizedChrome()
-        }
-        .onChange(of: pane) { _, _ in
-            menuBarTintEditorExpanded = false
-            ringTintEditorExpanded = false
-            ringIconsEditorExpanded = false
-            flowTintEditorExpanded = false
-            flowIconsEditorExpanded = false
         }
         .alert(
             Text("settings.tint.saveAs.title"),
@@ -286,80 +359,878 @@ struct SettingsView: View {
         return NSWindow.frameRect(forContentRect: content, styleMask: [.titled, .closable]).height - content.height
     }()
 
-    /// Content-sized and centered, so macOS 14/15 don't stretch the control to the window edges.
-    private var settingsTabPicker: some View {
-        Picker("settings.title", selection: $pane) {
-            Text("settings.section.general").tag(Pane.general)
-            Text("settings.section.icon").tag(Pane.menuBar)
-            Text("settings.tab.rings").tag(Pane.rings)
-            Text("settings.tab.flow").tag(Pane.flow)
-            Text("settings.tab.about").tag(Pane.about)
-        }
-        .pickerStyle(.segmented)
-        .labelsHidden()
-        .fixedSize(horizontal: true, vertical: true)
-        .frame(maxWidth: .infinity)
-        .padding(.horizontal, 16)
+    private var settingsTabItems: [SettingsSidebarEntry] {
+        let language = appState.settings.language
+        return [
+            entry(.general, "settings.section.general", "gearshape.fill", Color(red: 0.45, green: 0.47, blue: 0.50), language),
+            entry(.panel, "settings.popover.order", "rectangle.3.group", Color(red: 0.36, green: 0.52, blue: 0.72), language),
+            entry(.menuBar, "settings.section.icon", "battery.100", Color(red: 0.16, green: 0.55, blue: 0.95), language),
+            entry(.rings, "settings.tab.rings", "circle.circle", Color(red: 0.93, green: 0.42, blue: 0.18), language),
+            entry(.flow, "settings.tab.flow", "bolt.fill", Color(red: 0.18, green: 0.68, blue: 0.42), language),
+            entry(.topApps, "settings.tab.topApps", "chart.bar.fill", Color(red: 0.88, green: 0.28, blue: 0.26), language),
+            entry(.lowPower, "settings.tab.lowPower", "leaf.fill", Color(red: 0.86, green: 0.64, blue: 0.12), language),
+            entry(.localIP, "settings.tab.localIP", "network", Color(red: 0.22, green: 0.46, blue: 0.92), language),
+            entry(.batteryCycle, "settings.tab.batteryCycle", "arrow.triangle.2.circlepath", Color(red: 0.22, green: 0.62, blue: 0.42), language),
+            entry(.tutorial, "settings.tab.tutorial", "book.closed.fill", Color(red: 0.48, green: 0.36, blue: 0.86), language),
+            entry(.about, "settings.tab.about", "info.circle.fill", Color(red: 0.42, green: 0.44, blue: 0.48), language),
+        ]
     }
 
-    private var settingsStack: some View {
-        VStack(spacing: 0) {
-            settingsTabBar
-            settingsForm(scrolls: true)
-                .frame(maxHeight: .infinity, alignment: .top)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .background(alignment: .top) {
-            // The visible column is capped at the screen. This copy exists only
-            // to learn the uncapped height, so shorter panes still shrink the window.
-            VStack(spacing: 0) {
-                settingsTabBar
-                settingsForm(scrolls: false)
-            }
-            .fixedSize(horizontal: false, vertical: true)
-            .background {
-                GeometryReader { proxy in
-                    Color.clear.preference(key: SettingsContentHeightKey.self, value: proxy.size.height)
+    private func entry(_ pane: Pane, _ key: String, _ symbol: String, _ tint: Color, _ language: AppLanguage) -> SettingsSidebarEntry {
+        SettingsSidebarEntry(
+            pane: pane,
+            title: Localization.string(key, language: language),
+            symbol: symbol,
+            tint: tint
+        )
+    }
+
+    private var selectedTitle: String {
+        settingsTabItems.first { $0.pane == pane }?.title ?? ""
+    }
+
+    private var settingsSidebar: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 2) {
+                ForEach(settingsTabItems) { item in
+                    sidebarRow(item)
                 }
             }
-            .frame(width: 440, height: 0, alignment: .top)
-            .clipped()
-            .opacity(0)
-            .allowsHitTesting(false)
-            .accessibilityHidden(true)
+            .padding(.horizontal, 10)
+            .padding(.top, 8)
+            .padding(.bottom, 12)
         }
-        .onPreferenceChange(SettingsContentHeightKey.self) { newValue in
-            guard newValue > 80, abs(newValue - idealHeight) > 0.5 else { return }
-            var transaction = Transaction()
-            transaction.disablesAnimations = true
-            withTransaction(transaction) {
-                idealHeight = newValue
+        .scrollBounceBehavior(.basedOnSize, axes: .vertical)
+        .scrollIndicators(.hidden)
+        .frame(width: SettingsColumn.sidebarWidth)
+        .frame(maxHeight: .infinity, alignment: .top)
+        .background(Color.primary.opacity(0.045))
+        .overlay(alignment: .trailing) {
+            Rectangle()
+                .fill(Color(nsColor: .separatorColor))
+                .frame(width: 1)
+        }
+    }
+
+    private func sidebarRow(_ item: SettingsSidebarEntry) -> some View {
+        let selected = pane == item.pane
+        return Button {
+            pane = item.pane
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: item.symbol)
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .frame(width: 22, height: 22)
+                    .background(item.tint, in: RoundedRectangle(cornerRadius: 5, style: .continuous))
+                Text(item.title)
+                    .font(.system(size: 13))
+                    .foregroundStyle(.primary)
+                    .lineLimit(1)
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 5)
+            .background {
+                if selected {
+                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                        .fill(Color.primary.opacity(0.12))
+                }
+            }
+            .contentShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(selected ? .isSelected : [])
+    }
+
+    private var settingsDetail: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text(selectedTitle)
+                .font(.system(size: 22, weight: .bold))
+                .foregroundStyle(.primary)
+                .lineLimit(1)
+                .padding(.horizontal, 22)
+                .padding(.top, 6)
+                .padding(.bottom, 2)
+            if pane == .tutorial {
+                tutorialPane
+            } else {
+                settingsForm
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            }
+        }
+        .frame(width: SettingsColumn.contentWidth, alignment: .topLeading)
+        .frame(maxHeight: .infinity, alignment: .topLeading)
+        .background(Color(nsColor: .windowBackgroundColor))
+    }
+
+    private var tutorialPane: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            tutorialPagePicker
+                .padding(.horizontal, 22)
+                .padding(.top, 8)
+            ScrollView {
+                tutorialPageContent
+                    .padding(.horizontal, 22)
+                    .padding(.top, 16)
+                    .padding(.bottom, 20)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .scrollBounceBehavior(.basedOnSize)
+            if appState.showsWelcomeGuide {
+                Button("welcome.done") {
+                    appState.completeWelcomeGuide()
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+                .keyboardShortcut(.defaultAction)
+                .padding(.horizontal, 22)
+                .padding(.top, 4)
+                .padding(.bottom, 16)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+
+    private var tutorialPagePicker: some View {
+        ScrollView(.horizontal) {
+            HStack(spacing: 6) {
+                ForEach(TutorialPage.allCases) { page in
+                    let selected = tutorialPage == page
+                    Button {
+                        tutorialPage = page
+                    } label: {
+                        Text(LocalizedStringKey(page.titleKey))
+                            .font(.system(size: 12, weight: selected ? .semibold : .regular))
+                            .foregroundStyle(selected ? Color.accentColor : Color.primary)
+                            .lineLimit(1)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 5)
+                            .background {
+                                Capsule(style: .continuous)
+                                    .fill(selected ? Color.accentColor.opacity(0.16) : Color.primary.opacity(0.06))
+                            }
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityAddTraits(selected ? .isSelected : [])
+                }
+            }
+            .padding(.vertical, 2)
+        }
+        .scrollIndicators(.hidden)
+        .scrollBounceBehavior(.basedOnSize, axes: .horizontal)
+    }
+
+    @ViewBuilder
+    private var tutorialPageContent: some View {
+        switch tutorialPage {
+        case .start:
+            VStack(alignment: .leading, spacing: 20) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("welcome.title")
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundStyle(.primary)
+                    Text("welcome.subtitle")
+                        .font(.system(size: 13))
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                welcomeMenuPreview
+                welcomeStep(
+                    index: 1,
+                    title: "welcome.icon.title",
+                    body: "welcome.icon.body",
+                    actionTitle: "welcome.icon.button",
+                    action: { appState.openMenuBarSettings() }
+                )
+                welcomeStep(
+                    index: 2,
+                    title: "welcome.menu.title",
+                    body: "welcome.menu.body"
+                )
+            }
+        case .menuBar:
+            tutorialIllustrated("tutorial.menuBar.body") { menuBarTutorialPreview }
+        case .rings:
+            VStack(alignment: .leading, spacing: 16) {
+                ringsTutorialPreview
+                    .frame(maxWidth: .infinity, alignment: .center)
+                tutorialNote(title: "settings.rings.twoRows", "tutorial.rings.rows")
+                tutorialNote(title: "settings.icon.tint.preset", "tutorial.rings.colors")
+                tutorialNote(title: "settings.rings.scale", "tutorial.rings.scale")
+                tutorialNote(title: "settings.rings.thermalState", "tutorial.rings.thermal")
+            }
+        case .flow:
+            tutorialIllustrated("tutorial.flow.body") { flowTutorialPreview }
+        case .topApps:
+            VStack(alignment: .leading, spacing: 16) {
+                topAppsTutorialPreview
+                    .frame(maxWidth: .infinity, alignment: .center)
+                tutorialNote(title: "settings.topApps.chart", "tutorial.topApps.view")
+                tutorialNote(title: "settings.topApps.window", "tutorial.topApps.window")
+                tutorialNote(title: "popover.topApps.title", "tutorial.topApps.impact")
+            }
+        case .lowPower:
+            VStack(alignment: .leading, spacing: 16) {
+                lowPowerTutorialPreview
+                    .frame(maxWidth: .infinity, alignment: .center)
+                tutorialNote(title: "popover.lowPower.strategy", "tutorial.lowPower.strategy")
+                tutorialNote(title: "popover.lowPower.now", "tutorial.lowPower.now")
+                tutorialNote(title: "settings.lowPower.buttons", "tutorial.lowPower.buttons")
+                tutorialNote(title: "settings.lowPower.layout", "tutorial.lowPower.layout")
+            }
+        case .panel:
+            VStack(alignment: .leading, spacing: 16) {
+                panelTutorialPreview
+                    .frame(maxWidth: .infinity, alignment: .center)
+                tutorialNote(title: "settings.popover.arrow", "tutorial.panel.arrow")
+                tutorialNote(title: "settings.button.placement", "tutorial.panel.button")
+                tutorialNote(title: "settings.popover.order", "tutorial.panel.blocks")
+            }
+        case .localIP:
+            tutorialIllustrated("tutorial.localIP.body") { networkTutorialPreview }
+        case .batteryCycle:
+            tutorialIllustrated("tutorial.batteryCycle.body") { cycleTutorialPreview }
+        }
+    }
+
+    private func tutorialNote(title: LocalizedStringKey, _ body: LocalizedStringKey) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(title)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(.primary)
+            Text(body)
+                .font(.system(size: 13))
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func tutorialIllustrated<Picture: View>(
+        title: LocalizedStringKey? = nil,
+        _ body: LocalizedStringKey,
+        @ViewBuilder picture: () -> Picture
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 14) {
+            if let title {
+                Text(title)
+                    .font(.system(size: 14, weight: .semibold))
+            }
+            picture()
+                .frame(maxWidth: .infinity, alignment: .center)
+                .accessibilityHidden(true)
+            Text(body)
+                .font(.system(size: 13))
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    /// Same bitmap the status item draws, including outline, tint, bolt, and beside-percent title.
+    private var menuBarStatusIcon: some View {
+        let appearance = NSApp.effectiveAppearance
+        let image = MenuBarBatteryRenderer.image(
+            snapshot: appState.snapshot,
+            style: appState.settings.iconStyle,
+            fill: appState.menuBarFill(appearance: appearance),
+            appearance: appearance,
+            showChargeGlyphs: appState.settings.showChargeGlyphs
+        )
+        return HStack(spacing: 0) {
+            Image(nsImage: image)
+            if appState.settings.digitPlacement == .beside {
+                Text(" \(Int(appState.snapshot.percent.rounded()))%")
+                    .font(.body)
             }
         }
     }
 
-    private var settingsTabBar: some View {
-        settingsTabPicker
-            .padding(.top, Self.titlebarHeight + 12)
-            .padding(.bottom, 2)
+    /// Sample glyphs for the menu-bar tutorial. Each one is drawn by `MenuBarBatteryRenderer`.
+    private struct MenuBarTutorialSample: Identifiable {
+        var id: String
+        var percent: Double
+        var flowMode: EnergyFlowMode
+        var style: MenuBarIconStyle
+        var swatch: MenuBarTintSwatch
+        var showChargeGlyphs: Bool
+        var captionKeys: [String]
     }
 
-    private func settingsForm(scrolls: Bool) -> some View {
+    /// Filled and outline, percent inside and beside, a charge bolt, and green / yellow / red.
+    private var menuBarTutorialSamples: [MenuBarTutorialSample] {
+        [
+            MenuBarTutorialSample(
+                id: "fill-green",
+                percent: 84,
+                flowMode: .discharging,
+                style: .systemFill,
+                swatch: .systemGreen,
+                showChargeGlyphs: false,
+                captionKeys: ["settings.icon.border.off"]
+            ),
+            MenuBarTutorialSample(
+                id: "inside-yellow",
+                percent: 46,
+                flowMode: .discharging,
+                style: .systemPercentInside,
+                swatch: .systemYellow,
+                showChargeGlyphs: false,
+                captionKeys: ["settings.icon.digits.inside"]
+            ),
+            MenuBarTutorialSample(
+                id: "beside-red",
+                percent: 12,
+                flowMode: .discharging,
+                style: .classicBeside,
+                swatch: .systemRed,
+                showChargeGlyphs: false,
+                captionKeys: ["settings.icon.digits.beside"]
+            ),
+            MenuBarTutorialSample(
+                id: "outline-green",
+                percent: 84,
+                flowMode: .discharging,
+                style: .outlineFill,
+                swatch: .systemGreen,
+                showChargeGlyphs: false,
+                captionKeys: ["settings.icon.border.on"]
+            ),
+            MenuBarTutorialSample(
+                id: "outline-inside-yellow",
+                percent: 46,
+                flowMode: .discharging,
+                style: .outlinePercentInside,
+                swatch: .systemYellow,
+                showChargeGlyphs: false,
+                captionKeys: ["settings.icon.border.on", "settings.icon.digits.inside"]
+            ),
+            MenuBarTutorialSample(
+                id: "bolt-green",
+                percent: 68,
+                flowMode: .charging,
+                style: .systemFill,
+                swatch: .systemGreen,
+                showChargeGlyphs: true,
+                captionKeys: ["settings.icon.chargeGlyphs"]
+            ),
+        ]
+    }
+
+    private var menuBarTutorialPreview: some View {
+        let columns = Array(repeating: GridItem(.flexible(), spacing: 4), count: 3)
+        return VStack(spacing: 16) {
+            LazyVGrid(columns: columns, spacing: 16) {
+                ForEach(menuBarTutorialSamples) { sample in
+                    menuBarTutorialSampleCell(sample)
+                }
+            }
+            Divider()
+            VStack(spacing: 6) {
+                menuBarStatusIcon
+                Text("tutorial.menuBar.current")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .padding(.horizontal, 8)
+        .padding(.top, 16)
+        .padding(.bottom, 12)
+        .frame(maxWidth: 460)
+        .background(Color.primary.opacity(0.045), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .frame(maxWidth: .infinity, alignment: .center)
+        .id(colorScheme)
+    }
+
+    private func menuBarTutorialSampleCell(_ sample: MenuBarTutorialSample) -> some View {
+        VStack(spacing: 8) {
+            menuBarTutorialGlyph(sample)
+            menuBarSampleCaption(sample.captionKeys)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    private func menuBarSampleCaption(_ keys: [String]) -> some View {
+        HStack(spacing: 0) {
+            ForEach(Array(keys.enumerated()), id: \.offset) { index, key in
+                if index > 0 {
+                    Text(" · ")
+                }
+                Text(LocalizedStringKey(key))
+            }
+        }
+        .font(.system(size: 11))
+        .foregroundStyle(.secondary)
+        .multilineTextAlignment(.center)
+        .lineLimit(2)
+        .fixedSize(horizontal: false, vertical: true)
+    }
+
+    private func menuBarTutorialGlyph(_ sample: MenuBarTutorialSample) -> some View {
+        let appearance = NSApp.effectiveAppearance
+        let tint = MenuBarTintScheme(
+            preset: .custom,
+            mode: .always,
+            bands: [MenuBarTintBand(throughPercent: 100, swatch: sample.swatch)]
+        )
+        let snapshot = tutorialPowerSnapshot(percent: sample.percent, flowMode: sample.flowMode)
+        let fill = tint.fill(percent: sample.percent, flowMode: sample.flowMode, appearance: appearance)
+        let image = MenuBarBatteryRenderer.image(
+            snapshot: snapshot,
+            style: sample.style,
+            fill: fill,
+            appearance: appearance,
+            showChargeGlyphs: sample.showChargeGlyphs
+        )
+        let scale: CGFloat = 1.65
+        return HStack(spacing: 2) {
+            Image(nsImage: image)
+                .renderingMode(.original)
+                .resizable()
+                .interpolation(.high)
+                .frame(width: image.size.width * scale, height: image.size.height * scale)
+            if sample.style.showsPercentBeside {
+                Text("\(Int(snapshot.percent.rounded()))%")
+                    .font(.system(size: 11 * scale, weight: .medium))
+                    .monospacedDigit()
+            }
+        }
+        .frame(height: 26)
+    }
+
+    private func tutorialPowerSnapshot(percent: Double, flowMode: EnergyFlowMode) -> PowerSnapshot {
+        PowerSnapshot(
+            hasBattery: true,
+            percent: percent,
+            isCharging: flowMode == .charging,
+            externalConnected: flowMode != .discharging,
+            fullyCharged: false,
+            adapterCeilingWatts: flowMode == .discharging ? 0 : 70,
+            adapterInWatts: flowMode == .discharging ? 0 : 45,
+            systemLoadWatts: 12,
+            batteryWatts: flowMode == .charging ? 30 : -12,
+            remainingCapacityWh: 50,
+            missingCapacityWh: 10,
+            systemTimeToEmptyMinutes: nil,
+            systemTimeToFullMinutes: nil,
+            timeToEmptyMinutes: nil,
+            timeToFullMinutes: nil,
+            flowMode: flowMode
+        )
+    }
+
+    private var ringsTutorialPreview: some View {
+        VStack(spacing: 16) {
+            VStack(spacing: 10) {
+                HStack(alignment: .top, spacing: 2) {
+                    tutorialMetricRing(.battery, percent: 88)
+                    tutorialMetricRing(.cpu, percent: 36)
+                    tutorialMetricRing(.memory, percent: 72)
+                }
+                HStack(alignment: .top, spacing: 2) {
+                    tutorialSpeedRing(bytesPerSecond: 2.4 * 1024 * 1024, upload: false)
+                    tutorialTemperatureRing(celsius: 42)
+                    tutorialThermalRing(.serious)
+                }
+            }
+            tutorialRingOrderRow
+        }
+        .allowsHitTesting(false)
+    }
+
+    private func tutorialMetricRing(_ kind: RingKind, percent: Double) -> some View {
+        let language = appState.settings.language
+        let colors = appState.settings.ringTint.scheme(for: kind).colors(percent: percent)
+        return StatusRingView(
+            percent: percent,
+            fillLeft: colors.left,
+            fillRight: colors.right,
+            caption: Localization.string(kind.captionKey, language: language, Int64(percent.rounded())),
+            accessibilityName: Localization.string(kind.localizationKey, language: language),
+            glyph: appState.settings.ringIcons.slot(for: kind)
+        )
+        .frame(width: 78)
+    }
+
+    private func tutorialSpeedRing(bytesPerSecond: Double, upload: Bool) -> some View {
+        let language = appState.settings.language
+        let center = Double(upload ? appState.settings.uploadHalfKilobytes : appState.settings.downloadHalfKilobytes) * 1024
+        let percent = NetworkRateFormat.ringPercent(
+            bytesPerSecond: bytesPerSecond,
+            centerBytesPerSecond: center
+        )
+        let segment: RingColorSegment = upload ? .upload : .download
+        let colors = appState.settings.ringTint.scheme(forSegment: segment).colors(percent: percent)
+        let rate = NetworkRateFormat.string(bytesPerSecond: bytesPerSecond)
+        let name = Localization.string(upload ? "settings.rings.upload" : "settings.rings.download", language: language)
+        return StatusRingView(
+            percent: percent,
+            fillLeft: colors.left,
+            fillRight: colors.right,
+            caption: rate,
+            accessibilityName: name,
+            glyph: .system(upload ? "arrow.up" : "arrow.down"),
+            glyphTint: colors.left,
+            accessibilityValue: "\(name) \(rate)"
+        )
+        .frame(width: 78)
+    }
+
+    private func tutorialTemperatureRing(celsius: Double) -> some View {
+        let language = appState.settings.language
+        let percent = BatteryTemperatureFormat.ringPercent(
+            celsius: celsius,
+            centerCelsius: Double(appState.settings.temperatureHalfCelsius)
+        )
+        let colors = appState.settings.ringTint.scheme(forSegment: .batteryTemperature).colors(percent: percent)
+        let caption = BatteryTemperatureFormat.caption(celsius: celsius)
+        let name = Localization.string("settings.rings.batteryTemperature", language: language)
+        return StatusRingView(
+            percent: percent,
+            fillLeft: colors.left,
+            fillRight: colors.right,
+            caption: caption,
+            accessibilityName: name,
+            glyph: .system("thermometer.medium"),
+            glyphTint: colors.left,
+            accessibilityValue: "\(name) \(caption)"
+        )
+        .frame(width: 78)
+    }
+
+    private func tutorialThermalRing(_ level: MacThermalState) -> some View {
+        let language = appState.settings.language
+        let percent = level.ringPercent(
+            nominal: appState.settings.thermalNominalPercent,
+            fair: appState.settings.thermalFairPercent,
+            serious: appState.settings.thermalSeriousPercent,
+            critical: appState.settings.thermalCriticalPercent
+        )
+        let colors = appState.settings.ringTint.scheme(forSegment: .thermalState).colors(percent: percent)
+        let caption = Localization.string(level.captionKey, language: language)
+        let name = Localization.string("settings.rings.thermalState", language: language)
+        return StatusRingView(
+            percent: percent,
+            fillLeft: colors.left,
+            fillRight: colors.right,
+            caption: caption,
+            accessibilityName: name,
+            glyph: .system("thermometer.high"),
+            glyphTint: colors.left,
+            accessibilityValue: "\(name) \(caption)"
+        )
+        .frame(width: 78)
+    }
+
+    /// Same row as Settings → Rings: grip, name, scale button, switch on the trailing edge.
+    private var tutorialRingOrderRow: some View {
         Form {
-            switch pane {
-            case .general: generalSections
-            case .menuBar: menuBarSections
-            case .rings: ringsSections
-            case .flow: flowSections
-            case .about: aboutSections
+            HStack(spacing: 8) {
+                Image(systemName: "line.3.horizontal")
+                    .font(.body)
+                    .foregroundStyle(.secondary)
+                    .frame(width: 28, height: 22)
+                Toggle(isOn: .constant(true)) {
+                    HStack(spacing: 6) {
+                        Text("settings.rings.download")
+                        Image(systemName: "slider.horizontal.3")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundStyle(.secondary)
+                            .frame(width: 22, height: 16)
+                    }
+                }
             }
         }
         .formStyle(.grouped)
-        // The grouped form paints its own scroll fill, which on macOS 26+
-        // is a different shade than the window behind the tabs.
+        .frame(width: 420)
+        .fixedSize(horizontal: false, vertical: true)
+    }
+
+    private var flowTutorialPreview: some View {
+        let snapshot = flowTutorialSnapshot
+        return VStack(alignment: .leading, spacing: 4) {
+            TimeEstimateRow(snapshot: snapshot, language: appState.settings.language)
+            EnergyFlowView(
+                snapshot: snapshot,
+                theme: AppTheme.resolved(palette: appState.settings.palette, colorScheme: colorScheme),
+                flowTint: appState.settings.flowTint,
+                flowIcons: appState.settings.flowIcons,
+                isAnimating: false,
+                motion: appState.settings.motionStyle,
+                motionFrameRate: appState.settings.motionFrameRate,
+                pulseFlowIcons: appState.settings.pulseFlowIcons,
+                flowIconScale: appState.settings.flowIconScale,
+                language: appState.settings.language,
+                showsFooter: true
+            )
+        }
+        .frame(width: PopoverLayout.width - PopoverLayout.padding * 2, alignment: .leading)
+        .allowsHitTesting(false)
+    }
+
+    /// Charging example so the row above the ribbon is 「预计充满」, matching the panel.
+    private var flowTutorialSnapshot: PowerSnapshot {
+        var snapshot = appState.snapshot
+        snapshot.hasBattery = true
+        if snapshot.percent < 1 { snapshot.percent = 55 }
+        snapshot.isCharging = true
+        snapshot.externalConnected = true
+        snapshot.fullyCharged = false
+        snapshot.flowMode = .charging
+        if snapshot.adapterCeilingWatts <= 0 { snapshot.adapterCeilingWatts = 70 }
+        if snapshot.systemLoadWatts <= 0 { snapshot.systemLoadWatts = 18 }
+        if snapshot.chargeWatts <= 0 { snapshot.batteryWatts = 27 }
+        if snapshot.timeToFullMinutes == nil { snapshot.timeToFullMinutes = 72 }
+        return snapshot
+    }
+
+    private var topAppsTutorialPreview: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            ForEach(TopAppsChartStyle.allCases) { style in
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(LocalizedStringKey(style.localizationKey))
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                    TopAppsSection(
+                        list: tutorialTopApps,
+                        language: appState.settings.language,
+                        rowCount: 3,
+                        chart: style
+                    )
+                }
+            }
+        }
+        .frame(width: PopoverLayout.width - PopoverLayout.padding * 2, alignment: .leading)
+        .allowsHitTesting(false)
+    }
+
+    private var tutorialTopApps: TopAppList {
+        if case .apps(let apps) = appState.topApps, !apps.isEmpty {
+            return .apps(Array(apps.prefix(3)))
+        }
+        return .apps([
+            TopAppEntry(id: "safari", name: "Safari", iconPath: "/System/Applications/Safari.app", impact: 18.2),
+            TopAppEntry(id: "finder", name: "Finder", iconPath: "/System/Library/CoreServices/Finder.app", impact: 9.4),
+            TopAppEntry(id: "mail", name: "Mail", iconPath: "/System/Applications/Mail.app", impact: 3.1),
+        ])
+    }
+
+    private var lowPowerTutorialPreview: some View {
+        let language = appState.settings.language
+        let strategy = appState.settings.lowPowerStrategy ?? appState.lowPowerPreset ?? .onlyBattery
+        let labels = LowPowerPreset.allCases.map {
+            Localization.string($0.shortLocalizationKey, language: language)
+        }
+        let lowTitle = Localization.string("popover.lowPower.now", language: language)
+        let sideBySide = LowPowerButtonRowLayout.placesSideBySide(
+            layout: appState.settings.lowPowerButtonLayout,
+            visibility: .both,
+            strategyLabels: labels,
+            lowPowerLabel: lowTitle,
+            panelWidth: PopoverLayout.width
+        )
+        let strategyButton = EnergyModeButton(
+            title: Localization.string(strategy.shortLocalizationKey, language: language),
+            lineLimit: LowPowerButtonRowLayout.strategyLines,
+            fillsHeight: sideBySide,
+            reserveTitles: labels
+        )
+        let nowButton = EnergyModeButton(
+            title: lowTitle,
+            iconYellow: appState.lowPowerNow == true,
+            lineLimit: LowPowerButtonRowLayout.lowPowerLines,
+            fillsHeight: sideBySide
+        )
+        return Group {
+            if sideBySide {
+                HStack(alignment: .top, spacing: LowPowerButtonRowLayout.buttonSpacing) {
+                    strategyButton
+                    nowButton
+                }
+            } else {
+                VStack(alignment: .leading, spacing: LowPowerButtonRowLayout.buttonSpacing) {
+                    strategyButton
+                    nowButton
+                }
+            }
+        }
+        .frame(width: PopoverLayout.width - PopoverLayout.padding * 2, alignment: .leading)
+        .allowsHitTesting(false)
+    }
+
+    private var panelTutorialPreview: some View {
+        Form {
+            Toggle("settings.popover.arrow", isOn: .constant(true))
+            LabeledContent("settings.button.placement") {
+                Text("settings.button.ownBlock")
+                    .foregroundStyle(.secondary)
+            }
+            Section {
+                ForEach(Array(appState.settings.popoverOrder.prefix(4))) { block in
+                    HStack(spacing: 8) {
+                        Image(systemName: "line.3.horizontal")
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                            .frame(width: 28, height: 22)
+                        Toggle(LocalizedStringKey(block.localizationKey), isOn: .constant(popoverShown(block)))
+                    }
+                }
+            } header: {
+                Text("settings.popover.order")
+            }
+        }
+        .formStyle(.grouped)
+        .frame(width: 440)
+        .fixedSize(horizontal: false, vertical: true)
+        .allowsHitTesting(false)
+    }
+
+    private func popoverShown(_ block: PopoverBlock) -> Bool {
+        switch block {
+        case .rings: appState.settings.showStatusRings
+        case .flow: appState.settings.showEnergyFlow
+        case .topApps: appState.settings.showTopApps
+        case .lowPower: appState.settings.showLowPower
+        case .localIP: appState.settings.showLocalIP
+        case .batteryCycle: appState.settings.showBatteryCycle
+        case .settings: appState.settings.showSettingsBlock
+        }
+    }
+
+    private var networkTutorialPreview: some View {
+        LocalIPSection(
+            rows: tutorialIPRows,
+            language: appState.settings.language,
+            panelWidth: PopoverLayout.width
+        )
+        .frame(width: PopoverLayout.width - PopoverLayout.padding * 2, alignment: .leading)
+        .allowsHitTesting(false)
+    }
+
+    /// Fixed examples covering every scope, both families, two interfaces, and a failed lookup.
+    private var tutorialIPRows: [IPAddressRow] {
+        [
+            IPAddressRow(scope: .local, family: .ipv4, interfaceName: "en0", address: "192.168.1.24", failed: false),
+            IPAddressRow(scope: .local, family: .ipv4, interfaceName: "en1", address: "10.0.1.18", failed: false),
+            IPAddressRow(scope: .local, family: .ipv6, interfaceName: "en0", address: "240e:3b1:12:34:a1b2:c3d4:e5f6:7890", failed: false),
+            IPAddressRow(scope: .publicAddress, family: .ipv4, interfaceName: nil, address: "203.0.113.48", failed: false),
+            IPAddressRow(scope: .publicAddress, family: .ipv6, interfaceName: nil, address: "2001:db8:85a3::8a2e:370:7334", failed: false),
+            IPAddressRow(scope: .publicAddress, family: .ipv4, interfaceName: nil, address: "", failed: true),
+            IPAddressRow(scope: .loopback, family: .ipv4, interfaceName: "lo0", address: "127.0.0.1", failed: false),
+            IPAddressRow(scope: .loopback, family: .ipv6, interfaceName: "lo0", address: "::1", failed: false),
+            IPAddressRow(scope: .linkLocal, family: .ipv4, interfaceName: "en0", address: "169.254.42.16", failed: false),
+            IPAddressRow(scope: .linkLocal, family: .ipv6, interfaceName: "en0", address: "fe80::a1b2:c3d4:e5f6:7890", failed: false),
+        ]
+    }
+
+    private var cycleTutorialPreview: some View {
+        BatteryCycleSection(
+            hasBattery: appState.snapshot.hasBattery,
+            cycleCount: appState.snapshot.cycleCount,
+            fullChargeMilliAmpHours: appState.snapshot.fullChargeMilliAmpHours,
+            designCapacityMilliAmpHours: appState.snapshot.designCapacityMilliAmpHours,
+            capacityStyle: appState.settings.batteryCapacityStyle,
+            language: appState.settings.language
+        )
+        .frame(width: PopoverLayout.width - PopoverLayout.padding * 2, alignment: .leading)
+        .allowsHitTesting(false)
+    }
+
+    private var welcomeMenuPreview: some View {
+        VStack(alignment: .trailing, spacing: 8) {
+            VStack(spacing: 2) {
+                menuBarStatusIcon
+                Text("welcome.preview.icon")
+                    .font(.system(size: 9, weight: .semibold))
+                    .foregroundStyle(Color.accentColor)
+                    .lineLimit(1)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .background(Color.primary.opacity(0.05), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+
+            VStack(alignment: .leading, spacing: 0) {
+                HStack {
+                    Text("menu.openSettings")
+                    Spacer(minLength: 8)
+                }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 5)
+                .background(Color.accentColor.opacity(0.18), in: RoundedRectangle(cornerRadius: 5, style: .continuous))
+                .padding(4)
+                HStack {
+                    Text("settings.quit")
+                    Spacer(minLength: 12)
+                    Text("⌘Q")
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.horizontal, 14)
+                .padding(.bottom, 8)
+                .padding(.top, 2)
+            }
+            .font(.system(size: 13))
+            .frame(width: 220)
+            .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .strokeBorder(Color.primary.opacity(0.12))
+            }
+            .shadow(color: .black.opacity(0.14), radius: 14, y: 6)
+        }
+        .frame(maxWidth: .infinity, alignment: .center)
+    }
+
+    private func welcomeStep(
+        index: Int,
+        title: LocalizedStringKey,
+        body: LocalizedStringKey,
+        actionTitle: LocalizedStringKey? = nil,
+        action: (() -> Void)? = nil
+    ) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Text("\(index)")
+                .font(.system(size: 12, weight: .bold))
+                .foregroundStyle(.white)
+                .frame(width: 22, height: 22)
+                .background(Color.accentColor, in: Circle())
+            VStack(alignment: .leading, spacing: 6) {
+                Text(title)
+                    .font(.system(size: 14, weight: .semibold))
+                Text(body)
+                    .font(.system(size: 13))
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                if let actionTitle, let action {
+                    Button(actionTitle, action: action)
+                        .controlSize(.regular)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    private var settingsForm: some View {
+        Form {
+            switch pane {
+            case .general: generalSections
+            case .panel: panelSections
+            case .menuBar: menuBarSections
+            case .rings: ringsSections
+            case .flow: flowSections
+            case .topApps: topAppsSections
+            case .lowPower: lowPowerSections
+            case .localIP: localIPSections
+            case .batteryCycle: batteryCycleSections
+            case .about: aboutSections
+            case .tutorial: EmptyView()
+            }
+        }
+        .formStyle(.grouped)
         .scrollContentBackground(.hidden)
         .scrollBounceBehavior(.basedOnSize, axes: .vertical)
-        .scrollDisabled(!scrolls)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .background(SettingsFormWidthLock())
     }
 
     @ViewBuilder
@@ -371,17 +1242,6 @@ struct SettingsView: View {
                 }
             } label: {
                 Text("settings.language") + Text("（文/A）")
-            }
-            Toggle("settings.popover.arrow", isOn: $appState.settings.showPopoverArrow)
-                .onChange(of: appState.settings.showPopoverArrow) { _, _ in
-                    appState.onPopoverChromeChange?()
-                }
-            Toggle("settings.popover.showRings", isOn: $appState.settings.showStatusRings)
-            Toggle("settings.popover.showFlow", isOn: $appState.settings.showEnergyFlow)
-            Picker("settings.menuBar.rightClick", selection: $appState.settings.menuBarRightClickAction) {
-                ForEach(MenuBarRightClickAction.allCases) { action in
-                    Text(LocalizedStringKey(action.localizationKey)).tag(action)
-                }
             }
             Toggle("settings.launchAtLogin", isOn: launchAtLoginBinding)
             Toggle("settings.updates.automatic", isOn: $appState.settings.automaticallyCheckForUpdates)
@@ -399,6 +1259,157 @@ struct SettingsView: View {
             .buttonStyle(.plain)
             .foregroundStyle(.red)
             .frame(maxWidth: .infinity)
+        }
+    }
+
+    @ViewBuilder
+    private var panelSections: some View {
+        Section {
+            Toggle("settings.popover.arrow", isOn: $appState.settings.showPopoverArrow)
+                .onChange(of: appState.settings.showPopoverArrow) { _, _ in
+                    appState.onPopoverChromeChange?()
+                }
+            Picker("settings.button.placement", selection: $appState.settings.settingsButtonPlacement) {
+                ForEach(SettingsButtonPlacement.allCases) { placement in
+                    Text(LocalizedStringKey(placement.localizationKey)).tag(placement)
+                }
+            }
+            if appState.settings.settingsButtonPlacement == .insideBlock {
+                Picker("settings.button.host", selection: $appState.settings.settingsButtonHost) {
+                    ForEach(appState.settings.visibleSettingsHosts) { host in
+                        Text(LocalizedStringKey(host.localizationKey)).tag(host)
+                    }
+                }
+            }
+        }
+
+        Section {
+            ForEach(appState.settings.popoverOrder) { block in
+                popoverOrderRow(block)
+            }
+        } header: {
+            Text("settings.popover.order")
+        }
+    }
+
+    @ViewBuilder
+    private var localIPSections: some View {
+        Section {
+            ForEach(IPAddressScope.allCases) { scope in
+                Toggle(LocalizedStringKey(scope.localizationKey), isOn: ipScopeBinding(scope))
+            }
+            ForEach(IPAddressFamily.allCases) { family in
+                Toggle(LocalizedStringKey(family.localizationKey), isOn: ipFamilyBinding(family))
+            }
+        } header: {
+            Text("settings.localIP.options")
+        }
+    }
+
+    @ViewBuilder
+    private var topAppsSections: some View {
+        Section {
+            topAppStepper(
+                "settings.topApps.window",
+                value: appState.settings.topAppWindowMinutes,
+                unit: "settings.topApps.minutes",
+                range: AppSettings.topAppWindowRange,
+                step: 1
+            ) { appState.settings.topAppWindowMinutes = $0 }
+            topAppStepper(
+                "settings.topApps.interval",
+                value: appState.settings.topAppIntervalSeconds,
+                unit: "settings.topApps.seconds",
+                range: AppSettings.topAppIntervalRange,
+                step: 5
+            ) { appState.settings.topAppIntervalSeconds = $0 }
+            topAppStepper(
+                "settings.topApps.limit",
+                value: appState.settings.topAppLimit,
+                unit: nil,
+                range: AppSettings.topAppLimitRange,
+                step: 1
+            ) { appState.settings.topAppLimit = $0 }
+            Picker("settings.topApps.chart", selection: $appState.settings.topAppsChart) {
+                ForEach(TopAppsChartStyle.allCases) { style in
+                    Text(LocalizedStringKey(style.localizationKey)).tag(style)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var lowPowerSections: some View {
+        Section {
+            Picker("settings.lowPower.layout", selection: $appState.settings.lowPowerButtonLayout) {
+                ForEach(LowPowerButtonLayout.allCases) { layout in
+                    Text(LocalizedStringKey(layout.localizationKey)).tag(layout)
+                }
+            }
+            .disabled(appState.settings.lowPowerButtonVisibility != .both)
+            Picker("settings.lowPower.buttons", selection: $appState.settings.lowPowerButtonVisibility) {
+                ForEach(LowPowerButtonVisibility.allCases) { visibility in
+                    Text(LocalizedStringKey(visibility.localizationKey)).tag(visibility)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var batteryCycleSections: some View {
+        Section {
+            Picker("settings.batteryCycle.format", selection: $appState.settings.batteryCapacityStyle) {
+                ForEach(BatteryCapacityStyle.allCases) { style in
+                    Text(LocalizedStringKey(style.localizationKey)).tag(style)
+                }
+            }
+        }
+    }
+
+    private func speedHalfStepper(
+        _ title: LocalizedStringKey,
+        kilobytes: Int,
+        set: @escaping (Int) -> Void
+    ) -> some View {
+        HStack(spacing: 8) {
+            Text(title)
+            Spacer(minLength: 8)
+            Text(NetworkRateFormat.midpointLabel(kilobytesPerSecond: kilobytes))
+                .monospacedDigit()
+                .foregroundStyle(.secondary)
+            Stepper(
+                "",
+                value: Binding(get: { kilobytes }, set: set),
+                in: AppSettings.halfSpeedRange,
+                step: 64
+            )
+            .labelsHidden()
+            .fixedSize()
+        }
+    }
+
+    private func topAppStepper(
+        _ title: LocalizedStringKey,
+        value: Int,
+        unit: LocalizedStringKey?,
+        range: ClosedRange<Int>,
+        step: Int,
+        set: @escaping (Int) -> Void
+    ) -> some View {
+        HStack(spacing: 8) {
+            Text(title)
+            Spacer(minLength: 8)
+            HStack(spacing: 4) {
+                Text("\(value)")
+                    .monospacedDigit()
+                if let unit {
+                    Text(unit)
+                }
+            }
+            .foregroundStyle(.secondary)
+            Stepper("", value: Binding(get: { value }, set: set), in: range, step: step)
+                .labelsHidden()
+                .fixedSize()
         }
     }
 
@@ -505,8 +1516,7 @@ struct SettingsView: View {
                     }
                 }
             }
-            collapsiblePresetEditor(
-                expanded: $menuBarTintEditorExpanded,
+            presetEditor(
                 toolbar: {
                     tintPresetSaveControls(
                         canOverwrite: appState.settings.menuBarActiveSavedID != nil,
@@ -735,11 +1745,8 @@ struct SettingsView: View {
                 }
             }
             .disabled(!appState.settings.twoRingRows)
-            ringListToggle
-            if ringListExpanded {
-                ForEach(appState.settings.ringCatalog) { slot in
-                    ringOrderRow(slot)
-                }
+            ForEach(appState.settings.ringCatalog) { slot in
+                ringOrderRow(slot)
             }
         }
 
@@ -755,8 +1762,7 @@ struct SettingsView: View {
                     }
                 }
             }
-            collapsiblePresetEditor(
-                expanded: $ringTintEditorExpanded,
+            presetEditor(
                 toolbar: {
                     tintPresetSaveControls(
                         canOverwrite: appState.settings.ringActiveSavedID != nil,
@@ -788,8 +1794,7 @@ struct SettingsView: View {
                     }
                 }
             }
-            collapsiblePresetEditor(
-                expanded: $ringIconsEditorExpanded,
+            presetEditor(
                 toolbar: {
                     iconPresetEditorCaption(
                         canOverwrite: appState.settings.ringActiveSavedIconID != nil,
@@ -826,8 +1831,7 @@ struct SettingsView: View {
                     }
                 }
             }
-            collapsiblePresetEditor(
-                expanded: $flowTintEditorExpanded,
+            presetEditor(
                 toolbar: {
                     tintPresetSaveControls(
                         canOverwrite: appState.settings.flowActiveSavedID != nil,
@@ -896,8 +1900,7 @@ struct SettingsView: View {
                     }
                 }
             }
-            collapsiblePresetEditor(
-                expanded: $flowIconsEditorExpanded,
+            presetEditor(
                 toolbar: {
                     iconPresetEditorCaption(
                         canOverwrite: appState.settings.flowActiveSavedIconID != nil,
@@ -974,30 +1977,15 @@ struct SettingsView: View {
         )
     }
 
+    /// Preset controls stay visible. These panes used to collapse the editor and
+    /// force it shut again whenever the settings tab changed.
     @ViewBuilder
-    private func collapsiblePresetEditor<Toolbar: View, Content: View>(
-        expanded: Binding<Bool>,
+    private func presetEditor<Toolbar: View, Content: View>(
         @ViewBuilder toolbar: () -> Toolbar,
         @ViewBuilder content: () -> Content
     ) -> some View {
-        HStack(alignment: .center, spacing: 8) {
-            Button {
-                // Resizing the window inside an animated layout pass drops the
-                // frame off the screen. Tab changes resize with no animation.
-                expanded.wrappedValue.toggle()
-            } label: {
-                Text(
-                    expanded.wrappedValue
-                        ? LocalizedStringKey("settings.icons.hidePreset")
-                        : LocalizedStringKey("settings.icons.editPreset")
-                )
-            }
-            if expanded.wrappedValue {
-                toolbar()
-            }
-            Spacer(minLength: 0)
-        }
-        if expanded.wrappedValue {
+        VStack(alignment: .leading, spacing: 8) {
+            toolbar()
             content()
         }
     }
@@ -1010,21 +1998,26 @@ struct SettingsView: View {
         deleteID: UUID?,
         onDelete: @escaping (UUID) -> Void
     ) -> some View {
-        if canOverwrite {
-            Button("settings.tint.save", action: onSave)
-        }
-        Button("settings.tint.saveAs", action: onSaveAs)
-        if let deleteID {
-            Button("settings.tint.delete", role: .destructive) {
-                onDelete(deleteID)
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 8) {
+                if canOverwrite {
+                    Button("settings.tint.save", action: onSave)
+                }
+                Button("settings.tint.saveAs", action: onSaveAs)
+                if let deleteID {
+                    Button("settings.tint.delete", role: .destructive) {
+                        onDelete(deleteID)
+                    }
+                }
+                Spacer(minLength: 0)
             }
-        }
-        if !canOverwrite {
-            Text("settings.icons.builtinEditNote")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .lineLimit(2)
-                .fixedSize(horizontal: false, vertical: true)
+            if !canOverwrite {
+                Text("settings.icons.builtinEditNote")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
         }
     }
 
@@ -1036,16 +2029,18 @@ struct SettingsView: View {
         deleteID: UUID?,
         onDelete: @escaping (UUID) -> Void
     ) -> some View {
-        Text("settings.icons.clickToChange")
-            .font(.caption)
-            .foregroundStyle(.secondary)
-        tintPresetSaveControls(
-            canOverwrite: canOverwrite,
-            onSave: onSave,
-            onSaveAs: onSaveAs,
-            deleteID: deleteID,
-            onDelete: onDelete
-        )
+        VStack(alignment: .leading, spacing: 6) {
+            Text("settings.icons.clickToChange")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            tintPresetSaveControls(
+                canOverwrite: canOverwrite,
+                onSave: onSave,
+                onSaveAs: onSaveAs,
+                deleteID: deleteID,
+                onDelete: onDelete
+            )
+        }
     }
 
     private var iconSlotColumnWidth: CGFloat { 56 }
@@ -1066,22 +2061,69 @@ struct SettingsView: View {
         .help(Localization.string("settings.icons.zoom", language: appState.settings.language))
     }
 
-    /// Same bordered button as “查看/编辑当前预设”, not a full-width disclosure row.
-    private var ringListToggle: some View {
-        HStack(alignment: .center, spacing: 8) {
-            Button {
-                ringListExpanded.toggle()
-            } label: {
-                Text(ringListExpanded ? "settings.rings.hideList" : "settings.rings.list")
-            }
-            Spacer(minLength: 0)
+    private func popoverOrderRow(_ block: PopoverBlock) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: "line.3.horizontal")
+                .font(.body)
+                .foregroundStyle(.secondary)
+                .frame(width: 28, height: 22)
+                .contentShape(Rectangle())
+                .onDrag {
+                    popoverDrag.block = block
+                    return NSItemProvider(object: block.rawValue as NSString)
+                }
+            Toggle(LocalizedStringKey(block.localizationKey), isOn: popoverVisibilityBinding(block))
+                .disabled(appState.settings.isSoleVisiblePopoverBlock(block))
         }
+        .onDrop(of: [.plainText], delegate: PopoverBlockDropDelegate(
+            block: block,
+            drag: popoverDrag,
+            move: { item, target in
+                appState.settings.movePopoverBlock(item, to: target)
+            }
+        ))
+    }
+
+    private func popoverVisibilityBinding(_ block: PopoverBlock) -> Binding<Bool> {
+        switch block {
+        case .rings: $appState.settings.showStatusRings
+        case .flow: $appState.settings.showEnergyFlow
+        case .topApps: $appState.settings.showTopApps
+        case .lowPower: $appState.settings.showLowPower
+        case .localIP: $appState.settings.showLocalIP
+        case .batteryCycle: $appState.settings.showBatteryCycle
+        case .settings: $appState.settings.showSettingsBlock
+        }
+    }
+
+    private func ipScopeBinding(_ scope: IPAddressScope) -> Binding<Bool> {
+        Binding(
+            get: { appState.settings.ipScopes.contains(scope) },
+            set: { enabled in
+                if enabled {
+                    appState.settings.ipScopes.insert(scope)
+                } else {
+                    appState.settings.ipScopes.remove(scope)
+                }
+            }
+        )
+    }
+
+    private func ipFamilyBinding(_ family: IPAddressFamily) -> Binding<Bool> {
+        Binding(
+            get: { appState.settings.ipFamilies.contains(family) },
+            set: { enabled in
+                if enabled {
+                    appState.settings.ipFamilies.insert(family)
+                } else {
+                    appState.settings.ipFamilies.remove(family)
+                }
+            }
+        )
     }
 
     private func ringOrderRow(_ slot: RingSlot) -> some View {
         HStack(spacing: 8) {
-            Toggle(LocalizedStringKey(slot.localizationKey), isOn: ringVisibilityBinding(slot))
-            Spacer(minLength: 8)
             Image(systemName: "line.3.horizontal")
                 .font(.body)
                 .foregroundStyle(.secondary)
@@ -1091,6 +2133,14 @@ struct SettingsView: View {
                     ringDrag.slot = slot
                     return NSItemProvider(object: slot.rawValue as NSString)
                 }
+            Toggle(isOn: ringVisibilityBinding(slot)) {
+                HStack(spacing: 6) {
+                    Text(LocalizedStringKey(slot.localizationKey))
+                    if ringHasScale(slot) {
+                        ringScaleButton(slot)
+                    }
+                }
+            }
         }
         .onDrop(of: [.plainText], delegate: RingSlotDropDelegate(
             slot: slot,
@@ -1099,6 +2149,114 @@ struct SettingsView: View {
                 appState.settings.moveRingCatalogItem(item, to: target)
             }
         ))
+    }
+
+    private func ringHasScale(_ slot: RingSlot) -> Bool {
+        switch slot {
+        case .download, .upload, .speedPair, .batteryTemperature, .thermalState:
+            true
+        default:
+            false
+        }
+    }
+
+    private func ringScaleButton(_ slot: RingSlot) -> some View {
+        Button {
+            ringScaleSlot = slot
+        } label: {
+            Image(systemName: "slider.horizontal.3")
+                .font(.system(size: 12, weight: .medium))
+                .frame(width: 22, height: 16)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.borderless)
+        .foregroundStyle(.secondary)
+        .help(LocalizedStringKey("settings.rings.scale"))
+        .accessibilityLabel(Text(LocalizedStringKey("settings.rings.scale")))
+        .popover(isPresented: ringScalePresented(slot), arrowEdge: .bottom) {
+            ringScalePopover(slot)
+        }
+    }
+
+    private func ringScalePresented(_ slot: RingSlot) -> Binding<Bool> {
+        Binding(
+            get: { ringScaleSlot == slot },
+            set: { presented in
+                if presented {
+                    ringScaleSlot = slot
+                } else if ringScaleSlot == slot {
+                    ringScaleSlot = nil
+                }
+            }
+        )
+    }
+
+    @ViewBuilder
+    private func ringScalePopover(_ slot: RingSlot) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            switch slot {
+            case .download:
+                speedHalfStepper(
+                    "settings.rings.half.download",
+                    kilobytes: appState.settings.downloadHalfKilobytes
+                ) { appState.settings.downloadHalfKilobytes = $0 }
+            case .upload:
+                speedHalfStepper(
+                    "settings.rings.half.upload",
+                    kilobytes: appState.settings.uploadHalfKilobytes
+                ) { appState.settings.uploadHalfKilobytes = $0 }
+            case .speedPair:
+                speedHalfStepper(
+                    "settings.rings.half.download",
+                    kilobytes: appState.settings.downloadHalfKilobytes
+                ) { appState.settings.downloadHalfKilobytes = $0 }
+                speedHalfStepper(
+                    "settings.rings.half.upload",
+                    kilobytes: appState.settings.uploadHalfKilobytes
+                ) { appState.settings.uploadHalfKilobytes = $0 }
+            case .batteryTemperature:
+                topAppStepper(
+                    "settings.rings.half.temperature",
+                    value: appState.settings.temperatureHalfCelsius,
+                    unit: "°C",
+                    range: AppSettings.temperatureHalfRange,
+                    step: 1
+                ) { appState.settings.temperatureHalfCelsius = $0 }
+            case .thermalState:
+                topAppStepper(
+                    "ring.thermal.nominal",
+                    value: appState.settings.thermalNominalPercent,
+                    unit: "%",
+                    range: AppSettings.thermalPercentRange,
+                    step: 5
+                ) { appState.settings.thermalNominalPercent = $0 }
+                topAppStepper(
+                    "ring.thermal.fair",
+                    value: appState.settings.thermalFairPercent,
+                    unit: "%",
+                    range: AppSettings.thermalPercentRange,
+                    step: 5
+                ) { appState.settings.thermalFairPercent = $0 }
+                topAppStepper(
+                    "ring.thermal.serious",
+                    value: appState.settings.thermalSeriousPercent,
+                    unit: "%",
+                    range: AppSettings.thermalPercentRange,
+                    step: 5
+                ) { appState.settings.thermalSeriousPercent = $0 }
+                topAppStepper(
+                    "ring.thermal.critical",
+                    value: appState.settings.thermalCriticalPercent,
+                    unit: "%",
+                    range: AppSettings.thermalPercentRange,
+                    step: 5
+                ) { appState.settings.thermalCriticalPercent = $0 }
+            default:
+                EmptyView()
+            }
+        }
+        .padding(14)
+        .frame(width: 300)
     }
 
     private func ringVisibilityBinding(_ slot: RingSlot) -> Binding<Bool> {
@@ -2079,6 +3237,30 @@ private struct CenteredPercentField: NSViewRepresentable {
             parent.onCommit()
             sender.window?.makeFirstResponder(nil)
         }
+    }
+}
+
+private final class PopoverBlockDragState {
+    var block: PopoverBlock?
+}
+
+private struct PopoverBlockDropDelegate: DropDelegate {
+    var block: PopoverBlock
+    var drag: PopoverBlockDragState
+    var move: (PopoverBlock, PopoverBlock) -> Void
+
+    func dropEntered(info: DropInfo) {
+        guard let item = drag.block, item != block else { return }
+        move(item, block)
+    }
+
+    func dropUpdated(info: DropInfo) -> DropProposal? {
+        DropProposal(operation: .move)
+    }
+
+    func performDrop(info: DropInfo) -> Bool {
+        drag.block = nil
+        return true
     }
 }
 
