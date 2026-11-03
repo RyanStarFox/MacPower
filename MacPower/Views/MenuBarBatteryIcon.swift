@@ -18,7 +18,7 @@ enum MenuBarBatteryRenderer {
             return nil
         }()
 
-        let height: CGFloat = 13
+        let height: CGFloat = 16
         let metrics = layout(percent: percent, style: style, glyph: glyph, height: height)
         let size = NSSize(width: metrics.totalWidth, height: height)
         let image = rasterImage(size: size, appearance: appearance) { rect in
@@ -106,8 +106,8 @@ enum MenuBarBatteryRenderer {
     ) -> Metrics {
         let bodyHeight: CGFloat = 12
         let bodyY = (height - bodyHeight) / 2
-        let capWidth: CGFloat = 1.6
-        let capHeight: CGFloat = 5.4
+        let capWidth: CGFloat = 1.5
+        let capHeight: CGFloat = 4
         let capGap: CGFloat = 1.22
         let showsText = style.showsPercentInside
         let text = showsText ? "\(percent)" : ""
@@ -124,7 +124,7 @@ enum MenuBarBatteryRenderer {
         let gap: CGFloat = (showsText && glyph != nil) ? 0.45 : 0
         let groupWidth = (showsText ? textSize.width : 0) + gap + glyphAdvance
         let bodyWidth: CGFloat = {
-            if !showsText { return 21.5 }
+            if !showsText { return 23 }
             return digits >= 3 ? 24.0 : 22.5
         }()
         let body = NSRect(x: 0.35, y: bodyY, width: bodyWidth, height: bodyHeight)
@@ -197,14 +197,18 @@ enum MenuBarBatteryRenderer {
             punchCenteredText(metrics.text, font: metrics.font, in: metrics.digitBox)
         }
 
+        NSGraphicsContext.restoreGraphicsState()
+
         if let glyph {
-            let target = style.showsPercentInside ? metrics.glyphBox : body
             switch glyph {
-            case .bolt: punchChargeMark(in: target)
+            case .bolt:
+                if style.showsPercentInside {
+                    punchChargeMark(in: metrics.glyphBox)
+                } else {
+                    drawChargeMark(in: body, fill: fill)
+                }
             }
         }
-
-        NSGraphicsContext.restoreGraphicsState()
     }
 
     private static func drawChargeLevel(
@@ -216,8 +220,7 @@ enum MenuBarBatteryRenderer {
     ) {
         let clamped = min(1, max(0, percent))
         let bodyPath = NSBezierPath(roundedRect: body, xRadius: radius, yRadius: radius)
-        let capRadius = min(cap.width, cap.height) / 2
-        let capPath = NSBezierPath(roundedRect: cap, xRadius: capRadius, yRadius: capRadius)
+        let capPath = terminalPath(in: cap)
         let dim = fill.withAlpha(0.62)
 
         NSGraphicsContext.saveGraphicsState()
@@ -278,8 +281,7 @@ enum MenuBarBatteryRenderer {
         let inner = body.insetBy(dx: inset, dy: inset)
         let innerRadius = max(0.6, radius - inset)
         let innerPath = NSBezierPath(roundedRect: inner, xRadius: innerRadius, yRadius: innerRadius)
-        let capRadius = min(cap.width, cap.height) / 2
-        let capPath = NSBezierPath(roundedRect: cap, xRadius: capRadius, yRadius: capRadius)
+        let capPath = terminalPath(in: cap)
         let dim = fill.withAlpha(0.62)
 
         // Same pad as the borderless body, so knocked-out digits stay readable
@@ -327,6 +329,26 @@ enum MenuBarBatteryRenderer {
         }
     }
 
+    /// A flat inner edge and a narrow, rounded outer edge, detached from the body.
+    private static func terminalPath(in rect: NSRect) -> NSBezierPath {
+        let quarterArc: CGFloat = 0.55228475
+        let path = NSBezierPath()
+        path.move(to: NSPoint(x: rect.minX, y: rect.minY))
+        path.line(to: NSPoint(x: rect.minX, y: rect.maxY))
+        path.curve(
+            to: NSPoint(x: rect.maxX, y: rect.midY),
+            controlPoint1: NSPoint(x: rect.minX + rect.width * quarterArc, y: rect.maxY),
+            controlPoint2: NSPoint(x: rect.maxX, y: rect.midY + rect.height / 2 * quarterArc)
+        )
+        path.curve(
+            to: NSPoint(x: rect.minX, y: rect.minY),
+            controlPoint1: NSPoint(x: rect.maxX, y: rect.midY - rect.height / 2 * quarterArc),
+            controlPoint2: NSPoint(x: rect.minX + rect.width * quarterArc, y: rect.minY)
+        )
+        path.close()
+        return path
+    }
+
     private static func paint(_ fill: MenuBarResolvedFill, in rect: NSRect) {
         if samePaint(fill) {
             fill.left.setFill()
@@ -365,6 +387,42 @@ enum MenuBarBatteryRenderer {
         )
         CTLineDraw(line, cg)
         cg.restoreGState()
+    }
+
+    /// The large menu-bar bolt crosses the body edges, with a transparent halo
+    /// separating its filled silhouette from the battery and the wallpaper.
+    private static func drawChargeMark(in body: NSRect, fill: MenuBarResolvedFill) {
+        let origin = NSPoint(x: body.midX - 4.75, y: body.midY - 7)
+        func point(_ x: CGFloat, _ y: CGFloat) -> NSPoint {
+            NSPoint(x: origin.x + x, y: origin.y + y)
+        }
+        let bolt = NSBezierPath()
+        bolt.move(to: point(7.2, 13.8))
+        bolt.curve(to: point(6.7, 13.8), controlPoint1: point(7.1, 14.1), controlPoint2: point(6.9, 14.1))
+        bolt.line(to: point(0.6, 6.8))
+        bolt.curve(to: point(1.1, 5.4), controlPoint1: point(-0.1, 6.1), controlPoint2: point(0.1, 5.4))
+        bolt.line(to: point(4.4, 5.4))
+        bolt.line(to: point(2.3, 0.5))
+        bolt.curve(to: point(2.9, 0.1), controlPoint1: point(2.1, 0), controlPoint2: point(2.6, -0.2))
+        bolt.line(to: point(9.4, 7.4))
+        bolt.curve(to: point(8.9, 8.8), controlPoint1: point(10.1, 8.1), controlPoint2: point(9.9, 8.8))
+        bolt.line(to: point(5.6, 8.8))
+        bolt.close()
+
+        NSGraphicsContext.saveGraphicsState()
+        NSGraphicsContext.current?.compositingOperation = .destinationOut
+        NSColor.black.setFill()
+        NSColor.black.setStroke()
+        bolt.lineWidth = 2.2
+        bolt.lineJoinStyle = .round
+        bolt.fill()
+        bolt.stroke()
+        NSGraphicsContext.restoreGraphicsState()
+
+        NSGraphicsContext.saveGraphicsState()
+        bolt.addClip()
+        paint(fill, in: body.insetBy(dx: 0, dy: -2))
+        NSGraphicsContext.restoreGraphicsState()
     }
 
     private static func punchChargeMark(in box: NSRect) {
