@@ -531,10 +531,7 @@ struct SettingsView: View {
                     Text("welcome.title")
                         .font(.system(size: 17, weight: .semibold))
                         .foregroundStyle(.primary)
-                    Text("welcome.subtitle")
-                        .font(.system(size: 13))
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
+                    justifiedBody("welcome.subtitle")
                 }
                 welcomeMenuPreview
                 welcomeStep(
@@ -597,22 +594,24 @@ struct SettingsView: View {
         }
     }
 
-    private func tutorialNote(title: LocalizedStringKey, _ body: LocalizedStringKey) -> some View {
+    private func tutorialNote(title: LocalizedStringKey, _ body: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title)
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundStyle(.primary)
-            Text(body)
-                .font(.system(size: 13))
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
+            justifiedBody(body)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
+    private func justifiedBody(_ key: String) -> some View {
+        JustifiedBody(text: Localization.string(key, language: appState.settings.language))
+            .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
     private func tutorialIllustrated<Picture: View>(
         title: LocalizedStringKey? = nil,
-        _ body: LocalizedStringKey,
+        _ body: String,
         @ViewBuilder picture: () -> Picture
     ) -> some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -623,10 +622,7 @@ struct SettingsView: View {
             picture()
                 .frame(maxWidth: .infinity, alignment: .center)
                 .accessibilityHidden(true)
-            Text(body)
-                .font(.system(size: 13))
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
+            justifiedBody(body)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -1404,7 +1400,7 @@ struct SettingsView: View {
     private func welcomeStep(
         index: Int,
         title: LocalizedStringKey,
-        body: LocalizedStringKey,
+        body: String,
         actionTitle: LocalizedStringKey? = nil,
         action: (() -> Void)? = nil
     ) -> some View {
@@ -1417,10 +1413,7 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text(title)
                     .font(.system(size: 14, weight: .semibold))
-                Text(body)
-                    .font(.system(size: 13))
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
+                justifiedBody(body)
                 if let actionTitle, let action {
                     Button(actionTitle, action: action)
                         .controlSize(.regular)
@@ -3645,6 +3638,50 @@ private struct RingSlotDropDelegate: DropDelegate {
     func performDrop(info: DropInfo) -> Bool {
         drag.slot = nil
         return true
+    }
+}
+
+private struct JustifiedBody: NSViewRepresentable {
+    var text: String
+
+    func makeNSView(context: Context) -> JustifiedTextField {
+        let field = JustifiedTextField(wrappingLabelWithString: "")
+        field.isBezeled = false
+        field.isEditable = false
+        field.isSelectable = false
+        field.drawsBackground = false
+        field.maximumNumberOfLines = 0
+        field.lineBreakMode = .byWordWrapping
+        field.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        field.setContentHuggingPriority(.required, for: .vertical)
+        return field
+    }
+
+    func updateNSView(_ field: JustifiedTextField, context: Context) {
+        let style = NSMutableParagraphStyle()
+        style.alignment = .justified
+        style.lineBreakMode = .byWordWrapping
+        style.hyphenationFactor = 0.6
+        field.attributedStringValue = NSAttributedString(
+            string: text,
+            attributes: [
+                .font: NSFont.systemFont(ofSize: 13),
+                .foregroundColor: NSColor.secondaryLabelColor,
+                .paragraphStyle: style
+            ]
+        )
+        field.invalidateIntrinsicContentSize()
+    }
+}
+
+private final class JustifiedTextField: NSTextField {
+    override func layout() {
+        let width = bounds.width
+        if width > 0, preferredMaxLayoutWidth != width {
+            preferredMaxLayoutWidth = width
+            invalidateIntrinsicContentSize()
+        }
+        super.layout()
     }
 }
 
