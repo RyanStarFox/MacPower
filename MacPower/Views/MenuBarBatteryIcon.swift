@@ -106,7 +106,7 @@ enum MenuBarBatteryRenderer {
     ) -> Metrics {
         let bodyHeight: CGFloat = 12
         let bodyY = (height - bodyHeight) / 2
-        let capWidth: CGFloat = 2
+        let capWidth: CGFloat = 1.5
         let capHeight: CGFloat = 4
         let capGap: CGFloat = 1.22
         let showsText = style.showsPercentInside
@@ -329,14 +329,21 @@ enum MenuBarBatteryRenderer {
         }
     }
 
-    /// A flat inner edge and a semicircular outer edge, detached from the body.
+    /// A flat inner edge and a narrow, rounded outer edge, detached from the body.
     private static func terminalPath(in rect: NSRect) -> NSBezierPath {
+        let quarterArc: CGFloat = 0.55228475
         let path = NSBezierPath()
-        path.appendArc(
-            withCenter: NSPoint(x: rect.minX, y: rect.midY),
-            radius: rect.height / 2,
-            startAngle: -90,
-            endAngle: 90
+        path.move(to: NSPoint(x: rect.minX, y: rect.minY))
+        path.line(to: NSPoint(x: rect.minX, y: rect.maxY))
+        path.curve(
+            to: NSPoint(x: rect.maxX, y: rect.midY),
+            controlPoint1: NSPoint(x: rect.minX + rect.width * quarterArc, y: rect.maxY),
+            controlPoint2: NSPoint(x: rect.maxX, y: rect.midY + rect.height / 2 * quarterArc)
+        )
+        path.curve(
+            to: NSPoint(x: rect.minX, y: rect.minY),
+            controlPoint1: NSPoint(x: rect.maxX, y: rect.midY - rect.height / 2 * quarterArc),
+            controlPoint2: NSPoint(x: rect.minX + rect.width * quarterArc, y: rect.minY)
         )
         path.close()
         return path
@@ -406,7 +413,7 @@ enum MenuBarBatteryRenderer {
         NSGraphicsContext.current?.compositingOperation = .destinationOut
         NSColor.black.setFill()
         NSColor.black.setStroke()
-        bolt.lineWidth = 1.8
+        bolt.lineWidth = 2.2
         bolt.lineJoinStyle = .round
         bolt.fill()
         bolt.stroke()
