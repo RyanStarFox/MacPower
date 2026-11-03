@@ -1471,9 +1471,14 @@ struct SettingsView: View {
                     set: { appState.setAutomaticUpdateChecking($0, checkNow: true) }
                 )
             )
+        }
+
+        Section {
             Button("settings.updates.check") {
                 appState.checkForUpdates(reason: .manual)
             }
+            .buttonStyle(.plain)
+            .frame(maxWidth: .infinity)
             .disabled(appState.isCheckingForUpdates)
         }
 

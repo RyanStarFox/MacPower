@@ -63,14 +63,17 @@ enum UpdatePackage {
 
 /// Reports byte progress while `runModal` is up. URLSession retains this delegate.
 private final class DownloadProgressDelegate: NSObject, URLSessionDownloadDelegate, @unchecked Sendable {
-    let onFraction: @Sendable (Double?) -> Void
+    let onProgress: @Sendable (_ written: Int64, _ expected: Int64?) -> Void
     private let lock = NSLock()
     private var session: URLSession?
     private var continuation: CheckedContinuation<URL, Error>?
     private var finished = false
 
-    init(onFraction: @escaping @Sendable (Double?) -> Void, continuation: CheckedContinuation<URL, Error>) {
-        self.onFraction = onFraction
+    init(
+        onProgress: @escaping @Sendable (_ written: Int64, _ expected: Int64?) -> Void,
+        continuation: CheckedContinuation<URL, Error>
+    ) {
+        self.onProgress = onProgress
         self.continuation = continuation
     }
 
@@ -105,9 +108,8 @@ private final class DownloadProgressDelegate: NSObject, URLSessionDownloadDelega
         totalBytesWritten: Int64,
         totalBytesExpectedToWrite: Int64
     ) {
-        guard totalBytesExpectedToWrite > 0 else { return }
-        let fraction = min(1, max(0, Double(totalBytesWritten) / Double(totalBytesExpectedToWrite)))
-        onFraction(fraction)
+        let expected = totalBytesExpectedToWrite > 0 ? totalBytesExpectedToWrite : nil
+        onProgress(totalBytesWritten, expected)
     }
 
     func urlSession(
@@ -180,15 +182,15 @@ enum UpdateInstaller {
         offer: UpdatePackage.Offer,
         sessionBox: UpdateDownloadSession,
         progress: @escaping @Sendable (UpdateDownloadSource) -> Void,
-        onFraction: @escaping @Sendable (Double?) -> Void
+        onProgress: @escaping @Sendable (_ written: Int64, _ expected: Int64?) -> Void
     ) async throws -> URL {
         for source in UpdatePackage.sourceOrder {
             if sessionBox.isCancelled() { throw CancellationError() }
             progress(source)
-            onFraction(nil)
+            onProgress(0, nil)
             let url = UpdatePackage.url(for: source, offer: offer)
             do {
-                let file = try await download(url, box: sessionBox, onFraction: onFraction)
+                let file = try await download(url, box: sessionBox, onProgress: onProgress)
                 if sessionBox.isCancelled() { throw CancellationError() }
                 let digest = sha256Hex(of: file)
                 guard digest == offer.sha256 else {
@@ -271,14 +273,14 @@ enum UpdateInstaller {
     private static func download(
         _ url: URL,
         box: UpdateDownloadSession,
-        onFraction: @escaping @Sendable (Double?) -> Void
+        onProgress: @escaping @Sendable (_ written: Int64, _ expected: Int64?) -> Void
     ) async throws -> URL {
         let configuration = URLSessionConfiguration.ephemeral
         configuration.timeoutIntervalForRequest = UpdatePackage.stallTimeout
         configuration.timeoutIntervalForResource = 30 * 60
         configuration.waitsForConnectivity = false
         return try await withCheckedThrowingContinuation { continuation in
-            let delegate = DownloadProgressDelegate(onFraction: onFraction, continuation: continuation)
+            let delegate = DownloadProgressDelegate(onProgress: onProgress, continuation: continuation)
             let session = URLSession(configuration: configuration, delegate: delegate, delegateQueue: nil)
             delegate.attach(session)
             box.store(session)
@@ -315,6 +317,10 @@ final class UpdateInstallController {
     var phase: Phase = .ready
     /// Nil while the server has not sent a total size. Otherwise 0...1.
     var fraction: Double?
+    /// Bytes received for the current download, including when the total size is unknown.
+    var receivedBytes: Int64 = 0
+    /// Nil while the server has not sent a total size.
+    var expectedBytes: Int64?
     let offer: UpdatePackage.Offer
     var text: UpdateInstallText
     var onInstalled: () -> Void = {}
@@ -335,10 +341,23 @@ final class UpdateInstallController {
         }
     }
 
-    var percentText: String? {
-        guard case .downloading = phase, let fraction else { return nil }
-        return "\(Int((fraction * 100).rounded()))%"
+    /// `1.2 MB` when the total is unknown, `1.2 MB / 5 MB` when it is known.
+    var progressDetail: String {
+        guard case .downloading = phase else { return "" }
+        let written = Self.byteFormatter.string(fromByteCount: receivedBytes)
+        guard let expectedBytes, expectedBytes > 0 else { return written }
+        let total = Self.byteFormatter.string(fromByteCount: expectedBytes)
+        return "\(written) / \(total)"
     }
+
+    private static let byteFormatter: ByteCountFormatter = {
+        let formatter = ByteCountFormatter()
+        formatter.countStyle = .file
+        formatter.allowedUnits = [.useKB, .useMB, .useGB]
+        formatter.includesUnit = true
+        formatter.allowsNonnumericFormatting = false
+        return formatter
+    }()
     private var task: Task<Void, Never>?
     private let downloadSession = UpdateDownloadSession()
 
@@ -350,6 +369,8 @@ final class UpdateInstallController {
     func start() {
         guard phase == .ready || phase == .failed else { return }
         fraction = nil
+        receivedBytes = 0
+        expectedBytes = nil
         phase = .downloading(.github)
         task = Task { [weak self] in
             guard let self else { return }
@@ -360,11 +381,20 @@ final class UpdateInstallController {
                 ) { source in
                     Task { @MainActor in
                         self.fraction = nil
+                        self.receivedBytes = 0
+                        self.expectedBytes = nil
                         self.phase = .downloading(source)
                     }
-                } onFraction: { [weak self] value in
+                } onProgress: { [weak self] written, expected in
                     Task { @MainActor in
-                        self?.fraction = value
+                        guard let self else { return }
+                        self.receivedBytes = written
+                        self.expectedBytes = expected
+                        if let expected, expected > 0 {
+                            self.fraction = min(1, max(0, Double(written) / Double(expected)))
+                        } else {
+                            self.fraction = nil
+                        }
                     }
                 }
                 phase = .installing

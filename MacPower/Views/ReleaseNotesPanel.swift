@@ -379,7 +379,8 @@ private struct UpdateInstallBar: NSViewRepresentable {
             percent.textColor = .secondaryLabelColor
             percent.alignment = .right
             percent.translatesAutoresizingMaskIntoConstraints = false
-            percent.widthAnchor.constraint(equalToConstant: 44).isActive = true
+            percent.setContentHuggingPriority(.required, for: .horizontal)
+            percent.setContentCompressionResistancePriority(.required, for: .horizontal)
             progressRow.addArrangedSubview(percent)
             percentLabel = percent
 
@@ -456,14 +457,14 @@ private struct UpdateInstallBar: NSViewRepresentable {
                     progress?.isIndeterminate = false
                     progress?.doubleValue = fraction
                     progress?.stopAnimation(nil)
-                    percentLabel?.stringValue = install.percentText ?? ""
+                    percentLabel?.stringValue = install.progressDetail
                 } else if progress?.isIndeterminate != true {
                     progress?.isIndeterminate = true
                     progress?.startAnimation(nil)
-                    percentLabel?.stringValue = ""
+                    percentLabel?.stringValue = install.progressDetail
                 } else {
                     progress?.startAnimation(nil)
-                    percentLabel?.stringValue = ""
+                    percentLabel?.stringValue = install.progressDetail
                 }
             } else {
                 progress?.stopAnimation(nil)
