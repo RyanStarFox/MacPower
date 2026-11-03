@@ -6024,17 +6024,17 @@
     "update.install.failed": {
       "extractionState": "manual",
       "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Automatic install didn’t finish. You can download it from a release page." } },
-        "zh-Hans": { "stringUnit": { "state": "translated", "value": "自动安装没有完成，可以从发布页下载。" } },
-        "zh-Hant": { "stringUnit": { "state": "translated", "value": "自動安裝沒有完成，可以從發布頁下載。" } },
-        "ja": { "stringUnit": { "state": "translated", "value": "自動インストールが完了しませんでした。リリースページからダウンロードできます。" } },
-        "ko": { "stringUnit": { "state": "translated", "value": "자동 설치가 끝나지 않았습니다. 릴리스 페이지에서 받을 수 있습니다." } },
-        "fr": { "stringUnit": { "state": "translated", "value": "L’installation automatique n’a pas abouti. Vous pouvez la télécharger depuis la page de version." } },
-        "de": { "stringUnit": { "state": "translated", "value": "Die automatische Installation ist nicht abgeschlossen. Der Download ist auf der Release-Seite möglich." } },
-        "es": { "stringUnit": { "state": "translated", "value": "La instalación automática no terminó. Puedes descargarla desde la página de la versión." } },
-        "pt-BR": { "stringUnit": { "state": "translated", "value": "A instalação automática não terminou. Dá para baixar na página da versão." } },
-        "it": { "stringUnit": { "state": "translated", "value": "L’installazione automatica non è finita. Puoi scaricarla dalla pagina della versione." } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Автоустановка не завершилась. Файл можно скачать со страницы выпуска." } }
+        "en": { "stringUnit": { "state": "translated", "value": "The automatic download didn’t finish. Download it yourself from GitHub or Gitee." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "自动下载没有完成。请从 GitHub 或 Gitee 手动下载。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "自動下載沒有完成。請從 GitHub 或 Gitee 手動下載。" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "自動ダウンロードは完了しませんでした。GitHub または Gitee から手動でダウンロードしてください。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "자동 다운로드가 끝나지 않았습니다. GitHub 또는 Gitee에서 직접 받으세요." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Le téléchargement automatique n’a pas abouti. Téléchargez-le vous-même depuis GitHub ou Gitee." } },
+        "de": { "stringUnit": { "state": "translated", "value": "Der automatische Download ist nicht abgeschlossen. Laden Sie die Datei selbst von GitHub oder Gitee." } },
+        "es": { "stringUnit": { "state": "translated", "value": "La descarga automática no terminó. Descárgala tú desde GitHub o Gitee." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "O download automático não terminou. Baixe você mesmo no GitHub ou no Gitee." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Il download automatico non è finito. Scaricalo da GitHub o da Gitee." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Автозагрузка не завершилась. Скачайте файл сами с GitHub или Gitee." } }
       }
     },
     "update.available.message %@": {
@@ -14606,17 +14606,17 @@
     "welcome.icon.body": {
       "extractionState": "manual",
       "localizations": {
-        "de": { "stringUnit": { "state": "translated", "value": "Öffne Systemeinstellungen → Menüleiste und schalte MacPower unter „In Menüleiste erlauben“ ein. Ist der Schalter aus, bleibt das Symbol verborgen." } },
-        "en": { "stringUnit": { "state": "translated", "value": "Open System Settings → Menu Bar, and switch on MacPower under “Allow in the Menu Bar”. While that switch is off, the icon stays hidden." } },
-        "es": { "stringUnit": { "state": "translated", "value": "Abre Ajustes del Sistema → Barra de menús y activa MacPower en «Permitir en la barra de menús». Si está desactivado, el icono no aparece." } },
-        "fr": { "stringUnit": { "state": "translated", "value": "Ouvrez Réglages Système → Barre des menus, puis activez MacPower sous « Autoriser dans la barre des menus ». Si l’interrupteur est coupé, l’icône reste cachée." } },
-        "it": { "stringUnit": { "state": "translated", "value": "Apri Impostazioni di Sistema → Barra dei menu e attiva MacPower in «Consenti nella barra dei menu». Se l’interruttore è spento, l’icona non compare." } },
-        "ja": { "stringUnit": { "state": "translated", "value": "「システム設定」→「メニューバー」を開き、「メニューバーに追加することを許可」で MacPower をオンにしてください。オフのあいだ、アイコンは表示されません。" } },
-        "ko": { "stringUnit": { "state": "translated", "value": "시스템 설정 → 메뉴 막대에서 «메뉴 막대에서 허용»의 MacPower를 켜세요. 꺼져 있으면 아이콘이 나타나지 않습니다." } },
-        "pt-BR": { "stringUnit": { "state": "translated", "value": "Abra Ajustes do Sistema → Barra de Menus e ative o MacPower em “Permitir na Barra de Menus”. Com o interruptor desligado, o ícone não aparece." } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Откройте «Системные настройки» → «Строка меню» и включите MacPower в разделе «Разрешить в строке меню». Пока переключатель выключен, значка нет." } },
-        "zh-Hans": { "stringUnit": { "state": "translated", "value": "打开「系统设置 → 菜单栏」，在「允许在菜单栏显示」里打开 MacPower。这一项关掉时，图标不会出现。" } },
-        "zh-Hant": { "stringUnit": { "state": "translated", "value": "打開「系統設定 → 選單列」，在「在選單列中允許」裡打開 MacPower。這一項關掉時，圖示不會出現。" } }
+        "de": { "stringUnit": { "state": "translated", "value": "Öffne Systemeinstellungen → Menüleiste und schalte MacPower unter „In Menüleiste erlauben“ ein. Ist der Schalter aus, bleibt das Symbol verborgen. Schalte dort auch den Systemeintrag „Batterie“ aus, damit in der Menüleiste nur MacPower steht und nicht zwei Batteriesymbole." } },
+        "en": { "stringUnit": { "state": "translated", "value": "Open System Settings → Menu Bar, and switch on MacPower under “Allow in the Menu Bar”. While that switch is off, the icon stays hidden. On the same page, turn off the system Battery item so the menu bar keeps MacPower and does not show two battery icons." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Abre Ajustes del Sistema → Barra de menús y activa MacPower en «Permitir en la barra de menús». Si está desactivado, el icono no aparece. En la misma página, desactiva la «Batería» del sistema para que la barra de menús deje solo MacPower y no muestre dos iconos de batería." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Ouvrez Réglages Système → Barre des menus, puis activez MacPower sous « Autoriser dans la barre des menus ». Si l’interrupteur est coupé, l’icône reste cachée. Sur la même page, désactivez la « Batterie » du système pour ne garder que MacPower et éviter deux icônes de batterie." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Apri Impostazioni di Sistema → Barra dei menu e attiva MacPower in «Consenti nella barra dei menu». Se l’interruttore è spento, l’icona non compare. Nella stessa pagina disattiva «Batteria» di sistema, così resta solo MacPower e non compaiono due icone della batteria." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "「システム設定」→「メニューバー」を開き、「メニューバーに追加することを許可」で MacPower をオンにしてください。オフのあいだ、アイコンは表示されません。同じページでシステムの「バッテリー」もオフにし、メニューバーには MacPower だけを残して、電池アイコンが二つ並ばないようにしてください。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "시스템 설정 → 메뉴 막대에서 «메뉴 막대에서 허용»의 MacPower를 켜세요. 꺼져 있으면 아이콘이 나타나지 않습니다. 같은 페이지에서 시스템 «배터리»도 끄고, 메뉴 막대에는 MacPower만 남겨 배터리 아이콘이 두 개 나오지 않게 하세요." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Abra Ajustes do Sistema → Barra de Menus e ative o MacPower em “Permitir na Barra de Menus”. Com o interruptor desligado, o ícone não aparece. Na mesma página, desative a «Bateria» do sistema para a barra de menus ficar só com o MacPower e não mostrar dois ícones de bateria." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Откройте «Системные настройки» → «Строка меню» и включите MacPower в разделе «Разрешить в строке меню». Пока переключатель выключен, значка нет. На той же странице выключите системный пункт «Батарея», чтобы в строке меню остался только MacPower и не было двух значков батареи." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "打开「系统设置 → 菜单栏」，在「允许在菜单栏显示」里打开 MacPower。这一项关掉时，图标不会出现。同时关掉系统自带的「电池」，菜单栏里只留 MacPower，避免两个电池图标叠在一起。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "打開「系統設定 → 選單列」，在「在選單列中允許」裡打開 MacPower。這一項關掉時，圖示不會出現。同時關掉系統自帶的「電池」，選單列裡只留 MacPower，避免兩個電池圖示疊在一起。" } }
       }
     },
     "welcome.icon.button": {

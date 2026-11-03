@@ -3,6 +3,13 @@ import SwiftUI
 
 enum ReleaseNotesPanel {
     @MainActor
+    private static var visibleWindows: [NSWindow] = []
+    /// Set when this panel promotes a menu-bar-only app so the card can appear.
+    /// Restored after the last card closes, unless another main window is open.
+    @MainActor
+    private static var restoreAccessoryWhenIdle = false
+
+    @MainActor
     static func present(
         title: String,
         message: String? = nil,
@@ -42,7 +49,7 @@ enum ReleaseNotesPanel {
         window.isOpaque = false
         window.backgroundColor = .clear
         window.hasShadow = true
-        window.level = .modalPanel
+        window.level = .normal
         window.isMovableByWindowBackground = true
         window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
         window.layoutIfNeeded()
@@ -61,6 +68,10 @@ enum ReleaseNotesPanel {
         dismiss.onPrimary = onPrimary
         dismiss.onAlternate = onAlternate
         dismiss.onLater = onLater
+        dismiss.onDismissed = { [weak window] in
+            guard let window else { return }
+            ReleaseNotesPanel.drop(window)
+        }
         dismiss.resize = { [weak hosting, weak window] in
             guard let hosting, let window else { return }
             hosting.layoutSubtreeIfNeeded()
@@ -73,19 +84,28 @@ enum ReleaseNotesPanel {
         }
         install?.onInstalled = { dismiss.installedAndQuit() }
 
-        let restoreAccessory = NSApp.activationPolicy() == .accessory
-        if restoreAccessory {
+        if NSApp.activationPolicy() == .accessory {
+            restoreAccessoryWhenIdle = true
             NSApp.setActivationPolicy(.regular)
         }
         NSApp.activate(ignoringOtherApps: true)
         window.center()
         window.invalidateShadow()
+        visibleWindows.append(window)
         window.makeKeyAndOrderFront(nil)
-        window.orderFrontRegardless()
-        NSApp.runModal(for: window)
-        if restoreAccessory {
-            NSApp.setActivationPolicy(.accessory)
+    }
+
+    @MainActor
+    private static func drop(_ window: NSWindow) {
+        visibleWindows.removeAll { $0 === window }
+        guard visibleWindows.isEmpty, restoreAccessoryWhenIdle else { return }
+        let keepsRegular = NSApp.windows.contains { other in
+            guard other !== window, other.isVisible else { return false }
+            return other.canBecomeMain
         }
+        guard !keepsRegular else { return }
+        restoreAccessoryWhenIdle = false
+        NSApp.setActivationPolicy(.accessory)
     }
 }
 
@@ -99,6 +119,7 @@ private final class ReleaseNotesDismissBox {
     var onPrimary: () -> Void = {}
     var onAlternate: () -> Void = {}
     var onLater: () -> Void = {}
+    var onDismissed: () -> Void = {}
     var resize: (() -> Void)?
     private var closed = false
 
@@ -108,16 +129,18 @@ private final class ReleaseNotesDismissBox {
     func installedAndQuit() {
         guard !closed else { return }
         closed = true
-        NSApp.stopModal()
         window?.orderOut(nil)
+        window = nil
+        onDismissed()
         NSApp.terminate(nil)
     }
 
     private func finish(_ action: () -> Void) {
         guard !closed else { return }
         closed = true
-        NSApp.stopModal()
         window?.orderOut(nil)
+        window = nil
+        onDismissed()
         action()
     }
 }
@@ -282,9 +305,8 @@ private struct ReleaseNotesCard: View {
     }
 }
 
-/// AppKit buttons and a progress bar. SwiftUI often does not redraw an
-/// `NSHostingView` while `NSApp.runModal` is running, so a click looked dead
-/// even after the download had started.
+/// AppKit buttons and a progress bar, so download progress keeps painting
+/// on the normal update window.
 private struct UpdateInstallBar: NSViewRepresentable {
     var install: UpdateInstallController
     var laterTitle: String?

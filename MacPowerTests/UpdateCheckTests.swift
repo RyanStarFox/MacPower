@@ -161,8 +161,8 @@ final class ReleaseNotesTests: XCTestCase {
             offer?.giteeZip.absoluteString,
             "https://gitee.com/Ryan_LS_Wang/MacPower/releases/download/v1.3.1/MacPower-1.3.1.zip"
         )
-        XCTAssertEqual(UpdatePackage.sourceOrder, [.github, .gitee])
-        XCTAssertEqual(UpdatePackage.stallTimeout, 15)
+        XCTAssertEqual(UpdatePackage.sourceOrder, [.github])
+        XCTAssertEqual(UpdatePackage.noDataTimeout, 60)
         XCTAssertNil(UpdatePackage.offer(tag: "v1.3.1", body: body, assets: []))
     }
 

@@ -8,8 +8,9 @@ enum UpdateDownloadSource: String, Equatable, Sendable {
 }
 
 enum UpdatePackage {
-    /// Idle time with no new bytes before the current download is abandoned.
-    static let stallTimeout: TimeInterval = 15
+    /// Give up on GitHub when the first minute brings no file bytes.
+    /// Once any byte arrives, the download keeps going.
+    static let noDataTimeout: TimeInterval = 60
 
     struct Offer: Equatable, Sendable {
         var version: String
@@ -18,8 +19,8 @@ enum UpdatePackage {
         var giteeZip: URL
     }
 
-    /// GitHub first. Gitee is only tried after GitHub fails.
-    static let sourceOrder: [UpdateDownloadSource] = [.github, .gitee]
+    /// In-app download uses GitHub only. A failure asks the user to open GitHub or Gitee.
+    static let sourceOrder: [UpdateDownloadSource] = [.github]
 
     static func zipName(version: String) -> String {
         "MacPower-\(version).zip"
@@ -61,13 +62,15 @@ enum UpdatePackage {
     }
 }
 
-/// Reports byte progress while `runModal` is up. URLSession retains this delegate.
+/// Reports byte progress. URLSession retains this delegate.
 private final class DownloadProgressDelegate: NSObject, URLSessionDownloadDelegate, @unchecked Sendable {
     let onProgress: @Sendable (_ written: Int64, _ expected: Int64?) -> Void
     private let lock = NSLock()
     private var session: URLSession?
     private var continuation: CheckedContinuation<URL, Error>?
     private var finished = false
+    private var wroteBytes = false
+    private var watchdog: Task<Void, Never>?
 
     init(
         onProgress: @escaping @Sendable (_ written: Int64, _ expected: Int64?) -> Void,
@@ -81,6 +84,23 @@ private final class DownloadProgressDelegate: NSObject, URLSessionDownloadDelega
         lock.lock()
         self.session = session
         lock.unlock()
+        let watchdog = Task { [weak self] in
+            try? await Task.sleep(nanoseconds: UInt64(UpdatePackage.noDataTimeout * 1_000_000_000))
+            guard !Task.isCancelled else { return }
+            self?.abandonIfNoBytes()
+        }
+        lock.lock()
+        self.watchdog = watchdog
+        lock.unlock()
+    }
+
+    private func abandonIfNoBytes() {
+        lock.lock()
+        let wrote = wroteBytes
+        let session = self.session
+        lock.unlock()
+        guard !wrote else { return }
+        session?.invalidateAndCancel()
     }
 
     private func finish(with result: Result<URL, Error>) {
@@ -90,10 +110,13 @@ private final class DownloadProgressDelegate: NSObject, URLSessionDownloadDelega
             return
         }
         finished = true
+        let watchdog = self.watchdog
+        self.watchdog = nil
         let continuation = self.continuation
         self.continuation = nil
         let session = self.session
         lock.unlock()
+        watchdog?.cancel()
         session?.finishTasksAndInvalidate()
         switch result {
         case .success(let url): continuation?.resume(returning: url)
@@ -108,6 +131,14 @@ private final class DownloadProgressDelegate: NSObject, URLSessionDownloadDelega
         totalBytesWritten: Int64,
         totalBytesExpectedToWrite: Int64
     ) {
+        if totalBytesWritten > 0 {
+            lock.lock()
+            wroteBytes = true
+            let watchdog = self.watchdog
+            self.watchdog = nil
+            lock.unlock()
+            watchdog?.cancel()
+        }
         let expected = totalBytesExpectedToWrite > 0 ? totalBytesExpectedToWrite : nil
         onProgress(totalBytesWritten, expected)
     }
@@ -177,7 +208,7 @@ enum UpdateInstaller {
         case notWritable
     }
 
-    /// Downloads GitHub, then Gitee, and returns the first zip whose sha256 matches the release.
+    /// Downloads the GitHub zip and checks its sha256. Gitee is not tried here.
     static func downloadVerifiedZip(
         offer: UpdatePackage.Offer,
         sessionBox: UpdateDownloadSession,
@@ -276,7 +307,7 @@ enum UpdateInstaller {
         onProgress: @escaping @Sendable (_ written: Int64, _ expected: Int64?) -> Void
     ) async throws -> URL {
         let configuration = URLSessionConfiguration.ephemeral
-        configuration.timeoutIntervalForRequest = UpdatePackage.stallTimeout
+        configuration.timeoutIntervalForRequest = 30 * 60
         configuration.timeoutIntervalForResource = 30 * 60
         configuration.waitsForConnectivity = false
         return try await withCheckedThrowingContinuation { continuation in
@@ -285,7 +316,7 @@ enum UpdateInstaller {
             delegate.attach(session)
             box.store(session)
             var request = URLRequest(url: url)
-            request.timeoutInterval = UpdatePackage.stallTimeout
+            request.timeoutInterval = 30 * 60
             request.setValue("MacPower", forHTTPHeaderField: "User-Agent")
             session.downloadTask(with: request).resume()
         }
