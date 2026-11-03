@@ -1516,7 +1516,7 @@ final class RingColorTests: XCTestCase {
     func testRingAndFlowIconPresetsAndPersistence() {
         XCTAssertEqual(RingIconSettings.classic.gpu.source, .asset)
         XCTAssertEqual(RingIconSettings.classic.gpu.name, "GPUMark")
-        XCTAssertEqual(RingIconSettings.classic.gpu.opticalScale, 0.86, accuracy: 0.001)
+        XCTAssertEqual(RingIconSettings.classic.gpu.opticalScale, 1.07, accuracy: 0.001)
         XCTAssertEqual(RingIconSettings.classic.gpu.scale, 1.0, accuracy: 0.001)
         XCTAssertEqual(FlowIconSettings.classic.supply.name, "ChargeMark")
         XCTAssertEqual(FlowIconSettings.classic.supply.opticalScale, 0.9, accuracy: 0.001)

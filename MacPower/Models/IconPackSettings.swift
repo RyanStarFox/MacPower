@@ -39,15 +39,28 @@ struct GlyphSlot: Codable, Equatable, Hashable, Sendable {
         min(max(scale, 0.5), 1.5)
     }
 
-    /// Built-in assets fill their canvas more tightly than SF Symbols, so a 20pt
-    /// box looks oversized next to `cpu.fill` at 17pt. These factors keep Classic
-    /// presets optically matched at 100% zoom (die ≈ 13.7pt for GPUMark).
+    /// Built-in assets and SF Symbols don't ink the same share of a 20pt box.
+    /// `cpu.fill` at 17pt fills that box; GPUMark at 0.86 left the G visibly smaller.
+    /// 1.07 matches the CPU chip's ink. ChargeMark stays slightly inset.
+    static let retiredGPUMarkOpticalScale = 0.86
+
     static func opticalScale(forAsset name: String) -> Double {
         switch name {
-        case "GPUMark": return 0.86
+        case "GPUMark": return 1.07
         case "ChargeMark": return 0.9
         default: return 1.0
         }
+    }
+
+    /// Existing installs stored the old GPUMark factor. Only that exact value moves;
+    /// a zoom slider change is `scale`, not this field.
+    func adoptingMatchedGPUMark() -> GlyphSlot {
+        guard source == .asset, name == "GPUMark" else { return self }
+        let matched = Self.opticalScale(forAsset: name)
+        guard abs(opticalScale - Self.retiredGPUMarkOpticalScale) < 0.001 else { return self }
+        var copy = self
+        copy.opticalScale = matched
+        return copy
     }
 
     static func system(_ name: String, template: Bool = true, scale: Double = defaultScale) -> GlyphSlot {
@@ -269,6 +282,14 @@ struct RingIconSettings: Codable, Equatable, Sendable {
             batteryTemperature: batteryTemperature,
             thermalState: thermalState
         )
+    }
+
+    func adoptingMatchedGPUMark() -> RingIconSettings {
+        let matched = gpu.adoptingMatchedGPUMark()
+        guard matched != gpu else { return self }
+        var copy = self
+        copy.gpu = matched
+        return copy
     }
 
     func slot(for kind: RingKind) -> GlyphSlot {

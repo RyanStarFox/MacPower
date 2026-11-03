@@ -61,6 +61,86 @@ enum UpdatePackage {
     }
 }
 
+/// Reports byte progress while `runModal` is up. URLSession retains this delegate.
+private final class DownloadProgressDelegate: NSObject, URLSessionDownloadDelegate, @unchecked Sendable {
+    let onFraction: @Sendable (Double?) -> Void
+    private let lock = NSLock()
+    private var session: URLSession?
+    private var continuation: CheckedContinuation<URL, Error>?
+    private var finished = false
+
+    init(onFraction: @escaping @Sendable (Double?) -> Void, continuation: CheckedContinuation<URL, Error>) {
+        self.onFraction = onFraction
+        self.continuation = continuation
+    }
+
+    func attach(_ session: URLSession) {
+        lock.lock()
+        self.session = session
+        lock.unlock()
+    }
+
+    private func finish(with result: Result<URL, Error>) {
+        lock.lock()
+        guard !finished else {
+            lock.unlock()
+            return
+        }
+        finished = true
+        let continuation = self.continuation
+        self.continuation = nil
+        let session = self.session
+        lock.unlock()
+        session?.finishTasksAndInvalidate()
+        switch result {
+        case .success(let url): continuation?.resume(returning: url)
+        case .failure(let error): continuation?.resume(throwing: error)
+        }
+    }
+
+    func urlSession(
+        _ session: URLSession,
+        downloadTask: URLSessionDownloadTask,
+        didWriteData bytesWritten: Int64,
+        totalBytesWritten: Int64,
+        totalBytesExpectedToWrite: Int64
+    ) {
+        guard totalBytesExpectedToWrite > 0 else { return }
+        let fraction = min(1, max(0, Double(totalBytesWritten) / Double(totalBytesExpectedToWrite)))
+        onFraction(fraction)
+    }
+
+    func urlSession(
+        _ session: URLSession,
+        downloadTask: URLSessionDownloadTask,
+        didFinishDownloadingTo location: URL
+    ) {
+        let code = (downloadTask.response as? HTTPURLResponse)?.statusCode ?? 0
+        guard (200..<300).contains(code) else {
+            finish(with: .failure(UpdateInstaller.Failure.downloadFailed))
+            return
+        }
+        let destination = FileManager.default.temporaryDirectory
+            .appendingPathComponent("MacPower-\(UUID().uuidString).zip")
+        do {
+            try FileManager.default.moveItem(at: location, to: destination)
+            finish(with: .success(destination))
+        } catch {
+            finish(with: .failure(error))
+        }
+    }
+
+    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+        if let error {
+            finish(with: .failure(error))
+            return
+        }
+        if let response = task.response as? HTTPURLResponse, !(200..<300).contains(response.statusCode) {
+            finish(with: .failure(UpdateInstaller.Failure.downloadFailed))
+        }
+    }
+}
+
 final class UpdateDownloadSession: @unchecked Sendable {
     private let lock = NSLock()
     private var session: URLSession?
@@ -99,14 +179,16 @@ enum UpdateInstaller {
     static func downloadVerifiedZip(
         offer: UpdatePackage.Offer,
         sessionBox: UpdateDownloadSession,
-        progress: @escaping @Sendable (UpdateDownloadSource) -> Void
+        progress: @escaping @Sendable (UpdateDownloadSource) -> Void,
+        onFraction: @escaping @Sendable (Double?) -> Void
     ) async throws -> URL {
         for source in UpdatePackage.sourceOrder {
             if sessionBox.isCancelled() { throw CancellationError() }
             progress(source)
+            onFraction(nil)
             let url = UpdatePackage.url(for: source, offer: offer)
             do {
-                let file = try await download(url, box: sessionBox)
+                let file = try await download(url, box: sessionBox, onFraction: onFraction)
                 if sessionBox.isCancelled() { throw CancellationError() }
                 let digest = sha256Hex(of: file)
                 guard digest == offer.sha256 else {
@@ -186,25 +268,25 @@ enum UpdateInstaller {
         return hasher.finalize().map { String(format: "%02x", $0) }.joined()
     }
 
-    private static func download(_ url: URL, box: UpdateDownloadSession) async throws -> URL {
+    private static func download(
+        _ url: URL,
+        box: UpdateDownloadSession,
+        onFraction: @escaping @Sendable (Double?) -> Void
+    ) async throws -> URL {
         let configuration = URLSessionConfiguration.ephemeral
         configuration.timeoutIntervalForRequest = UpdatePackage.stallTimeout
         configuration.timeoutIntervalForResource = 30 * 60
         configuration.waitsForConnectivity = false
-        let session = URLSession(configuration: configuration)
-        box.store(session)
-        defer { session.finishTasksAndInvalidate() }
-        var request = URLRequest(url: url)
-        request.timeoutInterval = UpdatePackage.stallTimeout
-        request.setValue("MacPower", forHTTPHeaderField: "User-Agent")
-        let (temp, response) = try await session.download(for: request)
-        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
-            throw Failure.downloadFailed
+        return try await withCheckedThrowingContinuation { continuation in
+            let delegate = DownloadProgressDelegate(onFraction: onFraction, continuation: continuation)
+            let session = URLSession(configuration: configuration, delegate: delegate, delegateQueue: nil)
+            delegate.attach(session)
+            box.store(session)
+            var request = URLRequest(url: url)
+            request.timeoutInterval = UpdatePackage.stallTimeout
+            request.setValue("MacPower", forHTTPHeaderField: "User-Agent")
+            session.downloadTask(with: request).resume()
         }
-        let destination = FileManager.default.temporaryDirectory
-            .appendingPathComponent("MacPower-\(UUID().uuidString).zip")
-        try FileManager.default.moveItem(at: temp, to: destination)
-        return destination
     }
 
     private static func shellQuote(_ path: String) -> String {
@@ -231,9 +313,32 @@ final class UpdateInstallController {
     }
 
     var phase: Phase = .ready
+    /// Nil while the server has not sent a total size. Otherwise 0...1.
+    var fraction: Double?
     let offer: UpdatePackage.Offer
     var text: UpdateInstallText
     var onInstalled: () -> Void = {}
+
+    /// One sentence for the status line. The percent is drawn beside the bar.
+    var statusText: String {
+        switch phase {
+        case .ready:
+            return ""
+        case .downloading(.github):
+            return text.downloadingGitHub
+        case .downloading(.gitee):
+            return text.downloadingGitee
+        case .installing:
+            return text.installing
+        case .failed:
+            return text.failed
+        }
+    }
+
+    var percentText: String? {
+        guard case .downloading = phase, let fraction else { return nil }
+        return "\(Int((fraction * 100).rounded()))%"
+    }
     private var task: Task<Void, Never>?
     private let downloadSession = UpdateDownloadSession()
 
@@ -244,6 +349,8 @@ final class UpdateInstallController {
 
     func start() {
         guard phase == .ready || phase == .failed else { return }
+        fraction = nil
+        phase = .downloading(.github)
         task = Task { [weak self] in
             guard let self else { return }
             do {
@@ -252,7 +359,12 @@ final class UpdateInstallController {
                     sessionBox: downloadSession
                 ) { source in
                     Task { @MainActor in
+                        self.fraction = nil
                         self.phase = .downloading(source)
+                    }
+                } onFraction: { [weak self] value in
+                    Task { @MainActor in
+                        self?.fraction = value
                     }
                 }
                 phase = .installing

@@ -167,12 +167,6 @@ private struct ReleaseNotesCard: View {
             if !items.isEmpty {
                 notes
             }
-            if let status {
-                Text(status)
-                    .font(.system(size: 12))
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
             if let automaticTitle {
                 Toggle(automaticTitle, isOn: $automaticOn)
                     .onChange(of: automaticOn) { _, enabled in
@@ -192,22 +186,6 @@ private struct ReleaseNotesCard: View {
         }
         .onChange(of: install?.phase) { _, _ in
             DispatchQueue.main.async { dismiss.resize?() }
-        }
-    }
-
-    private var status: String? {
-        guard let install else { return nil }
-        switch install.phase {
-        case .ready:
-            return nil
-        case .downloading(.github):
-            return install.text.downloadingGitHub
-        case .downloading(.gitee):
-            return install.text.downloadingGitee
-        case .installing:
-            return install.text.installing
-        case .failed:
-            return install.text.failed
         }
     }
 
@@ -289,31 +267,231 @@ private struct ReleaseNotesCard: View {
         .controlSize(.large)
     }
 
-    @ViewBuilder
     private func installButtons(_ install: UpdateInstallController) -> some View {
-        HStack(spacing: 8) {
-            Spacer(minLength: 0)
-            if let secondary {
-                Button(secondary) { close() }
-                    .keyboardShortcut(.cancelAction)
-                    .disabled(install.phase == .installing)
+        UpdateInstallBar(
+            install: install,
+            laterTitle: secondary,
+            primaryTitle: primary,
+            alternateTitle: alternate,
+            onLater: close,
+            onPrimary: { dismiss.confirm() },
+            onAlternate: { dismiss.chooseAlternate() },
+            onLayout: { dismiss.resize?() }
+        )
+        .frame(maxWidth: .infinity, alignment: .trailing)
+    }
+}
+
+/// AppKit buttons and a progress bar. SwiftUI often does not redraw an
+/// `NSHostingView` while `NSApp.runModal` is running, so a click looked dead
+/// even after the download had started.
+private struct UpdateInstallBar: NSViewRepresentable {
+    var install: UpdateInstallController
+    var laterTitle: String?
+    var primaryTitle: String
+    var alternateTitle: String?
+    var onLater: () -> Void
+    var onPrimary: () -> Void
+    var onAlternate: () -> Void
+    var onLayout: () -> Void
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+
+    func makeNSView(context: Context) -> NSStackView {
+        let column = NSStackView()
+        column.orientation = .vertical
+        column.alignment = .trailing
+        column.spacing = 8
+        context.coordinator.build(in: column)
+        return column
+    }
+
+    func updateNSView(_ column: NSStackView, context: Context) {
+        context.coordinator.parent = self
+        context.coordinator.sync()
+    }
+
+    static func dismantleNSView(_ nsView: NSStackView, coordinator: Coordinator) {
+        coordinator.timer?.invalidate()
+    }
+
+    @MainActor
+    final class Coordinator: NSObject {
+        var parent: UpdateInstallBar
+        var column: NSStackView?
+        var status: NSTextField?
+        var progressRow: NSStackView?
+        var row: NSStackView?
+        var laterButton: NSButton?
+        var progress: NSProgressIndicator?
+        var percentLabel: NSTextField?
+        var updateButton: NSButton?
+        var primaryButton: NSButton?
+        var alternateButton: NSButton?
+        var timer: Timer?
+        var lastPhase: UpdateInstallController.Phase?
+
+        init(_ parent: UpdateInstallBar) {
+            self.parent = parent
+        }
+
+        func build(in column: NSStackView) {
+            self.column = column
+            column.alignment = .leading
+            column.translatesAutoresizingMaskIntoConstraints = false
+            column.widthAnchor.constraint(equalToConstant: 420).isActive = true
+
+            let status = NSTextField(wrappingLabelWithString: "")
+            status.font = .systemFont(ofSize: 12)
+            status.textColor = .secondaryLabelColor
+            status.alignment = .left
+            status.maximumNumberOfLines = 2
+            status.preferredMaxLayoutWidth = 420
+            status.isHidden = true
+            column.addArrangedSubview(status)
+            self.status = status
+
+            let progressRow = NSStackView()
+            progressRow.orientation = .horizontal
+            progressRow.alignment = .centerY
+            progressRow.spacing = 8
+            progressRow.isHidden = true
+            column.addArrangedSubview(progressRow)
+            self.progressRow = progressRow
+
+            let bar = NSProgressIndicator()
+            bar.style = .bar
+            bar.controlSize = .regular
+            bar.minValue = 0
+            bar.maxValue = 1
+            bar.isIndeterminate = true
+            bar.usesThreadedAnimation = true
+            bar.translatesAutoresizingMaskIntoConstraints = false
+            bar.setContentHuggingPriority(.defaultLow, for: .horizontal)
+            bar.widthAnchor.constraint(greaterThanOrEqualToConstant: 280).isActive = true
+            progressRow.addArrangedSubview(bar)
+            progress = bar
+
+            let percent = NSTextField(labelWithString: "")
+            percent.font = .monospacedDigitSystemFont(ofSize: 12, weight: .medium)
+            percent.textColor = .secondaryLabelColor
+            percent.alignment = .right
+            percent.translatesAutoresizingMaskIntoConstraints = false
+            percent.widthAnchor.constraint(equalToConstant: 44).isActive = true
+            progressRow.addArrangedSubview(percent)
+            percentLabel = percent
+
+            let row = NSStackView()
+            row.orientation = .horizontal
+            row.alignment = .centerY
+            row.spacing = 8
+            column.addArrangedSubview(row)
+            self.row = row
+
+            let spacer = NSView()
+            spacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
+            row.addArrangedSubview(spacer)
+
+            if parent.laterTitle != nil {
+                let later = button(parent.laterTitle ?? "", action: #selector(laterClicked), key: "\u{1b}")
+                row.addArrangedSubview(later)
+                laterButton = later
             }
-            switch install.phase {
-            case .ready, .downloading, .installing:
-                Button(install.text.update) { install.start() }
-                    .keyboardShortcut(.defaultAction)
-                    .buttonStyle(.borderedProminent)
-                    .disabled(install.phase != .ready)
-            case .failed:
-                Button(install.text.update) { install.start() }
-                    .keyboardShortcut(.defaultAction)
-                    .buttonStyle(.borderedProminent)
-                Button(primary) { dismiss.confirm() }
-                if let alternate {
-                    Button(alternate) { dismiss.chooseAlternate() }
+
+            let update = button(parent.install.text.update, action: #selector(updateClicked), key: "\r")
+            row.addArrangedSubview(update)
+            updateButton = update
+
+            let timer = Timer(timeInterval: 0.1, repeats: true) { [weak self] _ in
+                MainActor.assumeIsolated {
+                    self?.sync()
+                }
+            }
+            RunLoop.main.add(timer, forMode: .common)
+            RunLoop.main.add(timer, forMode: .modalPanel)
+            self.timer = timer
+            sync()
+        }
+
+        func button(_ title: String, action: Selector, key: String) -> NSButton {
+            let button = NSButton(title: title, target: self, action: action)
+            button.bezelStyle = .rounded
+            button.controlSize = .large
+            button.keyEquivalent = key
+            return button
+        }
+
+        @objc func updateClicked() {
+            parent.install.start()
+            sync()
+        }
+
+        @objc func laterClicked() {
+            parent.onLater()
+        }
+
+        @objc func primaryClicked() {
+            parent.onPrimary()
+        }
+
+        @objc func alternateClicked() {
+            parent.onAlternate()
+        }
+
+        func sync() {
+            let install = parent.install
+            let busy = install.phase != .ready && install.phase != .failed
+            let text = install.statusText
+            status?.stringValue = text
+            status?.isHidden = text.isEmpty
+            updateButton?.title = install.text.update
+            updateButton?.isEnabled = !busy
+            laterButton?.isEnabled = install.phase != .installing
+
+            progressRow?.isHidden = !busy
+            if busy {
+                if let fraction = install.fraction {
+                    progress?.isIndeterminate = false
+                    progress?.doubleValue = fraction
+                    progress?.stopAnimation(nil)
+                    percentLabel?.stringValue = install.percentText ?? ""
+                } else if progress?.isIndeterminate != true {
+                    progress?.isIndeterminate = true
+                    progress?.startAnimation(nil)
+                    percentLabel?.stringValue = ""
+                } else {
+                    progress?.startAnimation(nil)
+                    percentLabel?.stringValue = ""
+                }
+            } else {
+                progress?.stopAnimation(nil)
+                percentLabel?.stringValue = ""
+            }
+
+            if case .failed = install.phase {
+                if primaryButton == nil, let row {
+                    let primary = button(parent.primaryTitle, action: #selector(primaryClicked), key: "")
+                    row.addArrangedSubview(primary)
+                    primaryButton = primary
+                    if let alternateTitle = parent.alternateTitle {
+                        let alternate = button(alternateTitle, action: #selector(alternateClicked), key: "")
+                        row.addArrangedSubview(alternate)
+                        alternateButton = alternate
+                    }
+                }
+            }
+
+            if install.phase != lastPhase {
+                let previous = lastPhase
+                lastPhase = install.phase
+                if previous != nil {
+                    DispatchQueue.main.async { [weak self] in
+                        self?.parent.onLayout()
+                    }
                 }
             }
         }
-        .controlSize(.large)
     }
 }

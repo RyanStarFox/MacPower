@@ -17,11 +17,10 @@ struct GlyphSlotView: View {
 
     var body: some View {
         // Built-in assets (GPUMark) ink more of their canvas than SF Symbols, so
-        // draw them slightly smaller inside the shared layout box. `cpu` inks
-        // less of the em square than the chip and laptop, so it draws larger.
-        let boost = Self.systemInkScale(for: slot)
-        let drawSide = assetSide * CGFloat(slot.normalizedOpticalScale) * boost
-        let pointSize = systemPointSize * boost
+        // draw them slightly smaller inside the shared layout box. Every system
+        // symbol, including cpu, uses the same point size as the other rings.
+        let drawSide = assetSide * CGFloat(slot.normalizedOpticalScale)
+        let pointSize = systemPointSize
         let tint = ink ?? Color.primary
         Group {
             switch slot.source {
@@ -80,17 +79,8 @@ struct GlyphSlotView: View {
                 }
             }
         }
-        .frame(width: assetSide * boost, height: assetSide * boost)
+        .frame(width: assetSide, height: assetSide)
         .clipped()
-    }
-
-    /// `cpu` leaves more empty metal around the die than the other ring symbols.
-    private static func systemInkScale(for slot: GlyphSlot) -> CGFloat {
-        guard slot.source == .system else { return 1 }
-        switch slot.name {
-        case "cpu", "cpu.fill": return 1.35
-        default: return 1
-        }
     }
 
     /// Bake assets down to `side`×`side` so AppKit Menus cannot promote the PNG's

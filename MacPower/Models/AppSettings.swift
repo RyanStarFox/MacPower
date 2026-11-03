@@ -1402,6 +1402,25 @@ final class AppSettings {
             }
             store.set(4, forKey: revisionKey)
         }
+        if store.integer(forKey: revisionKey) < 5 {
+            let matchedIcons = ringIcons.adoptingMatchedGPUMark()
+            if matchedIcons != ringIcons {
+                ringIcons = matchedIcons
+            }
+            var library = savedIconLibrary
+            var libraryChanged = false
+            for index in library.ring.indices {
+                let matched = library.ring[index].payload.adoptingMatchedGPUMark()
+                if matched != library.ring[index].payload {
+                    library.ring[index].payload = matched
+                    libraryChanged = true
+                }
+            }
+            if libraryChanged {
+                savedIconLibrary = library
+            }
+            store.set(5, forKey: revisionKey)
+        }
     }
 
     private func persistTint() {
