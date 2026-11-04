@@ -106,9 +106,9 @@ enum MenuBarBatteryRenderer {
     ) -> Metrics {
         let bodyHeight: CGFloat = 12
         let bodyY = (height - bodyHeight) / 2
-        let capWidth: CGFloat = 1.5
-        let capHeight: CGFloat = 4
-        let capGap: CGFloat = 1.22
+        let capWidth: CGFloat = style.isOutlined ? 2 : 1.5
+        let capHeight: CGFloat = style.isOutlined ? bodyHeight : 4
+        let capGap: CGFloat = style.isOutlined ? 1 : 1.22
         let showsText = style.showsPercentInside
         let text = showsText ? "\(percent)" : ""
         let digits = text.count
@@ -125,9 +125,9 @@ enum MenuBarBatteryRenderer {
         let groupWidth = (showsText ? textSize.width : 0) + gap + glyphAdvance
         let bodyWidth: CGFloat = {
             if !showsText { return 23 }
-            return digits >= 3 ? 24.0 : 22.5
+            return digits >= 3 ? 24.0 : (style.isOutlined ? 23 : 22.5)
         }()
-        let body = NSRect(x: 0.35, y: bodyY, width: bodyWidth, height: bodyHeight)
+        let body = NSRect(x: style.isOutlined ? 0 : 0.35, y: bodyY, width: bodyWidth, height: bodyHeight)
         let cap = NSRect(
             x: body.maxX + capGap,
             y: body.midY - capHeight / 2,
@@ -173,18 +173,18 @@ enum MenuBarBatteryRenderer {
                 body: body,
                 cap: metrics.cap,
                 percent: percent,
-                fill: fill,
-                radius: radius
+                fill: fill
             )
-        } else {
-            drawChargeLevel(
-                body: body,
-                cap: metrics.cap,
-                percent: percent,
-                fill: fill,
-                radius: radius
-            )
+            if style.showsPercentInside {
+                drawOutlinedText(metrics: metrics, percent: percent, fill: fill)
+            }
+            if glyph != nil {
+                let target = style.showsPercentInside ? metrics.glyphBox : body
+                drawOutlinedChargeMark(in: target, compact: style.showsPercentInside, fill: fill)
+            }
+            return
         }
+        drawChargeLevel(body: body, cap: metrics.cap, percent: percent, fill: fill, radius: radius)
 
         guard !style.showsPercentBeside || glyph != nil else { return }
 
@@ -225,7 +225,7 @@ enum MenuBarBatteryRenderer {
 
         NSGraphicsContext.saveGraphicsState()
         bodyPath.addClip()
-        paint(dim, in: body)
+        paint(fill.withAlpha(0.52), in: body)
         NSGraphicsContext.restoreGraphicsState()
         NSGraphicsContext.saveGraphicsState()
         capPath.addClip()
@@ -243,13 +243,6 @@ enum MenuBarBatteryRenderer {
         paint(fill, in: body)
         NSGraphicsContext.restoreGraphicsState()
 
-        if clamped >= 0.995 {
-            NSGraphicsContext.saveGraphicsState()
-            capPath.addClip()
-            paint(fill, in: cap)
-            NSGraphicsContext.restoreGraphicsState()
-        }
-
         // Template rendering blends anti-aliased edges; cut the gap so the terminal stays detached.
         let gap = NSRect(
             x: body.maxX,
@@ -266,67 +259,61 @@ enum MenuBarBatteryRenderer {
         }
     }
 
-    /// Apple-style outlined battery: hollow body with a stroke, charge fill inset inside.
+    /// Native 23 × 12pt frame, with a separate terminal and a 1pt clear gutter.
     private static func drawOutlinedChargeLevel(
         body: NSRect,
         cap: NSRect,
         percent: CGFloat,
-        fill: MenuBarResolvedFill,
-        radius: CGFloat
+        fill: MenuBarResolvedFill
     ) {
-        let clamped = min(1, max(0, percent))
-        let line: CGFloat = 1.15
-        let inset = line / 2 + 0.35
-        let bodyPath = NSBezierPath(roundedRect: body, xRadius: radius, yRadius: radius)
-        let inner = body.insetBy(dx: inset, dy: inset)
-        let innerRadius = max(0.6, radius - inset)
-        let innerPath = NSBezierPath(roundedRect: inner, xRadius: innerRadius, yRadius: innerRadius)
-        let capPath = terminalPath(in: cap)
-        let dim = fill.withAlpha(0.62)
-
-        // Same pad as the borderless body, so knocked-out digits stay readable
-        // where the charge has already been used.
-        NSGraphicsContext.saveGraphicsState()
-        innerPath.addClip()
-        paint(dim, in: inner)
-        NSGraphicsContext.restoreGraphicsState()
-
-        if clamped > 0.004 {
+        if percent > 0 {
             NSGraphicsContext.saveGraphicsState()
-            innerPath.addClip()
-            NSBezierPath(rect: NSRect(
-                x: inner.minX,
-                y: inner.minY,
-                width: inner.width * clamped,
-                height: inner.height
-            )).addClip()
-            paint(fill, in: inner)
+            outlinedChargePath(body: body, percent: percent).addClip()
+            paint(fill, in: body.insetBy(dx: 2, dy: 2))
             NSGraphicsContext.restoreGraphicsState()
         }
+        paintTemplate(named: "MenuBarBatteryOutline", in: body, fill: fill)
+        paintTemplate(named: "MenuBarBatteryCap", in: cap, fill: fill)
+    }
 
-        fill.right.setStroke()
-        bodyPath.lineWidth = line
-        bodyPath.lineJoinStyle = .round
-        bodyPath.stroke()
+    private static func outlinedChargePath(body: NSRect, percent: CGFloat) -> NSBezierPath {
+        var charged = body.insetBy(dx: 2, dy: 2)
+        charged.size.width *= min(1, max(0, percent))
+        return NSBezierPath(roundedRect: charged, xRadius: 1.5, yRadius: 1.5)
+    }
 
+    private static func paintTemplate(named name: String, in rect: NSRect, fill: MenuBarResolvedFill) {
+        guard let image = NSImage(named: name),
+              let mask = image.cgImage(forProposedRect: nil, context: .current, hints: nil),
+              let context = NSGraphicsContext.current?.cgContext else { return }
         NSGraphicsContext.saveGraphicsState()
-        capPath.addClip()
-        paint(fill, in: cap)
+        context.clip(to: rect, mask: mask)
+        paint(fill, in: rect)
+        NSGraphicsContext.restoreGraphicsState()
+    }
+
+    private static func drawOutlinedText(metrics: Metrics, percent: CGFloat, fill: MenuBarResolvedFill) {
+        NSGraphicsContext.saveGraphicsState()
+        NSGraphicsContext.current?.compositingOperation = .destinationOut
+        punchCenteredText(metrics.text, font: metrics.font, in: metrics.digitBox)
         NSGraphicsContext.restoreGraphicsState()
 
-        let gap = NSRect(
-            x: body.maxX,
-            y: 0,
-            width: max(0, cap.minX - body.maxX),
-            height: max(body.maxY, cap.maxY) + 2
-        )
-        if gap.width > 0 {
-            NSGraphicsContext.saveGraphicsState()
-            NSGraphicsContext.current?.compositingOperation = .destinationOut
-            NSColor.black.setFill()
-            gap.fill()
-            NSGraphicsContext.restoreGraphicsState()
-        }
+        // Invert the digits over the charge, and paint them normally over empty space.
+        let empty = NSBezierPath(rect: metrics.body.insetBy(dx: 2, dy: 2))
+        if percent > 0 { empty.append(outlinedChargePath(body: metrics.body, percent: percent)) }
+        empty.windingRule = .evenOdd
+        NSGraphicsContext.saveGraphicsState()
+        empty.addClip()
+        punchCenteredText(metrics.text, font: metrics.font, in: metrics.digitBox, color: fill.right)
+        NSGraphicsContext.restoreGraphicsState()
+    }
+
+    private static func drawOutlinedChargeMark(in box: NSRect, compact: Bool, fill: MenuBarResolvedFill) {
+        let width: CGFloat = compact ? 5.8 : 11
+        let height = width * 14 / 11
+        let rect = NSRect(x: box.midX - width / 2, y: box.midY - height / 2, width: width, height: height)
+        NSImage(named: "MenuBarBatteryBoltMask")?.draw(in: rect, from: .zero, operation: .destinationOut, fraction: 1)
+        paintTemplate(named: "MenuBarBatteryBolt", in: rect, fill: fill)
     }
 
     /// A flat inner edge and a narrow, rounded outer edge, detached from the body.
@@ -371,11 +358,11 @@ enum MenuBarBatteryRenderer {
             && abs(left.alphaComponent - right.alphaComponent) < 0.004
     }
 
-    private static func punchCenteredText(_ text: String, font: NSFont, in box: NSRect) {
+    private static func punchCenteredText(_ text: String, font: NSFont, in box: NSRect, color: NSColor = .black) {
         let line = CTLineCreateWithAttributedString(
             NSAttributedString(string: text, attributes: [
                 .font: font,
-                .foregroundColor: NSColor.black
+                .foregroundColor: color
             ])
         )
         let bounds = CTLineGetBoundsWithOptions(line, [.useGlyphPathBounds])
