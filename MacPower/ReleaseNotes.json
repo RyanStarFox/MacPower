@@ -1,13 +1,13 @@
 {
-  "zh-Hans": "• 菜单栏充电时使用更大的闪电，电池极耳改为内侧平、外侧圆的窄极耳",
-  "zh-Hant": "• 選單列充電時改用更大的閃電，電池極耳改成內側平、外側圓的窄極耳",
-  "en": "• While charging, the menu bar uses a larger bolt, and the battery terminal is a narrow cap that is flat on the inside and round on the outside",
-  "ja": "• 充電中のメニューバーは大きな稲妻になり、電池の端子は内側が平らで外側が丸い細い形になりました",
-  "ko": "• 충전 중 메뉴 막대는 더 큰 번개를 쓰고, 배터리 단자는 안쪽이 평평하고 바깥쪽이 둥근 좁은 모양이 되었습니다",
-  "fr": "• En charge, la barre des menus affiche un éclair plus grand, et la borne de la batterie est plus étroite, plate à l’intérieur et arrondie à l’extérieur",
-  "de": "• Beim Laden zeigt die Menüleiste einen größeren Blitz, und der Batteriepol ist schmal, innen flach und außen rund",
-  "es": "• Al cargar, la barra de menús usa un rayo más grande, y el terminal de la batería es estrecho, plano por dentro y redondeado por fuera",
-  "pt-BR": "• Durante a carga, a barra de menus usa um raio maior, e o terminal da bateria ficou estreito, reto por dentro e arredondado por fora",
-  "it": "• In carica, la barra dei menu usa un fulmine più grande, e il polo della batteria è stretto, piatto dentro e arrotondato fuori",
-  "ru": "• При зарядке в строке меню более крупная молния, а контакт батареи узкий: внутри плоский, снаружи скруглённый"
+  "zh-Hans": "• 可以把耳机电量放进圆环。AirPods 会分成左耳、右耳和充电盒\n• 圆环可以拖动排序，点「添加换行」就能分成多行\n• 交换圆环显示已经用掉的大小。默认走到一半是内存的四分之一，满圈是整份内存，一半的位置可以在设置里改\n• 耳机断开后，面板会跟着变窄",
+  "zh-Hant": "• 可以把耳機電量放進圓環。AirPods 會分成左耳、右耳和充電盒\n• 圓環可以拖動排序，點「加入換行」就能分成多行\n• 交換圓環顯示已經用掉的大小。預設走到一半是記憶體的四分之一，滿圈是整份記憶體，一半的位置可以在設定裡改\n• 耳機斷開後，面板會跟著變窄",
+  "en": "• Headphone battery can sit in the rings. AirPods split into left, right, and case\n• Drag rings to reorder them, and add a row break to start another row\n• The swap ring shows how much is in use. Halfway is a quarter of memory by default, a full ring is all of that memory, and the halfway size can be changed\n• When headphones disconnect, the panel narrows with them",
+  "ja": "• イヤホンの電池をリングに入れられます。AirPods は左、右、ケースに分かれます\n• リングはドラッグで並べ替えられ、「改行を追加」で次の行に分けられます\n• スワップのリングは使用量を表示します。初期状態では半分がメモリの 4 分の 1、満タンがメモリ全体で、半分の位置は設定で変えられます\n• イヤホンが切れると、パネルもそれに合わせて狭くなります",
+  "ko": "• 이어폰 배터리를 링에 넣을 수 있습니다. AirPods는 왼쪽, 오른쪽, 케이스로 나뉩니다\n• 링은 끌어 순서를 바꿀 수 있고, 줄바꿈을 추가하면 다음 줄로 나뉩니다\n• 스왑 링은 사용 중인 크기를 보여 줍니다. 기본으로 절반은 메모리의 4분의 1, 가득 찬 링은 메모리 전체이며, 절반 위치는 설정에서 바꿀 수 있습니다\n• 이어폰 연결이 끊기면 패널도 함께 좁아집니다",
+  "fr": "• La batterie des écouteurs peut apparaître dans les anneaux. Les AirPods se séparent en gauche, droite et boîtier\n• Faites glisser les anneaux pour les réordonner, et ajoutez un saut de ligne pour commencer une autre rangée\n• L’anneau de swap affiche la taille utilisée. À mi-parcours, c’est un quart de la mémoire par défaut, un anneau plein correspond à toute la mémoire, et cette moitié se règle\n• Quand les écouteurs se déconnectent, le panneau se rétrécit avec eux",
+  "de": "• Der Akkustand von Kopfhörern kann in den Ringen stehen. AirPods teilen sich in links, rechts und Case\n• Ringe lassen sich ziehen, und eine neue Zeile beginnt mit „Zeilenumbruch hinzufügen“\n• Der Swap-Ring zeigt die belegte Größe. Standardmäßig ist die Hälfte ein Viertel des Arbeitsspeichers, ein voller Ring der gesamte, und die Hälfte lässt sich ändern\n• Wenn die Kopfhörer getrennt werden, wird das Panel mit ihnen schmaler",
+  "es": "• La batería de los auriculares puede ir en los anillos. Los AirPods se separan en izquierdo, derecho y estuche\n• Arrastra los anillos para reordenarlos, y añade un salto de línea para empezar otra fila\n• El anillo de swap muestra el tamaño en uso. A mitad, por defecto, es un cuarto de la memoria; el anillo lleno es toda la memoria, y esa mitad se puede cambiar\n• Cuando los auriculares se desconectan, el panel se estrecha con ellos",
+  "pt-BR": "• A bateria dos fones pode entrar nos anéis. Os AirPods se separam em esquerdo, direito e estojo\n• Arraste os anéis para reordenar, e adicione uma quebra para começar outra linha\n• O anel de swap mostra o tamanho em uso. No meio, por padrão, é um quarto da memória; o anel cheio é toda a memória, e essa metade pode ser alterada\n• Quando os fones desconectam, o painel estreita junto",
+  "it": "• La batteria delle cuffie può stare negli anelli. Gli AirPods si dividono in sinistra, destra e custodia\n• Trascina gli anelli per riordinarli, e aggiungi un a capo per iniziare un’altra riga\n• L’anello di swap mostra lo spazio usato. A metà, per impostazione predefinita, è un quarto della memoria; l’anello pieno è tutta la memoria, e quella metà si può cambiare\n• Quando le cuffie si scollegano, il pannello si restringe con loro",
+  "ru": "• Заряд наушников можно показать в кольцах. AirPods делятся на левое, правое и футляр\n• Кольца можно перетаскивать, а «Добавить перенос» начинает новую строку\n• Кольцо подкачки показывает занятый объём. По умолчанию половина — это четверть памяти, полное кольцо — вся память, и положение половины можно изменить\n• Когда наушники отключаются, панель сужается вместе с ними"
 }

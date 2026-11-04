@@ -223,6 +223,107 @@ final class LoginLaunchTests: XCTestCase {
         XCTAssertFalse(LoginLaunch.isLoginLaunch(event))
     }
 
+    func testRingRowsMigrateFromTheOldTwoRowSplit() {
+        let order: [RingSlot] = [.battery, .cpu, .gpu, .memory, .disk]
+        let rows = RingBoard.migratedRows(order: order, twoRows: true)
+        XCTAssertEqual(rows.map { $0.compactMap(\.slot) }, [[.battery, .cpu, .gpu], [.memory, .disk]])
+        let single = RingBoard.migratedRows(order: order, twoRows: false)
+        XCTAssertEqual(single.map { $0.compactMap(\.slot) }, [order])
+    }
+
+    func testDisconnectedDeviceHidesOrKeepsAnEmptyRing() {
+        let left = BluetoothDisplayRing.make(parts: [.left])
+        let box = BluetoothDisplayRing.make(parts: [.box])
+        let device = BluetoothRingDevice(address: "aa", name: "Buds", multi: true, rings: [left, box])
+        let rows: [[RingItem]] = [[
+            .slot(.battery),
+            .bluetooth(address: "aa", ringID: left.id),
+            .bluetooth(address: "aa", ringID: box.id)
+        ]]
+        let hidden = RingBoard.visibleRows(rows: rows, devices: [device], seen: [])
+        XCTAssertEqual(hidden, [[.slot(.battery)]])
+
+        var emptyBox = box
+        emptyBox.whenDisconnected = .empty
+        var emptyDevice = device
+        emptyDevice.rings = [left, emptyBox]
+        let kept = RingBoard.visibleRows(rows: rows, devices: [emptyDevice], seen: [])
+        XCTAssertEqual(kept, [[.slot(.battery), .bluetooth(address: "aa", ringID: box.id)]])
+
+        let live = BluetoothSeenDevice(address: "aa", name: "Buds", connected: true, levels: [.left: 40])
+        let partial = RingBoard.visibleRows(rows: rows, devices: [device], seen: [live])
+        XCTAssertEqual(partial, [[.slot(.battery), .bluetooth(address: "aa", ringID: left.id)]])
+        let face = RingBoard.face(ring: left, connected: true, levels: live.levels)
+        XCTAssertEqual(face?.levels[.left], 40)
+        XCTAssertNil(RingBoard.face(ring: box, connected: true, levels: live.levels))
+    }
+
+    func testMergedRingCanHideOrKeepTheRemainingBud() {
+        var merged = BluetoothDisplayRing.make(parts: [.left, .right])
+        merged.whenIncomplete = .showRemaining
+        let device = BluetoothRingDevice(address: "aa", name: "Buds", multi: true, rings: [merged])
+        let rows: [[RingItem]] = [[.bluetooth(address: "aa", ringID: merged.id)]]
+        let live = BluetoothSeenDevice(address: "aa", name: "Buds", connected: true, levels: [.right: 70])
+        let shown = RingBoard.visibleRows(rows: rows, devices: [device], seen: [live])
+        XCTAssertEqual(shown, rows)
+        XCTAssertEqual(
+            RingBoard.face(ring: merged, connected: true, levels: live.levels)?.parts,
+            [.right]
+        )
+
+        merged.whenIncomplete = .hide
+        var hiding = device
+        hiding.rings = [merged]
+        XCTAssertEqual(RingBoard.visibleRows(rows: rows, devices: [hiding], seen: [live]), [])
+    }
+
+    func testBluetoothOnlyRowDisappearsWhenEveryRingIsHidden() {
+        let ring = BluetoothDisplayRing.make(parts: [.single])
+        let device = BluetoothRingDevice(address: "aa", name: "Mouse", multi: false, rings: [ring])
+        let rows: [[RingItem]] = [[.slot(.cpu)], [.bluetooth(address: "aa", ringID: ring.id)]]
+        let visible = RingBoard.visibleRows(rows: rows, devices: [device], seen: [])
+        XCTAssertEqual(visible, [[.slot(.cpu)]])
+    }
+
+    func testHeadphoneIconsFollowTheModel() {
+        XCTAssertEqual(
+            HeadphoneModel.detect(name: "王邵言's AirPods 5", productID: nil),
+            .airpods(generation: 5, artwork: "B868m.icns")
+        )
+        XCTAssertEqual(
+            HeadphoneModel.detect(name: "Headphones", productID: "0x2030"),
+            .airpods(generation: 5, artwork: "B868m.icns")
+        )
+        XCTAssertEqual(
+            HeadphoneModel.detect(name: "Headphones", productID: "0x2030").symbolName(parts: [.left, .right, .box]),
+            "airpods.gen4"
+        )
+        XCTAssertEqual(
+            HeadphoneModel.detect(name: "Headphones", productID: "0x2036").symbolName(part: .left),
+            "airpods.gen4.left"
+        )
+        XCTAssertEqual(HeadphoneModel.detect(name: "AirPods Pro", productID: nil).symbolName(part: .left), "airpods.pro.left")
+        XCTAssertEqual(HeadphoneModel.detect(name: "AirPods Pro", productID: nil).symbolName(part: .box), "airpods.pro.chargingcase.wireless")
+        XCTAssertEqual(HeadphoneModel.detect(name: "AirPods Max", productID: nil), .airpodsMax)
+        XCTAssertEqual(HeadphoneModel.detect(name: "Beats Studio Buds", productID: nil).symbolName(part: .right), "beats.studiobuds.right")
+        XCTAssertEqual(HeadphoneModel.detect(name: "Sony WH-1000XM5", productID: nil).symbolName(part: .single), "headphones")
+        XCTAssertEqual(HeadphoneModel.detect(name: "Headphones", productID: "0x2013"), .airpods(generation: 3, artwork: nil))
+        XCTAssertEqual(HeadphoneModel.detect(name: "Headphones", productID: "0x2013").symbolName(part: .left), "airpod.gen3.left")
+    }
+
+    func testBluetoothProfilerJSONReadsPercents() {
+        let json = """
+        {"SPBluetoothDataType":[{"device_connected":[{"Pods":{"device_address":"AA-BB","device_batteryLevelLeft":"80%","device_batteryLevelCase":"18%"}}],"device_not_connected":[{"Mouse":{"device_address":"CC-DD"}}]}]}
+        """.data(using: .utf8)!
+        let devices = BluetoothBatteryReader.parse(json)
+        XCTAssertEqual(devices.count, 2)
+        XCTAssertEqual(devices[0].levels[.left], 80)
+        XCTAssertEqual(devices[0].levels[.box], 18)
+        XCTAssertTrue(devices[0].connected)
+        XCTAssertFalse(devices[1].connected)
+        XCTAssertTrue(devices[1].levels.isEmpty)
+    }
+
     private func openEvent() -> NSAppleEventDescriptor {
         NSAppleEventDescriptor(
             eventClass: kCoreEventClass,

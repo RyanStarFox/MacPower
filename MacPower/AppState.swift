@@ -23,6 +23,10 @@ final class AppState {
     var publicIPv6: String?
     var publicIPv4Failed = false
     var publicIPv6Failed = false
+    var bluetoothDevices: [BluetoothSeenDevice] = []
+    var bluetoothScanWanted = false {
+        didSet { syncBluetoothMonitoring() }
+    }
     @ObservationIgnored
     private var armedExternalPower: Bool?
     @ObservationIgnored
@@ -32,6 +36,9 @@ final class AppState {
     var onLanguageChange: (() -> Void)?
     @ObservationIgnored
     var onPopoverChromeChange: (() -> Void)?
+    /// Ring rows gained or lost a cell while the panel is open. The window size is not SwiftUI's frame.
+    @ObservationIgnored
+    var onPopoverLayoutChange: (() -> Void)?
     @ObservationIgnored
     var onMenuBarNeedsRefresh: (() -> Void)?
     /// First interactive launch shows the menu-bar guide. Login launches stay quiet.
@@ -51,6 +58,7 @@ final class AppState {
     private let updateChecker = UpdateChecker()
     @ObservationIgnored
     private var updateCheckLoop: Task<Void, Never>?
+    @ObservationIgnored private var bluetoothTask: Task<Void, Never>?
 
     private var settingsWindow: NSWindow?
     @ObservationIgnored
@@ -98,8 +106,12 @@ final class AppState {
         settings.onLocalIPChange = { [weak self] in
             self?.syncLocalIP(fetchPublic: self?.isPopoverOpen == true)
         }
+        settings.onBluetoothDevicesChange = { [weak self] in
+            self?.syncBluetoothMonitoring()
+        }
         syncTopAppSampling()
         syncLocalIP(fetchPublic: false)
+        syncBluetoothMonitoring()
     }
 
     func setPopoverOpen(_ open: Bool) {
@@ -108,6 +120,34 @@ final class AppState {
         metricsService.setPopoverOpen(open)
         syncPopoverExtras()
         syncLocalIP(fetchPublic: open)
+        if open, !settings.bluetoothRingDevices.isEmpty {
+            Task { await self.refreshBluetoothNow() }
+        }
+    }
+
+    func syncBluetoothMonitoring() {
+        let needed = bluetoothScanWanted || !settings.bluetoothRingDevices.isEmpty
+        if needed {
+            guard bluetoothTask == nil else { return }
+            bluetoothTask = Task { [weak self] in
+                while !Task.isCancelled {
+                    await self?.refreshBluetoothNow()
+                    try? await Task.sleep(nanoseconds: 8_000_000_000)
+                }
+            }
+        } else {
+            bluetoothTask?.cancel()
+            bluetoothTask = nil
+        }
+    }
+
+    func refreshBluetoothNow() async {
+        let next = await Task.detached(priority: .utility) {
+            BluetoothBatteryReader.load()
+        }.value
+        bluetoothDevices = next
+        settings.refreshBluetoothNames(from: next)
+        onPopoverLayoutChange?()
     }
 
     private func metricNeeds() -> SystemMetricsService.Needs {

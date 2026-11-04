@@ -734,6 +734,50 @@ final class PopoverExtrasTests: XCTestCase {
         XCTAssertEqual(ipv4.interfaceName, "Wi-Fi")
     }
 
+    func testSwapRingMeasuresUsedBytesAgainstInstalledMemory() {
+        let gigabyte = 1024.0 * 1024 * 1024
+        let memory = 32 * gigabyte
+        let quarter = 8 * gigabyte
+        XCTAssertEqual(
+            SwapUsageFormat.ringPercent(usedBytes: quarter, halfBytes: quarter, memoryBytes: memory),
+            50,
+            accuracy: 0.05
+        )
+        XCTAssertEqual(
+            SwapUsageFormat.ringPercent(usedBytes: memory / 2, halfBytes: quarter, memoryBytes: memory),
+            81.2,
+            accuracy: 0.2
+        )
+        XCTAssertEqual(
+            SwapUsageFormat.ringPercent(usedBytes: memory, halfBytes: quarter, memoryBytes: memory),
+            100,
+            accuracy: 0.001
+        )
+        XCTAssertEqual(
+            SwapUsageFormat.ringPercent(usedBytes: memory * 1.25, halfBytes: quarter, memoryBytes: memory),
+            100,
+            accuracy: 0.001
+        )
+        XCTAssertEqual(
+            SwapUsageFormat.ringPercent(usedBytes: 4 * gigabyte, halfBytes: 4 * gigabyte, memoryBytes: memory),
+            50,
+            accuracy: 0.05
+        )
+        XCTAssertEqual(
+            SwapUsageFormat.ringPercent(usedBytes: memory, halfBytes: 4 * gigabyte, memoryBytes: memory),
+            100,
+            accuracy: 0.001
+        )
+        XCTAssertEqual(SwapUsageFormat.ringPercent(usedBytes: 0, halfBytes: quarter, memoryBytes: memory), 0, accuracy: 0.001)
+        XCTAssertEqual(SwapUsageFormat.string(bytes: 3.3 * gigabyte), "3.3 GB")
+        XCTAssertEqual(SwapUsageFormat.string(bytes: quarter), "8 GB")
+        XCTAssertEqual(SwapUsageFormat.string(bytes: 0), "0 MB")
+        let fallback = AppSettings.defaultSwapHalfMegabytes()
+        XCTAssertTrue(AppSettings.swapHalfLimit().contains(fallback))
+        XCTAssertEqual(fallback % AppSettings.swapHalfStep, 0)
+        XCTAssertLessThan(fallback, Int(memory / 1_048_576))
+    }
+
     func testBatteryTemperatureCurveMatchesNetworkRing() {
         XCTAssertEqual(BatteryTemperatureFormat.ringPercent(celsius: 30), 50, accuracy: 0.0001)
         XCTAssertLessThan(BatteryTemperatureFormat.ringPercent(celsius: 20), 50)
@@ -772,14 +816,17 @@ final class PopoverExtrasTests: XCTestCase {
         XCTAssertEqual(first.downloadHalfKilobytes, 1024)
         XCTAssertEqual(first.uploadHalfKilobytes, 1024)
         XCTAssertEqual(first.temperatureHalfCelsius, 30)
+        XCTAssertEqual(first.swapHalfMegabytes, AppSettings.defaultSwapHalfMegabytes())
         XCTAssertEqual(first.thermalNominalPercent, 25)
         XCTAssertEqual(first.thermalCriticalPercent, 100)
         first.downloadHalfKilobytes = 2048
         first.temperatureHalfCelsius = 35
+        first.swapHalfMegabytes = 8192
         first.thermalNominalPercent = 10
         let second = AppSettings(defaults: defaults)
         XCTAssertEqual(second.downloadHalfKilobytes, 2048)
         XCTAssertEqual(second.temperatureHalfCelsius, 35)
+        XCTAssertEqual(second.swapHalfMegabytes, 8192)
         XCTAssertEqual(second.thermalNominalPercent, 10)
         defaults.removePersistentDomain(forName: suite)
     }

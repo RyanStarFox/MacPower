@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 struct StatusRingView: View {
@@ -196,6 +197,233 @@ struct SpeedPairRingView: View {
                 .rotationEffect(.degrees(-90))
                 .frame(width: diameter - lineWidth, height: diameter - lineWidth)
         }
+    }
+}
+
+/// Two halves, each with its own icon and color, matching the upload/download ring.
+struct PairRingView: View {
+    var leftProgress: Double
+    var rightProgress: Double
+    var leftColor: Color
+    var rightColor: Color
+    var leftGlyph: GlyphSlot
+    var rightGlyph: GlyphSlot
+    var leftCaption: String
+    var rightCaption: String
+    var accessibilityValue: String
+    @Environment(\.readmeGalleryCapture) private var readmeGalleryCapture
+    @State private var animateProgress = false
+
+    private let diameter: CGFloat = StatusRingView.diameter
+    private let lineWidth: CGFloat = StatusRingView.lineWidth
+
+    var body: some View {
+        let left = min(1, max(0, leftProgress))
+        let right = min(1, max(0, rightProgress))
+        VStack(spacing: 6) {
+            ZStack {
+                halfTrack(from: 0.5, to: 1)
+                halfTrack(from: 0, to: 0.5)
+                halfFill(from: 1 - 0.5 * left, to: 1, color: leftColor)
+                    .animation(animateProgress ? .smooth(duration: 0.85) : nil, value: left)
+                halfFill(from: 0, to: 0.5 * right, color: rightColor)
+                    .animation(animateProgress ? .smooth(duration: 0.85) : nil, value: right)
+                HStack(spacing: 0) {
+                    GlyphSlotView(
+                        slot: leftGlyph,
+                        systemPointSize: 13,
+                        assetSide: 15,
+                        prefersMonochrome: true,
+                        ink: leftColor
+                    )
+                    .frame(maxWidth: .infinity)
+                    GlyphSlotView(
+                        slot: rightGlyph,
+                        systemPointSize: 13,
+                        assetSide: 15,
+                        prefersMonochrome: true,
+                        ink: rightColor
+                    )
+                    .frame(maxWidth: .infinity)
+                }
+                .frame(width: diameter - lineWidth * 2 - 4)
+            }
+            .frame(width: diameter, height: diameter)
+
+            VStack(spacing: 1) {
+                Text(leftCaption).autoFittingCaption(minimumScale: 0.7)
+                Text(rightCaption).autoFittingCaption(minimumScale: 0.7)
+            }
+            .font(.system(size: 9, weight: .semibold, design: .rounded).monospacedDigit())
+            .foregroundStyle(.primary)
+            .frame(height: 24, alignment: .top)
+        }
+        .frame(maxWidth: .infinity, alignment: .top)
+        .onAppear { armProgressAnimation($animateProgress) }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text(accessibilityValue))
+    }
+
+    private func halfFill(from: Double, to: Double, color: Color) -> some View {
+        Circle()
+            .trim(from: from, to: max(from, to))
+            .stroke(color, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
+            .rotationEffect(.degrees(-90))
+            .frame(width: diameter - lineWidth, height: diameter - lineWidth)
+    }
+
+    @ViewBuilder
+    private func halfTrack(from: Double, to: Double) -> some View {
+        let arc = Circle()
+            .trim(from: from, to: to)
+            .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .butt))
+            .rotationEffect(.degrees(-90))
+            .frame(width: diameter - lineWidth, height: diameter - lineWidth)
+        if readmeGalleryCapture {
+            Color(white: 0.88)
+                .frame(width: diameter, height: diameter)
+                .mask { arc }
+        } else if #available(macOS 26.0, *) {
+            Color.clear
+                .frame(width: diameter, height: diameter)
+                .macPowerGlassEffect(.regular, in: Circle())
+                .mask { arc }
+        } else {
+            Circle()
+                .trim(from: from, to: to)
+                .stroke(.ultraThinMaterial, style: StrokeStyle(lineWidth: lineWidth, lineCap: .butt))
+                .rotationEffect(.degrees(-90))
+                .frame(width: diameter - lineWidth, height: diameter - lineWidth)
+        }
+    }
+}
+
+/// Three equal arcs. Each one grows from its own center toward both ends.
+struct MeterRingView: View {
+    var segments: [MeterSegment]
+    var glyph: GlyphSlot
+    var glyphTint: Color?
+    var accessibilityValue: String
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.readmeGalleryCapture) private var readmeGalleryCapture
+    @State private var animateProgress = false
+
+    struct MeterSegment: Equatable {
+        var progress: Double
+        var color: Color
+        var caption: String
+    }
+
+    private let diameter: CGFloat = StatusRingView.diameter
+    private let lineWidth: CGFloat = StatusRingView.lineWidth
+    /// Clockwise from the top, matching the rotated ring trim.
+    private let centers = [60.0, 180.0, 300.0]
+
+    private var glyphInk: Color {
+        glyphTint ?? (colorScheme == .dark ? Color(white: 0.92) : Color(white: 0.14))
+    }
+
+    var body: some View {
+        VStack(spacing: 6) {
+            ZStack {
+                ForEach(segments.indices, id: \.self) { index in
+                    arcTrack(index: index)
+                    arcFill(index: index, segment: segments[index])
+                }
+                GlyphSlotView(
+                    slot: glyph,
+                    systemPointSize: StatusRingView.glyphPointSize * CGFloat(glyph.normalizedScale),
+                    assetSide: StatusRingView.glyphAssetSide * CGFloat(glyph.normalizedScale),
+                    prefersMonochrome: true,
+                    ink: glyphInk
+                )
+            }
+            .frame(width: diameter, height: diameter)
+
+            VStack(spacing: 1) {
+                HStack(spacing: 4) {
+                    Text(segments.count > 2 ? segments[2].caption : "")
+                        .autoFittingCaption(minimumScale: 0.65)
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                    Text(segments.first?.caption ?? "")
+                        .autoFittingCaption(minimumScale: 0.65)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                Text(segments.count > 1 ? segments[1].caption : "")
+                    .autoFittingCaption(minimumScale: 0.65)
+            }
+            .font(.system(size: 9, weight: .semibold, design: .rounded).monospacedDigit())
+            .foregroundStyle(.primary)
+            .frame(height: 24, alignment: .top)
+        }
+        .frame(maxWidth: .infinity, alignment: .top)
+        .onAppear { armProgressAnimation($animateProgress) }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text(accessibilityValue))
+    }
+
+    /// Half of one arc, leaving the same gap the old three-part ring used.
+    private var halfSpan: Double {
+        (1.0 / 3.0 - 0.015) / 2
+    }
+
+    private func centerTrim(index: Int) -> Double {
+        centers[index % centers.count] / 360
+    }
+
+    @ViewBuilder
+    private func arcFill(index: Int, segment: MeterSegment) -> some View {
+        let amount = min(1, max(0, segment.progress))
+        let reach = halfSpan * amount
+        let center = centerTrim(index: index)
+        Circle()
+            .trim(from: center - reach, to: center + max(reach, 0.001))
+            .stroke(segment.color, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+            .rotationEffect(.degrees(-90))
+            .frame(width: diameter - lineWidth, height: diameter - lineWidth)
+            .opacity(amount > 0.001 ? 1 : 0)
+            .animation(animateProgress ? .smooth(duration: 0.85) : nil, value: amount)
+    }
+
+    @ViewBuilder
+    private func arcTrack(index: Int) -> some View {
+        let center = centerTrim(index: index)
+        let arc = Circle()
+            .trim(from: center - halfSpan, to: center + halfSpan)
+            .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .butt))
+            .rotationEffect(.degrees(-90))
+            .frame(width: diameter - lineWidth, height: diameter - lineWidth)
+        if readmeGalleryCapture {
+            Color(white: 0.88)
+                .frame(width: diameter, height: diameter)
+                .mask { arc }
+        } else if #available(macOS 26.0, *) {
+            Color.clear
+                .frame(width: diameter, height: diameter)
+                .macPowerGlassEffect(.regular, in: Circle())
+                .mask { arc }
+        } else {
+            Circle()
+                .trim(from: center - halfSpan, to: center + halfSpan)
+                .stroke(.ultraThinMaterial, style: StrokeStyle(lineWidth: lineWidth, lineCap: .butt))
+                .rotationEffect(.degrees(-90))
+                .frame(width: diameter - lineWidth, height: diameter - lineWidth)
+        }
+    }
+}
+
+extension RingIconRGB {
+    var color: Color {
+        Color(red: red, green: green, blue: blue)
+    }
+
+    init(color: Color) {
+        let converted = NSColor(color).usingColorSpace(.sRGB)
+        self.init(
+            red: Double(converted?.redComponent ?? 0),
+            green: Double(converted?.greenComponent ?? 0),
+            blue: Double(converted?.blueComponent ?? 0)
+        )
     }
 }
 

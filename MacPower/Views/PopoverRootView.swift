@@ -22,6 +22,10 @@ enum PopoverLayout {
         return (ringColumn, ringSpacing)
     }
 
+    static func width(rowCounts: [Int]) -> CGFloat {
+        width(ringCount: rowCounts.max() ?? 0, twoRows: false, includesSettings: false)
+    }
+
     static func width(ringCount: Int, twoRows: Bool, includesSettings: Bool = true) -> CGFloat {
         let count = columns(ringCount: ringCount, twoRows: twoRows, includesSettings: includesSettings)
         let pitch = ringPitch(columns: count)
@@ -80,12 +84,43 @@ struct PopoverRootView: View {
     }
 
     private var panelWidth: CGFloat {
-        guard appState.settings.showStatusRings else { return PopoverLayout.width }
-        return PopoverLayout.width(
-            ringCount: appState.settings.ringOrder.count,
-            twoRows: appState.settings.twoRingRows,
-            includesSettings: settingsGearInRings
-        )
+        guard showsRingBlock else { return PopoverLayout.width }
+        let counts = ringRowCounts
+        guard counts.contains(where: { $0 > 0 }) else { return PopoverLayout.width }
+        return PopoverLayout.width(rowCounts: counts)
+    }
+
+    private var showsRingBlock: Bool {
+        appState.settings.showStatusRings
+            && appState.settings.displayedRingRows(seen: appState.bluetoothDevices).contains { !$0.isEmpty }
+    }
+
+    private func compactPopoverEntries(_ entries: [PopoverEntry], showRings: Bool) -> [PopoverEntry] {
+        var kept = entries
+        if !showRings {
+            kept.removeAll { $0.block == .rings }
+        }
+        var result: [PopoverEntry] = []
+        for entry in kept {
+            if entry.isDivider {
+                if result.isEmpty || result.last?.isDivider == true { continue }
+                result.append(entry)
+            } else {
+                result.append(entry)
+            }
+        }
+        while result.last?.isDivider == true {
+            result.removeLast()
+        }
+        return result
+    }
+
+    private var ringRowCounts: [Int] {
+        var counts = appState.settings.displayedRingRows(seen: appState.bluetoothDevices).map(\.count)
+        if settingsGearInRings {
+            if counts.isEmpty { counts = [1] } else { counts[counts.count - 1] += 1 }
+        }
+        return counts
     }
 
     private var settingsGearInRings: Bool {
@@ -118,9 +153,9 @@ struct PopoverRootView: View {
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, minHeight: 80)
         } else {
-            let showRings = appState.settings.showStatusRings
+            let showRings = showsRingBlock
             let showFlow = appState.settings.showEnergyFlow
-            let entries = appState.settings.renderedPopoverEntries
+            let entries = compactPopoverEntries(appState.settings.renderedPopoverEntries, showRings: showRings)
             VStack(alignment: .leading, spacing: 0) {
                 ForEach(Array(entries.enumerated()), id: \.element.id) { index, entry in
                     switch entry {
@@ -236,25 +271,22 @@ struct PopoverRootView: View {
     }
 
     private var ringsHeader: some View {
-        let slots = appState.settings.ringOrder
-        return RingHeaderLayout(
-            twoRows: appState.settings.twoRingRows,
-            staggerOdd: appState.settings.ringOddRow == .stagger
-        ) {
-            ForEach(slots) { slot in
-                ringCell(slot)
+        let rows = appState.settings.displayedRingRows(seen: appState.bluetoothDevices)
+        return RingHeaderLayout(rowCounts: ringRowCounts) {
+            ForEach(Array(rows.enumerated()), id: \.offset) { _, row in
+                ForEach(row) { item in
+                    ringItemCell(item)
+                }
             }
             if settingsGearInRings {
                 settingsButton
             }
         }
         // Opening lays this block out in the short placeholder, then the
-        // popover animation eases both rows up into the final grid. Snap.
+        // popover animation eases the rows up into the final grid. Snap.
         .animation(nil, value: appState.isPopoverOpen)
         .animation(nil, value: panelWidth)
-        .animation(nil, value: appState.settings.twoRingRows)
-        .animation(nil, value: appState.settings.ringOddRow)
-        .animation(nil, value: slots.count)
+        .animation(nil, value: rows.map(\.count))
         .transaction { transaction in
             if !ringPlacementSettled {
                 transaction.animation = nil
@@ -275,6 +307,110 @@ struct PopoverRootView: View {
                 ringPlacementSettled = false
             }
         }
+    }
+
+    @ViewBuilder
+    private func ringItemCell(_ item: RingItem) -> some View {
+        if let slot = item.slot {
+            ringCell(slot)
+        } else {
+            bluetoothRing(item)
+        }
+    }
+
+    @ViewBuilder
+    private func bluetoothRing(_ item: RingItem) -> some View {
+        let language = appState.settings.language
+        let devices = appState.settings.bluetoothRingDevices
+        let ring = RingBoard.resolve(item, devices: devices)
+        let reading = appState.bluetoothDevices.first { $0.address == item.address }
+        let face = ring.flatMap {
+            RingBoard.face(ring: $0, connected: reading?.connected == true, levels: reading?.levels ?? [:])
+        }
+        if let ring, let face {
+            let device = devices.first { $0.address == item.address }
+            let model = device?.model ?? .generic
+            let name = device?.name ?? item.address ?? ""
+            let captions = bluetoothCaptions(face: face, language: language)
+            let title = ([name] + captions).joined(separator: " ")
+            let scheme = appState.settings.ringTint.scheme(for: .battery)
+            if face.parts.count == 2, let left = face.parts.first, let right = face.parts.last {
+                let leftPercent = Double(face.levels[left] ?? 0)
+                let rightPercent = Double(face.levels[right] ?? 0)
+                PairRingView(
+                    leftProgress: face.isPlaceholder ? 0 : leftPercent / 100,
+                    rightProgress: face.isPlaceholder ? 0 : rightPercent / 100,
+                    leftColor: ring.sideColors[left]?.color ?? scheme.colors(percent: leftPercent).left,
+                    rightColor: ring.sideColors[right]?.color ?? scheme.colors(percent: rightPercent).left,
+                    leftGlyph: ring.shownGlyph(model: model, part: left),
+                    rightGlyph: ring.shownGlyph(model: model, part: right),
+                    leftCaption: bluetoothCaption(part: left, face: face, language: language),
+                    rightCaption: bluetoothCaption(part: right, face: face, language: language),
+                    accessibilityValue: title
+                )
+            } else if face.parts.count <= 1 {
+                let percent = face.parts.first.flatMap { face.levels[$0] }
+                let shown = Double(percent ?? 0)
+                let colors = scheme.colors(percent: shown)
+                StatusRingView(
+                    percent: shown,
+                    fillLeft: colors.left,
+                    fillRight: colors.right,
+                    caption: face.isPlaceholder ? "—" : "\(percent ?? 0)%",
+                    accessibilityName: title,
+                    glyph: ring.shownGlyph(model: model, parts: face.parts),
+                    glyphTint: ring.iconColor?.color
+                )
+            } else {
+                MeterRingView(
+                    segments: meterSegments(face: face, scheme: scheme),
+                    glyph: ring.shownGlyph(model: model, parts: ring.parts),
+                    glyphTint: ring.iconColor?.color,
+                    accessibilityValue: title
+                )
+            }
+        }
+    }
+
+    /// Index 0 is 60° (right ear), 1 is 180° (case), 2 is 300° (left ear).
+    private func meterSegments(face: BluetoothRingFace, scheme: ValueTintScheme) -> [MeterRingView.MeterSegment] {
+        let language = appState.settings.language
+        var placed: [BluetoothBatteryPart?] = [nil, nil, nil]
+        var rest: [BluetoothBatteryPart] = []
+        for part in face.parts {
+            switch part {
+            case .right: placed[0] = part
+            case .box: placed[1] = part
+            case .left: placed[2] = part
+            default: rest.append(part)
+            }
+        }
+        for part in rest {
+            if let index = placed.firstIndex(where: { $0 == nil }) {
+                placed[index] = part
+            }
+        }
+        return placed.compactMap { part in
+            guard let part else { return nil }
+            let percent = Double(face.levels[part] ?? 0)
+            return MeterRingView.MeterSegment(
+                progress: face.isPlaceholder ? 0 : percent / 100,
+                color: scheme.colors(percent: percent).left,
+                caption: bluetoothCaption(part: part, face: face, language: language)
+            )
+        }
+    }
+
+    private func bluetoothCaptions(face: BluetoothRingFace, language: AppLanguage) -> [String] {
+        if face.isPlaceholder { return ["—"] }
+        if face.parts.count <= 1 { return ["\(face.parts.first.flatMap { face.levels[$0] } ?? 0)%"] }
+        return face.parts.map { bluetoothCaption(part: $0, face: face, language: language) }
+    }
+
+    private func bluetoothCaption(part: BluetoothBatteryPart, face: BluetoothRingFace, language: AppLanguage) -> String {
+        if face.isPlaceholder { return "—" }
+        let name = Localization.string(part.shortLocalizationKey, language: language)
+        return "\(name) \(face.levels[part] ?? 0)%"
     }
 
     @ViewBuilder
@@ -326,7 +462,7 @@ struct PopoverRootView: View {
             caption: caption,
             accessibilityName: name,
             glyph: appState.settings.ringIcons.slot(for: .batteryTemperature),
-            glyphTint: colors.left,
+            glyphTint: appState.settings.slotIconColors[RingSlot.batteryTemperature.rawValue]?.color,
             accessibilityValue: "\(name) \(caption)"
         )
     }
@@ -350,7 +486,7 @@ struct PopoverRootView: View {
             caption: caption,
             accessibilityName: name,
             glyph: appState.settings.ringIcons.slot(for: .thermalState),
-            glyphTint: colors.left,
+            glyphTint: appState.settings.slotIconColors[RingSlot.thermalState.rawValue]?.color,
             accessibilityValue: "\(name) \(caption)"
         )
     }
@@ -359,13 +495,16 @@ struct PopoverRootView: View {
         let language = appState.settings.language
         let percent = percent(for: kind)
         let colors = appState.settings.ringTint.scheme(for: kind).colors(percent: percent)
+        let name = Localization.string(kind.localizationKey, language: language)
+        let caption = metricCaption(kind, percent: percent, language: language)
         return StatusRingView(
             percent: percent,
             fillLeft: colors.left,
             fillRight: colors.right,
-            caption: Localization.string(kind.captionKey, language: language, Int64(percent.rounded())),
-            accessibilityName: Localization.string(kind.localizationKey, language: language),
-            glyph: appState.settings.ringIcons.slot(for: kind)
+            caption: caption,
+            accessibilityName: name,
+            glyph: appState.settings.ringIcons.slot(for: kind),
+            accessibilityValue: kind == .swap ? "\(name) \(caption)" : nil
         )
     }
 
@@ -426,6 +565,17 @@ struct PopoverRootView: View {
         )
     }
 
+    private func metricCaption(_ kind: RingKind, percent: Double, language: AppLanguage) -> String {
+        if kind == .swap {
+            return Localization.string(
+                kind.captionKey,
+                language: language,
+                SwapUsageFormat.string(bytes: appState.metrics.swapUsedBytes)
+            )
+        }
+        return Localization.string(kind.captionKey, language: language, Int64(percent.rounded()))
+    }
+
     private func percent(for kind: RingKind) -> Double {
         switch kind {
         case .battery: appState.snapshot.percent
@@ -434,7 +584,12 @@ struct PopoverRootView: View {
         case .memory: appState.metrics.memoryPercent
         case .disk: appState.metrics.diskPercent
         case .memoryPressure: appState.metrics.memoryPressurePercent
-        case .swap: appState.metrics.swapPercent
+        case .swap:
+            SwapUsageFormat.ringPercent(
+                usedBytes: appState.metrics.swapUsedBytes,
+                halfBytes: Double(appState.settings.swapHalfMegabytes) * 1_048_576,
+                memoryBytes: SwapUsageFormat.physicalMemoryBytes()
+            )
         }
     }
 
@@ -549,110 +704,62 @@ struct RingSettingsCell: View {
     }
 }
 
-/// Rings and the settings button are one sequence. Two rows split an even
-/// count into n + n, and an odd count into n+1 over n, with the shorter row
-/// in the gaps of the row above.
+/// One centered row per saved row. The settings gear is the last cell of the last row.
 private struct RingHeaderLayout: Layout {
-    var twoRows: Bool
-    var staggerOdd: Bool
+    var rowCounts: [Int]
     var rowSpacing: CGFloat = 10
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
         let width = proposal.width ?? (PopoverLayout.width - PopoverLayout.padding * 2)
-        let metrics = layoutMetrics(total: subviews.count, width: width)
-        let heights = rowHeights(column: metrics.column, subviews: subviews, topCount: metrics.columns)
-        let height = heights.bottom > 0 ? heights.top + rowSpacing + heights.bottom : heights.top
+        let height = stackedHeight(subviews: subviews)
         return CGSize(width: width, height: height)
     }
 
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-        let total = subviews.count
-        guard total > 0 else { return }
-        let metrics = layoutMetrics(total: total, width: bounds.width)
-        let column = metrics.column
-        let fitted = ProposedViewSize(width: column, height: nil)
-        let heights = rowHeights(column: column, subviews: subviews, topCount: metrics.columns)
-        let topCount = metrics.columns
-        let xOrigin = rowOrigin(
-            in: bounds.width,
-            columns: topCount,
-            column: column,
-            spacing: metrics.spacing,
-            minX: bounds.minX
-        )
-        for index in 0..<topCount {
-            place(
-                subviews[index],
-                column: column,
-                spacing: metrics.spacing,
-                xIndex: index,
-                y: bounds.minY,
-                xOrigin: xOrigin,
-                proposal: fitted
+        var cursor = 0
+        var y = bounds.minY
+        for count in rowCounts where count > 0 {
+            guard cursor + count <= subviews.count else { return }
+            let pitch = PopoverLayout.ringPitch(columns: count)
+            let fitted = ProposedViewSize(width: pitch.column, height: nil)
+            let slice = subviews[cursor..<(cursor + count)]
+            let height = slice.map { $0.sizeThatFits(fitted).height }.max() ?? 0
+            let origin = centeredOrigin(
+                width: bounds.width,
+                columns: count,
+                column: pitch.column,
+                spacing: pitch.spacing,
+                minX: bounds.minX
             )
-        }
-        let bottomCount = total - topCount
-        guard bottomCount > 0 else { return }
-        let shift = staggerOdd && bottomCount < topCount ? (column + metrics.spacing) / 2 : 0
-        let y = bounds.minY + heights.top + rowSpacing
-        for index in 0..<bottomCount {
-            place(
-                subviews[topCount + index],
-                column: column,
-                spacing: metrics.spacing,
-                xIndex: index,
-                y: y,
-                xOrigin: xOrigin,
-                proposal: fitted,
-                extraX: shift
-            )
+            for offset in 0..<count {
+                let x = origin + CGFloat(offset) * (pitch.column + pitch.spacing)
+                subviews[cursor + offset].place(at: CGPoint(x: x, y: y), anchor: .topLeading, proposal: fitted)
+            }
+            y += height + rowSpacing
+            cursor += count
         }
     }
 
-    private func place(
-        _ subview: LayoutSubview,
-        column: CGFloat,
-        spacing: CGFloat,
-        xIndex: Int,
-        y: CGFloat,
-        xOrigin: CGFloat,
-        proposal: ProposedViewSize,
-        extraX: CGFloat = 0
-    ) {
-        let x = xOrigin + extraX + CGFloat(xIndex) * (column + spacing)
-        subview.place(at: CGPoint(x: x, y: y), anchor: .topLeading, proposal: proposal)
-    }
-
-    private func usesTwoRows(_ total: Int) -> Bool {
-        twoRows && total >= 2
-    }
-
-    private func layoutMetrics(total: Int, width: CGFloat) -> (columns: Int, column: CGFloat, spacing: CGFloat) {
-        let columns = usesTwoRows(total) ? (total + 1) / 2 : max(total, 1)
-        let pitch = PopoverLayout.ringPitch(columns: columns)
-        // One or two cells keep stretching so the panel stays wide enough for
-        // the battery section. Three or more use a fixed pitch.
-        if columns >= 3 {
-            return (columns, pitch.column, pitch.spacing)
+    private func stackedHeight(subviews: Subviews) -> CGFloat {
+        var cursor = 0
+        var height: CGFloat = 0
+        var rows = 0
+        for count in rowCounts where count > 0 {
+            guard cursor + count <= subviews.count else { break }
+            let pitch = PopoverLayout.ringPitch(columns: count)
+            let fitted = ProposedViewSize(width: pitch.column, height: nil)
+            let row = subviews[cursor..<(cursor + count)].map { $0.sizeThatFits(fitted).height }.max() ?? 0
+            height += row
+            rows += 1
+            cursor += count
         }
-        let gaps = pitch.spacing * CGFloat(max(columns - 1, 0))
-        let column = max(0, (width - gaps) / CGFloat(max(columns, 1)))
-        return (columns, column, pitch.spacing)
+        if rows > 1 { height += rowSpacing * CGFloat(rows - 1) }
+        return height
     }
 
-    private func rowOrigin(in width: CGFloat, columns: Int, column: CGFloat, spacing: CGFloat, minX: CGFloat) -> CGFloat {
-        guard columns >= 3 else { return minX }
-        let group = CGFloat(columns) * column + spacing * CGFloat(columns - 1)
+    private func centeredOrigin(width: CGFloat, columns: Int, column: CGFloat, spacing: CGFloat, minX: CGFloat) -> CGFloat {
+        let group = CGFloat(columns) * column + spacing * CGFloat(max(columns - 1, 0))
         return minX + max(0, (width - group) / 2)
-    }
-
-    /// Each row is as tall as its own tallest cell, so the up/down ring's
-    /// second caption stays inside the second row.
-    private func rowHeights(column: CGFloat, subviews: Subviews, topCount: Int) -> (top: CGFloat, bottom: CGFloat) {
-        let proposal = ProposedViewSize(width: column, height: nil)
-        let top = subviews.prefix(topCount).map { $0.sizeThatFits(proposal).height }.max() ?? 0
-        let bottom = subviews.dropFirst(topCount).map { $0.sizeThatFits(proposal).height }.max() ?? 0
-        return (top, bottom)
     }
 }
 

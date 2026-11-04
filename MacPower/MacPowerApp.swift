@@ -31,6 +31,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         state.onPopoverChromeChange = { [weak statusItemController] in
             statusItemController?.applyArrowVisibility()
         }
+        state.onPopoverLayoutChange = { [weak statusItemController] in
+            statusItemController?.adoptPopoverLayoutIfNeeded()
+        }
         state.onMenuBarNeedsRefresh = { [weak statusItemController] in
             statusItemController?.refreshIcon()
         }

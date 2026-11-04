@@ -289,7 +289,7 @@ enum RingKind: String, CaseIterable, Identifiable, Codable, Sendable {
         case .memory: "ring.caption.memory %lld"
         case .disk: "ring.caption.disk %lld"
         case .memoryPressure: "ring.caption.pressure %lld"
-        case .swap: "ring.caption.swap %lld"
+        case .swap: "ring.caption.swap %@"
         }
     }
 }

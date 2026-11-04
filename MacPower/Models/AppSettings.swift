@@ -78,6 +78,28 @@ enum PopoverEntry: Identifiable, Equatable, Hashable, Sendable {
     }
 }
 
+/// One row in the ring settings list. Hidden built-in rings stay here so their switch remains.
+struct RingLayoutEntry: Identifiable, Equatable {
+    enum Kind: Equatable {
+        case slot(RingSlot)
+        case bluetooth(address: String, ringID: UUID)
+        case lineBreak(UUID)
+    }
+
+    var kind: Kind
+
+    var id: String {
+        switch kind {
+        case .slot(let slot):
+            return "slot:\(slot.rawValue)"
+        case .bluetooth(let address, let ringID):
+            return "device:\(address):\(ringID.uuidString)"
+        case .lineBreak(let id):
+            return "break:\(id.uuidString)"
+        }
+    }
+}
+
 @Observable
 final class AppSettings {
     static let defaultRingOrder: [RingSlot] = [.battery, .cpu, .gpu, .memory, .disk, .speedPair]
@@ -137,6 +159,9 @@ final class AppSettings {
         static let showStatusRings = "showStatusRings"
         static let twoRingRows = "twoRingRows"
         static let ringOddRow = "ringOddRow"
+        static let ringRows = "ringRows"
+        static let bluetoothRingDevices = "bluetoothRingDevices"
+        static let slotIconColors = "slotIconColors"
         static let visibleRings = "visibleRings"
         static let showDownloadSpeed = "showDownloadSpeed"
         static let showUploadSpeed = "showUploadSpeed"
@@ -162,6 +187,7 @@ final class AppSettings {
         static let downloadHalfKilobytes = "downloadHalfKilobytes"
         static let uploadHalfKilobytes = "uploadHalfKilobytes"
         static let temperatureHalfCelsius = "temperatureHalfCelsius"
+        static let swapHalfMegabytes = "swapHalfMegabytes"
         static let thermalNominalPercent = "thermalNominalPercent"
         static let thermalFairPercent = "thermalFairPercent"
         static let thermalSeriousPercent = "thermalSeriousPercent"
@@ -191,6 +217,10 @@ final class AppSettings {
     @ObservationIgnored
     var onLocalIPChange: (() -> Void)?
 
+    /// Saved Bluetooth rings were added or removed, so sampling can start or stop.
+    @ObservationIgnored
+    var onBluetoothDevicesChange: (() -> Void)?
+
     static let defaultTopAppWindowMinutes = 3
     static let defaultTopAppIntervalSeconds = 30
     static let defaultTopAppLimit = 3
@@ -201,6 +231,8 @@ final class AppSettings {
     static let defaultHalfSpeedKilobytes = 1024
     static let temperatureHalfRange = 10...80
     static let defaultTemperatureHalfCelsius = 30
+    static let swapHalfRange = 256...262_144
+    static let swapHalfStep = 256
     static let thermalPercentRange = 0...100
 
     var iconOutlined: Bool {
@@ -341,6 +373,30 @@ final class AppSettings {
         didSet { store.set(ringOddRow.rawValue, forKey: Keys.ringOddRow) }
     }
 
+    /// Each inner array is one centered row in the panel.
+    var ringRows: [[RingItem]] {
+        didSet {
+            alignRingRowIDs()
+            persistRingRows()
+        }
+    }
+
+    /// Stable identity for each panel row, so a line break keeps its place while it is dragged.
+    var ringRowIDs: [UUID] = []
+
+    /// Bluetooth devices the user chose to show as rings.
+    var bluetoothRingDevices: [BluetoothRingDevice] {
+        didSet {
+            persistBluetoothDevices()
+            onBluetoothDevicesChange?()
+        }
+    }
+
+    /// Custom center-icon colors for built-in rings. Missing means system ink.
+    var slotIconColors: [String: RingIconRGB] {
+        didSet { persistSlotIconColors() }
+    }
+
     /// Every ring and speed slot, in the order shown in settings. Enabled ones
     /// keep this order in the popover.
     var ringCatalog: [RingSlot] {
@@ -367,9 +423,391 @@ final class AppSettings {
     func setRingSlot(_ slot: RingSlot, visible: Bool) {
         if visible {
             enabledRingSlots.insert(slot)
+            if !ringRows.flatMap({ $0 }).contains(where: { $0.slot == slot }) {
+                applyRingLayout(ringLayoutEntries())
+            }
         } else {
             enabledRingSlots.remove(slot)
         }
+    }
+
+    /// One list for settings: placed rings in panel order, with a line break between rows and hidden built-in rings kept in their catalog spot.
+    func ringLayoutEntries() -> [RingLayoutEntry] {
+        var entries: [RingLayoutEntry] = []
+        for (rowIndex, row) in ringRows.enumerated() {
+            if rowIndex > 0 {
+                let id = rowIndex < ringRowIDs.count ? ringRowIDs[rowIndex] : UUID()
+                entries.append(RingLayoutEntry(kind: .lineBreak(id)))
+            }
+            for item in row {
+                if let slot = item.slot {
+                    entries.append(RingLayoutEntry(kind: .slot(slot)))
+                } else if let address = item.address, let ringID = item.ringID {
+                    entries.append(RingLayoutEntry(kind: .bluetooth(address: address, ringID: ringID)))
+                }
+            }
+        }
+        let placedSlots = Set(entries.compactMap { entry -> RingSlot? in
+            if case .slot(let slot) = entry.kind { return slot }
+            return nil
+        })
+        for slot in ringCatalog where !enabledRingSlots.contains(slot) && !placedSlots.contains(slot) {
+            let earlier = ringCatalog.prefix { $0 != slot }.reversed().first { placedSlots.contains($0) }
+            if let earlier,
+               let index = entries.firstIndex(where: { if case .slot(let item) = $0.kind { return item == earlier } else { return false } }) {
+                entries.insert(RingLayoutEntry(kind: .slot(slot)), at: entries.index(after: index))
+            } else {
+                entries.insert(RingLayoutEntry(kind: .slot(slot)), at: 0)
+            }
+        }
+        return entries
+    }
+
+    func addLineBreak() {
+        var entries = ringLayoutEntries()
+        if case .lineBreak = entries.last?.kind { return }
+        entries.append(RingLayoutEntry(kind: .lineBreak(UUID())))
+        applyRingLayout(entries)
+    }
+
+    func removeLineBreak(_ id: String) {
+        var entries = ringLayoutEntries()
+        entries.removeAll { $0.id == id }
+        applyRingLayout(entries)
+    }
+
+    func moveRingLayoutEntry(id: String, to targetID: String) {
+        guard id != targetID else { return }
+        var entries = ringLayoutEntries()
+        guard let from = entries.firstIndex(where: { $0.id == id }),
+              let target = entries.firstIndex(where: { $0.id == targetID })
+        else { return }
+        let entry = entries.remove(at: from)
+        let insertAt = target > from ? target : target
+        entries.insert(entry, at: min(insertAt, entries.count))
+        applyRingLayout(entries)
+    }
+
+    private func applyRingLayout(_ entries: [RingLayoutEntry]) {
+        var seenSlots = Set<RingSlot>()
+        var slots: [RingSlot] = []
+        var rows: [[RingItem]] = [[]]
+        var ids: [UUID] = [ringRowIDs.first ?? UUID()]
+        for entry in entries {
+            switch entry.kind {
+            case .lineBreak(let id):
+                guard rows[rows.count - 1].isEmpty == false else { continue }
+                rows.append([])
+                ids.append(id)
+            case .slot(let slot):
+                if seenSlots.insert(slot).inserted {
+                    slots.append(slot)
+                }
+                rows[rows.count - 1].append(.slot(slot))
+            case .bluetooth(let address, let ringID):
+                rows[rows.count - 1].append(.bluetooth(address: address, ringID: ringID))
+            }
+        }
+        let keepTrailingRow = entries.last.map { if case .lineBreak = $0.kind { return true } else { return false } } ?? false
+        if rows.last?.isEmpty == true, rows.count > 1, !keepTrailingRow {
+            rows.removeLast()
+            ids.removeLast()
+        }
+        for slot in RingSlot.allCases where seenSlots.insert(slot).inserted {
+            slots.append(slot)
+        }
+        ringRowIDs = ids
+        ringRows = rows
+        ringCatalog = slots
+    }
+
+    func displayedRingRows(seen: [BluetoothSeenDevice]) -> [[RingItem]] {
+        let shown = ringRows.map { row in
+            row.filter { item in
+                guard let slot = item.slot else { return true }
+                return enabledRingSlots.contains(slot)
+            }
+        }
+        return RingBoard.visibleRows(rows: shown, devices: bluetoothRingDevices, seen: seen)
+    }
+
+    private func alignRingRowIDs() {
+        guard ringRowIDs.count != ringRows.count else { return }
+        var ids = ringRowIDs
+        if ids.count < ringRows.count {
+            ids.append(contentsOf: (0..<(ringRows.count - ids.count)).map { _ in UUID() })
+        } else {
+            ids = Array(ids.prefix(ringRows.count))
+        }
+        ringRowIDs = ids
+    }
+
+    func moveRingItem(id: String, to targetID: String) {
+        guard id != targetID,
+              let from = ringItemPosition(id),
+              let target = ringItemPosition(targetID)
+        else { return }
+        if from.row == target.row {
+            var items = ringRows[from.row]
+            let destination = target.index > from.index ? target.index + 1 : target.index
+            items.move(fromOffsets: IndexSet(integer: from.index), toOffset: destination)
+            ringRows[from.row] = items
+            return
+        }
+        var rows = ringRows
+        let item = rows[from.row].remove(at: from.index)
+        var row = target.row
+        if rows[from.row].isEmpty, rows.count > 1 {
+            rows.remove(at: from.row)
+            if from.row < row { row -= 1 }
+        }
+        let index = min(max(target.index, 0), rows[row].count)
+        rows[row].insert(item, at: index)
+        ringRows = rows
+    }
+
+    func moveRingItem(id: String, toEndOfRow row: Int) {
+        guard ringRows.indices.contains(row), let from = ringItemPosition(id) else { return }
+        if from.row == row, from.index == ringRows[row].count - 1 { return }
+        var rows = ringRows
+        let item = rows[from.row].remove(at: from.index)
+        var destination = row
+        if rows[from.row].isEmpty, from.row != row, rows.count > 1 {
+            rows.remove(at: from.row)
+            if from.row < destination { destination -= 1 }
+        }
+        guard rows.indices.contains(destination) else { return }
+        rows[destination].append(item)
+        ringRows = rows
+    }
+
+    private func ringItemPosition(_ id: String) -> (row: Int, index: Int)? {
+        for (row, items) in ringRows.enumerated() {
+            if let index = items.firstIndex(where: { $0.id == id }) {
+                return (row, index)
+            }
+        }
+        return nil
+    }
+
+    func moveRingItemLeft(row: Int, index: Int) {
+        guard ringRows.indices.contains(row), ringRows[row].indices.contains(index), index > 0 else { return }
+        ringRows[row].swapAt(index, index - 1)
+    }
+
+    func moveRingItemRight(row: Int, index: Int) {
+        guard ringRows.indices.contains(row), ringRows[row].indices.contains(index), index + 1 < ringRows[row].count else { return }
+        ringRows[row].swapAt(index, index + 1)
+    }
+
+    func moveRingItemToRow(fromRow: Int, index: Int, toRow: Int) {
+        guard ringRows.indices.contains(fromRow), ringRows.indices.contains(toRow), fromRow != toRow else { return }
+        guard ringRows[fromRow].indices.contains(index) else { return }
+        let item = ringRows[fromRow].remove(at: index)
+        ringRows[toRow].append(item)
+        ringRows = occupiedRows(ringRows)
+    }
+
+    func addRingRow() {
+        ringRows.append([])
+    }
+
+    func removeRingRow(_ index: Int) {
+        guard ringRows.indices.contains(index), ringRows.count > 1 else { return }
+        let items = ringRows.remove(at: index)
+        let destination = min(index, ringRows.count - 1)
+        ringRows[destination].append(contentsOf: items)
+        ringRows = occupiedRows(ringRows)
+    }
+
+    func addBluetoothDevice(_ seen: BluetoothSeenDevice) {
+        guard !bluetoothRingDevices.contains(where: { $0.address == seen.address }) else { return }
+        let parts = BluetoothBatteryPart.ordered(Array(seen.reportedParts))
+        let multi = seen.isMulti
+        let model = seen.model
+        let rings = (parts.isEmpty ? [BluetoothBatteryPart.single] : parts).map {
+            BluetoothDisplayRing.make(parts: [$0], model: model)
+        }
+        bluetoothRingDevices.append(
+            BluetoothRingDevice(address: seen.address, name: seen.name, multi: multi, rings: rings, productID: seen.productID)
+        )
+        appendBluetoothItems(address: seen.address, ringIDs: rings.map(\.id))
+    }
+
+    func removeBluetoothDevice(address: String) {
+        bluetoothRingDevices.removeAll { $0.address == address }
+        ringRows = occupiedRows(ringRows.map { row in
+            row.filter { $0.address != address }
+        })
+    }
+
+    func setBluetoothRingDisconnected(address: String, ringID: UUID, style: BluetoothDisconnectedStyle) {
+        updateBluetoothRing(address: address, ringID: ringID) { $0.whenDisconnected = style }
+    }
+
+    func setBluetoothRingIncomplete(address: String, ringID: UUID, style: BluetoothIncompleteStyle) {
+        updateBluetoothRing(address: address, ringID: ringID) { $0.whenIncomplete = style }
+    }
+
+    func setBluetoothRingGlyph(address: String, ringID: UUID, part: BluetoothBatteryPart?, glyph: GlyphSlot) {
+        guard let device = bluetoothRingDevices.first(where: { $0.address == address }) else { return }
+        let model = device.model
+        updateBluetoothRing(address: address, ringID: ringID) { ring in
+            if ring.automaticIcons {
+                ring.glyph = HeadphoneSymbols.glyph(model: model, parts: ring.parts)
+                if ring.parts.count == 2 {
+                    for side in ring.parts {
+                        ring.sideGlyphs[side] = HeadphoneSymbols.glyph(model: model, part: side)
+                    }
+                }
+                ring.automaticIcons = false
+            }
+            if let part {
+                ring.sideGlyphs[part] = glyph
+            } else {
+                ring.glyph = glyph
+            }
+        }
+    }
+
+    func setBluetoothRingIconColor(address: String, ringID: UUID, part: BluetoothBatteryPart?, color: RingIconRGB?) {
+        updateBluetoothRing(address: address, ringID: ringID) { ring in
+            if let part {
+                if let color {
+                    ring.sideColors[part] = color
+                } else {
+                    ring.sideColors.removeValue(forKey: part)
+                }
+            } else {
+                ring.iconColor = color
+            }
+        }
+    }
+
+    func setBluetoothRingPart(address: String, ringID: UUID, part: BluetoothBatteryPart, included: Bool) {
+        guard let index = bluetoothRingDevices.firstIndex(where: { $0.address == address }) else { return }
+        var device = bluetoothRingDevices[index]
+        guard let ringIndex = device.rings.firstIndex(where: { $0.id == ringID }) else { return }
+        if included {
+            for other in device.rings.indices where other != ringIndex {
+                device.rings[other].parts.removeAll { $0 == part }
+            }
+            if !device.rings[ringIndex].parts.contains(part) {
+                device.rings[ringIndex].parts.append(part)
+            }
+        } else {
+            device.rings[ringIndex].parts.removeAll { $0 == part }
+        }
+        device.rings[ringIndex].parts = BluetoothBatteryPart.ordered(device.rings[ringIndex].parts)
+        device.rings[ringIndex].applyAutomaticIcons(model: device.model)
+        let removed = device.rings.filter { $0.parts.isEmpty }.map(\.id)
+        device.rings.removeAll { $0.parts.isEmpty }
+        bluetoothRingDevices[index] = device
+        if !removed.isEmpty {
+            ringRows = occupiedRows(ringRows.map { row in
+                row.filter { item in
+                    guard item.address == address, let id = item.ringID else { return true }
+                    return !removed.contains(id)
+                }
+            })
+        }
+    }
+
+    func addBluetoothDisplayRing(address: String) {
+        guard let index = bluetoothRingDevices.firstIndex(where: { $0.address == address }) else { return }
+        var device = bluetoothRingDevices[index]
+        guard device.rings.count < 3 else { return }
+        let used = Set(device.rings.flatMap(\.parts))
+        let catalog: [BluetoothBatteryPart] = device.multi ? [.left, .right, .box] : [.single]
+        guard let part = catalog.first(where: { !used.contains($0) }) else { return }
+        let ring = BluetoothDisplayRing.make(parts: [part], model: device.model)
+        device.rings.append(ring)
+        bluetoothRingDevices[index] = device
+        appendBluetoothItems(address: address, ringIDs: [ring.id])
+    }
+
+    func removeBluetoothDisplayRing(address: String, ringID: UUID) {
+        guard let index = bluetoothRingDevices.firstIndex(where: { $0.address == address }) else { return }
+        bluetoothRingDevices[index].rings.removeAll { $0.id == ringID }
+        ringRows = occupiedRows(ringRows.map { row in
+            row.filter { !($0.address == address && $0.ringID == ringID) }
+        })
+    }
+
+    func setSlotIconColor(_ slot: RingSlot, color: RingIconRGB?) {
+        if let color {
+            slotIconColors[slot.rawValue] = color
+        } else {
+            slotIconColors.removeValue(forKey: slot.rawValue)
+        }
+    }
+
+    private func updateBluetoothRing(
+        address: String,
+        ringID: UUID,
+        _ change: (inout BluetoothDisplayRing) -> Void
+    ) {
+        guard let index = bluetoothRingDevices.firstIndex(where: { $0.address == address }),
+              let ringIndex = bluetoothRingDevices[index].rings.firstIndex(where: { $0.id == ringID })
+        else { return }
+        change(&bluetoothRingDevices[index].rings[ringIndex])
+    }
+
+    private func appendBluetoothItems(address: String, ringIDs: [UUID]) {
+        if ringRows.isEmpty { ringRows = [[]] }
+        for id in ringIDs {
+            ringRows[ringRows.count - 1].append(.bluetooth(address: address, ringID: id))
+        }
+    }
+
+    func refreshBluetoothNames(from seen: [BluetoothSeenDevice]) {
+        var devices = bluetoothRingDevices
+        var changed = false
+        for reading in seen {
+            guard let index = devices.firstIndex(where: { $0.address == reading.address }) else { continue }
+            if devices[index].name != reading.name {
+                devices[index].name = reading.name
+                changed = true
+            }
+            if devices[index].productID != reading.productID {
+                devices[index].productID = reading.productID
+                changed = true
+            }
+            for ringIndex in devices[index].rings.indices where devices[index].rings[ringIndex].automaticIcons {
+                var ring = devices[index].rings[ringIndex]
+                let before = ring
+                ring.applyAutomaticIcons(model: reading.model)
+                if ring != before {
+                    devices[index].rings[ringIndex] = ring
+                    changed = true
+                }
+            }
+        }
+        if changed { bluetoothRingDevices = devices }
+    }
+
+    private func occupiedRows(_ rows: [[RingItem]]) -> [[RingItem]] {
+        let kept = rows.filter { !$0.isEmpty }
+        guard !kept.isEmpty else { return [[]] }
+        if rows.last?.isEmpty == true {
+            return kept + [[]]
+        }
+        return kept
+    }
+
+    private func persistRingRows() {
+        guard let data = try? JSONEncoder().encode(ringRows) else { return }
+        store.set(data, forKey: Keys.ringRows)
+    }
+
+    private func persistBluetoothDevices() {
+        guard let data = try? JSONEncoder().encode(bluetoothRingDevices) else { return }
+        store.set(data, forKey: Keys.bluetoothRingDevices)
+    }
+
+    private func persistSlotIconColors() {
+        guard let data = try? JSONEncoder().encode(slotIconColors) else { return }
+        store.set(data, forKey: Keys.slotIconColors)
     }
 
     func moveRingCatalogItem(_ slot: RingSlot, to target: RingSlot) {
@@ -499,6 +937,11 @@ final class AppSettings {
     /// Battery temperature that fills the ring to 50%.
     var temperatureHalfCelsius: Int {
         didSet { storeRingScale(\.temperatureHalfCelsius, range: Self.temperatureHalfRange, key: Keys.temperatureHalfCelsius) }
+    }
+
+    /// Swap used that fills the ring to 50%. A full ring stays one memory of swap.
+    var swapHalfMegabytes: Int {
+        didSet { storeRingScale(\.swapHalfMegabytes, range: Self.swapHalfLimit(), key: Keys.swapHalfMegabytes) }
     }
 
     var thermalNominalPercent: Int {
@@ -716,6 +1159,26 @@ final class AppSettings {
         return order
     }
 
+    /// 50% can move, but it has to stay below one full memory so the top of the ring can remain there.
+    static func swapHalfLimit() -> ClosedRange<Int> {
+        let memoryMB = Int((SwapUsageFormat.physicalMemoryBytes() / 1_048_576).rounded(.down))
+        let capped = memoryMB > swapHalfStep ? memoryMB - swapHalfStep : swapHalfRange.upperBound
+        let upper = min(swapHalfRange.upperBound, max(swapHalfRange.lowerBound, capped))
+        return swapHalfRange.lowerBound...upper
+    }
+
+    /// Megabytes that fill the swap ring to 50% when the user has not chosen one.
+    /// That default is a quarter of installed memory, snapped to the stepper step.
+    static func defaultSwapHalfMegabytes() -> Int {
+        let quarter = SwapUsageFormat.physicalMemoryBytes() / 4
+        let megabytes = Int((quarter / 1_048_576).rounded())
+        let limit = swapHalfLimit()
+        let step = swapHalfStep
+        let snapped = ((max(megabytes, 0) + step / 2) / step) * step
+        let resolved = snapped == 0 ? limit.lowerBound : snapped
+        return min(limit.upperBound, max(limit.lowerBound, resolved))
+    }
+
     private static func clampedStoredInteger(
         _ defaults: UserDefaults,
         key: String,
@@ -908,11 +1371,13 @@ final class AppSettings {
             showStatusRings = defaults.bool(forKey: Keys.showStatusRings)
         }
 
+        let splitRows: Bool
         if defaults.object(forKey: Keys.twoRingRows) == nil {
-            twoRingRows = false
+            splitRows = false
         } else {
-            twoRingRows = defaults.bool(forKey: Keys.twoRingRows)
+            splitRows = defaults.bool(forKey: Keys.twoRingRows)
         }
+        twoRingRows = splitRows
 
         ringOddRow = RingOddRow(rawValue: defaults.string(forKey: Keys.ringOddRow) ?? "") ?? .stagger
 
@@ -923,6 +1388,33 @@ final class AppSettings {
             ringCatalog = Self.uniqueSlots(storedCatalog)
         } else {
             ringCatalog = enabled + RingSlot.allCases.filter { !enabled.contains($0) }
+        }
+
+        let loadedRows: [[RingItem]]
+        if let data = defaults.data(forKey: Keys.ringRows),
+           let stored = try? JSONDecoder().decode([[RingItem]].self, from: data),
+           !stored.isEmpty {
+            loadedRows = stored
+        } else {
+            loadedRows = RingBoard.migratedRows(order: enabled, twoRows: splitRows)
+        }
+        let loadedDevices: [BluetoothRingDevice]
+        if let data = defaults.data(forKey: Keys.bluetoothRingDevices),
+           let stored = try? JSONDecoder().decode([BluetoothRingDevice].self, from: data) {
+            loadedDevices = stored
+        } else {
+            loadedDevices = []
+        }
+        let hadLegacyRingParts = loadedRows.flatMap { $0 }.contains { $0.slot == nil && $0.ringID == nil && $0.part != nil }
+        let linkedRows = RingBoard.linkedRows(loadedRows, devices: loadedDevices)
+        ringRows = linkedRows
+        ringRowIDs = linkedRows.map { _ in UUID() }
+        bluetoothRingDevices = loadedDevices
+        if let data = defaults.data(forKey: Keys.slotIconColors),
+           let stored = try? JSONDecoder().decode([String: RingIconRGB].self, from: data) {
+            slotIconColors = stored
+        } else {
+            slotIconColors = [:]
         }
 
         if defaults.object(forKey: Keys.showEnergyFlow) == nil {
@@ -1018,6 +1510,12 @@ final class AppSettings {
             fallback: Self.defaultTemperatureHalfCelsius,
             range: Self.temperatureHalfRange
         )
+        swapHalfMegabytes = Self.clampedStoredInteger(
+            defaults,
+            key: Keys.swapHalfMegabytes,
+            fallback: Self.defaultSwapHalfMegabytes(),
+            range: Self.swapHalfLimit()
+        )
         thermalNominalPercent = Self.clampedStoredInteger(
             defaults,
             key: Keys.thermalNominalPercent,
@@ -1090,6 +1588,10 @@ final class AppSettings {
             store.removeObject(forKey: Keys.legacyEnergyMotion)
         }
         clearLegacyAppleLanguages()
+        if hadLegacyRingParts {
+            persistRingRows()
+            persistBluetoothDevices()
+        }
     }
 
     var lowBatteryTintEnabled: Bool {

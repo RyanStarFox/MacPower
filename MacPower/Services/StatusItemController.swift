@@ -289,17 +289,38 @@ final class StatusItemController: NSObject, NSPopoverDelegate, NSMenuDelegate {
     }
 
     private var popoverWidth: CGFloat {
-        guard appState.settings.showStatusRings else { return PopoverLayout.width }
+        guard appState.settings.showStatusRings,
+              appState.settings.displayedRingRows(seen: appState.bluetoothDevices).contains(where: { !$0.isEmpty })
+        else { return PopoverLayout.width }
         let settings = appState.settings
         let includesSettings = settings.settingsButtonPlacement.drawsRingGear(
             host: settings.settingsButtonHost,
             ringsVisible: true
         )
-        return PopoverLayout.width(
-            ringCount: settings.ringOrder.count,
-            twoRows: settings.twoRingRows,
-            includesSettings: includesSettings
-        )
+        var counts = settings.displayedRingRows(seen: appState.bluetoothDevices).map(\.count)
+        if includesSettings {
+            if counts.isEmpty { counts = [1] } else { counts[counts.count - 1] += 1 }
+        }
+        guard counts.contains(where: { $0 > 0 }) else { return PopoverLayout.width }
+        return PopoverLayout.width(rowCounts: counts)
+    }
+
+    /// A hidden Bluetooth ring changes the SwiftUI width immediately. The popover window only follows when we set `contentSize` again.
+    func adoptPopoverLayoutIfNeeded() {
+        guard popover.isShown else { return }
+        DispatchQueue.main.async { [weak self] in
+            guard let self, self.popover.isShown else { return }
+            let width = self.popoverWidth
+            let fitted = self.hosting.sizeThatFits(
+                in: NSSize(width: width, height: CGFloat.greatestFiniteMagnitude)
+            )
+            let visibleHeight = min(max(ceil(fitted.height), 1), self.maximumPopoverHeight())
+            let sameWidth = abs(self.popover.contentSize.width - width) < 0.5
+            let sameHeight = abs(self.popover.contentSize.height - visibleHeight) < 0.5
+            guard !sameWidth || !sameHeight else { return }
+            self.syncPopoverContentSize()
+            self.hugMenuBarIfArrowHidden()
+        }
     }
 
     /// Lock width to the SwiftUI design width and take height from the hosting view.

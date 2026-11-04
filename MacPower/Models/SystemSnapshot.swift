@@ -1,3 +1,4 @@
+import Darwin
 import Foundation
 
 struct SystemSnapshot: Equatable, Sendable {
@@ -7,6 +8,7 @@ struct SystemSnapshot: Equatable, Sendable {
     var diskPercent: Double = 0
     var memoryPressurePercent: Double = 0
     var swapPercent: Double = 0
+    var swapUsedBytes: Double = 0
     var downloadBytesPerSecond: Double = 0
     var uploadBytesPerSecond: Double = 0
 
@@ -21,6 +23,7 @@ struct SystemSnapshot: Equatable, Sendable {
             && Self.sameRingPercent(diskPercent, other.diskPercent)
             && Self.sameRingPercent(memoryPressurePercent, other.memoryPressurePercent)
             && Self.sameRingPercent(swapPercent, other.swapPercent)
+            && SwapUsageFormat.string(bytes: swapUsedBytes) == SwapUsageFormat.string(bytes: other.swapUsedBytes)
             && Self.sameRate(downloadBytesPerSecond, other.downloadBytesPerSecond)
             && Self.sameRate(uploadBytesPerSecond, other.uploadBytesPerSecond)
     }
@@ -39,6 +42,41 @@ struct SystemSnapshot: Equatable, Sendable {
 
     private static func tintPercent(_ percent: Double) -> Int {
         Int(min(100, max(0, percent)).rounded(.towardZero))
+    }
+}
+
+enum SwapUsageFormat {
+    /// `halfBytes` sits at 50%. A full ring is always one memory’s worth of swap.
+    /// The curve is `1 - (1 - used/memory) ^ p`, with `p` chosen so `halfBytes` is 50%.
+    /// The default half is a quarter of installed memory.
+    static func ringPercent(usedBytes: Double, halfBytes: Double, memoryBytes: Double) -> Double {
+        let used = max(0, usedBytes)
+        guard used > 0, memoryBytes > 0, memoryBytes.isFinite else { return 0 }
+        let ratio = used / memoryBytes
+        if ratio >= 1 { return 100 }
+        let mark = min(max(halfBytes, memoryBytes * 0.001), memoryBytes * 0.999)
+        let exponent = log(0.5) / log(1 - mark / memoryBytes)
+        let fill = 1 - pow(1 - ratio, exponent)
+        return min(100, max(0, fill * 100))
+    }
+
+    static func physicalMemoryBytes() -> Double {
+        var memsize: UInt64 = 0
+        var size = MemoryLayout<UInt64>.size
+        guard sysctlbyname("hw.memsize", &memsize, &size, nil, 0) == 0 else { return 0 }
+        return Double(memsize)
+    }
+
+    static func string(bytes: Double) -> String {
+        let bytes = max(0, bytes)
+        let gigabytes = bytes / 1_073_741_824
+        if gigabytes >= 1, abs(gigabytes.rounded() - gigabytes) < 0.05 {
+            return String(format: "%.0f GB", gigabytes.rounded())
+        }
+        if gigabytes >= 1 {
+            return String(format: "%.1f GB", gigabytes)
+        }
+        return String(format: "%.0f MB", bytes / 1_048_576)
     }
 }
 

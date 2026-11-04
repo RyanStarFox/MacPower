@@ -273,6 +273,8 @@ struct SettingsView: View {
     @State private var ringColorSelectionID: UUID?
     @State private var flowEditorTarget: FlowEditorTarget = .all
     @State private var saveDialog: SaveTintDialog?
+    @State private var showingBluetoothDevices = false
+    @State private var bluetoothIconEditor: BluetoothIconEdit?
 
     private enum SaveTintDialog: Identifiable {
         case menuBar, ring, flow, ringIcon, flowIcon
@@ -288,7 +290,7 @@ struct SettingsView: View {
     }
 
     @State private var savePresetName = ""
-    @State private var ringDrag = RingDragState()
+    @State private var ringItemDrag = RingItemDragState()
     @State private var popoverDrag = PopoverBlockDragState()
     @State private var ringScaleSlot: RingSlot?
     @State private var ringIconEditor: RingSlot?
@@ -553,7 +555,8 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 16) {
                 ringsTutorialPreview
                     .frame(maxWidth: .infinity, alignment: .center)
-                tutorialNote(title: "settings.rings.twoRows", "tutorial.rings.rows")
+                tutorialNote(title: "settings.rings.layout", "tutorial.rings.rows")
+                tutorialNote(title: "settings.rings.bluetooth", "tutorial.rings.bluetooth")
                 tutorialNote(title: "settings.icon.tint.preset", "tutorial.rings.colors")
                 tutorialNote(title: "settings.rings.scale", "tutorial.rings.scale")
                 tutorialNote(title: "settings.rings.thermalState", "tutorial.rings.thermal")
@@ -1966,16 +1969,33 @@ struct SettingsView: View {
     @ViewBuilder
     private var ringsSections: some View {
         Section {
-            Toggle("settings.rings.twoRows", isOn: $appState.settings.twoRingRows)
-            Picker("settings.rings.oddRow", selection: $appState.settings.ringOddRow) {
-                ForEach(RingOddRow.allCases) { layout in
-                    Text(LocalizedStringKey(layout.localizationKey)).tag(layout)
+            ForEach(appState.settings.ringLayoutEntries()) { entry in
+                ringLayoutRow(entry)
+            }
+            HStack(alignment: .center, spacing: 12) {
+                Button("settings.rings.bluetooth.add") {
+                    showingBluetoothDevices = true
                 }
+                Button("settings.rings.addLineBreak") {
+                    appState.settings.addLineBreak()
+                }
+                Text("settings.rings.bluetooth.connectHint")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .disabled(!appState.settings.twoRingRows)
-            ForEach(appState.settings.ringCatalog) { slot in
-                ringOrderRow(slot)
-            }
+        } header: {
+            Text("settings.rings.layout")
+        }
+        .sheet(isPresented: $showingBluetoothDevices, onDismiss: {
+            appState.bluetoothScanWanted = false
+        }) {
+            BluetoothDevicePicker(appState: appState)
+                .onAppear {
+                    appState.bluetoothScanWanted = true
+                    Task { await appState.refreshBluetoothNow() }
+                }
         }
 
         Section {
@@ -2043,6 +2063,7 @@ struct SettingsView: View {
                     ringIconSlotRow(Array(slots.dropFirst(8)))
                 }
             }
+            bluetoothIconSettings
         }
     }
 
@@ -2394,38 +2415,396 @@ struct SettingsView: View {
         )
     }
 
-    private func ringOrderRow(_ slot: RingSlot) -> some View {
-        HStack(spacing: 8) {
-            Image(systemName: "line.3.horizontal")
-                .font(.body)
-                .foregroundStyle(.secondary)
-                .frame(width: 28, height: 22)
+    private func ringRowEditor(rowIndex: Int, row: [RingItem]) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text("settings.rings.row \(rowIndex + 1)")
+                Spacer()
+                if appState.settings.ringRows.count > 1 {
+                    Button("settings.rings.removeRow") {
+                        appState.settings.removeRingRow(rowIndex)
+                    }
+                }
+            }
+            if row.isEmpty {
+                Text("—")
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.vertical, 6)
+                    .onDrop(of: [.plainText], delegate: RingItemRowDropDelegate(
+                        row: rowIndex,
+                        drag: ringItemDrag,
+                        move: { id, row in
+                            appState.settings.moveRingItem(id: id, toEndOfRow: row)
+                        }
+                    ))
+            }
+            ForEach(row) { item in
+                HStack(spacing: 8) {
+                    Image(systemName: "line.3.horizontal")
+                        .font(.body)
+                        .foregroundStyle(.secondary)
+                        .frame(width: 28, height: 22)
+                    Text(ringItemTitle(item))
+                        .lineLimit(1)
+                    Spacer(minLength: 8)
+                }
                 .contentShape(Rectangle())
                 .onDrag {
-                    ringDrag.slot = slot
-                    return NSItemProvider(object: slot.rawValue as NSString)
+                    ringItemDrag.itemID = item.id
+                    return NSItemProvider(object: item.id as NSString)
                 }
-            Toggle(isOn: ringVisibilityBinding(slot)) {
-                HStack(spacing: 6) {
-                    Text(LocalizedStringKey(slot.localizationKey))
-                    if ringHasScale(slot) {
-                        ringScaleButton(slot)
+                .onDrop(of: [.plainText], delegate: RingItemDropDelegate(
+                    itemID: item.id,
+                    drag: ringItemDrag,
+                    move: { id, target in
+                        appState.settings.moveRingItem(id: id, to: target)
+                    }
+                ))
+            }
+        }
+        .padding(.vertical, 4)
+    }
+
+    private func ringItemTitle(_ item: RingItem) -> String {
+        let language = appState.settings.language
+        if let slot = item.slot {
+            return Localization.string(slot.localizationKey, language: language)
+        }
+        let device = appState.settings.bluetoothRingDevices.first { $0.address == item.address }
+        let name = device?.name ?? item.address ?? ""
+        let parts = device?.rings.first { $0.id == item.ringID }?.parts ?? []
+        if parts.isEmpty || parts == [.single] { return name }
+        let detail = parts.map { Localization.string($0.localizationKey, language: language) }.joined(separator: " + ")
+        return "\(name) · \(detail)"
+    }
+
+    private func bluetoothDeviceEditor(_ device: BluetoothRingDevice) -> some View {
+        let catalog: [BluetoothBatteryPart] = device.multi ? [.left, .right, .box] : []
+        let unused = catalog.filter { part in !device.rings.contains { $0.parts.contains(part) } }
+        return VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text(device.name)
+                Spacer()
+                Button("settings.rings.bluetooth.remove") {
+                    appState.settings.removeBluetoothDevice(address: device.address)
+                }
+            }
+            if device.rings.isEmpty {
+                Text("settings.rings.bluetooth.empty")
+                    .foregroundStyle(.secondary)
+            }
+            ForEach(Array(device.rings.enumerated()), id: \.element.id) { offset, ring in
+                bluetoothRingEditor(device: device, ring: ring, index: offset, catalog: catalog)
+            }
+            if device.rings.count < 3, !unused.isEmpty || (!device.multi && device.rings.isEmpty) {
+                Button("settings.rings.bluetooth.addRing") {
+                    appState.settings.addBluetoothDisplayRing(address: device.address)
+                }
+            }
+        }
+        .padding(.vertical, 4)
+    }
+
+    private func bluetoothRingEditor(
+        device: BluetoothRingDevice,
+        ring: BluetoothDisplayRing,
+        index: Int,
+        catalog: [BluetoothBatteryPart]
+    ) -> some View {
+        let usedElsewhere = Set(device.rings.filter { $0.id != ring.id }.flatMap(\.parts))
+        let choices = catalog.filter { ring.parts.contains($0) || !usedElsewhere.contains($0) }
+        return VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Text("settings.rings.bluetooth.ring \(index + 1)")
+                Spacer()
+                if device.rings.count > 1 {
+                    Button("settings.rings.bluetooth.removeRing") {
+                        appState.settings.removeBluetoothDisplayRing(address: device.address, ringID: ring.id)
+                    }
+                }
+            }
+            if !choices.isEmpty {
+                Text("settings.rings.bluetooth.partsInRing")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                ForEach(choices) { part in
+                    Toggle(isOn: Binding(
+                        get: { ring.parts.contains(part) },
+                        set: { appState.settings.setBluetoothRingPart(address: device.address, ringID: ring.id, part: part, included: $0) }
+                    )) {
+                        Text(LocalizedStringKey(part.localizationKey))
+                    }
+                }
+            }
+            Picker("settings.rings.bluetooth.disconnected", selection: Binding(
+                get: { ring.whenDisconnected },
+                set: { appState.settings.setBluetoothRingDisconnected(address: device.address, ringID: ring.id, style: $0) }
+            )) {
+                ForEach(BluetoothDisconnectedStyle.allCases) { style in
+                    Text(LocalizedStringKey(style.localizationKey)).tag(style)
+                }
+            }
+            if ring.parts.count > 1 {
+                Picker("settings.rings.bluetooth.incomplete", selection: Binding(
+                    get: { ring.whenIncomplete },
+                    set: { appState.settings.setBluetoothRingIncomplete(address: device.address, ringID: ring.id, style: $0) }
+                )) {
+                    ForEach(BluetoothIncompleteStyle.allCases) { style in
+                        Text(LocalizedStringKey(style.localizationKey)).tag(style)
                     }
                 }
             }
         }
-        .onDrop(of: [.plainText], delegate: RingSlotDropDelegate(
-            slot: slot,
-            drag: ringDrag,
-            move: { item, target in
-                appState.settings.moveRingCatalogItem(item, to: target)
+        .padding(8)
+        .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+    }
+
+    private struct BluetoothIconTarget: Identifiable {
+        var device: BluetoothRingDevice
+        var ring: BluetoothDisplayRing
+        var part: BluetoothBatteryPart?
+        var id: String { "\(ring.id.uuidString):\(part?.rawValue ?? "center")" }
+    }
+
+    @ViewBuilder
+    private var bluetoothIconSettings: some View {
+        let targets = appState.settings.bluetoothRingDevices.flatMap { device in
+            device.rings.flatMap { ring -> [BluetoothIconTarget] in
+                if ring.parts.count == 2 {
+                    return ring.parts.map { BluetoothIconTarget(device: device, ring: ring, part: $0) }
+                }
+                return [BluetoothIconTarget(device: device, ring: ring, part: nil)]
             }
-        ))
+        }
+        if !targets.isEmpty {
+            ForEach(targets) { target in
+                bluetoothIconRow(target)
+            }
+        }
+    }
+
+    private func bluetoothIconRow(_ target: BluetoothIconTarget) -> some View {
+        let language = appState.settings.language
+        let model = target.device.model
+        let ring = target.ring
+        let glyph = target.part.map { ring.shownGlyph(model: model, part: $0) }
+            ?? ring.shownGlyph(model: model, parts: ring.parts)
+        let stored = target.part.flatMap { ring.sideColors[$0] } ?? (target.part == nil ? ring.iconColor : nil)
+        let followsLevel = target.part != nil
+        var title = target.device.name
+        if let part = target.part {
+            title += " · " + Localization.string(part.localizationKey, language: language)
+        } else if ring.parts.count == 1, let part = ring.parts.first, part != .single {
+            title += " · " + Localization.string(part.localizationKey, language: language)
+        }
+        return VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 10) {
+                Button {
+                    bluetoothIconEditor = BluetoothIconEdit(ringID: ring.id, part: target.part)
+                } label: {
+                    ringGlyphPlate(slot: glyph, diameter: 44)
+                }
+                .buttonStyle(.plain)
+                .popover(isPresented: bluetoothIconPresented(ring.id, part: target.part), arrowEdge: .bottom) {
+                    bluetoothIconChoices(device: target.device, ring: ring, part: target.part)
+                }
+                Text(title)
+                    .lineLimit(2)
+                Spacer(minLength: 8)
+            }
+            Picker("settings.rings.bluetooth.iconColor", selection: Binding(
+                get: { stored == nil ? RingIconColorChoice.system : .custom },
+                set: { choice in
+                    let color = choice == .custom ? (stored ?? RingIconRGB(red: 0.2, green: 0.55, blue: 0.35)) : nil
+                    appState.settings.setBluetoothRingIconColor(
+                        address: target.device.address,
+                        ringID: ring.id,
+                        part: target.part,
+                        color: color
+                    )
+                }
+            )) {
+                Text(followsLevel ? "settings.rings.bluetooth.colorLevel" : "settings.rings.bluetooth.colorSystem")
+                    .tag(RingIconColorChoice.system)
+                Text("settings.rings.bluetooth.colorCustom").tag(RingIconColorChoice.custom)
+            }
+            if let stored {
+                ColorPicker(
+                    "settings.rings.bluetooth.iconColor",
+                    selection: Binding(
+                        get: { stored.color },
+                        set: {
+                            appState.settings.setBluetoothRingIconColor(
+                                address: target.device.address,
+                                ringID: ring.id,
+                                part: target.part,
+                                color: RingIconRGB(color: $0)
+                            )
+                        }
+                    ),
+                    supportsOpacity: false
+                )
+            }
+        }
+        .padding(.vertical, 4)
+    }
+
+    private func bluetoothIconPresented(_ id: UUID, part: BluetoothBatteryPart?) -> Binding<Bool> {
+        Binding(
+            get: { bluetoothIconEditor == BluetoothIconEdit(ringID: id, part: part) },
+            set: { show in
+                let edit = BluetoothIconEdit(ringID: id, part: part)
+                bluetoothIconEditor = show ? edit : (bluetoothIconEditor == edit ? nil : bluetoothIconEditor)
+            }
+        )
+    }
+
+    private func bluetoothIconChoices(
+        device: BluetoothRingDevice,
+        ring: BluetoothDisplayRing,
+        part: BluetoothBatteryPart?
+    ) -> some View {
+        let columns = Array(repeating: GridItem(.fixed(44), spacing: 10), count: 4)
+        let current = part.map { ring.shownGlyph(model: device.model, part: $0) } ?? ring.glyph
+        return LazyVGrid(columns: columns, spacing: 10) {
+            ForEach(Array(HeadphoneSymbols.choices(model: device.model).enumerated()), id: \.offset) { _, choice in
+                Button {
+                    var glyph = choice
+                    glyph.scale = current.scale
+                    appState.settings.setBluetoothRingGlyph(
+                        address: device.address,
+                        ringID: ring.id,
+                        part: part,
+                        glyph: glyph
+                    )
+                    bluetoothIconEditor = nil
+                } label: {
+                    GlyphSlotView(slot: choice, systemPointSize: 18, assetSide: 20, prefersMonochrome: true)
+                        .frame(width: 44, height: 44)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(12)
+    }
+
+    @ViewBuilder
+    private func ringLayoutRow(_ entry: RingLayoutEntry) -> some View {
+        switch entry.kind {
+        case .lineBreak:
+            HStack(spacing: 8) {
+                layoutDragHandle(entry.id)
+                Text("settings.rings.lineBreak")
+                    .foregroundStyle(Color(nsColor: .separatorColor))
+                Spacer(minLength: 8)
+                Button {
+                    appState.settings.removeLineBreak(entry.id)
+                } label: {
+                    Image(systemName: "minus.circle.fill")
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.borderless)
+                .help(LocalizedStringKey("settings.rings.joinRow"))
+            }
+            .onDrop(of: [.plainText], delegate: layoutDropDelegate(entry.id))
+        case .slot(let slot):
+            ringOrderRow(slot)
+        case .bluetooth(let address, let ringID):
+            if let device = appState.settings.bluetoothRingDevices.first(where: { $0.address == address }),
+               let ring = device.rings.first(where: { $0.id == ringID }) {
+                let index = device.rings.firstIndex(where: { $0.id == ringID }) ?? 0
+                let catalog: [BluetoothBatteryPart] = device.multi ? [.left, .right, .box] : []
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(spacing: 8) {
+                        layoutDragHandle(entry.id)
+                        Text(device.name)
+                            .lineLimit(1)
+                        Spacer(minLength: 8)
+                        Button("settings.rings.bluetooth.remove") {
+                            appState.settings.removeBluetoothDevice(address: address)
+                        }
+                    }
+                    bluetoothRingEditor(device: device, ring: ring, index: index, catalog: catalog)
+                        .padding(.leading, 36)
+                }
+                .onDrop(of: [.plainText], delegate: layoutDropDelegate(entry.id))
+            }
+        }
+    }
+
+    private func layoutDragHandle(_ id: String) -> some View {
+        Image(systemName: "line.3.horizontal")
+            .font(.body)
+            .foregroundStyle(.secondary)
+            .frame(width: 28, height: 22)
+            .contentShape(Rectangle())
+            .onDrag {
+                ringItemDrag.itemID = id
+                return NSItemProvider(object: id as NSString)
+            }
+    }
+
+    private func layoutDropDelegate(_ id: String) -> RingItemDropDelegate {
+        RingItemDropDelegate(
+            itemID: id,
+            drag: ringItemDrag,
+            move: { item, target in
+                appState.settings.moveRingLayoutEntry(id: item, to: target)
+            }
+        )
+    }
+
+    private func ringOrderRow(_ slot: RingSlot) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 8) {
+                layoutDragHandle("slot:\(slot.rawValue)")
+                Toggle(isOn: ringVisibilityBinding(slot)) {
+                    HStack(spacing: 6) {
+                        Text(LocalizedStringKey(slot.localizationKey))
+                        if ringHasScale(slot) {
+                            ringScaleButton(slot)
+                        }
+                    }
+                }
+            }
+            if slot == .batteryTemperature || slot == .thermalState {
+                slotIconColorControls(slot)
+                    .padding(.leading, 36)
+            }
+        }
+        .onDrop(of: [.plainText], delegate: layoutDropDelegate("slot:\(slot.rawValue)"))
+    }
+
+    private func slotIconColorControls(_ slot: RingSlot) -> some View {
+        let stored = appState.settings.slotIconColors[slot.rawValue]
+        return VStack(alignment: .leading, spacing: 4) {
+            Picker("settings.rings.bluetooth.iconColor", selection: Binding(
+                get: { stored == nil ? RingIconColorChoice.system : .custom },
+                set: { choice in
+                    let color = choice == .custom ? (stored ?? RingIconRGB(red: 0.15, green: 0.15, blue: 0.15)) : nil
+                    appState.settings.setSlotIconColor(slot, color: color)
+                }
+            )) {
+                Text("settings.rings.bluetooth.colorSystem").tag(RingIconColorChoice.system)
+                Text("settings.rings.bluetooth.colorCustom").tag(RingIconColorChoice.custom)
+            }
+            if let stored {
+                ColorPicker(
+                    "settings.rings.bluetooth.iconColor",
+                    selection: Binding(
+                        get: { stored.color },
+                        set: { appState.settings.setSlotIconColor(slot, color: RingIconRGB(color: $0)) }
+                    ),
+                    supportsOpacity: false
+                )
+            }
+        }
     }
 
     private func ringHasScale(_ slot: RingSlot) -> Bool {
         switch slot {
-        case .download, .upload, .speedPair, .batteryTemperature, .thermalState:
+        case .download, .upload, .speedPair, .batteryTemperature, .thermalState, .swap:
             true
         default:
             false
@@ -2486,6 +2865,29 @@ struct SettingsView: View {
                     "settings.rings.half.upload",
                     kilobytes: appState.settings.uploadHalfKilobytes
                 ) { appState.settings.uploadHalfKilobytes = $0 }
+            case .swap:
+                HStack(spacing: 8) {
+                    Text("settings.rings.half.swap")
+                    Spacer(minLength: 8)
+                    Text(SwapUsageFormat.string(bytes: Double(appState.settings.swapHalfMegabytes) * 1_048_576))
+                        .monospacedDigit()
+                        .foregroundStyle(.secondary)
+                    Stepper(
+                        "",
+                        value: Binding(
+                            get: { appState.settings.swapHalfMegabytes },
+                            set: { appState.settings.swapHalfMegabytes = $0 }
+                        ),
+                        in: AppSettings.swapHalfLimit(),
+                        step: AppSettings.swapHalfStep
+                    )
+                    .labelsHidden()
+                    .fixedSize()
+                }
+                Text("settings.rings.half.swap.note")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
             case .batteryTemperature:
                 topAppStepper(
                     "settings.rings.half.temperature",
@@ -3621,6 +4023,50 @@ private final class RingDragState {
     var slot: RingSlot?
 }
 
+private final class RingItemDragState {
+    var itemID: String?
+}
+
+private struct RingItemDropDelegate: DropDelegate {
+    var itemID: String
+    var drag: RingItemDragState
+    var move: (String, String) -> Void
+
+    func dropEntered(info: DropInfo) {
+        guard let item = drag.itemID, item != itemID else { return }
+        move(item, itemID)
+    }
+
+    func dropUpdated(info: DropInfo) -> DropProposal? {
+        DropProposal(operation: .move)
+    }
+
+    func performDrop(info: DropInfo) -> Bool {
+        drag.itemID = nil
+        return true
+    }
+}
+
+private struct RingItemRowDropDelegate: DropDelegate {
+    var row: Int
+    var drag: RingItemDragState
+    var move: (String, Int) -> Void
+
+    func dropEntered(info: DropInfo) {
+        guard let item = drag.itemID else { return }
+        move(item, row)
+    }
+
+    func dropUpdated(info: DropInfo) -> DropProposal? {
+        DropProposal(operation: .move)
+    }
+
+    func performDrop(info: DropInfo) -> Bool {
+        drag.itemID = nil
+        return true
+    }
+}
+
 private struct RingSlotDropDelegate: DropDelegate {
     var slot: RingSlot
     var drag: RingDragState
@@ -3682,6 +4128,69 @@ private final class JustifiedTextField: NSTextField {
             invalidateIntrinsicContentSize()
         }
         super.layout()
+    }
+}
+
+private struct BluetoothIconEdit: Equatable {
+    var ringID: UUID
+    var part: BluetoothBatteryPart?
+}
+
+private enum RingIconColorChoice: String, Hashable {
+    case system
+    case custom
+}
+
+private struct BluetoothDevicePicker: View {
+    @Bindable var appState: AppState
+    @Environment(\.dismiss) private var dismiss
+
+    private var candidates: [BluetoothSeenDevice] {
+        let taken = Set(appState.settings.bluetoothRingDevices.map(\.address))
+        return appState.bluetoothDevices
+            .filter { !$0.levels.isEmpty && !taken.contains($0.address) }
+            .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("settings.rings.bluetooth.add")
+                .font(.headline)
+            if candidates.isEmpty {
+                Text("settings.rings.bluetooth.none")
+                    .foregroundStyle(.secondary)
+            } else {
+                ForEach(candidates) { device in
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(device.name)
+                            Text(candidateDetail(device))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        Button("settings.rings.bluetooth.add") {
+                            appState.settings.addBluetoothDevice(device)
+                        }
+                    }
+                }
+            }
+            HStack {
+                Spacer()
+                Button("settings.rings.bluetooth.close") { dismiss() }
+                    .keyboardShortcut(.defaultAction)
+            }
+        }
+        .padding(20)
+        .frame(width: 420)
+    }
+
+    private func candidateDetail(_ device: BluetoothSeenDevice) -> String {
+        let language = appState.settings.language
+        return device.levels.keys.sorted { $0.rawValue < $1.rawValue }.map { part in
+            let name = Localization.string(part.localizationKey, language: language)
+            return "\(name) \(device.levels[part] ?? 0)%"
+        }.joined(separator: "  ")
     }
 }
 

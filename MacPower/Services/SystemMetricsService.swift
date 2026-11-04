@@ -12,6 +12,7 @@ final class SystemMetricsService {
     private var lastDisk: Double = 0
     private var lastPressure: Double = 0
     private var lastSwap: Double = 0
+    private var lastSwapBytes: Double = 0
     private var lastDownload: Double = 0
     private var lastUpload: Double = 0
     private var lastNetworkBytes: (rx: UInt64, tx: UInt64, time: TimeInterval)?
@@ -115,7 +116,9 @@ final class SystemMetricsService {
             lastPressure = Self.memoryPressurePercent()
         }
         if wanted.swap {
-            lastSwap = Self.swapPercent()
+            let reading = Self.swapReading()
+            lastSwap = reading.percent
+            lastSwapBytes = reading.usedBytes
         }
         if wanted.network, let rates = Self.networkRates(since: &lastNetworkBytes) {
             lastDownload = rates.download
@@ -130,6 +133,7 @@ final class SystemMetricsService {
             diskPercent: lastDisk,
             memoryPressurePercent: lastPressure,
             swapPercent: lastSwap,
+            swapUsedBytes: lastSwapBytes,
             downloadBytesPerSecond: lastDownload,
             uploadBytesPerSecond: lastUpload
         )
@@ -204,11 +208,18 @@ final class SystemMetricsService {
         }
     }
 
-    private static func swapPercent() -> Double {
+    private static func swapReading() -> (percent: Double, usedBytes: Double) {
         var usage = xsw_usage()
         var size = MemoryLayout<xsw_usage>.size
-        guard sysctlbyname("vm.swapusage", &usage, &size, nil, 0) == 0, usage.xsu_total > 0 else { return 0 }
-        return min(100, Double(usage.xsu_used) / Double(usage.xsu_total) * 100)
+        guard sysctlbyname("vm.swapusage", &usage, &size, nil, 0) == 0 else { return (0, 0) }
+        let used = Double(usage.xsu_used)
+        let memory = SwapUsageFormat.physicalMemoryBytes()
+        let percent = SwapUsageFormat.ringPercent(
+            usedBytes: used,
+            halfBytes: memory / 4,
+            memoryBytes: memory
+        )
+        return (percent, used)
     }
 
     private static func networkRates(since previous: inout (rx: UInt64, tx: UInt64, time: TimeInterval)?) -> (download: Double, upload: Double)? {

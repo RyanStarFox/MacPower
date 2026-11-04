@@ -13601,73 +13601,73 @@
         }
       }
     },
-    "ring.caption.swap %lld": {
+    "ring.caption.swap %@": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Swap: %lld%"
+            "value": "Swap: %@"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "交换：%lld%"
+            "value": "交换：%@"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "交換：%lld%"
+            "value": "交換：%@"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "スワップ: %lld%"
+            "value": "スワップ: %@"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "스왑: %lld%"
+            "value": "스왑: %@"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Swap : %lld%"
+            "value": "Swap : %@"
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Swap: %lld%"
+            "value": "Swap: %@"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Swap: %lld%"
+            "value": "Swap: %@"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Swap: %lld%"
+            "value": "Swap: %@"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Swap: %lld%"
+            "value": "Swap: %@"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Подкачка: %lld%"
+            "value": "Подкачка: %@"
           }
         }
       }
@@ -14098,6 +14098,38 @@
         "ru": { "stringUnit": { "state": "translated", "value": "Отдача на 50%" } },
         "zh-Hans": { "stringUnit": { "state": "translated", "value": "上传 50%" } },
         "zh-Hant": { "stringUnit": { "state": "translated", "value": "上傳 50%" } }
+      }
+    },
+    "settings.rings.half.swap": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Swap bei 50 %" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Swap at 50%" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Swap al 50 %" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Swap à 50 %" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Swap al 50%" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "スワップ 50%" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "스왑 50%" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Swap em 50%" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Подкачка на 50%" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "交换 50%" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "交換 50%" } }
+      }
+    },
+    "settings.rings.half.swap.note": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Diese Größe füllt den Ring zur Hälfte. Ein voller Ring ist immer der gesamte Arbeitsspeicher. Voreingestellt ist ein Viertel davon." } },
+        "en": { "stringUnit": { "state": "translated", "value": "This size fills the ring halfway. A full ring is always all of this Mac’s memory. The default is a quarter of that memory." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Este tamaño llena el anillo hasta la mitad. El anillo lleno es siempre toda la memoria. El valor inicial es un cuarto de esa memoria." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Cette taille remplit l’anneau à moitié. Un anneau plein correspond toujours à toute la mémoire. La valeur d’origine est un quart de cette mémoire." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Questa dimensione riempie l’anello a metà. L’anello pieno è sempre tutta la memoria. Il valore iniziale è un quarto di quella memoria." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "この大きさでリングが半分になります。満タンは常にこの Mac のメモリ全体です。初期値はその 4 分の 1 です。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "이 크기에서 링이 절반이 됩니다. 가득 찬 링은 항상 이 Mac의 메모리 전체입니다. 기본값은 그 4분의 1입니다." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Este tamanho enche o anel até a metade. O anel cheio é sempre toda a memória. O padrão é um quarto dessa memória." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Этот размер заполняет кольцо наполовину. Полное кольцо — это всегда вся память. По умолчанию это её четверть." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "改这个大小，圆环就走到一半。满圈始终是这台 Mac 的整份内存。默认是内存的四分之一。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "改這個大小，圓環就走到一半。滿圈始終是這台 Mac 的整份記憶體。預設是記憶體的四分之一。" } }
       }
     },
     "settings.rings.scale": {
@@ -14766,17 +14798,113 @@
     "tutorial.rings.rows": {
       "extractionState": "manual",
       "localizations": {
-        "de": { "stringUnit": { "state": "translated", "value": "Der Griff links zieht die Reihenfolge, der Schalter blendet den Ring ein oder aus. Zwei Reihen verteilt die Ringe auf zwei Zeilen." } },
-        "en": { "stringUnit": { "state": "translated", "value": "The grip on the left drags the order, and the switch shows or hides that ring. Two rows splits the rings onto two lines." } },
-        "es": { "stringUnit": { "state": "translated", "value": "El asa de la izquierda arrastra el orden, y el interruptor muestra u oculta ese anillo. Dos filas reparte los anillos en dos líneas." } },
-        "fr": { "stringUnit": { "state": "translated", "value": "La poignée à gauche fait glisser l’ordre, et l’interrupteur affiche ou masque l’anneau. Deux rangées répartit les anneaux sur deux lignes." } },
-        "it": { "stringUnit": { "state": "translated", "value": "La presa a sinistra trascina l’ordine, e l’interruttore mostra o nasconde l’anello. Due righe divide gli anelli su due linee." } },
-        "ja": { "stringUnit": { "state": "translated", "value": "行の左にあるグリップで並べ替え、スイッチでそのリングを出します。「2行にする」を開くと、リングは二段になります。" } },
-        "ko": { "stringUnit": { "state": "translated", "value": "줄 왼쪽 손잡이로 순서를 끌고, 스위치로 그 링을 켜거나 끕니다. 두 줄로를 켜면 링이 두 줄로 나뉩니다." } },
-        "pt-BR": { "stringUnit": { "state": "translated", "value": "A alça à esquerda arrasta a ordem, e o interruptor mostra ou oculta o anel. Duas linhas reparte os anéis em duas linhas." } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Ручка слева перетаскивает порядок, а переключатель показывает или скрывает кольцо. Два ряда раскладывает кольца в две строки." } },
-        "zh-Hans": { "stringUnit": { "state": "translated", "value": "每行左边的握把用来拖动排序，开关决定这一项出不出现。打开「分成两行」后，圆环会排成两排。" } },
-        "zh-Hant": { "stringUnit": { "state": "translated", "value": "每行左邊的握把用來拖動排序，開關決定這一項出不出現。打開「分成兩行」後，圓環會排成兩排。" } }
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "开关决定这一项出不出现。按住一行上下拖动就能调整顺序。点「添加换行」，再把这条换行拖到要分开的位置，面板就从那里另起一行。蓝牙设备也在这份列表里。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "開關決定這一項出不出現。按住一行上下拖動就能調整順序。點「加入換行」，再把這條換行拖到要分開的位置，面板就從那裡另起一行。藍牙裝置也在這份列表裡。" } },
+        "en": { "stringUnit": { "state": "translated", "value": "The switch shows or hides a ring. Drag a row up or down to change the order. Tap Add a row break, then drag that break to where the panel should start a new row. Bluetooth devices sit in this same list." } },
+        "de": { "stringUnit": { "state": "translated", "value": "Der Schalter blendet den Ring ein oder aus. Ziehe einen Eintrag nach oben oder unten, um die Reihenfolge zu ändern. Die Umbruch-Taste beginnt danach eine neue Zeile. Bluetooth-Geräte stehen in derselben Liste." } },
+        "es": { "stringUnit": { "state": "translated", "value": "El interruptor muestra u oculta el anillo. Arrastra una fila hacia arriba o abajo para cambiar el orden. El botón de salto empieza una fila nueva después de ese elemento. Los dispositivos Bluetooth están en la misma lista." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "L’interrupteur affiche ou masque l’anneau. Fais glisser une ligne vers le haut ou le bas pour changer l’ordre. Le bouton de saut commence une nouvelle ligne après cet élément. Les appareils Bluetooth sont dans la même liste." } },
+        "it": { "stringUnit": { "state": "translated", "value": "L’interruttore mostra o nasconde l’anello. Trascina una riga in alto o in basso per cambiare l’ordine. Il pulsante di a capo inizia una nuova riga dopo quella voce. I dispositivi Bluetooth stanno nella stessa lista." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "スイッチでリングの表示を切り替えます。行を上下にドラッグして順番を変えます。改行ボタンで、その項目のあとからパネルを改行します。Bluetooth 機器も同じリストに並びます。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "스위치로 링을 켜거나 끕니다. 줄을 위아래로 끌어 순서를 바꿉니다. 줄바꿈 버튼으로 그 항목 다음부터 새 줄을 시작합니다. Bluetooth 기기도 같은 목록에 있습니다." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "O interruptor mostra ou oculta o anel. Arraste uma linha para cima ou para baixo para mudar a ordem. O botão de quebra começa uma nova linha depois desse item. Os dispositivos Bluetooth ficam na mesma lista." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Переключатель показывает или скрывает кольцо. Перетащите строку вверх или вниз, чтобы изменить порядок. Кнопка переноса начинает новую строку после этого пункта. Устройства Bluetooth стоят в том же списке." } }
+      }
+    },
+    "tutorial.rings.bluetooth": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Verbinde die Kopfhörer zuerst unter Systemeinstellungen → Bluetooth. Tippe dann in der Ringliste auf „Gerät hinzufügen“ und wähle ein Gerät, dessen Akku das System meldet. Links, rechts und das Case können ein Ring sein oder getrennt bleiben." } },
+        "en": { "stringUnit": { "state": "translated", "value": "Connect the headphones in System Settings → Bluetooth first. Then, in this ring list, tap Add a device and pick one whose battery the system can read. Left, right, and the case can share one ring or stay separate." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Conecta los auriculares en Ajustes del Sistema → Bluetooth. Después, en esta lista, pulsa Añadir un dispositivo y elige uno cuya batería lea el sistema. Izquierda, derecha y el estuche pueden ir en un anillo o por separado." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Connecte d’abord les écouteurs dans Réglages Système → Bluetooth. Puis, dans cette liste, touche Ajouter un appareil et choisis-en un dont le système lit la batterie. Gauche, droite et le boîtier peuvent partager un anneau ou rester séparés." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Collega prima le cuffie in Impostazioni di Sistema → Bluetooth. Poi, in questo elenco, tocca Aggiungi un dispositivo e scegline uno di cui il sistema legge la batteria. Sinistra, destra e la custodia possono stare in un anello o separati." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "まずシステム設定の Bluetooth でヘッドホンを接続します。この一覧で「機器を追加」を押し、システムが電池を読める機器を選びます。左、右、ケースは一つのリングにまとめても、分けても表示できます。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "먼저 시스템 설정의 Bluetooth에서 헤드폰을 연결하세요. 이 목록에서 기기 추가를 누르고, 시스템에서 배터리를 읽는 기기를 고르면 됩니다. 왼쪽, 오른쪽, 케이스는 링 하나에 모으거나 나눠 둘 수 있습니다." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Conecte os fones em Ajustes do Sistema → Bluetooth. Depois, nesta lista, toque em Adicionar um dispositivo e escolha um cuja bateria o sistema leia. Esquerdo, direito e o estojo podem ficar em um anel ou separados." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Сначала подключите наушники в Системных настройках → Bluetooth. Затем в этом списке нажмите «Добавить устройство» и выберите то, чей заряд система читает. Левый, правый и футляр могут быть одним кольцом или отдельными." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "先在系统设置的「蓝牙」里连上耳机。然后在这份圆环列表里点「添加设备」，选中系统已经读到电量的那一副。左耳、右耳和盒子可以合成一个圆环，也可以分开。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "先在系統設定的「藍牙」裡連上耳機。然後在這份圓環列表裡點「加入裝置」，選中系統已經讀到電量的那一副。左耳、右耳和盒子可以合成一個圓環，也可以分開。" } }
+      }
+    },
+    "settings.rings.bluetooth.connectHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Verbinde die Kopfhörer unter Systemeinstellungen → Bluetooth. Tippe dann auf „Gerät hinzufügen“ und wähle ein Gerät, dessen Akku das System meldet." } },
+        "en": { "stringUnit": { "state": "translated", "value": "Connect the headphones in System Settings → Bluetooth, then tap Add a device and pick one whose battery the system can read." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Conecta los auriculares en Ajustes del Sistema → Bluetooth y pulsa Añadir un dispositivo para elegir uno cuya batería lea el sistema." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Connecte les écouteurs dans Réglages Système → Bluetooth, puis touche Ajouter un appareil et choisis-en un dont le système lit la batterie." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Collega le cuffie in Impostazioni di Sistema → Bluetooth, poi tocca Aggiungi un dispositivo e scegline uno di cui il sistema legge la batteria." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "システム設定の Bluetooth でヘッドホンを接続してから「機器を追加」を押し、電池を読める機器を選びます。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "시스템 설정의 Bluetooth에서 헤드폰을 연결한 뒤 기기 추가를 눌러, 배터리를 읽는 기기를 고르세요." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Conecte os fones em Ajustes do Sistema → Bluetooth e toque em Adicionar um dispositivo para escolher um cuja bateria o sistema leia." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Подключите наушники в Системных настройках → Bluetooth, затем нажмите «Добавить устройство» и выберите то, чей заряд система читает." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "先在系统设置的「蓝牙」里连上耳机，再点「添加设备」，选择系统已经读到电量的设备。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "先在系統設定的「藍牙」裡連上耳機，再點「加入裝置」，選擇系統已經讀到電量的裝置。" } }
+      }
+    },
+    "settings.rings.lineBreak": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Zeilenumbruch" } },
+        "en": { "stringUnit": { "state": "translated", "value": "New row" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Nueva fila" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Nouvelle ligne" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Nuova riga" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "改行" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "줄바꿈" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Nova linha" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Новая строка" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "换行" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "換行" } }
+      }
+    },
+    "settings.rings.breakAfter": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Danach eine neue Zeile beginnen" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Start a new row after this" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Empezar una fila después de esto" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Commencer une ligne après ceci" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Iniziare una riga dopo questo" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "この項目の後で改行" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "이 항목 뒤에서 줄바꿈" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Começar uma linha depois disto" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Начать новую строку после этого" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "在此项后换行" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "在此項後換行" } }
+      }
+    },
+    "settings.rings.joinRow": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Zeilenumbruch entfernen" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Remove the row break" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Quitar el salto de fila" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Retirer le saut de ligne" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Rimuovere l’interruzione di riga" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "改行をやめる" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "줄바꿈 없애기" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Remover a quebra de linha" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Убрать перенос строки" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "取消换行" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "取消換行" } }
+      }
+    },
+    "settings.rings.addLineBreak": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Zeilenumbruch hinzufügen" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Add a row break" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Añadir un salto" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Ajouter un saut" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Aggiungi un a capo" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "改行を追加" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "줄바꿈 추가" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Adicionar uma quebra" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Добавить перенос" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "添加换行" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "加入換行" } }
       }
     },
     "tutorial.rings.colors": {
@@ -14798,17 +14926,17 @@
     "tutorial.rings.scale": {
       "extractionState": "manual",
       "localizations": {
-        "de": { "stringUnit": { "state": "translated", "value": "Download, Upload, Up/Down und Akkutemperatur gehen von 0 bis unendlich, der Ring nur von 0 bis 100. Erst wenn feststeht, welche Zahl 50 % ist, ist die Zuordnung bestimmt." } },
-        "en": { "stringUnit": { "state": "translated", "value": "Download, Upload, Up/Down, and Battery Temperature run from 0 to infinity, while the ring only runs from 0 to 100. Setting which number is 50% is what fixes that mapping." } },
-        "es": { "stringUnit": { "state": "translated", "value": "Descarga, Subida, Subida/Bajada y Temperatura van de 0 a infinito, y el anillo solo de 0 a 100. Hay que fijar qué número es el 50 % para determinar esa correspondencia." } },
-        "fr": { "stringUnit": { "state": "translated", "value": "Téléchargement, Envoi, Débit et Température vont de 0 à l’infini, l’anneau seulement de 0 à 100. Il faut choisir quel nombre vaut 50 % pour fixer cette correspondance." } },
-        "it": { "stringUnit": { "state": "translated", "value": "Download, Upload, Invio/Ricezione e Temperatura vanno da 0 a infinito, l’anello solo da 0 a 100. Bisogna stabilire quale numero è il 50% per fissare questa corrispondenza." } },
-        "ja": { "stringUnit": { "state": "translated", "value": "ダウンロード、アップロード、送受信、バッテリー温度は 0 から無限大、リングは 0 から 100 です。50% がどの数字かを決めて、この対応を定めます。" } },
-        "ko": { "stringUnit": { "state": "translated", "value": "다운로드, 업로드, 송수신, 배터리 온도는 0에서 무한대이고, 링은 0에서 100입니다. 50%가 어느 숫자인지 정해야 이 대응이 정해집니다." } },
-        "pt-BR": { "stringUnit": { "state": "translated", "value": "Download, Upload, Envio/Recebimento e Temperatura vão de 0 ao infinito, e o anel só de 0 a 100. É preciso definir qual número é 50% para determinar essa correspondência." } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Загрузка, Отдача, Обмен и Температура идут от 0 до бесконечности, а кольцо только от 0 до 100. Нужно задать, какое число соответствует 50%, чтобы определить это соответствие." } },
-        "zh-Hans": { "stringUnit": { "state": "translated", "value": "下载、上传、上传下载和电池温度是 0 到正无穷，圆环是 0 到 100，所以要规定 50% 对应哪一个数字，才能确定 0 到正无穷和 0 到 100 的对应关系。" } },
-        "zh-Hant": { "stringUnit": { "state": "translated", "value": "下載、上傳、上傳下載和電池溫度是 0 到正無窮，圓環是 0 到 100，所以要規定 50% 對應哪一個數字，才能確定 0 到正無窮和 0 到 100 的對應關係。" } }
+        "de": { "stringUnit": { "state": "translated", "value": "Download, Upload, Up/Down und Akkutemperatur gehen von 0 bis unendlich, der Ring nur von 0 bis 100. Erst wenn feststeht, welche Zahl 50 % ist, ist die Zuordnung bestimmt. Bei Swap lässt sich die 50-%-Größe ändern. Voreingestellt ist ein Viertel des Arbeitsspeichers, ein voller Ring ist immer der gesamte." } },
+        "en": { "stringUnit": { "state": "translated", "value": "Download, Upload, Up/Down, and Battery Temperature run from 0 to infinity, while the ring only runs from 0 to 100. Setting which number is 50% is what fixes that mapping. Swap’s 50% can be changed too. The default is a quarter of this Mac’s memory, and a full ring is always all of that memory." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Descarga, Subida, Subida/Bajada y Temperatura van de 0 a infinito, y el anillo solo de 0 a 100. Hay que fijar qué número es el 50 % para determinar esa correspondencia. El 50 % de Swap también se puede cambiar. El valor inicial es un cuarto de la memoria, y el anillo lleno es siempre toda la memoria." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Téléchargement, Envoi, Débit et Température vont de 0 à l’infini, l’anneau seulement de 0 à 100. Il faut choisir quel nombre vaut 50 % pour fixer cette correspondance. Le 50 % du swap se règle aussi. La valeur d’origine est un quart de la mémoire, et un anneau plein correspond toujours à toute la mémoire." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Download, Upload, Invio/Ricezione e Temperatura vanno da 0 a infinito, l’anello solo da 0 a 100. Bisogna stabilire quale numero è il 50% per fissare questa corrispondenza. Anche il 50% dello swap si può cambiare. Il valore iniziale è un quarto della memoria, e l’anello pieno è sempre tutta la memoria." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ダウンロード、アップロード、送受信、バッテリー温度は 0 から無限大、リングは 0 から 100 です。50% がどの数字かを決めて、この対応を定めます。スワップの 50% も変更できます。初期値はメモリの 4 分の 1 で、満タンは常にメモリ全体です。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "다운로드, 업로드, 송수신, 배터리 온도는 0에서 무한대이고, 링은 0에서 100입니다. 50%가 어느 숫자인지 정해야 이 대응이 정해집니다. 스왑의 50%도 바꿀 수 있습니다. 기본값은 메모리의 4분의 1이고, 가득 찬 링은 항상 메모리 전체입니다." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Download, Upload, Envio/Recebimento e Temperatura vão de 0 ao infinito, e o anel só de 0 a 100. É preciso definir qual número é 50% para determinar essa correspondência. Os 50% do swap também podem ser alterados. O padrão é um quarto da memória, e o anel cheio é sempre toda a memória." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Загрузка, Отдача, Обмен и Температура идут от 0 до бесконечности, а кольцо только от 0 до 100. Нужно задать, какое число соответствует 50%, чтобы определить это соответствие. Для подкачки 50% тоже можно изменить. По умолчанию это четверть памяти, а полное кольцо — всегда вся память." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "下载、上传、上传下载和电池温度是 0 到正无穷，圆环是 0 到 100，所以要规定 50% 对应哪一个数字，才能确定 0 到正无穷和 0 到 100 的对应关系。交换的 50% 也可以改，默认是这台 Mac 物理内存的四分之一，满圈始终是整份内存。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "下載、上傳、上傳下載和電池溫度是 0 到正無窮，圓環是 0 到 100，所以要規定 50% 對應哪一個數字，才能確定 0 到正無窮和 0 到 100 的對應關係。交換的 50% 也可以改，預設是這台 Mac 實體記憶體的四分之一，滿圈始終是整份記憶體。" } }
       }
     },
     "tutorial.rings.thermal": {
@@ -15097,6 +15225,598 @@
         "ru": { "stringUnit": { "state": "translated", "value": "Откройте Циклы на боковой панели. Ёмкость задаёт, как писать максимальную ёмкость: Проценты, мА·ч или Оба." } },
         "zh-Hans": { "stringUnit": { "state": "translated", "value": "在侧边栏打开「电池循环」。容量格式决定最大容量写成百分比、mAh，或两个都要。" } },
         "zh-Hant": { "stringUnit": { "state": "translated", "value": "在側邊欄打開「電池循環」。容量格式決定最大容量寫成百分比、mAh，或兩個都要。" } }
+      }
+    },
+    "settings.rings.layout": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Anordnung" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Layout" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Disposición" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Disposition" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Disposizione" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "並び" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "배치" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Disposição" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Раскладка" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "圆环排版" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "圓環排版" } }
+      }
+    },
+    "settings.rings.row %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Zeile %lld" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Row %lld" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Fila %lld" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Ligne %lld" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Riga %lld" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "%lld 行目" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "%lld번째 줄" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Linha %lld" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Строка %lld" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "第 %lld 行" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "第 %lld 行" } }
+      }
+    },
+    "settings.rings.addRow": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Zeile hinzufügen" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Add a row" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Añadir una fila" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Ajouter une ligne" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Aggiungi una riga" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "行を追加" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "줄 추가" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Adicionar uma linha" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Добавить строку" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "加一行" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "加一行" } }
+      }
+    },
+    "settings.rings.removeRow": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Diese Zeile entfernen" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Remove this row" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Quitar esta fila" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Retirer cette ligne" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Rimuovi questa riga" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "この行を削除" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "이 줄 삭제" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Remover esta linha" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Удалить эту строку" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "删掉这一行" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "刪掉這一行" } }
+      }
+    },
+    "settings.rings.moveLeft": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Nach links" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Move left" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Mover a la izquierda" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Déplacer à gauche" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Sposta a sinistra" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "左へ" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "왼쪽으로" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Mover para a esquerda" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Влево" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "左移" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "左移" } }
+      }
+    },
+    "settings.rings.moveRight": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Nach rechts" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Move right" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Mover a la derecha" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Déplacer à droite" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Sposta a destra" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "右へ" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "오른쪽으로" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Mover para a direita" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Вправо" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "右移" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "右移" } }
+      }
+    },
+    "settings.rings.moveUp": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "In die Zeile darüber" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Move to the row above" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Mover a la fila de arriba" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Déplacer vers la ligne au-dessus" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Sposta nella riga sopra" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "上の行へ" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "윗줄로" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Mover para a linha de cima" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "В строку выше" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "移到上一行" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "移到上一行" } }
+      }
+    },
+    "settings.rings.moveDown": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "In die Zeile darunter" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Move to the row below" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Mover a la fila de abajo" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Déplacer vers la ligne en dessous" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Sposta nella riga sotto" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "下の行へ" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "아랫줄로" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Mover para a linha de baixo" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "В строку ниже" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "移到下一行" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "移到下一行" } }
+      }
+    },
+    "settings.rings.bluetooth": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Bluetooth-Geräte" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Bluetooth devices" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Dispositivos Bluetooth" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Appareils Bluetooth" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Dispositivi Bluetooth" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Bluetooth 機器" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Bluetooth 기기" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Dispositivos Bluetooth" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Устройства Bluetooth" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "蓝牙设备" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "藍牙裝置" } }
+      }
+    },
+    "settings.rings.bluetooth.add": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Gerät hinzufügen" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Add a device" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Añadir un dispositivo" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Ajouter un appareil" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Aggiungi un dispositivo" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "機器を追加" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "기기 추가" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Adicionar um dispositivo" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Добавить устройство" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "添加设备" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "加入裝置" } }
+      }
+    },
+    "settings.rings.bluetooth.empty": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Noch kein Gerät. Es erscheinen nur Geräte, die du auswählst und deren Akku das System meldet." } },
+        "en": { "stringUnit": { "state": "translated", "value": "No devices yet. Only devices you pick, and that report a battery level, are shown." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Todavía no hay dispositivos. Solo se muestran los que eliges y cuyo nivel de batería informa el sistema." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Aucun appareil pour l’instant. Seuls ceux que tu choisis, et qui indiquent une batterie, apparaissent." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Nessun dispositivo. Compaiono solo quelli che scegli e di cui il sistema legge la batteria." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "まだ機器がありません。選んだ、電池を知らせる機器だけを表示します。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "아직 기기가 없습니다. 직접 고르고 시스템에서 배터리를 읽은 기기만 표시합니다." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Nenhum dispositivo ainda. Só aparecem os que você escolhe e que informam a bateria." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Устройств пока нет. Показываются только выбранные, у которых система читает заряд." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "还没有添加设备。只显示你选中的、并且系统读得到电量的设备。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "還沒有加入裝置。只顯示你選中的、而且系統讀得到電量的裝置。" } }
+      }
+    },
+    "settings.rings.bluetooth.none": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Kein gekoppeltes Bluetooth-Gerät meldet gerade einen Akku." } },
+        "en": { "stringUnit": { "state": "translated", "value": "No paired Bluetooth device is reporting a battery level right now." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Ningún dispositivo Bluetooth emparejado informa la batería ahora." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Aucun appareil Bluetooth appairé n’indique de batterie pour le moment." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Nessun dispositivo Bluetooth associato sta riportando la batteria." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "いま電池を知らせている、ペアリング済みの Bluetooth 機器はありません。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "지금 배터리를 알려 주는 페어링된 Bluetooth 기기가 없습니다." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Nenhum dispositivo Bluetooth pareado está informando a bateria agora." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Сейчас ни одно сопряжённое устройство Bluetooth не сообщает заряд." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "没有找到已配对、并且正在报电量的蓝牙设备。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "沒有找到已配對、而且正在回報電量的藍牙裝置。" } }
+      }
+    },
+    "settings.rings.bluetooth.disconnected": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Wenn nicht verbunden" } },
+        "en": { "stringUnit": { "state": "translated", "value": "When disconnected" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Si no está conectado" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Quand il est déconnecté" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Quando è scollegato" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "未接続のとき" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "연결되지 않았을 때" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Quando desconectado" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Когда не подключено" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "没连上时" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "沒連上時" } }
+      }
+    },
+    "settings.rings.bluetooth.hide": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Ausblenden" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Hide" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Ocultar" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Masquer" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Nascondi" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "隠す" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "숨기기" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Ocultar" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Скрыть" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "隐藏" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "隱藏" } }
+      }
+    },
+    "settings.rings.bluetooth.placeholder": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Leeren Ring zeigen" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Show an empty ring" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Mostrar un anillo vacío" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Afficher un anneau vide" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Mostra un anello vuoto" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "空のリングを出す" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "빈 링 표시" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Mostrar um anel vazio" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Показать пустое кольцо" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "显示空圆环" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "顯示空圓環" } }
+      }
+    },
+    "settings.rings.bluetooth.remove": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Entfernen" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Remove" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Quitar" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Retirer" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Rimuovi" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "削除" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "제거" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Remover" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Удалить" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "移除" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "移除" } }
+      }
+    },
+    "settings.rings.bluetooth.parts": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Welche Werte" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Which levels" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Qué niveles" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Quels niveaux" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Quali livelli" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "表示する電池" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "표시할 배터리" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Quais níveis" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Какие значения" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "显示哪些电量" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "顯示哪些電量" } }
+      }
+    },
+    "settings.rings.bluetooth.single": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Akku" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Battery" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Batería" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Batterie" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Batteria" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "電池" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "배터리" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Bateria" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Заряд" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "电量" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "電量" } }
+      }
+    },
+    "settings.rings.bluetooth.left": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Links" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Left" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Izquierdo" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Gauche" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Sinistro" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "左" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "왼쪽" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Esquerdo" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Левый" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "左耳" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "左耳" } }
+      }
+    },
+    "settings.rings.bluetooth.right": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Rechts" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Right" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Derecho" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Droite" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Destro" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "右" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "오른쪽" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Direito" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Правый" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "右耳" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "右耳" } }
+      }
+    },
+    "settings.rings.bluetooth.case": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Ladecase" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Case" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Estuche" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Boîtier" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Custodia" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ケース" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "케이스" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Estojo" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Футляр" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "充电盒" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "充電盒" } }
+      }
+    },
+    "settings.rings.bluetooth.close": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Fertig" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Done" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Listo" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Terminé" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Fine" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "完了" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "완료" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "OK" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Готово" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "完成" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "完成" } }
+      }
+    },
+    "settings.rings.bluetooth.ring %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Ring %lld" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Ring %lld" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Anillo %lld" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Anneau %lld" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Anello %lld" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "リング %lld" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "링 %lld" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Anel %lld" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Кольцо %lld" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "圆环 %lld" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "圓環 %lld" } }
+      }
+    },
+    "settings.rings.bluetooth.addRing": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Weiteren Ring hinzufügen" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Add another ring" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Añadir otro anillo" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Ajouter un anneau" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Aggiungi un altro anello" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "リングを追加" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "링 추가" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Adicionar outro anel" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Добавить ещё кольцо" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "加一个圆环" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "加一個圓環" } }
+      }
+    },
+    "settings.rings.bluetooth.removeRing": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Diesen Ring entfernen" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Remove this ring" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Quitar este anillo" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Retirer cet anneau" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Rimuovi questo anello" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "このリングを削除" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "이 링 제거" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Remover este anel" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Удалить это кольцо" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "去掉这个圆环" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "去掉這個圓環" } }
+      }
+    },
+    "settings.rings.bluetooth.icon": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Symbol" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Icon" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Icono" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Icône" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Icona" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "アイコン" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "아이콘" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Ícone" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Значок" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "图标" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "圖示" } }
+      }
+    },
+    "settings.rings.bluetooth.iconColor": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Symbolfarbe" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Icon color" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Color del icono" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Couleur de l’icône" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Colore dell’icona" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "アイコンの色" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "아이콘 색" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Cor do ícone" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Цвет значка" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "图标颜色" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "圖示顏色" } }
+      }
+    },
+    "settings.rings.bluetooth.colorSystem": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Systemhelligkeit" } },
+        "en": { "stringUnit": { "state": "translated", "value": "System dark or light" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Claro u oscuro del sistema" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Clair ou sombre du système" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Chiaro o scuro di sistema" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "システムの明暗" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "시스템 밝기" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Claro ou escuro do sistema" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Как в системе" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "跟随系统" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "跟隨系統" } }
+      }
+    },
+    "settings.rings.bluetooth.colorCustom": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Eigene Farbe" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Custom" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Personalizado" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Personnalisée" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Personalizzato" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "カスタム" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "사용자 지정" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Personalizada" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Свой цвет" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "自定义" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "自訂" } }
+      }
+    },
+    "settings.rings.bluetooth.incomplete": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Wenn ein Wert fehlt" } },
+        "en": { "stringUnit": { "state": "translated", "value": "When one level is missing" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Si falta un nivel" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Quand un niveau manque" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Se manca un livello" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "一部の電池がないとき" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "일부가 없을 때" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Quando falta um nível" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Если одного значения нет" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "缺了其中一项" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "缺了其中一項" } }
+      }
+    },
+    "settings.rings.bluetooth.incompleteHide": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Ring ausblenden" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Hide this ring" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Ocultar este anillo" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Masquer cet anneau" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Nascondi questo anello" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "このリングを隠す" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "이 링 숨기기" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Ocultar este anel" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Скрыть это кольцо" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "隐藏这个圆环" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "隱藏這個圓環" } }
+      }
+    },
+    "settings.rings.bluetooth.incompleteRest": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Nur vorhandene Werte zeigen" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Show the levels that remain" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Mostrar los niveles que quedan" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Afficher les niveaux restants" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Mostra i livelli rimasti" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "残っている電池だけ出す" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "남은 배터리만 표시" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Mostrar os níveis que restam" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Показать оставшиеся" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "只显示还有电量的" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "只顯示還有電量的" } }
+      }
+    },
+    "settings.rings.bluetooth.partsInRing": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "In diesem Ring" } },
+        "en": { "stringUnit": { "state": "translated", "value": "In this ring" } },
+        "es": { "stringUnit": { "state": "translated", "value": "En este anillo" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Dans cet anneau" } },
+        "it": { "stringUnit": { "state": "translated", "value": "In questo anello" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "このリングに入れる" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "이 링에 넣기" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Neste anel" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "В этом кольце" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "这一圈显示" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "這一圈顯示" } }
+      }
+    },
+    "settings.rings.bluetooth.leftShort": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "L" } },
+        "en": { "stringUnit": { "state": "translated", "value": "L" } },
+        "es": { "stringUnit": { "state": "translated", "value": "I" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "G" } },
+        "it": { "stringUnit": { "state": "translated", "value": "S" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "左" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "왼" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "E" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Л" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "左" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "左" } }
+      }
+    },
+    "settings.rings.bluetooth.rightShort": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "R" } },
+        "en": { "stringUnit": { "state": "translated", "value": "R" } },
+        "es": { "stringUnit": { "state": "translated", "value": "D" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "D" } },
+        "it": { "stringUnit": { "state": "translated", "value": "D" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "右" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "오" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "D" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "П" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "右" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "右" } }
+      }
+    },
+    "settings.rings.bluetooth.caseShort": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Case" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Case" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Estuche" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Boîtier" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Box" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ケース" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "케이스" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Estojo" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Футляр" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "盒" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "盒" } }
+      }
+    },
+    "settings.rings.bluetooth.colorLevel": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Nach Akkustand" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Follow battery level" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Según la batería" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Selon la batterie" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Secondo la batteria" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "電池に合わせる" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "배터리에 맞추기" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Seguir a bateria" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "По заряду" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "跟随电量" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "跟隨電量" } }
       }
     }
   },

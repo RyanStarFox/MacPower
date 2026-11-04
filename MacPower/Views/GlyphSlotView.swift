@@ -25,7 +25,15 @@ struct GlyphSlotView: View {
         Group {
             switch slot.source {
             case .system:
-                if prefersMonochrome, ink != nil,
+                if slot.name.hasPrefix(HeadphoneSymbols.systemImagePrefix),
+                   let image = HeadphoneSymbols.systemImage(named: String(slot.name.dropFirst(HeadphoneSymbols.systemImagePrefix.count))) {
+                    Image(nsImage: image)
+                        .resizable()
+                        .interpolation(.high)
+                        .renderingMode(.original)
+                        .scaledToFit()
+                        .frame(width: drawSide, height: drawSide)
+                } else if prefersMonochrome, ink != nil,
                    let image = Self.rasterizedSystemSymbol(
                     name: slot.name,
                     side: drawSide,
