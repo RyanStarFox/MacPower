@@ -789,6 +789,8 @@ final class PopoverExtrasTests: XCTestCase {
         XCTAssertNil(BatteryTemperatureFormat.celsius(raw: 0))
         XCTAssertNil(BatteryTemperatureFormat.celsius(raw: -10))
         XCTAssertEqual(BatteryTemperatureFormat.caption(celsius: 31.4), "31°C")
+        XCTAssertEqual(BatteryTemperatureFormat.caption(celsius: 30, unit: .fahrenheit), "86°F")
+        XCTAssertEqual(TemperatureUnit.fahrenheit.storedCelsius(fromDisplayed: 86), 30)
         let megabyte = 1024.0 * 1024.0
         XCTAssertEqual(NetworkRateFormat.ringPercent(bytesPerSecond: megabyte), 50, accuracy: 0.001)
         XCTAssertLessThan(
@@ -816,16 +818,19 @@ final class PopoverExtrasTests: XCTestCase {
         XCTAssertEqual(first.downloadHalfKilobytes, 1024)
         XCTAssertEqual(first.uploadHalfKilobytes, 1024)
         XCTAssertEqual(first.temperatureHalfCelsius, 30)
+        XCTAssertEqual(first.temperatureUnit, .celsius)
         XCTAssertEqual(first.swapHalfMegabytes, AppSettings.defaultSwapHalfMegabytes())
         XCTAssertEqual(first.thermalNominalPercent, 25)
         XCTAssertEqual(first.thermalCriticalPercent, 100)
         first.downloadHalfKilobytes = 2048
         first.temperatureHalfCelsius = 35
+        first.temperatureUnit = .fahrenheit
         first.swapHalfMegabytes = 8192
         first.thermalNominalPercent = 10
         let second = AppSettings(defaults: defaults)
         XCTAssertEqual(second.downloadHalfKilobytes, 2048)
         XCTAssertEqual(second.temperatureHalfCelsius, 35)
+        XCTAssertEqual(second.temperatureUnit, .fahrenheit)
         XCTAssertEqual(second.swapHalfMegabytes, 8192)
         XCTAssertEqual(second.thermalNominalPercent, 10)
         defaults.removePersistentDomain(forName: suite)

@@ -132,8 +132,47 @@ enum BatteryTemperatureFormat {
         return min(100, max(0, unit * 100))
     }
 
-    static func caption(celsius: Double) -> String {
-        String(format: "%.0f°C", celsius.rounded())
+    static func caption(celsius: Double, unit: TemperatureUnit = .celsius) -> String {
+        let shown = unit.degrees(fromCelsius: celsius).rounded()
+        return String(format: "%.0f%@", shown, unit.symbol)
+    }
+}
+
+/// Display unit for the battery-temperature ring. The scale itself stays in Celsius.
+enum TemperatureUnit: String, CaseIterable, Identifiable, Sendable {
+    case celsius
+    case fahrenheit
+
+    var id: String { rawValue }
+    var localizationKey: String { "settings.rings.temperatureUnit.\(rawValue)" }
+    var symbol: String { self == .celsius ? "°C" : "°F" }
+    static let fallback = TemperatureUnit.celsius
+
+    static func resolved(stored raw: String?) -> TemperatureUnit {
+        guard let raw, let unit = TemperatureUnit(rawValue: raw) else { return fallback }
+        return unit
+    }
+
+    func degrees(fromCelsius celsius: Double) -> Double {
+        switch self {
+        case .celsius: celsius
+        case .fahrenheit: celsius * 9 / 5 + 32
+        }
+    }
+
+    func celsius(fromDegrees degrees: Double) -> Double {
+        switch self {
+        case .celsius: degrees
+        case .fahrenheit: (degrees - 32) * 5 / 9
+        }
+    }
+
+    func display(_ celsius: Int) -> Int {
+        Int(degrees(fromCelsius: Double(celsius)).rounded())
+    }
+
+    func storedCelsius(fromDisplayed value: Int) -> Int {
+        Int(celsius(fromDegrees: Double(value)).rounded())
     }
 }
 

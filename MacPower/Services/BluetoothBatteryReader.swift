@@ -43,7 +43,9 @@ enum BluetoothBatteryReader {
                 name: name,
                 connected: connected,
                 levels: levels(in: info),
-                productID: text(info["device_productID"])
+                productID: text(info["device_productID"]),
+                minorType: text(info["device_minorType"]),
+                vendorID: text(info["device_vendorID"])
             )
         }
     }
@@ -87,15 +89,31 @@ enum BluetoothBatteryReader {
 
 enum HeadphoneSymbols {
     static func glyph(model: HeadphoneModel, part: BluetoothBatteryPart) -> GlyphSlot {
-        slot(model.symbolName(part: part))
+        slot(firstExisting(model.symbolCandidates(part: part)))
     }
 
     static func glyph(model: HeadphoneModel, parts: [BluetoothBatteryPart]) -> GlyphSlot {
-        slot(model.symbolName(parts: parts))
+        slot(firstExisting(model.symbolCandidates(parts: parts)))
     }
 
     static func choices(model: HeadphoneModel) -> [GlyphSlot] {
-        model.choiceNames().map(slot)
+        let modelNames = Set(
+            [model.symbolName(parts: [.single, .left])]
+                + [BluetoothBatteryPart.left, .right, .box, .single].map { model.symbolName(part: $0) }
+        )
+        var seen = Set<String>()
+        return model.choiceNames().compactMap { name in
+            let resolved: String
+            if NSImage(systemSymbolName: name, accessibilityDescription: nil) != nil {
+                resolved = name
+            } else if modelNames.contains(name) {
+                resolved = firstExisting([name])
+            } else {
+                return nil
+            }
+            guard seen.insert(resolved).inserted else { return nil }
+            return slot(resolved)
+        }
     }
 
     private static func slot(_ name: String) -> GlyphSlot {
@@ -116,6 +134,22 @@ enum HeadphoneSymbols {
         let url = URL(fileURLWithPath: "/System/Library/PrivateFrameworks/CoreBluetoothUI.framework/Resources", isDirectory: true)
             .appendingPathComponent(file)
         return NSImage(contentsOf: url)
+    }
+
+    /// First candidate that exists on this Mac. A missing specific drawing falls back to a generic radio symbol, then headphones.
+    private static func firstExisting(_ names: [String]) -> String {
+        for name in names {
+            if name.hasPrefix(systemImagePrefix) {
+                let file = String(name.dropFirst(systemImagePrefix.count))
+                if systemImage(named: file) != nil { return name }
+                continue
+            }
+            if NSImage(systemSymbolName: name, accessibilityDescription: nil) != nil { return name }
+        }
+        if NSImage(systemSymbolName: "dot.radiowaves.left.and.right", accessibilityDescription: nil) != nil {
+            return "dot.radiowaves.left.and.right"
+        }
+        return "headphones"
     }
 
     /// System SF Symbols, or a Bluetooth product image shipped with macOS. A missing name falls back to the generic headphones symbol.

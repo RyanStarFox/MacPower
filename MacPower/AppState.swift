@@ -381,11 +381,11 @@ final class AppState {
             switch result {
             case .skipped:
                 return
-            case .failed:
+            case .failed(let failure):
                 if reason == .manual {
                     presentCheckNotice(
                         title: Localization.string("update.check.failed", language: language),
-                        message: nil,
+                        message: failure.message(language: language),
                         language: language
                     )
                 }

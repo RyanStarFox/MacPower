@@ -23,6 +23,13 @@ final class AppVersionTests: XCTestCase {
         XCTAssertFalse(AppVersion.isNewer("1.2", than: "1.2.0"))
         XCTAssertTrue(AppVersion.isNewer("1.2.1", than: "1.2"))
     }
+
+    func testUpdateFailureRecordsTheStatus() {
+        XCTAssertEqual(UpdateCheckFailure.http(status: 403, rateLimitRemaining: "0"), .http(403, rateLimited: true))
+        XCTAssertEqual(UpdateCheckFailure.http(status: 429, rateLimitRemaining: "0"), .http(429, rateLimited: true))
+        XCTAssertEqual(UpdateCheckFailure.http(status: 404, rateLimitRemaining: "0"), .http(404, rateLimited: false))
+        XCTAssertEqual(UpdateCheckFailure.http(status: 403, rateLimitRemaining: "3"), .http(403, rateLimited: false))
+    }
 }
 
 final class GitHubLatestReleaseTests: XCTestCase {
@@ -309,6 +316,71 @@ final class LoginLaunchTests: XCTestCase {
         XCTAssertEqual(HeadphoneModel.detect(name: "Sony WH-1000XM5", productID: nil).symbolName(part: .single), "headphones")
         XCTAssertEqual(HeadphoneModel.detect(name: "Headphones", productID: "0x2013"), .airpods(generation: 3, artwork: nil))
         XCTAssertEqual(HeadphoneModel.detect(name: "Headphones", productID: "0x2013").symbolName(part: .left), "airpod.gen3.left")
+    }
+
+    func testBluetoothKindChoosesDefaultSymbolAndKeepsManualPicks() {
+        func symbol(_ name: String, minor: String?, vendor: String? = nil, product: String? = nil) -> String {
+            HeadphoneModel.detect(name: name, productID: product, minorType: minor, vendorID: vendor).symbolName(part: .single)
+        }
+
+        XCTAssertEqual(
+            symbol("邵言的Magic Keyboard", minor: "Keyboard", vendor: "0x004C", product: "0x029C"),
+            "keyboard"
+        )
+        XCTAssertEqual(
+            HeadphoneModel.detect(name: "邵言的Magic Keyboard", productID: "0x029C", minorType: "Keyboard", vendorID: "0x004C"),
+            .keyboard(apple: true)
+        )
+        XCTAssertEqual(symbol("键盘", minor: "Keyboard", vendor: "0x04E8", product: "0x7021"), "keyboard")
+        XCTAssertEqual(symbol("Apple Magic Mouse", minor: "Mouse", vendor: "0x05AC", product: "0x030D"), "magicmouse")
+        XCTAssertEqual(symbol("Logi POP Mouse", minor: "Mouse", vendor: "0x046D"), "computermouse")
+        XCTAssertEqual(
+            symbol("邵言的Magic Trackpad", minor: "Magic Trackpad", vendor: "0x004C", product: "0x0265"),
+            "rectangle.and.hand.point.up.left"
+        )
+        XCTAssertEqual(symbol("SRS-XB13", minor: "Speaker"), "hifispeaker")
+        XCTAssertEqual(symbol("[AV] Samsung Soundbar Q6C-Series", minor: "Headset", vendor: "0x04E8"), "hifispeaker")
+        XCTAssertEqual(symbol("HomePod mini", minor: "Speaker", vendor: "0x004C"), "homepod.mini")
+        XCTAssertEqual(symbol("Car Audio", minor: "Car Audio"), "car.front.waves.up")
+        XCTAssertEqual(symbol("车载音响", minor: nil), "car.front.waves.up")
+        XCTAssertEqual(symbol("Galaxy Buds2", minor: "Headphones"), "earbuds")
+        XCTAssertEqual(symbol("Call Headset", minor: "Headset"), "headset")
+        XCTAssertEqual(symbol("MOMENTUM 4", minor: "Headset"), "headphones")
+        XCTAssertEqual(symbol("Xbox Wireless Controller", minor: "Gamepad"), "gamecontroller")
+        XCTAssertEqual(symbol("助听器", minor: "Hearing Aid"), "hearingdevice.ear")
+        XCTAssertEqual(symbol("王邵言's iPhone 15 Pro", minor: nil), "iphone")
+        XCTAssertEqual(symbol("Some Accessory", minor: "Unknown"), "dot.radiowaves.left.and.right")
+
+        let airpods = HeadphoneModel.detect(
+            name: "王邵言's AirPods 5",
+            productID: "0x2030",
+            minorType: "Headphones",
+            vendorID: "0x004C"
+        )
+        XCTAssertEqual(airpods.symbolName(parts: [.left, .right, .box]), "airpods.gen4")
+        XCTAssertEqual(airpods.symbolName(part: .left), "airpods.gen4.left")
+        XCTAssertFalse(airpods.symbolName(part: .single).contains("B868"))
+        XCTAssertEqual(
+            HeadphoneSymbols.glyph(model: airpods, parts: [.left, .right, .box]).name,
+            "airpods.gen4"
+        )
+        XCTAssertEqual(HeadphoneSymbols.glyph(model: .mouse(apple: true), part: .single).name, "magicmouse")
+
+        var ring = BluetoothDisplayRing.make(parts: [.single], model: .mouse(apple: false))
+        XCTAssertEqual(ring.glyph.name, "computermouse")
+        ring.automaticIcons = false
+        ring.glyph = .system("star")
+        ring.applyAutomaticIcons(model: .keyboard(apple: true))
+        XCTAssertEqual(ring.glyph.name, "star")
+        XCTAssertFalse(ring.automaticIcons)
+
+        let json = """
+        {"SPBluetoothDataType":[{"device_connected":[{"Apple Magic Mouse":{"device_address":"AA-BB","device_minorType":"Mouse","device_vendorID":"0x05AC","device_productID":"0x030D","device_batteryLevel":"80%"}}]}]}
+        """.data(using: .utf8)!
+        let seen = BluetoothBatteryReader.parse(json)
+        XCTAssertEqual(seen.first?.minorType, "Mouse")
+        XCTAssertEqual(seen.first?.vendorID, "0x05AC")
+        XCTAssertEqual(seen.first?.model.symbolName(part: .single), "magicmouse")
     }
 
     func testBluetoothProfilerJSONReadsPercents() {

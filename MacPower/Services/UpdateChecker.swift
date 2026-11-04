@@ -72,9 +72,33 @@ enum UpdateCheckReason: Sendable {
 
 enum UpdateCheckResult: Equatable, Sendable {
     case skipped
-    case failed
+    case failed(UpdateCheckFailure)
     case current
     case available(GitHubLatestRelease)
+}
+
+enum UpdateCheckFailure: Equatable, Sendable {
+    case http(Int, rateLimited: Bool)
+    case transport(Int)
+    case unreadable
+
+    static func http(status: Int, rateLimitRemaining: String?) -> UpdateCheckFailure {
+        let rateLimited = (status == 403 || status == 429) && rateLimitRemaining == "0"
+        return .http(status, rateLimited: rateLimited)
+    }
+
+    func message(language: AppLanguage) -> String {
+        switch self {
+        case .http(let code, true):
+            Localization.string("update.check.failed.rate %lld", language: language, Int64(code))
+        case .http(let code, false):
+            Localization.string("update.check.failed.http %lld", language: language, Int64(code))
+        case .transport(let code):
+            Localization.string("update.check.failed.url %lld", language: language, Int64(code))
+        case .unreadable:
+            Localization.string("update.check.failed.unreadable", language: language)
+        }
+    }
 }
 
 enum UpdateCheckPolicy {
@@ -163,14 +187,19 @@ final class UpdateChecker {
             request.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
             let (data, response) = try await session.data(for: request)
             if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
-                return .failed
+                return .failed(.http(
+                    status: http.statusCode,
+                    rateLimitRemaining: http.value(forHTTPHeaderField: "X-RateLimit-Remaining")
+                ))
             }
             let release = try GitHubLatestRelease.decode(data)
             defaults.set(now(), forKey: Keys.lastCheck)
             guard AppVersion.isNewer(release.tagName, than: currentVersion) else { return .current }
             return .available(release)
+        } catch let error as URLError {
+            return .failed(.transport(error.code.rawValue))
         } catch {
-            return .failed
+            return .failed(.unreadable)
         }
     }
 }

@@ -886,7 +886,9 @@ struct SettingsView: View {
             centerCelsius: Double(appState.settings.temperatureHalfCelsius)
         )
         let colors = appState.settings.ringTint.scheme(forSegment: .batteryTemperature).colors(percent: percent)
-        let caption = BatteryTemperatureFormat.caption(celsius: celsius)
+        let unit = appState.settings.temperatureUnit
+        let value = BatteryTemperatureFormat.caption(celsius: celsius, unit: unit)
+        let caption = Localization.string("ring.caption.batteryTemperature %@", language: language, value)
         let name = Localization.string("settings.rings.batteryTemperature", language: language)
         return StatusRingView(
             percent: percent,
@@ -1985,6 +1987,11 @@ struct SettingsView: View {
                     .fixedSize(horizontal: false, vertical: true)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
+            Picker("settings.rings.temperatureUnit", selection: $appState.settings.temperatureUnit) {
+                ForEach(TemperatureUnit.allCases) { unit in
+                    Text(LocalizedStringKey(unit.localizationKey)).tag(unit)
+                }
+            }
         } header: {
             Text("settings.rings.layout")
         }
@@ -2667,26 +2674,50 @@ struct SettingsView: View {
     ) -> some View {
         let columns = Array(repeating: GridItem(.fixed(44), spacing: 10), count: 4)
         let current = part.map { ring.shownGlyph(model: device.model, part: $0) } ?? ring.glyph
-        return LazyVGrid(columns: columns, spacing: 10) {
-            ForEach(Array(HeadphoneSymbols.choices(model: device.model).enumerated()), id: \.offset) { _, choice in
-                Button {
-                    var glyph = choice
-                    glyph.scale = current.scale
-                    appState.settings.setBluetoothRingGlyph(
-                        address: device.address,
-                        ringID: ring.id,
-                        part: part,
-                        glyph: glyph
-                    )
-                    bluetoothIconEditor = nil
-                } label: {
-                    GlyphSlotView(slot: choice, systemPointSize: 18, assetSide: 20, prefersMonochrome: true)
-                        .frame(width: 44, height: 44)
+        return ScrollView {
+            LazyVGrid(columns: columns, spacing: 10) {
+                ForEach(Array(HeadphoneSymbols.choices(model: device.model).enumerated()), id: \.offset) { _, choice in
+                    Button {
+                        var glyph = choice
+                        glyph.scale = current.scale
+                        appState.settings.setBluetoothRingGlyph(
+                            address: device.address,
+                            ringID: ring.id,
+                            part: part,
+                            glyph: glyph
+                        )
+                        bluetoothIconEditor = nil
+                    } label: {
+                        bluetoothChoiceGlyph(choice)
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
+            .padding(12)
         }
-        .padding(12)
+        .frame(width: 44 * 4 + 10 * 3 + 24, height: 280)
+    }
+
+    /// Wide symbols (keyboard, headset, gamepad) must fit the cell. The ring glyph plate clips to a square.
+    @ViewBuilder
+    private func bluetoothChoiceGlyph(_ slot: GlyphSlot) -> some View {
+        let side: CGFloat = 30
+        if slot.name.hasPrefix(HeadphoneSymbols.systemImagePrefix),
+           let artwork = HeadphoneSymbols.systemImage(named: String(slot.name.dropFirst(HeadphoneSymbols.systemImagePrefix.count))) {
+            Image(nsImage: artwork)
+                .resizable()
+                .scaledToFit()
+                .frame(width: side, height: side)
+                .frame(width: 44, height: 44)
+        } else {
+            Image(systemName: slot.name)
+                .resizable()
+                .scaledToFit()
+                .symbolRenderingMode(.monochrome)
+                .foregroundStyle(.primary)
+                .frame(width: side, height: side)
+                .frame(width: 44, height: 44)
+        }
     }
 
     @ViewBuilder
@@ -2802,6 +2833,48 @@ struct SettingsView: View {
         }
     }
 
+    private func temperatureReading(_ celsius: Int) -> String {
+        let unit = appState.settings.temperatureUnit
+        return "\(unit.display(celsius))\(unit.symbol)"
+    }
+
+    private func temperatureHalfStepper() -> some View {
+        let unit = appState.settings.temperatureUnit
+        let bounds = AppSettings.temperatureHalfRange
+        let shown = unit.display(appState.settings.temperatureHalfCelsius)
+        return topAppStepper(
+            "settings.rings.half.temperature",
+            value: shown,
+            unit: LocalizedStringKey(stringLiteral: unit.symbol),
+            range: unit.display(bounds.lowerBound)...unit.display(bounds.upperBound),
+            step: 1
+        ) { displayed in
+            let celsius = unit.storedCelsius(fromDisplayed: displayed)
+            appState.settings.temperatureHalfCelsius = min(max(celsius, bounds.lowerBound), bounds.upperBound)
+        }
+    }
+
+    private func ringScaleSummary(_ slot: RingSlot) -> String? {
+        switch slot {
+        case .download:
+            NetworkRateFormat.midpointLabel(kilobytesPerSecond: appState.settings.downloadHalfKilobytes)
+        case .upload:
+            NetworkRateFormat.midpointLabel(kilobytesPerSecond: appState.settings.uploadHalfKilobytes)
+        case .batteryTemperature:
+            Localization.string(
+                "settings.rings.scale.temperature %@",
+                language: appState.settings.language,
+                temperatureReading(appState.settings.temperatureHalfCelsius)
+            )
+        case .swap:
+            SwapUsageFormat.string(bytes: Double(appState.settings.swapHalfMegabytes) * 1_048_576)
+        case .thermalState:
+            "\(appState.settings.thermalNominalPercent)–\(appState.settings.thermalCriticalPercent)%"
+        default:
+            nil
+        }
+    }
+
     private func ringHasScale(_ slot: RingSlot) -> Bool {
         switch slot {
         case .download, .upload, .speedPair, .batteryTemperature, .thermalState, .swap:
@@ -2889,13 +2962,7 @@ struct SettingsView: View {
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             case .batteryTemperature:
-                topAppStepper(
-                    "settings.rings.half.temperature",
-                    value: appState.settings.temperatureHalfCelsius,
-                    unit: "°C",
-                    range: AppSettings.temperatureHalfRange,
-                    step: 1
-                ) { appState.settings.temperatureHalfCelsius = $0 }
+                temperatureHalfStepper()
             case .thermalState:
                 topAppStepper(
                     "ring.thermal.nominal",
@@ -2979,6 +3046,23 @@ struct SettingsView: View {
                 ),
                 width: column
             )
+            if let summary = ringScaleSummary(ring) {
+                Button {
+                    ringScaleSlot = ring
+                } label: {
+                    Text(summary)
+                        .font(.caption2.monospacedDigit())
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
+                        .frame(width: column)
+                }
+                .buttonStyle(.plain)
+                .help(LocalizedStringKey("settings.rings.scale"))
+                .popover(isPresented: ringScalePresented(ring), arrowEdge: .bottom) {
+                    ringScalePopover(ring)
+                }
+            }
         }
         .frame(width: column)
     }

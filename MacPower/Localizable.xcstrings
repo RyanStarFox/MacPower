@@ -5767,6 +5767,70 @@
         "ru": { "stringUnit": { "state": "translated", "value": "Не удалось проверить обновления. Попробуйте позже." } }
       }
     },
+    "update.check.failed.http %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "HTTP %lld" } },
+        "en": { "stringUnit": { "state": "translated", "value": "HTTP %lld" } },
+        "es": { "stringUnit": { "state": "translated", "value": "HTTP %lld" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "HTTP %lld" } },
+        "it": { "stringUnit": { "state": "translated", "value": "HTTP %lld" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "HTTP %lld" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "HTTP %lld" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "HTTP %lld" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "HTTP %lld" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "HTTP %lld" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "HTTP %lld" } }
+      }
+    },
+    "update.check.failed.rate %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "HTTP %lld, Zugriffskontingent aufgebraucht" } },
+        "en": { "stringUnit": { "state": "translated", "value": "HTTP %lld, rate limit reached" } },
+        "es": { "stringUnit": { "state": "translated", "value": "HTTP %lld, límite de acceso agotado" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "HTTP %lld, quota d’accès atteint" } },
+        "it": { "stringUnit": { "state": "translated", "value": "HTTP %lld, quota di accesso esaurita" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "HTTP %lld、アクセス上限に達しました" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "HTTP %lld, 접근 한도에 도달했습니다" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "HTTP %lld, limite de acesso esgotado" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "HTTP %lld, лимит запросов исчерпан" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "HTTP %lld，访问额度已用完" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "HTTP %lld，存取額度已用完" } }
+      }
+    },
+    "update.check.failed.url %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "URLError %lld" } },
+        "en": { "stringUnit": { "state": "translated", "value": "URLError %lld" } },
+        "es": { "stringUnit": { "state": "translated", "value": "URLError %lld" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "URLError %lld" } },
+        "it": { "stringUnit": { "state": "translated", "value": "URLError %lld" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "URLError %lld" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "URLError %lld" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "URLError %lld" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "URLError %lld" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "URLError %lld" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "URLError %lld" } }
+      }
+    },
+    "update.check.failed.unreadable": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Die Update-Daten konnten nicht gelesen werden" } },
+        "en": { "stringUnit": { "state": "translated", "value": "The update info could not be read" } },
+        "es": { "stringUnit": { "state": "translated", "value": "No se han podido leer los datos de la actualización" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Les informations de mise à jour sont illisibles" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Impossibile leggere i dati dell’aggiornamento" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "更新情報を読み取れませんでした" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "업데이트 정보를 읽지 못했습니다" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Não foi possível ler os dados da atualização" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Не удалось прочитать данные обновления" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "返回的数据无法读取" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "回傳的資料無法讀取" } }
+      }
+    },
     "settings.about.version %@": {
       "extractionState": "manual",
       "localizations": {
@@ -14162,6 +14226,86 @@
         "ru": { "stringUnit": { "state": "translated", "value": "Температура на 50%" } },
         "zh-Hans": { "stringUnit": { "state": "translated", "value": "温度 50%" } },
         "zh-Hant": { "stringUnit": { "state": "translated", "value": "溫度 50%" } }
+      }
+    },
+    "settings.rings.scale.temperature %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "50 %: %@" } },
+        "en": { "stringUnit": { "state": "translated", "value": "50%: %@" } },
+        "es": { "stringUnit": { "state": "translated", "value": "50 %: %@" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "50 % : %@" } },
+        "it": { "stringUnit": { "state": "translated", "value": "50%: %@" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "50%: %@" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "50%: %@" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "50%: %@" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "50%: %@" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "50%：%@" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "50%：%@" } }
+      }
+    },
+    "ring.caption.batteryTemperature %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Akkutemperatur: %@" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Battery: %@" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Batería: %@" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Batterie : %@" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Batteria: %@" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "バッテリー温度: %@" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "배터리 온도: %@" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Bateria: %@" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Батарея: %@" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "电池温度：%@" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "電池溫度：%@" } }
+      }
+    },
+    "settings.rings.temperatureUnit": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Temperatureinheit" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Temperature unit" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Unidad de temperatura" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Unité de température" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Unità di temperatura" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "温度の単位" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "온도 단위" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Unidade de temperatura" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Единица температуры" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "温度单位" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "溫度單位" } }
+      }
+    },
+    "settings.rings.temperatureUnit.celsius": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Celsius" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Celsius" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Celsius" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Celsius" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Celsius" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "摂氏" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "섭씨" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Celsius" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Цельсий" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "摄氏度" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "攝氏度" } }
+      }
+    },
+    "settings.rings.temperatureUnit.fahrenheit": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Fahrenheit" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Fahrenheit" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Fahrenheit" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Fahrenheit" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Fahrenheit" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "華氏" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "화씨" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Fahrenheit" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Фаренгейт" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "华氏度" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "華氏度" } }
       }
     },
     "settings.rings.twoRows": {

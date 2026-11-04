@@ -453,7 +453,9 @@ struct PopoverRootView: View {
             )
         } ?? 0
         let colors = appState.settings.ringTint.scheme(forSegment: .batteryTemperature).colors(percent: percent)
-        let caption = celsius.map { BatteryTemperatureFormat.caption(celsius: $0) } ?? "—"
+        let unit = appState.settings.temperatureUnit
+        let value = celsius.map { BatteryTemperatureFormat.caption(celsius: $0, unit: unit) } ?? "—"
+        let caption = Localization.string("ring.caption.batteryTemperature %@", language: language, value)
         let name = Localization.string("settings.rings.batteryTemperature", language: language)
         return StatusRingView(
             percent: percent,

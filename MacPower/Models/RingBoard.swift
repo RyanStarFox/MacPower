@@ -186,6 +186,13 @@ struct BluetoothDisplayRing: Codable, Equatable, Identifiable, Sendable {
     }
 }
 
+enum BluetoothSpeakerStyle: Equatable, Sendable {
+    case speaker
+    case soundbar
+    case homePod
+    case homePodMini
+}
+
 enum HeadphoneModel: Equatable, Sendable {
     /// `artwork` is a filename in the system Bluetooth UI resources, used when SF Symbols has no drawing for that model.
     case airpods(generation: Int, artwork: String?)
@@ -198,9 +205,32 @@ enum HeadphoneModel: Equatable, Sendable {
     case fitPro
     case soloBuds
     case beatsHeadphones
+    /// `apple` selects the Magic Mouse drawing when that SF Symbol exists.
+    case mouse(apple: Bool)
+    /// `apple` records a Magic Keyboard. The system symbol is the same outline keyboard.
+    case keyboard(apple: Bool)
+    /// `apple` records a Magic Trackpad. macOS has no dedicated trackpad symbol.
+    case trackpad(apple: Bool)
+    case speaker(BluetoothSpeakerStyle)
+    case carAudio
+    case gameController
+    case earbuds
+    case headset
+    case hearingAid
+    case phone
+    case tablet
+    case watch
+    case pencil
+    /// Unrecognized minor type: a generic radio symbol, not headphones.
+    case other
     case generic
 
-    static func detect(name: String, productID: String?) -> HeadphoneModel {
+    static func detect(
+        name: String,
+        productID: String?,
+        minorType: String? = nil,
+        vendorID: String? = nil
+    ) -> HeadphoneModel {
         if let id = normalizedID(productID), let known = productIDs[id] { return known }
         let text = name.lowercased()
         if text.contains("airpods max") || text.contains("airpod max") { return .airpodsMax }
@@ -230,6 +260,7 @@ enum HeadphoneModel: Equatable, Sendable {
             }
             return .airpods(generation: 2, artwork: nil)
         }
+        if let kind = classify(name: text, minorType: minorType, vendorID: vendorID) { return kind }
         return .generic
     }
 
@@ -298,7 +329,71 @@ enum HeadphoneModel: Equatable, Sendable {
             }
         case .beatsHeadphones:
             return "beats.headphones"
+        case .mouse(let apple):
+            return apple ? "magicmouse" : "computermouse"
+        case .keyboard:
+            return "keyboard"
+        case .trackpad:
+            return "rectangle.and.hand.point.up.left"
+        case .speaker(let style):
+            switch style {
+            case .speaker, .soundbar: return "hifispeaker"
+            case .homePod: return "homepod"
+            case .homePodMini: return "homepod.mini"
+            }
+        case .carAudio:
+            return "car.front.waves.up"
+        case .gameController:
+            return "gamecontroller"
+        case .earbuds:
+            return "earbuds"
+        case .headset:
+            return "headset"
+        case .hearingAid:
+            return "hearingdevice.ear"
+        case .phone:
+            return "iphone"
+        case .tablet:
+            return "ipad"
+        case .watch:
+            return "applewatch"
+        case .pencil:
+            return "applepencil"
+        case .other:
+            return "dot.radiowaves.left.and.right"
         }
+    }
+
+    /// Preferred symbol first, then drawings that can stand in if that one is missing on this Mac.
+    func symbolCandidates(part: BluetoothBatteryPart) -> [String] {
+        let primary = symbolName(part: part)
+        let extras: [String]
+        switch self {
+        case .mouse(let apple):
+            extras = apple ? ["computermouse", "dot.radiowaves.left.and.right"] : ["dot.radiowaves.left.and.right"]
+        case .keyboard, .gameController, .phone, .tablet, .watch, .pencil, .other:
+            extras = ["dot.radiowaves.left.and.right"]
+        case .trackpad:
+            extras = ["hand.point.up.left", "dot.radiowaves.left.and.right"]
+        case .speaker:
+            extras = ["speaker.wave.2", "headphones"]
+        case .carAudio:
+            extras = ["car.top.radiowaves.front", "hifispeaker"]
+        case .earbuds, .headset, .hearingAid, .generic:
+            extras = ["headphones"]
+        default:
+            extras = []
+        }
+        var seen = Set<String>()
+        return ([primary] + extras).filter { seen.insert($0).inserted }
+    }
+
+    func symbolCandidates(parts: [BluetoothBatteryPart]) -> [String] {
+        if parts.count == 1, let part = parts.first { return symbolCandidates(part: part) }
+        let combined = symbolName(parts: parts)
+        let chain = symbolCandidates(part: parts.first ?? .single)
+        var seen = Set<String>()
+        return ([combined] + chain).filter { seen.insert($0).inserted }
     }
 
     func symbolName(parts: [BluetoothBatteryPart]) -> String {
@@ -316,6 +411,8 @@ enum HeadphoneModel: Equatable, Sendable {
         case .fitPro: return "beats.fitpro"
         case .soloBuds: return "beats.solobuds"
         case .beatsHeadphones: return "beats.headphones"
+        case .mouse, .keyboard, .trackpad, .speaker, .carAudio, .gameController, .earbuds, .headset, .hearingAid, .phone, .tablet, .watch, .pencil, .other:
+            return symbolName(part: .single)
         }
     }
 
@@ -324,11 +421,119 @@ enum HeadphoneModel: Equatable, Sendable {
         for part in [BluetoothBatteryPart.left, .right, .box, .single] {
             names.append(symbolName(part: part))
         }
-        if self == .generic {
-            names.append(contentsOf: ["earbuds", "hearingdevice.ear"])
-        }
+        names.append(contentsOf: Self.pickerCatalog)
         var seen = Set<String>()
         return names.filter { seen.insert($0).inserted }
+    }
+
+    /// Every kind the ring can represent, offered in the icon picker for any device.
+    static let pickerCatalog = [
+        "keyboard",
+        "magicmouse",
+        "computermouse",
+        "rectangle.and.hand.point.up.left",
+        "headphones",
+        "earbuds",
+        "headset",
+        "hifispeaker",
+        "homepod",
+        "homepod.mini",
+        "car.front.waves.up",
+        "gamecontroller",
+        "hearingdevice.ear",
+        "iphone",
+        "ipad",
+        "applewatch",
+        "applepencil",
+        "dot.radiowaves.left.and.right",
+    ]
+
+    /// Kinds other than AirPods and Beats. Those stay on the name and product-id path above.
+    private static func classify(name: String, minorType: String?, vendorID: String?) -> HeadphoneModel? {
+        let minor = minorType?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() ?? ""
+        let apple = isAppleVendor(vendorID)
+        if isCarAudio(name: name, minor: minor) { return .carAudio }
+        if isTrackpad(name: name, minor: minor) {
+            return .trackpad(apple: apple || name.contains("magic trackpad") || name.contains("妙控板") || minor.contains("magic"))
+        }
+        if isMouse(name: name, minor: minor) {
+            return .mouse(apple: apple || name.contains("magic mouse") || name.contains("妙控鼠"))
+        }
+        if isKeyboard(name: name, minor: minor) {
+            return .keyboard(apple: apple || name.contains("magic keyboard") || name.contains("妙控键盘"))
+        }
+        if name.contains("homepod") {
+            return .speaker(name.contains("mini") ? .homePodMini : .homePod)
+        }
+        if name.contains("soundbar") || name.contains("sound bar") || name.contains("回音壁") {
+            return .speaker(.soundbar)
+        }
+        if isSpeaker(name: name, minor: minor) { return .speaker(.speaker) }
+        if isGameController(name: name, minor: minor) { return .gameController }
+        if isHearingAid(name: name, minor: minor) { return .hearingAid }
+        if isEarbuds(name) { return .earbuds }
+        if name.contains("headset") || name.contains("耳麦") { return .headset }
+        if name.contains("iphone") { return .phone }
+        if name.contains("ipad") { return .tablet }
+        if name.contains("apple watch") || name.contains("applewatch") { return .watch }
+        if name.contains("apple pencil") || name.contains("applepencil") { return .pencil }
+        if !minor.isEmpty, !isHeadphoneMinor(minor) { return .other }
+        return nil
+    }
+
+    private static func isCarAudio(name: String, minor: String) -> Bool {
+        if minor.contains("car") { return true }
+        let cues = ["car audio", "carplay", "car stereo", "车载", "车机", "汽车音响"]
+        return cues.contains { name.contains($0) }
+    }
+
+    private static func isTrackpad(name: String, minor: String) -> Bool {
+        minor.contains("trackpad") || minor.contains("touchpad")
+            || name.contains("trackpad") || name.contains("touchpad")
+            || name.contains("触控板") || name.contains("妙控板")
+    }
+
+    private static func isMouse(name: String, minor: String) -> Bool {
+        minor.contains("mouse") || minor.contains("pointing")
+            || name.contains("mouse") || name.contains("鼠标") || name.contains("妙控鼠")
+    }
+
+    private static func isKeyboard(name: String, minor: String) -> Bool {
+        minor.contains("keyboard") || name.contains("keyboard") || name.contains("键盘") || name.contains("妙控键盘")
+    }
+
+    private static func isSpeaker(name: String, minor: String) -> Bool {
+        minor == "speaker" || minor.contains("loudspeaker") || minor.contains("hifi") || minor.contains("hi-fi")
+            || name.contains("speaker") || name.contains("音箱") || name.contains("音响") || name.contains("喇叭")
+    }
+
+    private static func isGameController(name: String, minor: String) -> Bool {
+        minor.contains("game") || minor.contains("joystick")
+            || name.contains("gamepad") || name.contains("joystick")
+            || name.contains("xbox") || name.contains("dualsense") || name.contains("dualshock")
+            || name.contains("手柄")
+    }
+
+    private static func isHearingAid(name: String, minor: String) -> Bool {
+        minor.contains("hearing") || name.contains("hearing aid") || name.contains("助听器")
+    }
+
+    private static func isEarbuds(_ name: String) -> Bool {
+        name.contains("earbud") || name.contains("earbuds") || name.contains("buds")
+            || name.contains("入耳") || name.contains("真无线")
+    }
+
+    /// Headset and Headphones minor classes are both worn audio. A boom-mic symbol is only for an explicit headset name.
+    private static func isHeadphoneMinor(_ minor: String) -> Bool {
+        minor.contains("headphone") || minor.contains("headset") || minor.contains("audio")
+    }
+
+    /// Apple's Bluetooth company id is `0x004C`. Magic Mouse reports the USB vendor id `0x05AC` instead.
+    private static func isAppleVendor(_ raw: String?) -> Bool {
+        guard var text = raw?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased(), !text.isEmpty else { return false }
+        if text.hasPrefix("0x") { text.removeFirst(2) }
+        while text.first == "0" { text.removeFirst() }
+        return text == "4c" || text == "5ac"
     }
 
     private static let productIDs: [String: HeadphoneModel] = [
@@ -361,20 +566,36 @@ struct BluetoothRingDevice: Codable, Equatable, Identifiable, Sendable {
     var multi: Bool
     var rings: [BluetoothDisplayRing]
     var productID: String?
+    /// `system_profiler` `device_minorType`, such as Keyboard, Mouse, or Speaker.
+    var minorType: String?
+    /// `system_profiler` `device_vendorID`. Apple uses `0x004C`, and some Apple accessories report `0x05AC`.
+    var vendorID: String?
 
     var id: String { address }
-    var model: HeadphoneModel { HeadphoneModel.detect(name: name, productID: productID) }
-
-    private enum CodingKeys: String, CodingKey {
-        case address, name, multi, rings, parts, whenDisconnected, productID
+    var model: HeadphoneModel {
+        HeadphoneModel.detect(name: name, productID: productID, minorType: minorType, vendorID: vendorID)
     }
 
-    init(address: String, name: String, multi: Bool, rings: [BluetoothDisplayRing], productID: String? = nil) {
+    private enum CodingKeys: String, CodingKey {
+        case address, name, multi, rings, parts, whenDisconnected, productID, minorType, vendorID
+    }
+
+    init(
+        address: String,
+        name: String,
+        multi: Bool,
+        rings: [BluetoothDisplayRing],
+        productID: String? = nil,
+        minorType: String? = nil,
+        vendorID: String? = nil
+    ) {
         self.address = address
         self.name = name
         self.multi = multi
         self.rings = rings
         self.productID = productID
+        self.minorType = minorType
+        self.vendorID = vendorID
     }
 
     init(from decoder: Decoder) throws {
@@ -393,6 +614,8 @@ struct BluetoothRingDevice: Codable, Equatable, Identifiable, Sendable {
             rings = chosen.map { BluetoothDisplayRing.make(parts: [$0], whenDisconnected: style) }
         }
         productID = try container.decodeIfPresent(String.self, forKey: .productID)
+        minorType = try container.decodeIfPresent(String.self, forKey: .minorType)
+        vendorID = try container.decodeIfPresent(String.self, forKey: .vendorID)
     }
 
     func encode(to encoder: Encoder) throws {
@@ -402,6 +625,8 @@ struct BluetoothRingDevice: Codable, Equatable, Identifiable, Sendable {
         try container.encode(multi, forKey: .multi)
         try container.encode(rings, forKey: .rings)
         try container.encodeIfPresent(productID, forKey: .productID)
+        try container.encodeIfPresent(minorType, forKey: .minorType)
+        try container.encodeIfPresent(vendorID, forKey: .vendorID)
     }
 }
 
@@ -435,19 +660,33 @@ struct BluetoothSeenDevice: Equatable, Identifiable, Sendable {
     var connected: Bool
     var levels: [BluetoothBatteryPart: Int]
     var productID: String?
+    var minorType: String?
+    var vendorID: String?
 
-    init(address: String, name: String, connected: Bool, levels: [BluetoothBatteryPart: Int], productID: String? = nil) {
+    init(
+        address: String,
+        name: String,
+        connected: Bool,
+        levels: [BluetoothBatteryPart: Int],
+        productID: String? = nil,
+        minorType: String? = nil,
+        vendorID: String? = nil
+    ) {
         self.address = address
         self.name = name
         self.connected = connected
         self.levels = levels
         self.productID = productID
+        self.minorType = minorType
+        self.vendorID = vendorID
     }
 
     var id: String { address }
     var reportedParts: Set<BluetoothBatteryPart> { Set(levels.keys) }
     var isMulti: Bool { levels.keys.contains { $0 != .single } }
-    var model: HeadphoneModel { HeadphoneModel.detect(name: name, productID: productID) }
+    var model: HeadphoneModel {
+        HeadphoneModel.detect(name: name, productID: productID, minorType: minorType, vendorID: vendorID)
+    }
 }
 
 struct BluetoothRingFace: Equatable, Sendable {

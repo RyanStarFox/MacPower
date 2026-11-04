@@ -187,6 +187,7 @@ final class AppSettings {
         static let downloadHalfKilobytes = "downloadHalfKilobytes"
         static let uploadHalfKilobytes = "uploadHalfKilobytes"
         static let temperatureHalfCelsius = "temperatureHalfCelsius"
+        static let temperatureUnit = "temperatureUnit"
         static let swapHalfMegabytes = "swapHalfMegabytes"
         static let thermalNominalPercent = "thermalNominalPercent"
         static let thermalFairPercent = "thermalFairPercent"
@@ -629,7 +630,15 @@ final class AppSettings {
             BluetoothDisplayRing.make(parts: [$0], model: model)
         }
         bluetoothRingDevices.append(
-            BluetoothRingDevice(address: seen.address, name: seen.name, multi: multi, rings: rings, productID: seen.productID)
+            BluetoothRingDevice(
+                address: seen.address,
+                name: seen.name,
+                multi: multi,
+                rings: rings,
+                productID: seen.productID,
+                minorType: seen.minorType,
+                vendorID: seen.vendorID
+            )
         )
         appendBluetoothItems(address: seen.address, ringIDs: rings.map(\.id))
     }
@@ -771,6 +780,14 @@ final class AppSettings {
             }
             if devices[index].productID != reading.productID {
                 devices[index].productID = reading.productID
+                changed = true
+            }
+            if devices[index].minorType != reading.minorType {
+                devices[index].minorType = reading.minorType
+                changed = true
+            }
+            if devices[index].vendorID != reading.vendorID {
+                devices[index].vendorID = reading.vendorID
                 changed = true
             }
             for ringIndex in devices[index].rings.indices where devices[index].rings[ringIndex].automaticIcons {
@@ -934,9 +951,14 @@ final class AppSettings {
         didSet { storeRingScale(\.uploadHalfKilobytes, range: Self.halfSpeedRange, key: Keys.uploadHalfKilobytes) }
     }
 
-    /// Battery temperature that fills the ring to 50%.
+    /// Battery temperature that fills the ring to 50%. Stored in Celsius.
     var temperatureHalfCelsius: Int {
         didSet { storeRingScale(\.temperatureHalfCelsius, range: Self.temperatureHalfRange, key: Keys.temperatureHalfCelsius) }
+    }
+
+    /// Celsius or Fahrenheit for the battery-temperature caption and its 50% mark.
+    var temperatureUnit: TemperatureUnit {
+        didSet { store.set(temperatureUnit.rawValue, forKey: Keys.temperatureUnit) }
     }
 
     /// Swap used that fills the ring to 50%. A full ring stays one memory of swap.
@@ -1510,6 +1532,7 @@ final class AppSettings {
             fallback: Self.defaultTemperatureHalfCelsius,
             range: Self.temperatureHalfRange
         )
+        temperatureUnit = TemperatureUnit.resolved(stored: defaults.string(forKey: Keys.temperatureUnit))
         swapHalfMegabytes = Self.clampedStoredInteger(
             defaults,
             key: Keys.swapHalfMegabytes,

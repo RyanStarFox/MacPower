@@ -362,9 +362,9 @@ struct MeterRingView: View {
         .accessibilityLabel(Text(accessibilityValue))
     }
 
-    /// Half of one arc, leaving the same gap the old three-part ring used.
+    /// Half of one arc. The three arcs meet, so the track is one ring.
     private var halfSpan: Double {
-        (1.0 / 3.0 - 0.015) / 2
+        1.0 / 6.0
     }
 
     private func centerTrim(index: Int) -> Double {
