@@ -112,7 +112,12 @@ enum MenuBarBatteryRenderer {
         let showsText = style.showsPercentInside
         let text = showsText ? "\(percent)" : ""
         let digits = text.count
-        let font = percentFont(size: digits >= 3 ? 8.6 : 9.4)
+        let fontSize: CGFloat = {
+            // The outlined body keeps a 2pt gutter, so the shared size fills the interior.
+            if style.isOutlined, showsText { return digits >= 3 ? 7.2 : 8.0 }
+            return digits >= 3 ? 8.6 : 9.4
+        }()
+        let font = percentFont(size: fontSize)
         let textSize = text.isEmpty
             ? NSSize.zero
             : (text as NSString).size(withAttributes: [.font: font])
