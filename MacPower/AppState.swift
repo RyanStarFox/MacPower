@@ -573,13 +573,21 @@ final class AppState {
         // when a shorter tab is selected. SettingsWindowSizer sets the size.
         hosting.sizingOptions = []
         let window = NSWindow(contentViewController: hosting)
-        // SwiftUI lays out under the title bar and pads the title-bar height in by
-        // hand, so the safe area cannot move the tabs. The title bar stays opaque:
-        // on macOS 27 a transparent one showed its strip black for up to half a
-        // second whenever the window grew for a taller tab.
+        // SwiftUI lays out under the title bar and leaves the strip by hand, so the
+        // safe area cannot move the tabs. Like System Settings, the strip is a tall
+        // unified toolbar (empty) that the sidebar runs up into, with the page
+        // title drawn by SettingsView. It can be transparent now that every page
+        // shares one window height: the black flash on macOS 27 came from the
+        // window growing for a taller tab.
         window.styleMask = [.titled, .closable, .fullSizeContentView]
-        window.titlebarAppearsTransparent = false
+        window.titlebarAppearsTransparent = true
+        window.titleVisibility = .hidden
         window.titlebarSeparatorStyle = .none
+        let toolbar = NSToolbar(identifier: "MacPowerSettings")
+        toolbar.allowsUserCustomization = false
+        toolbar.displayMode = .iconOnly
+        window.toolbar = toolbar
+        window.toolbarStyle = .unified
         window.backgroundColor = .windowBackgroundColor
         window.title = Localization.string("settings.title", language: settings.language)
         window.isReleasedWhenClosed = false

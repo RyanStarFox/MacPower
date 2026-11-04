@@ -10,10 +10,33 @@ extension Notification.Name {
 
 /// Sidebar plus a wider detail column. The window keeps this size and the detail scrolls.
 enum SettingsColumn {
-    static let sidebarWidth: CGFloat = 212
+    /// System Settings' sidebar width on macOS 26.
+    static let sidebarWidth: CGFloat = 246
     static let contentWidth: CGFloat = 520
     static let width: CGFloat = sidebarWidth + contentWidth
     static let preferredHeight: CGFloat = 680
+}
+
+/// Sidebar and title-strip measurements, taken from macOS 26 System Settings
+/// so the settings window reads like the system's own.
+enum SettingsChrome {
+    /// The unified-toolbar strip that holds the traffic lights and the page title.
+    static let stripHeight: CGFloat = 52
+    static let titleSize: CGFloat = 15
+    /// Lines the title up with the left edge of the grouped form below it.
+    static let titleLeading: CGFloat = 20
+
+    static let rowHeight: CGFloat = 40
+    /// Space between the sidebar edges and the selection highlight.
+    static let rowInset: CGFloat = 10
+    /// Space between the selection highlight's left edge and the icon.
+    static let rowPadding: CGFloat = 7
+    static let selectionRadius: CGFloat = 10
+    static let iconSize: CGFloat = 26
+    static let iconLabelSpacing: CGFloat = 6
+    static let labelSize: CGFloat = 15
+    /// Extra space between sidebar groups.
+    static let groupGap: CGFloat = 13
 }
 
 /// macOS 15's hosting controller grows this window but will not shrink it when a
@@ -158,7 +181,13 @@ extension NSWindow {
                 hideBackdrops(in: container)
                 for background in container.subviews
                 where String(describing: type(of: background)).contains("TitlebarBackground") {
-                    if let layer = background.layer { styleTitlebarFill(in: layer) }
+                    if titlebarAppearsTransparent {
+                        // The sidebar and the page title draw the strip themselves,
+                        // like System Settings. A fill here would cut across both.
+                        background.isHidden = true
+                    } else if let layer = background.layer {
+                        styleTitlebarFill(in: layer)
+                    }
                 }
             }
         }
@@ -232,12 +261,123 @@ private final class SettingsFormWidthLockView: NSView {
     }
 }
 
+/// What sits on a sidebar icon's colored tile.
+private enum SettingsSidebarGlyph {
+    case symbol(String)
+    /// Drawn by hand: SF Symbols' battery sits off-center in a square tile.
+    case battery
+}
+
 private struct SettingsSidebarEntry: Identifiable {
     var pane: SettingsView.Pane
     var title: String
-    var symbol: String
+    var glyph: SettingsSidebarGlyph
     var tint: Color
     var id: SettingsView.Pane { pane }
+}
+
+/// A System Settings style icon: a white glyph on a rounded tile with the system's soft top-light gradient.
+private struct SettingsSidebarIcon: View {
+    var glyph: SettingsSidebarGlyph
+    var tint: Color
+    var size: CGFloat = SettingsChrome.iconSize
+
+    var body: some View {
+        let tile = RoundedRectangle(cornerRadius: size * 0.27, style: .continuous)
+        ZStack {
+            tile.fill(tint.gradient)
+            tile.strokeBorder(Color.black.opacity(0.08), lineWidth: 0.5)
+            switch glyph {
+            case .symbol(let name):
+                Image(systemName: name)
+                    .font(.system(size: size * 0.54, weight: .semibold))
+                    .foregroundStyle(.white)
+            case .battery:
+                SettingsSidebarBatteryGlyph(size: size)
+            }
+        }
+        .frame(width: size, height: size)
+        .accessibilityHidden(true)
+    }
+}
+
+/// A full battery, body and terminal centered together as one shape, in proportion to the tile.
+private struct SettingsSidebarBatteryGlyph: View {
+    var size: CGFloat
+
+    var body: some View {
+        let bodyWidth = size * 0.58
+        let bodyHeight = size * 0.32
+        let stroke = max(1, size * 0.055)
+        let outerRadius = bodyHeight * 0.32
+        let inset = stroke * 1.7
+        let innerRadius = max(outerRadius - inset, 0.5)
+        HStack(spacing: size * 0.025) {
+            ZStack {
+                RoundedRectangle(cornerRadius: outerRadius, style: .continuous)
+                    .strokeBorder(Color.white, lineWidth: stroke)
+                RoundedRectangle(cornerRadius: innerRadius, style: .continuous)
+                    .fill(Color.white)
+                    .padding(inset)
+            }
+            .frame(width: bodyWidth, height: bodyHeight)
+            UnevenRoundedRectangle(
+                bottomTrailingRadius: size * 0.03,
+                topTrailingRadius: size * 0.03,
+                style: .continuous
+            )
+            .fill(Color.white)
+            .frame(width: size * 0.06, height: size * 0.13)
+        }
+    }
+}
+
+/// The system sidebar material, so the column picks up the desktop behind the
+/// window and dims when the window is inactive, as System Settings does.
+private struct SettingsSidebarMaterial: NSViewRepresentable {
+    func makeNSView(context: Context) -> NSVisualEffectView {
+        let view = NSVisualEffectView()
+        view.material = .sidebar
+        view.blendingMode = .behindWindow
+        view.state = .followsWindowActiveState
+        return view
+    }
+
+    func updateNSView(_ nsView: NSVisualEffectView, context: Context) {}
+}
+
+/// One sidebar row. The selection is the accent color with white text while the
+/// window is active and turns gray when it is not, as in System Settings.
+private struct SettingsSidebarRow: View {
+    var item: SettingsSidebarEntry
+    var selected: Bool
+    var select: () -> Void
+    @Environment(\.controlActiveState) private var activeState
+
+    var body: some View {
+        let emphasized = selected && activeState != .inactive
+        let highlight = RoundedRectangle(cornerRadius: SettingsChrome.selectionRadius, style: .continuous)
+        Button(action: select) {
+            HStack(spacing: SettingsChrome.iconLabelSpacing) {
+                SettingsSidebarIcon(glyph: item.glyph, tint: item.tint)
+                Text(item.title)
+                    .font(.system(size: SettingsChrome.labelSize))
+                    .foregroundStyle(emphasized ? Color.white : Color.primary)
+                    .lineLimit(1)
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, SettingsChrome.rowPadding)
+            .frame(height: SettingsChrome.rowHeight)
+            .background {
+                if selected {
+                    highlight.fill(emphasized ? AnyShapeStyle(Color.accentColor) : AnyShapeStyle(Color.primary.opacity(0.1)))
+                }
+            }
+            .contentShape(highlight)
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(selected ? .isSelected : [])
+    }
 }
 
 struct SettingsView: View {
@@ -315,7 +455,8 @@ struct SettingsView: View {
             settingsSidebar
             settingsDetail
         }
-        .padding(.top, Self.titlebarHeight)
+        // The sidebar and the detail column each run up under the transparent
+        // title strip and leave SettingsChrome.stripHeight for it themselves.
         .frame(width: SettingsColumn.width, height: displayHeight, alignment: .topLeading)
         .background {
             SettingsWindowSizer(height: displayHeight)
@@ -328,7 +469,7 @@ struct SettingsView: View {
         .frame(minHeight: 0, maxHeight: .infinity, alignment: .top)
         .animation(nil, value: pane)
         .background(Color(nsColor: .windowBackgroundColor))
-        // Full-size content view: the title-bar inset is padded in by hand above,
+        // Full-size content view: the title strip is left by hand in each column,
         // so SwiftUI's safe area cannot shift the tabs between panes.
         .ignoresSafeArea()
         .environment(\.locale, appState.settings.resolvedLocale)
@@ -356,105 +497,87 @@ struct SettingsView: View {
         }
     }
 
-    /// Standard title-bar height on this OS, independent of any window's layout state.
-    private static let titlebarHeight: CGFloat = {
-        let content = NSRect(x: 0, y: 0, width: 100, height: 100)
-        return NSWindow.frameRect(forContentRect: content, styleMask: [.titled, .closable]).height - content.height
-    }()
-
-    private var settingsTabItems: [SettingsSidebarEntry] {
+    /// Sidebar entries in System Settings style groups: the app as a whole, how it
+    /// shows itself, the panel's sections, then help.
+    private var settingsSidebarGroups: [[SettingsSidebarEntry]] {
         let language = appState.settings.language
+        func entry(_ pane: Pane, _ key: String, _ glyph: SettingsSidebarGlyph, _ tint: NSColor) -> SettingsSidebarEntry {
+            SettingsSidebarEntry(
+                pane: pane,
+                title: Localization.string(key, language: language),
+                glyph: glyph,
+                tint: Color(nsColor: tint)
+            )
+        }
         return [
-            entry(.general, "settings.section.general", "gearshape.fill", Color(red: 0.45, green: 0.47, blue: 0.50), language),
-            entry(.panel, "settings.popover.order", "rectangle.3.group", Color(red: 0.36, green: 0.52, blue: 0.72), language),
-            entry(.menuBar, "settings.section.icon", "battery.100", Color(red: 0.16, green: 0.55, blue: 0.95), language),
-            entry(.rings, "settings.tab.rings", "circle.circle", Color(red: 0.93, green: 0.42, blue: 0.18), language),
-            entry(.flow, "settings.tab.flow", "bolt.fill", Color(red: 0.18, green: 0.68, blue: 0.42), language),
-            entry(.topApps, "settings.tab.topApps", "chart.bar.fill", Color(red: 0.88, green: 0.28, blue: 0.26), language),
-            entry(.lowPower, "settings.tab.lowPower", "leaf.fill", Color(red: 0.86, green: 0.64, blue: 0.12), language),
-            entry(.localIP, "settings.tab.localIP", "network", Color(red: 0.22, green: 0.46, blue: 0.92), language),
-            entry(.batteryCycle, "settings.tab.batteryCycle", "arrow.triangle.2.circlepath", Color(red: 0.22, green: 0.62, blue: 0.42), language),
-            entry(.tutorial, "settings.tab.tutorial", "book.closed.fill", Color(red: 0.48, green: 0.36, blue: 0.86), language),
-            entry(.about, "settings.tab.about", "info.circle.fill", Color(red: 0.42, green: 0.44, blue: 0.48), language),
+            [
+                entry(.general, "settings.section.general", .symbol("gearshape.fill"), .systemGray),
+            ],
+            [
+                entry(.menuBar, "settings.section.icon", .battery, .systemGreen),
+                entry(.panel, "settings.popover.order", .symbol("rectangle.3.group.fill"), .systemBlue),
+            ],
+            [
+                entry(.rings, "settings.tab.rings", .symbol("circle.circle"), .systemOrange),
+                entry(.flow, "settings.tab.flow", .symbol("bolt.fill"), .systemCyan),
+                entry(.topApps, "settings.tab.topApps", .symbol("chart.bar.fill"), .systemRed),
+                entry(.lowPower, "settings.tab.lowPower", .symbol("leaf.fill"), .systemYellow),
+                entry(.localIP, "settings.tab.localIP", .symbol("network"), .systemIndigo),
+                entry(.batteryCycle, "settings.tab.batteryCycle", .symbol("arrow.triangle.2.circlepath"), .systemPink),
+            ],
+            [
+                entry(.tutorial, "settings.tab.tutorial", .symbol("book.closed.fill"), .systemPurple),
+                entry(.about, "settings.tab.about", .symbol("info.circle.fill"), .systemTeal),
+            ],
         ]
     }
 
-    private func entry(_ pane: Pane, _ key: String, _ symbol: String, _ tint: Color, _ language: AppLanguage) -> SettingsSidebarEntry {
-        SettingsSidebarEntry(
-            pane: pane,
-            title: Localization.string(key, language: language),
-            symbol: symbol,
-            tint: tint
-        )
-    }
-
     private var selectedTitle: String {
-        settingsTabItems.first { $0.pane == pane }?.title ?? ""
+        settingsSidebarGroups.joined().first { $0.pane == pane }?.title ?? ""
     }
 
     private var settingsSidebar: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 2) {
-                ForEach(settingsTabItems) { item in
-                    sidebarRow(item)
+            VStack(alignment: .leading, spacing: 0) {
+                ForEach(Array(settingsSidebarGroups.enumerated()), id: \.offset) { index, group in
+                    if index > 0 {
+                        Spacer(minLength: 0)
+                            .frame(height: SettingsChrome.groupGap)
+                    }
+                    ForEach(group) { item in
+                        SettingsSidebarRow(item: item, selected: pane == item.pane) {
+                            pane = item.pane
+                        }
+                    }
                 }
             }
-            .padding(.horizontal, 10)
-            .padding(.top, 8)
+            .padding(.horizontal, SettingsChrome.rowInset)
+            .padding(.top, 4)
             .padding(.bottom, 12)
         }
         .scrollBounceBehavior(.basedOnSize, axes: .vertical)
         .scrollIndicators(.hidden)
+        // The traffic lights sit in the strip above the first row.
+        .padding(.top, SettingsChrome.stripHeight)
         .frame(width: SettingsColumn.sidebarWidth)
         .frame(maxHeight: .infinity, alignment: .top)
-        .background(Color.primary.opacity(0.045))
-        .overlay(alignment: .trailing) {
-            Rectangle()
-                .fill(Color(nsColor: .separatorColor))
-                .frame(width: 1)
+        .background {
+            SettingsSidebarMaterial()
         }
-    }
-
-    private func sidebarRow(_ item: SettingsSidebarEntry) -> some View {
-        let selected = pane == item.pane
-        return Button {
-            pane = item.pane
-        } label: {
-            HStack(spacing: 8) {
-                Image(systemName: item.symbol)
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(.white)
-                    .frame(width: 22, height: 22)
-                    .background(item.tint, in: RoundedRectangle(cornerRadius: 5, style: .continuous))
-                Text(item.title)
-                    .font(.system(size: 13))
-                    .foregroundStyle(.primary)
-                    .lineLimit(1)
-                Spacer(minLength: 0)
-            }
-            .padding(.horizontal, 8)
-            .padding(.vertical, 5)
-            .background {
-                if selected {
-                    RoundedRectangle(cornerRadius: 6, style: .continuous)
-                        .fill(Color.primary.opacity(0.12))
-                }
-            }
-            .contentShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
-        }
-        .buttonStyle(.plain)
-        .accessibilityAddTraits(selected ? .isSelected : [])
     }
 
     private var settingsDetail: some View {
         VStack(alignment: .leading, spacing: 0) {
+            // The page title lives in the title strip, beside the traffic lights'
+            // row, the way System Settings shows it in its toolbar.
             Text(selectedTitle)
-                .font(.system(size: 22, weight: .bold))
+                .font(.system(size: SettingsChrome.titleSize, weight: .bold))
                 .foregroundStyle(.primary)
                 .lineLimit(1)
-                .padding(.horizontal, 22)
-                .padding(.top, 6)
-                .padding(.bottom, 2)
+                .padding(.horizontal, SettingsChrome.titleLeading)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .frame(height: SettingsChrome.stripHeight)
+                .accessibilityAddTraits(.isHeader)
             if pane == .tutorial {
                 tutorialPane
             } else {
