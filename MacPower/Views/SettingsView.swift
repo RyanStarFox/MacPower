@@ -271,14 +271,20 @@ private enum SettingsSidebarGlyph {
     case symbol(String, extent: CGFloat, weight: NSFont.Weight)
 }
 
-/// Tile colors measured from macOS 26 System Settings (Display P3, top to bottom).
+/// Tile colors measured from macOS 26 System Settings (Display P3, the gradient's
+/// top and bottom rows).
 private struct SettingsIconPalette {
     var top: Color
     var bottom: Color
+    /// Black tiles get a faint inner edge, as the system's do, so they still read
+    /// against a dark sidebar.
+    var hasEdge = false
 
-    static let blue = Self(top: p3(62, 141, 247), bottom: p3(59, 134, 241))
-    static let green = Self(top: p3(109, 204, 110), bottom: p3(100, 195, 102))
-    static let gray = Self(top: p3(155, 155, 160), bottom: p3(141, 142, 147))
+    static let blue = Self(top: p3(64, 144, 250), bottom: p3(56, 127, 239))
+    static let cyan = Self(top: p3(96, 200, 236), bottom: p3(82, 182, 222))
+    static let green = Self(top: p3(111, 207, 112), bottom: p3(97, 190, 99))
+    static let gray = Self(top: p3(158, 158, 162), bottom: p3(136, 136, 142))
+    static let black = Self(top: p3(12, 12, 12), bottom: p3(0, 0, 0), hasEdge: true)
 
     private static func p3(_ red: Double, _ green: Double, _ blue: Double) -> Color {
         Color(.displayP3, red: red / 255, green: green / 255, blue: blue / 255)
@@ -300,6 +306,7 @@ private struct SettingsSidebarIcon: View {
     var glyph: SettingsSidebarGlyph
     var palette: SettingsIconPalette
     var size: CGFloat = SettingsChrome.iconSize
+    @Environment(\.colorScheme) private var colorScheme
 
     /// System glyphs are white at about 94%, so a little of the tile shows through.
     private static let ink = Color.white.opacity(0.94)
@@ -308,6 +315,12 @@ private struct SettingsSidebarIcon: View {
         ZStack {
             RoundedRectangle(cornerRadius: size * 0.225, style: .continuous)
                 .fill(LinearGradient(colors: [palette.top, palette.bottom], startPoint: .top, endPoint: .bottom))
+                .overlay {
+                    if palette.hasEdge {
+                        RoundedRectangle(cornerRadius: size * 0.225, style: .continuous)
+                            .strokeBorder(Color.white.opacity(colorScheme == .dark ? 0.16 : 0.07), lineWidth: 0.5)
+                    }
+                }
                 .shadow(color: .black.opacity(0.25), radius: 1, x: 0, y: 0.6)
             glyphLayer
         }
@@ -568,10 +581,13 @@ private enum SettingsSymbolGlyphs {
                 bitsPerPixel: 32
               ),
               let context = NSGraphicsContext(bitmapImageRep: bitmap) else { return nil }
-        bitmap.size = symbol.size
+        // Draw across every pixel of the bitmap and convert back with the real
+        // pixels-per-point below. Relying on the bitmap's point size instead is
+        // order-sensitive: a context made before that size is set draws at 1x,
+        // which halves the measured ink and doubles every glyph.
         NSGraphicsContext.saveGraphicsState()
         NSGraphicsContext.current = context
-        symbol.draw(in: NSRect(origin: .zero, size: symbol.size))
+        symbol.draw(in: NSRect(x: 0, y: 0, width: CGFloat(width), height: CGFloat(height)))
         context.flushGraphics()
         NSGraphicsContext.restoreGraphicsState()
         guard let data = bitmap.bitmapData else { return nil }
@@ -585,12 +601,14 @@ private enum SettingsSymbolGlyphs {
             }
         }
         guard maxX >= minX, maxY >= minY else { return nil }
+        let pixelsPerPointX = CGFloat(width) / symbol.size.width
+        let pixelsPerPointY = CGFloat(height) / symbol.size.height
         // Bitmap rows run top to bottom; image points run bottom to top.
         return NSRect(
-            x: CGFloat(minX) / scale,
-            y: CGFloat(height - 1 - maxY) / scale,
-            width: CGFloat(maxX - minX + 1) / scale,
-            height: CGFloat(maxY - minY + 1) / scale
+            x: CGFloat(minX) / pixelsPerPointX,
+            y: CGFloat(height - 1 - maxY) / pixelsPerPointY,
+            width: CGFloat(maxX - minX + 1) / pixelsPerPointX,
+            height: CGFloat(maxY - minY + 1) / pixelsPerPointY
         )
     }
 }
@@ -767,8 +785,8 @@ struct SettingsView: View {
     }
 
     /// Sidebar entries in System Settings style groups: the app as a whole, how it
-    /// shows itself, the panel's sections, then help. Like System Settings, most
-    /// tiles are blue; gray and green are kept for the icons borrowed from it.
+    /// shows itself, the panel's sections, then help. Colors follow System
+    /// Settings' own mix: mostly blue, with gray, black, cyan and green between.
     private var settingsSidebarGroups: [[SettingsSidebarEntry]] {
         let language = appState.settings.language
         func entry(_ pane: Pane, _ key: String, _ glyph: SettingsSidebarGlyph, _ palette: SettingsIconPalette) -> SettingsSidebarEntry {
@@ -790,17 +808,17 @@ struct SettingsView: View {
             [
                 // System Settings' Battery.
                 entry(.menuBar, "settings.section.icon", .battery, .green),
-                // System Settings' Control Center.
-                entry(.panel, "settings.popover.order", symbol("switch.2", 0.62), .gray),
+                // Black like System Settings' Desktop & Dock.
+                entry(.panel, "settings.popover.order", symbol("rectangle.3.group", 0.62), .black),
             ],
             [
                 entry(.rings, "settings.tab.rings", symbol("circle.circle", 0.62), .blue),
-                entry(.flow, "settings.tab.flow", symbol("bolt.fill", 0.64), .blue),
+                entry(.flow, "settings.tab.flow", symbol("bolt.fill", 0.64), .cyan),
                 entry(.topApps, "settings.tab.topApps", symbol("chart.bar.fill", 0.58), .blue),
-                entry(.lowPower, "settings.tab.lowPower", symbol("leaf.fill", 0.6), .blue),
+                entry(.lowPower, "settings.tab.lowPower", symbol("leaf.fill", 0.6), .green),
                 // System Settings' Network.
                 entry(.localIP, "settings.tab.localIP", symbol("network", 0.65, .regular), .blue),
-                entry(.batteryCycle, "settings.tab.batteryCycle", symbol("arrow.triangle.2.circlepath", 0.64), .blue),
+                entry(.batteryCycle, "settings.tab.batteryCycle", symbol("arrow.triangle.2.circlepath", 0.64), .gray),
             ],
             [
                 entry(.tutorial, "settings.tab.tutorial", symbol("book.closed.fill", 0.6), .blue),
