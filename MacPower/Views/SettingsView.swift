@@ -10,10 +10,33 @@ extension Notification.Name {
 
 /// Sidebar plus a wider detail column. The window keeps this size and the detail scrolls.
 enum SettingsColumn {
-    static let sidebarWidth: CGFloat = 212
+    /// System Settings' sidebar width on macOS 26.
+    static let sidebarWidth: CGFloat = 246
     static let contentWidth: CGFloat = 520
     static let width: CGFloat = sidebarWidth + contentWidth
     static let preferredHeight: CGFloat = 680
+}
+
+/// Sidebar and title-strip measurements, taken from macOS 26 System Settings
+/// so the settings window reads like the system's own.
+enum SettingsChrome {
+    /// The unified-toolbar strip that holds the traffic lights and the page title.
+    static let stripHeight: CGFloat = 52
+    static let titleSize: CGFloat = 15
+    /// Lines the title up with the left edge of the grouped form below it.
+    static let titleLeading: CGFloat = 20
+
+    static let rowHeight: CGFloat = 40
+    /// Space between the sidebar edges and the selection highlight.
+    static let rowInset: CGFloat = 10
+    /// Space between the selection highlight's left edge and the icon.
+    static let rowPadding: CGFloat = 7
+    static let selectionRadius: CGFloat = 10
+    static let iconSize: CGFloat = 26
+    static let iconLabelSpacing: CGFloat = 6
+    static let labelSize: CGFloat = 15
+    /// Extra space between sidebar groups.
+    static let groupGap: CGFloat = 13
 }
 
 /// macOS 15's hosting controller grows this window but will not shrink it when a
@@ -158,7 +181,13 @@ extension NSWindow {
                 hideBackdrops(in: container)
                 for background in container.subviews
                 where String(describing: type(of: background)).contains("TitlebarBackground") {
-                    if let layer = background.layer { styleTitlebarFill(in: layer) }
+                    if titlebarAppearsTransparent {
+                        // The sidebar and the page title draw the strip themselves,
+                        // like System Settings. A fill here would cut across both.
+                        background.isHidden = true
+                    } else if let layer = background.layer {
+                        styleTitlebarFill(in: layer)
+                    }
                 }
             }
         }
@@ -232,12 +261,410 @@ private final class SettingsFormWidthLockView: NSView {
     }
 }
 
+/// What sits on a sidebar icon's tile.
+private enum SettingsSidebarGlyph {
+    /// System Settings' own General gear.
+    case gear
+    /// System Settings' own Battery glyph.
+    case battery
+    /// An SF Symbol, fitted so its longer side spans `extent` of the tile.
+    case symbol(String, extent: CGFloat, weight: NSFont.Weight)
+}
+
+/// Tile colors measured from macOS 26 System Settings (Display P3, the gradient's
+/// top and bottom rows).
+private struct SettingsIconPalette {
+    var top: Color
+    var bottom: Color
+    /// Black tiles get a faint inner edge, as the system's do, so they still read
+    /// against a dark sidebar.
+    var hasEdge = false
+
+    static let blue = Self(top: p3(64, 144, 250), bottom: p3(56, 127, 239))
+    static let cyan = Self(top: p3(96, 200, 236), bottom: p3(82, 182, 222))
+    static let green = Self(top: p3(111, 207, 112), bottom: p3(97, 190, 99))
+    static let gray = Self(top: p3(158, 158, 162), bottom: p3(136, 136, 142))
+    static let black = Self(top: p3(12, 12, 12), bottom: p3(0, 0, 0), hasEdge: true)
+
+    private static func p3(_ red: Double, _ green: Double, _ blue: Double) -> Color {
+        Color(.displayP3, red: red / 255, green: green / 255, blue: blue / 255)
+    }
+}
+
 private struct SettingsSidebarEntry: Identifiable {
     var pane: SettingsView.Pane
     var title: String
-    var symbol: String
-    var tint: Color
+    var glyph: SettingsSidebarGlyph
+    var palette: SettingsIconPalette
     var id: SettingsView.Pane { pane }
+}
+
+/// A System Settings sidebar icon. Proportions, colors and shadows are measured
+/// from macOS 26 System Settings at 2x. Every glyph is drawn at exact coordinates
+/// inside a tile-sized frame, so layout rounding cannot push it off center.
+private struct SettingsSidebarIcon: View {
+    var glyph: SettingsSidebarGlyph
+    var palette: SettingsIconPalette
+    var size: CGFloat = SettingsChrome.iconSize
+    @Environment(\.colorScheme) private var colorScheme
+
+    /// System glyphs are white at about 94%, so a little of the tile shows through.
+    private static let ink = Color.white.opacity(0.94)
+
+    var body: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: size * 0.225, style: .continuous)
+                .fill(LinearGradient(colors: [palette.top, palette.bottom], startPoint: .top, endPoint: .bottom))
+                .overlay {
+                    if palette.hasEdge {
+                        RoundedRectangle(cornerRadius: size * 0.225, style: .continuous)
+                            .strokeBorder(Color.white.opacity(colorScheme == .dark ? 0.16 : 0.07), lineWidth: 0.5)
+                    }
+                }
+                .shadow(color: .black.opacity(0.25), radius: 1, x: 0, y: 0.6)
+            glyphLayer
+        }
+        .frame(width: size, height: size)
+        .accessibilityHidden(true)
+    }
+
+    @ViewBuilder
+    private var glyphLayer: some View {
+        switch glyph {
+        case .gear:
+            SettingsGearGlyph()
+                .fill(Self.ink)
+                .glyphShadow()
+        case .battery:
+            ZStack {
+                SettingsBatteryTray()
+                    .fill(Color.white.opacity(0.2), style: FillStyle(eoFill: true))
+                SettingsBatteryGlyph()
+                    .fill(Self.ink, style: FillStyle(eoFill: true))
+                    .glyphShadow()
+            }
+        case .symbol(let name, let extent, let weight):
+            if let image = SettingsSymbolGlyphs.tileImage(name, weight: weight, extent: extent, tile: size) {
+                Image(nsImage: image)
+                    .renderingMode(.template)
+                    .foregroundStyle(Self.ink)
+                    .glyphShadow()
+            }
+        }
+    }
+}
+
+private extension View {
+    /// The soft shadow System Settings puts under each white glyph.
+    func glyphShadow() -> some View {
+        shadow(color: .black.opacity(0.15), radius: 0.5, x: 0, y: 0.5)
+    }
+}
+
+/// System Settings' General gear: 24 tapered teeth on a ring, three spokes and a
+/// small hub, in fractions of the tile. Filled with the nonzero rule: the ring's
+/// hole and the hub's hole run the other way round, so spokes fill where they cross them.
+private struct SettingsGearGlyph: Shape {
+    func path(in rect: CGRect) -> Path {
+        let s = min(rect.width, rect.height)
+        let center = CGPoint(x: rect.midX, y: rect.midY)
+        let tipRadius = 0.373 * s
+        let rootRadius = 0.3125 * s
+        let ringInner = 0.269 * s
+        let hubOuter = 0.0433 * s
+        let hubInner = 0.0144 * s
+        let spokeHalfWidth = 0.0212 * s
+        let teeth = 24
+        let pitch = 360.0 / Double(teeth)
+        let rootHalf = 4.7
+        let tipHalf = 2.1
+
+        func point(_ radius: CGFloat, _ degrees: Double) -> CGPoint {
+            let radians = degrees * .pi / 180
+            return CGPoint(x: center.x + radius * cos(radians), y: center.y - radius * sin(radians))
+        }
+
+        var path = Path()
+
+        // Teeth and the ring's outer edge, counterclockwise on screen.
+        path.move(to: point(rootRadius, -pitch / 2))
+        for tooth in 0..<teeth {
+            let middle = Double(tooth) * pitch
+            for step in 1...4 {
+                let t = Double(step) / 4
+                path.addLine(to: point(rootRadius, middle - pitch / 2 + (pitch / 2 - rootHalf) * t))
+            }
+            path.addLine(to: point(tipRadius, middle - tipHalf))
+            path.addLine(to: point(tipRadius, middle))
+            path.addLine(to: point(tipRadius, middle + tipHalf))
+            path.addLine(to: point(rootRadius, middle + rootHalf))
+            for step in 1...4 {
+                let t = Double(step) / 4
+                path.addLine(to: point(rootRadius, middle + rootHalf + (pitch / 2 - rootHalf) * t))
+            }
+        }
+        path.closeSubpath()
+
+        addCircle(&path, radius: ringInner, clockwise: true, segments: 120, point: point)
+        addCircle(&path, radius: hubOuter, clockwise: false, segments: 36, point: point)
+        addCircle(&path, radius: hubInner, clockwise: true, segments: 24, point: point)
+
+        // Spokes reach a hair into the hub ring and the outer ring so the joins have no seam.
+        let spokeStart = hubOuter - 0.006 * s
+        let spokeEnd = ringInner + 0.012 * s
+        for degrees in [0.0, 120.0, 240.0] {
+            let radians = degrees * .pi / 180
+            let along = CGVector(dx: cos(radians), dy: -sin(radians))
+            let across = CGVector(dx: -sin(radians), dy: -cos(radians))
+            func corner(_ radius: CGFloat, _ offset: CGFloat) -> CGPoint {
+                CGPoint(
+                    x: center.x + along.dx * radius + across.dx * offset,
+                    y: center.y + along.dy * radius + across.dy * offset
+                )
+            }
+            path.move(to: corner(spokeStart, -spokeHalfWidth))
+            path.addLine(to: corner(spokeEnd, -spokeHalfWidth))
+            path.addLine(to: corner(spokeEnd, spokeHalfWidth))
+            path.addLine(to: corner(spokeStart, spokeHalfWidth))
+            path.closeSubpath()
+        }
+        return path
+    }
+
+    private func addCircle(
+        _ path: inout Path,
+        radius: CGFloat,
+        clockwise: Bool,
+        segments: Int,
+        point: (CGFloat, Double) -> CGPoint
+    ) {
+        for step in 0...segments {
+            let fraction = Double(step) / Double(segments)
+            let degrees = (clockwise ? 1 - fraction : fraction) * 360
+            if step == 0 {
+                path.move(to: point(radius, degrees))
+            } else {
+                path.addLine(to: point(radius, degrees))
+            }
+        }
+        path.closeSubpath()
+    }
+}
+
+/// System Settings' Battery glyph in fractions of the tile. Like the system's,
+/// the body (not body plus terminal) is what sits in the middle.
+private enum SettingsBatteryMetrics {
+    static let bodyWidth: CGFloat = 0.641
+    static let bodyHeight: CGFloat = 0.328
+    static let bodyOffsetX: CGFloat = -0.0206
+    static let stroke: CGFloat = 0.0337
+    static let outerRadius: CGFloat = 0.0817
+    static let fillInset: CGFloat = 0.0692
+    static let fillRadius: CGFloat = 0.0288
+    static let capGap: CGFloat = 0.0365
+    static let capWidth: CGFloat = 0.0413
+    static let capHeight: CGFloat = 0.1096
+    static let capRadius: CGFloat = 0.0385
+
+    static func body(in rect: CGRect) -> CGRect {
+        let s = min(rect.width, rect.height)
+        return CGRect(
+            x: rect.midX + (bodyOffsetX - bodyWidth / 2) * s,
+            y: rect.midY - bodyHeight / 2 * s,
+            width: bodyWidth * s,
+            height: bodyHeight * s
+        )
+    }
+
+    static func inner(in rect: CGRect) -> CGRect {
+        body(in: rect).insetBy(dx: stroke * min(rect.width, rect.height), dy: stroke * min(rect.width, rect.height))
+    }
+
+    static func fill(in rect: CGRect) -> CGRect {
+        body(in: rect).insetBy(dx: fillInset * min(rect.width, rect.height), dy: fillInset * min(rect.width, rect.height))
+    }
+}
+
+/// Outline, charge and terminal, filled even-odd.
+private struct SettingsBatteryGlyph: Shape {
+    func path(in rect: CGRect) -> Path {
+        let s = min(rect.width, rect.height)
+        typealias M = SettingsBatteryMetrics
+        let body = M.body(in: rect)
+        var path = Path()
+        path.addRoundedRect(in: body, cornerSize: CGSize(width: M.outerRadius * s, height: M.outerRadius * s), style: .continuous)
+        let innerRadius = (M.outerRadius - M.stroke) * s
+        path.addRoundedRect(in: M.inner(in: rect), cornerSize: CGSize(width: innerRadius, height: innerRadius), style: .continuous)
+        path.addRoundedRect(in: M.fill(in: rect), cornerSize: CGSize(width: M.fillRadius * s, height: M.fillRadius * s), style: .continuous)
+        let cap = CGRect(
+            x: body.maxX + M.capGap * s,
+            y: rect.midY - M.capHeight / 2 * s,
+            width: M.capWidth * s,
+            height: M.capHeight * s
+        )
+        path.addPath(
+            UnevenRoundedRectangle(
+                cornerRadii: RectangleCornerRadii(bottomTrailing: M.capRadius * s, topTrailing: M.capRadius * s),
+                style: .continuous
+            )
+            .path(in: cap)
+        )
+        return path
+    }
+}
+
+/// The faint tint between the battery's outline and its charge.
+private struct SettingsBatteryTray: Shape {
+    func path(in rect: CGRect) -> Path {
+        let s = min(rect.width, rect.height)
+        typealias M = SettingsBatteryMetrics
+        var path = Path()
+        let innerRadius = (M.outerRadius - M.stroke) * s
+        path.addRoundedRect(in: M.inner(in: rect), cornerSize: CGSize(width: innerRadius, height: innerRadius), style: .continuous)
+        path.addRoundedRect(in: M.fill(in: rect), cornerSize: CGSize(width: M.fillRadius * s, height: M.fillRadius * s), style: .continuous)
+        return path
+    }
+}
+
+/// SF Symbols drawn as tile-sized template images. A symbol image carries text
+/// layout padding above and below its ink, so centering the image leaves the
+/// glyph low; these images center the drawn pixels themselves instead.
+@MainActor
+private enum SettingsSymbolGlyphs {
+    private static var cache: [String: NSImage] = [:]
+
+    static func tileImage(_ name: String, weight: NSFont.Weight, extent: CGFloat, tile: CGFloat) -> NSImage? {
+        let key = "\(name)|\(weight.rawValue)|\(extent)|\(tile)"
+        if let cached = cache[key] { return cached }
+        let configuration = NSImage.SymbolConfiguration(pointSize: 100, weight: weight)
+        guard let symbol = NSImage(systemSymbolName: name, accessibilityDescription: nil)?
+            .withSymbolConfiguration(configuration),
+              let ink = inkBounds(of: symbol) else { return nil }
+        let scale = extent * tile / max(ink.width, ink.height)
+        let frame = NSRect(
+            x: (tile - ink.width * scale) / 2 - ink.minX * scale,
+            y: (tile - ink.height * scale) / 2 - ink.minY * scale,
+            width: symbol.size.width * scale,
+            height: symbol.size.height * scale
+        )
+        let image = makeTileImage(symbol, in: frame, tile: tile)
+        cache[key] = image
+        return image
+    }
+
+    /// Nonisolated so the drawing handler can run wherever AppKit draws it.
+    nonisolated private static func makeTileImage(_ symbol: NSImage, in frame: NSRect, tile: CGFloat) -> NSImage {
+        let image = NSImage(size: NSSize(width: tile, height: tile), flipped: false) { _ in
+            symbol.draw(in: frame)
+            return true
+        }
+        image.isTemplate = true
+        return image
+    }
+
+    /// The symbol's inked area in its own points, origin bottom left.
+    private static func inkBounds(of symbol: NSImage) -> NSRect? {
+        let scale: CGFloat = 2
+        let width = Int((symbol.size.width * scale).rounded(.up))
+        let height = Int((symbol.size.height * scale).rounded(.up))
+        guard width > 0, height > 0,
+              let bitmap = NSBitmapImageRep(
+                bitmapDataPlanes: nil,
+                pixelsWide: width,
+                pixelsHigh: height,
+                bitsPerSample: 8,
+                samplesPerPixel: 4,
+                hasAlpha: true,
+                isPlanar: false,
+                colorSpaceName: .deviceRGB,
+                bytesPerRow: width * 4,
+                bitsPerPixel: 32
+              ),
+              let context = NSGraphicsContext(bitmapImageRep: bitmap) else { return nil }
+        // Draw across every pixel of the bitmap and convert back with the real
+        // pixels-per-point below. Relying on the bitmap's point size instead is
+        // order-sensitive: a context made before that size is set draws at 1x,
+        // which halves the measured ink and doubles every glyph.
+        NSGraphicsContext.saveGraphicsState()
+        NSGraphicsContext.current = context
+        symbol.draw(in: NSRect(x: 0, y: 0, width: CGFloat(width), height: CGFloat(height)))
+        context.flushGraphics()
+        NSGraphicsContext.restoreGraphicsState()
+        guard let data = bitmap.bitmapData else { return nil }
+        var minX = width, maxX = -1, minY = height, maxY = -1
+        for row in 0..<height {
+            for column in 0..<width where data[row * width * 4 + column * 4 + 3] > 24 {
+                minX = min(minX, column)
+                maxX = max(maxX, column)
+                minY = min(minY, row)
+                maxY = max(maxY, row)
+            }
+        }
+        guard maxX >= minX, maxY >= minY else { return nil }
+        let pixelsPerPointX = CGFloat(width) / symbol.size.width
+        let pixelsPerPointY = CGFloat(height) / symbol.size.height
+        // Bitmap rows run top to bottom; image points run bottom to top.
+        return NSRect(
+            x: CGFloat(minX) / pixelsPerPointX,
+            y: CGFloat(height - 1 - maxY) / pixelsPerPointY,
+            width: CGFloat(maxX - minX + 1) / pixelsPerPointX,
+            height: CGFloat(maxY - minY + 1) / pixelsPerPointY
+        )
+    }
+}
+
+/// The system sidebar material, so the column picks up the desktop behind the
+/// window and dims when the window is inactive, as System Settings does.
+private struct SettingsSidebarMaterial: NSViewRepresentable {
+    func makeNSView(context: Context) -> NSVisualEffectView {
+        let view = NSVisualEffectView()
+        view.material = .sidebar
+        view.blendingMode = .behindWindow
+        view.state = .followsWindowActiveState
+        return view
+    }
+
+    func updateNSView(_ nsView: NSVisualEffectView, context: Context) {}
+}
+
+/// One sidebar row. The selection is the accent color with white text while the
+/// window is active and turns gray when it is not, as in System Settings.
+private struct SettingsSidebarRow: View {
+    var item: SettingsSidebarEntry
+    var selected: Bool
+    var select: () -> Void
+    @Environment(\.controlActiveState) private var activeState
+
+    var body: some View {
+        let emphasized = selected && activeState != .inactive
+        let highlight = RoundedRectangle(cornerRadius: SettingsChrome.selectionRadius, style: .continuous)
+        Button(action: select) {
+            HStack(spacing: SettingsChrome.iconLabelSpacing) {
+                SettingsSidebarIcon(glyph: item.glyph, palette: item.palette)
+                Text(item.title)
+                    .font(.system(size: SettingsChrome.labelSize))
+                    .foregroundStyle(emphasized ? Color.white : Color.primary)
+                    .lineLimit(1)
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, SettingsChrome.rowPadding)
+            .frame(height: SettingsChrome.rowHeight)
+            .background {
+                if selected {
+                    // The sidebar's emphasized selection color, a shade deeper than the
+                    // plain accent color, as System Settings draws it.
+                    highlight.fill(
+                        emphasized
+                            ? AnyShapeStyle(Color(nsColor: .selectedContentBackgroundColor))
+                            : AnyShapeStyle(Color.primary.opacity(0.1))
+                    )
+                }
+            }
+            .contentShape(highlight)
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(selected ? .isSelected : [])
+    }
 }
 
 struct SettingsView: View {
@@ -315,7 +742,8 @@ struct SettingsView: View {
             settingsSidebar
             settingsDetail
         }
-        .padding(.top, Self.titlebarHeight)
+        // The sidebar and the detail column each run up under the transparent
+        // title strip and leave SettingsChrome.stripHeight for it themselves.
         .frame(width: SettingsColumn.width, height: displayHeight, alignment: .topLeading)
         .background {
             SettingsWindowSizer(height: displayHeight)
@@ -328,7 +756,7 @@ struct SettingsView: View {
         .frame(minHeight: 0, maxHeight: .infinity, alignment: .top)
         .animation(nil, value: pane)
         .background(Color(nsColor: .windowBackgroundColor))
-        // Full-size content view: the title-bar inset is padded in by hand above,
+        // Full-size content view: the title strip is left by hand in each column,
         // so SwiftUI's safe area cannot shift the tabs between panes.
         .ignoresSafeArea()
         .environment(\.locale, appState.settings.resolvedLocale)
@@ -356,105 +784,95 @@ struct SettingsView: View {
         }
     }
 
-    /// Standard title-bar height on this OS, independent of any window's layout state.
-    private static let titlebarHeight: CGFloat = {
-        let content = NSRect(x: 0, y: 0, width: 100, height: 100)
-        return NSWindow.frameRect(forContentRect: content, styleMask: [.titled, .closable]).height - content.height
-    }()
-
-    private var settingsTabItems: [SettingsSidebarEntry] {
+    /// Sidebar entries in System Settings style groups: the app as a whole, how it
+    /// shows itself, the panel's sections, then help. Colors follow System
+    /// Settings' own mix: mostly blue, with gray, black, cyan and green between.
+    private var settingsSidebarGroups: [[SettingsSidebarEntry]] {
         let language = appState.settings.language
+        func entry(_ pane: Pane, _ key: String, _ glyph: SettingsSidebarGlyph, _ palette: SettingsIconPalette) -> SettingsSidebarEntry {
+            SettingsSidebarEntry(
+                pane: pane,
+                title: Localization.string(key, language: language),
+                glyph: glyph,
+                palette: palette
+            )
+        }
+        func symbol(_ name: String, _ extent: CGFloat, _ weight: NSFont.Weight = .medium) -> SettingsSidebarGlyph {
+            .symbol(name, extent: extent, weight: weight)
+        }
         return [
-            entry(.general, "settings.section.general", "gearshape.fill", Color(red: 0.45, green: 0.47, blue: 0.50), language),
-            entry(.panel, "settings.popover.order", "rectangle.3.group", Color(red: 0.36, green: 0.52, blue: 0.72), language),
-            entry(.menuBar, "settings.section.icon", "battery.100", Color(red: 0.16, green: 0.55, blue: 0.95), language),
-            entry(.rings, "settings.tab.rings", "circle.circle", Color(red: 0.93, green: 0.42, blue: 0.18), language),
-            entry(.flow, "settings.tab.flow", "bolt.fill", Color(red: 0.18, green: 0.68, blue: 0.42), language),
-            entry(.topApps, "settings.tab.topApps", "chart.bar.fill", Color(red: 0.88, green: 0.28, blue: 0.26), language),
-            entry(.lowPower, "settings.tab.lowPower", "leaf.fill", Color(red: 0.86, green: 0.64, blue: 0.12), language),
-            entry(.localIP, "settings.tab.localIP", "network", Color(red: 0.22, green: 0.46, blue: 0.92), language),
-            entry(.batteryCycle, "settings.tab.batteryCycle", "arrow.triangle.2.circlepath", Color(red: 0.22, green: 0.62, blue: 0.42), language),
-            entry(.tutorial, "settings.tab.tutorial", "book.closed.fill", Color(red: 0.48, green: 0.36, blue: 0.86), language),
-            entry(.about, "settings.tab.about", "info.circle.fill", Color(red: 0.42, green: 0.44, blue: 0.48), language),
+            [
+                // System Settings' General.
+                entry(.general, "settings.section.general", .gear, .gray),
+            ],
+            [
+                // System Settings' Battery.
+                entry(.menuBar, "settings.section.icon", .battery, .green),
+                // Black like System Settings' Desktop & Dock.
+                entry(.panel, "settings.popover.order", symbol("rectangle.3.group", 0.62), .black),
+            ],
+            [
+                entry(.rings, "settings.tab.rings", symbol("circle.circle", 0.62), .blue),
+                entry(.flow, "settings.tab.flow", symbol("bolt.fill", 0.64), .cyan),
+                entry(.topApps, "settings.tab.topApps", symbol("chart.bar.fill", 0.58), .blue),
+                entry(.lowPower, "settings.tab.lowPower", symbol("leaf.fill", 0.6), .green),
+                // System Settings' Network.
+                entry(.localIP, "settings.tab.localIP", symbol("network", 0.65, .regular), .blue),
+                entry(.batteryCycle, "settings.tab.batteryCycle", symbol("arrow.triangle.2.circlepath", 0.64), .gray),
+            ],
+            [
+                entry(.tutorial, "settings.tab.tutorial", symbol("book.closed.fill", 0.6), .blue),
+                entry(.about, "settings.tab.about", symbol("info.circle", 0.62), .gray),
+            ],
         ]
     }
 
-    private func entry(_ pane: Pane, _ key: String, _ symbol: String, _ tint: Color, _ language: AppLanguage) -> SettingsSidebarEntry {
-        SettingsSidebarEntry(
-            pane: pane,
-            title: Localization.string(key, language: language),
-            symbol: symbol,
-            tint: tint
-        )
-    }
-
     private var selectedTitle: String {
-        settingsTabItems.first { $0.pane == pane }?.title ?? ""
+        settingsSidebarGroups.joined().first { $0.pane == pane }?.title ?? ""
     }
 
     private var settingsSidebar: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 2) {
-                ForEach(settingsTabItems) { item in
-                    sidebarRow(item)
+            VStack(alignment: .leading, spacing: 0) {
+                ForEach(Array(settingsSidebarGroups.enumerated()), id: \.offset) { index, group in
+                    if index > 0 {
+                        Spacer(minLength: 0)
+                            .frame(height: SettingsChrome.groupGap)
+                    }
+                    ForEach(group) { item in
+                        SettingsSidebarRow(item: item, selected: pane == item.pane) {
+                            pane = item.pane
+                        }
+                    }
                 }
             }
-            .padding(.horizontal, 10)
-            .padding(.top, 8)
+            .padding(.horizontal, SettingsChrome.rowInset)
+            .padding(.top, 4)
             .padding(.bottom, 12)
         }
         .scrollBounceBehavior(.basedOnSize, axes: .vertical)
         .scrollIndicators(.hidden)
+        // The traffic lights sit in the strip above the first row.
+        .padding(.top, SettingsChrome.stripHeight)
         .frame(width: SettingsColumn.sidebarWidth)
         .frame(maxHeight: .infinity, alignment: .top)
-        .background(Color.primary.opacity(0.045))
-        .overlay(alignment: .trailing) {
-            Rectangle()
-                .fill(Color(nsColor: .separatorColor))
-                .frame(width: 1)
+        .background {
+            SettingsSidebarMaterial()
         }
-    }
-
-    private func sidebarRow(_ item: SettingsSidebarEntry) -> some View {
-        let selected = pane == item.pane
-        return Button {
-            pane = item.pane
-        } label: {
-            HStack(spacing: 8) {
-                Image(systemName: item.symbol)
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(.white)
-                    .frame(width: 22, height: 22)
-                    .background(item.tint, in: RoundedRectangle(cornerRadius: 5, style: .continuous))
-                Text(item.title)
-                    .font(.system(size: 13))
-                    .foregroundStyle(.primary)
-                    .lineLimit(1)
-                Spacer(minLength: 0)
-            }
-            .padding(.horizontal, 8)
-            .padding(.vertical, 5)
-            .background {
-                if selected {
-                    RoundedRectangle(cornerRadius: 6, style: .continuous)
-                        .fill(Color.primary.opacity(0.12))
-                }
-            }
-            .contentShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
-        }
-        .buttonStyle(.plain)
-        .accessibilityAddTraits(selected ? .isSelected : [])
     }
 
     private var settingsDetail: some View {
         VStack(alignment: .leading, spacing: 0) {
+            // The page title lives in the title strip, beside the traffic lights'
+            // row, the way System Settings shows it in its toolbar.
             Text(selectedTitle)
-                .font(.system(size: 22, weight: .bold))
+                .font(.system(size: SettingsChrome.titleSize, weight: .bold))
                 .foregroundStyle(.primary)
                 .lineLimit(1)
-                .padding(.horizontal, 22)
-                .padding(.top, 6)
-                .padding(.bottom, 2)
+                .padding(.horizontal, SettingsChrome.titleLeading)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .frame(height: SettingsChrome.stripHeight)
+                .accessibilityAddTraits(.isHeader)
             if pane == .tutorial {
                 tutorialPane
             } else {
