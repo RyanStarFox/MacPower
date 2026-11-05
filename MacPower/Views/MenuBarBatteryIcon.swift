@@ -116,7 +116,9 @@ enum MenuBarBatteryRenderer {
         let fontSize: CGFloat = {
             // The outlined body keeps a 2pt gutter, so the shared size fills the interior.
             if style.isOutlined, showsText { return digits >= 3 ? 7.2 : 8.0 }
-            return digits >= 3 ? 9.0 : 10.2
+            // Beside the bolt the system shrinks three digits to 13px; alone they stay 15px.
+            if digits >= 3 { return glyph != nil ? 9.0 : 10.0 }
+            return 10.2
         }()
         let insideKnockout = showsText && !style.isOutlined
         let font = percentFont(size: fontSize)
@@ -124,7 +126,7 @@ enum MenuBarBatteryRenderer {
             ? NSSize.zero
             : (text as NSString).size(withAttributes: [.font: font])
         // The system spaces three inside digits slightly wider than the font does.
-        let kern: CGFloat = insideKnockout && digits >= 3 ? 0.5 : 0
+        let kern: CGFloat = insideKnockout && digits >= 3 ? (glyph != nil ? 0.5 : 0.4) : 0
         if insideKnockout {
             // Space the knockout by ink so the bolt sits as close to the digits as the system's.
             let line = CTLineCreateWithAttributedString(NSAttributedString(string: text, attributes: [.font: font, .kern: kern]))

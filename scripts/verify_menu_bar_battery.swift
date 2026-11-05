@@ -130,7 +130,20 @@ enum VerifyMenuBarBattery {
         } else {
             check(false, "The inside bolt separates from the digits")
         }
-        // Targets measured from the 2x screenshot of the macOS battery at 100% charging.
+        // Targets measured from a 2x screenshot of the macOS battery at 100%, not charging.
+        let threeIdle = inkRuns(render(100, style: .systemPercentInside))
+        print("  100% runs:", threeIdle.map { "\($0.first)-\($0.last) \($0.width)x\($0.height) area \(Int($0.area))" })
+        if threeIdle.count == 3 {
+            check(threeIdle.allSatisfy { $0.height == 15 } && threeIdle[0].width == 6 && threeIdle.dropFirst().allSatisfy { $0.width == 11 }, "Three idle inside digits match the system's 15px height and 6px / 11px widths")
+            let gaps = [threeIdle[1].first - threeIdle[0].last - 1, threeIdle[2].first - threeIdle[1].last - 1]
+            check((3...4).contains(gaps[0]) && gaps[1] == 2, "Three idle inside digits keep the system's 3px and 2px spacing")
+            check(threeIdle.dropFirst().allSatisfy { $0.area > 72 && $0.area < 84 }, "Three idle inside digits match the system's stroke weight")
+        } else {
+            check(false, "Three idle inside digits render as separate glyphs")
+        }
+
+        // Targets measured from a 2x menu-bar screenshot of the macOS battery at 100% charging,
+        // where the system shrinks the digits to fit the bolt.
         let threeDigits = inkRuns(render(100, style: .systemPercentInside, charging: true))
         print("  100% charging runs:", threeDigits.map { "\($0.first)-\($0.last) \($0.width)x\($0.height) area \(Int($0.area))" })
         if threeDigits.count == 4 {
