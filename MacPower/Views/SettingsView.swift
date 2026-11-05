@@ -678,6 +678,21 @@ struct SettingsView: View {
         case start, panel, menuBar, rings, flow, topApps, lowPower, localIP, batteryCycle
         var id: String { rawValue }
 
+        /// The settings page this tutorial page explains.
+        var settingsPane: Pane? {
+            switch self {
+            case .start: nil
+            case .panel: .panel
+            case .menuBar: .menuBar
+            case .rings: .rings
+            case .flow: .flow
+            case .topApps: .topApps
+            case .lowPower: .lowPower
+            case .localIP: .localIP
+            case .batteryCycle: .batteryCycle
+            }
+        }
+
         var titleKey: String {
             switch self {
             case .start: "tutorial.page.start"
@@ -895,61 +910,98 @@ struct SettingsView: View {
         .background(Color(nsColor: .windowBackgroundColor))
     }
 
+    /// The tutorial as a short book: a contents menu, one page at a time, and
+    /// buttons to turn the page or jump to the settings it describes.
     private var tutorialPane: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            tutorialPagePicker
-                .padding(.horizontal, 22)
-                .padding(.top, 8)
+        let pages = TutorialPage.allCases
+        let index = pages.firstIndex(of: tutorialPage) ?? 0
+        let language = appState.settings.language
+        return VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: 8) {
+                Menu {
+                    ForEach(pages) { page in
+                        Button {
+                            tutorialPage = page
+                        } label: {
+                            if page == tutorialPage {
+                                Label(Localization.string(page.titleKey, language: language), systemImage: "checkmark")
+                            } else {
+                                Text(Localization.string(page.titleKey, language: language))
+                            }
+                        }
+                    }
+                } label: {
+                    Label("tutorial.contents", systemImage: "list.bullet")
+                }
+                .fixedSize()
+                Spacer(minLength: 8)
+                Text(Localization.string("tutorial.pageOf %lld %lld", language: language, index + 1, pages.count))
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .monospacedDigit()
+            }
+            .padding(.horizontal, 22)
+            .padding(.top, 8)
+            .padding(.bottom, 4)
+
             ScrollView {
-                tutorialPageContent
-                    .padding(.horizontal, 22)
-                    .padding(.top, 16)
-                    .padding(.bottom, 20)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                VStack(alignment: .leading, spacing: 16) {
+                    if tutorialPage != .start {
+                        Text(LocalizedStringKey(tutorialPage.titleKey))
+                            .font(.system(size: 17, weight: .semibold))
+                            .accessibilityAddTraits(.isHeader)
+                    }
+                    tutorialPageContent
+                    if let target = tutorialPage.settingsPane {
+                        Button {
+                            pane = target
+                        } label: {
+                            HStack(spacing: 3) {
+                                Text(Localization.string(
+                                    "tutorial.openSettings %@",
+                                    language: language,
+                                    Localization.string(tutorialPage.titleKey, language: language)
+                                ))
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 10, weight: .semibold))
+                            }
+                        }
+                        .buttonStyle(.link)
+                    }
+                }
+                .padding(.horizontal, 22)
+                .padding(.top, 12)
+                .padding(.bottom, 20)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .id(tutorialPage)
             }
             .scrollBounceBehavior(.basedOnSize)
-            if appState.showsWelcomeGuide {
-                Button("welcome.done") {
-                    appState.completeWelcomeGuide()
+
+            Divider()
+            HStack(spacing: 10) {
+                Button("tutorial.previous") {
+                    tutorialPage = pages[max(index - 1, 0)]
                 }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
-                .keyboardShortcut(.defaultAction)
-                .padding(.horizontal, 22)
-                .padding(.top, 4)
-                .padding(.bottom, 16)
+                .disabled(index == 0)
+                Spacer(minLength: 8)
+                if appState.showsWelcomeGuide {
+                    Button("welcome.done") {
+                        appState.completeWelcomeGuide()
+                    }
+                    .keyboardShortcut(index == pages.count - 1 ? .defaultAction : nil)
+                }
+                if index < pages.count - 1 {
+                    Button("tutorial.next") {
+                        tutorialPage = pages[index + 1]
+                    }
+                    .keyboardShortcut(.defaultAction)
+                }
             }
+            .controlSize(.large)
+            .padding(.horizontal, 22)
+            .padding(.vertical, 12)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-    }
-
-    private var tutorialPagePicker: some View {
-        ScrollView(.horizontal) {
-            HStack(spacing: 6) {
-                ForEach(TutorialPage.allCases) { page in
-                    let selected = tutorialPage == page
-                    Button {
-                        tutorialPage = page
-                    } label: {
-                        Text(LocalizedStringKey(page.titleKey))
-                            .font(.system(size: 12, weight: selected ? .semibold : .regular))
-                            .foregroundStyle(selected ? Color.accentColor : Color.primary)
-                            .lineLimit(1)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 5)
-                            .background {
-                                Capsule(style: .continuous)
-                                    .fill(selected ? Color.accentColor.opacity(0.16) : Color.primary.opacity(0.06))
-                            }
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityAddTraits(selected ? .isSelected : [])
-                }
-            }
-            .padding(.vertical, 2)
-        }
-        .scrollIndicators(.hidden)
-        .scrollBounceBehavior(.basedOnSize, axes: .horizontal)
     }
 
     @ViewBuilder
@@ -6210,6 +6262,16 @@ private struct JustifiedBody: NSViewRepresentable {
             ]
         )
         field.invalidateIntrinsicContentSize()
+    }
+
+    /// Wrap to the width SwiftUI offers on the first pass. Waiting for
+    /// `layout()` left the first frame as one long, clipped line.
+    func sizeThatFits(_ proposal: ProposedViewSize, nsView field: JustifiedTextField, context: Context) -> CGSize? {
+        guard let width = proposal.width, width.isFinite, width > 0 else { return nil }
+        field.preferredMaxLayoutWidth = width
+        let bounds = NSRect(x: 0, y: 0, width: width, height: .greatestFiniteMagnitude)
+        let height = field.cell?.cellSize(forBounds: bounds).height ?? field.intrinsicContentSize.height
+        return CGSize(width: width, height: ceil(height))
     }
 }
 

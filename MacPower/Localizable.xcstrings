@@ -18090,6 +18090,86 @@
         "it": { "stringUnit": { "state": "translated", "value": "Velocità e temperatura non hanno limite, ma un anello ha un solo giro: scegli il valore che ne riempie metà." } },
         "ru": { "stringUnit": { "state": "translated", "value": "У скорости и температуры нет предела, а у кольца лишь один оборот, поэтому задайте значение для половины кольца." } }
       }
+    },
+    "tutorial.contents": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Contents" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "目录" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "目錄" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "目次" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "목차" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Sommaire" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Inhalt" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Contenido" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Sumário" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Indice" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Содержание" } }
+      }
+    },
+    "tutorial.pageOf %lld %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Page %lld of %lld" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "第 %lld 页，共 %lld 页" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "第 %lld 頁，共 %lld 頁" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "%lld / %lld ページ" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "%lld / %lld페이지" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Page %lld sur %lld" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Seite %lld von %lld" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Página %lld de %lld" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Página %lld de %lld" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Pagina %lld di %lld" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Страница %lld из %lld" } }
+      }
+    },
+    "tutorial.previous": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Previous" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "上一页" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "上一頁" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "前へ" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "이전" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Précédent" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Zurück" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Anterior" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Anterior" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Precedente" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Назад" } }
+      }
+    },
+    "tutorial.next": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Next" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "下一页" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "下一頁" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "次へ" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "다음" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Suivant" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Weiter" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Siguiente" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Próxima" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Avanti" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Далее" } }
+      }
+    },
+    "tutorial.openSettings %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Open “%@” in Settings" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "在设置里打开「%@」" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "在設定裡打開「%@」" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "設定で「%@」を開く" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "설정에서 ‘%@’ 열기" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Ouvrir « %@ » dans les réglages" } },
+        "de": { "stringUnit": { "state": "translated", "value": "„%@“ in den Einstellungen öffnen" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Abrir «%@» en Ajustes" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Abrir “%@” nos Ajustes" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Apri «%@» nelle impostazioni" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Открыть «%@» в настройках" } }
+      }
     }
   },
   "version": "1.0"
