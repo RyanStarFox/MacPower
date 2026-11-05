@@ -3074,6 +3074,12 @@ struct SettingsView: View {
             SettingsPreviewCard(title: "settings.rings.preview") {
                 ringsPanelPreview
             }
+            .task {
+                // Headphone levels are read only while the panel is open; read once for the preview.
+                if !appState.settings.bluetoothRingDevices.isEmpty {
+                    await appState.refreshBluetoothNow()
+                }
+            }
         }
 
         ForEach(Array(appState.settings.ringRows.enumerated()), id: \.offset) { rowIndex, row in
