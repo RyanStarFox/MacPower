@@ -10,6 +10,7 @@
 		02568E8BE7F9038DBCF40765 /* TimeEstimateRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = D014F62CBF5CA300F430CDA1 /* TimeEstimateRow.swift */; };
 		5E771C0A0B0C4D2E8F901A01 /* SettingsComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E771C0A0B0C4D2E8F901A02 /* SettingsComponents.swift */; };
 		5E771C0A0B0C4D2E8F901A03 /* TintRampEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E771C0A0B0C4D2E8F901A04 /* TintRampEditor.swift */; };
+		5E771C0A0B0C4D2E8F901A05 /* RingItemCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E771C0A0B0C4D2E8F901A06 /* RingItemCell.swift */; };
 		0A11B0A1D0014E7A9C01B101 /* RingBoard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A11B0A1D0014E7A9C01B201 /* RingBoard.swift */; };
 		0A11B0A1D0014E7A9C01B102 /* BluetoothBatteryReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A11B0A1D0014E7A9C01B202 /* BluetoothBatteryReader.swift */; };
 		0F789E41829F0C0E6B8AA796 /* ThemePalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20A295272AA067DB3D994259 /* ThemePalette.swift */; };
@@ -119,6 +120,7 @@
 		D014F62CBF5CA300F430CDA1 /* TimeEstimateRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeEstimateRow.swift; sourceTree = "<group>"; };
 		5E771C0A0B0C4D2E8F901A02 /* SettingsComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsComponents.swift; sourceTree = "<group>"; };
 		5E771C0A0B0C4D2E8F901A04 /* TintRampEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TintRampEditor.swift; sourceTree = "<group>"; };
+		5E771C0A0B0C4D2E8F901A06 /* RingItemCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RingItemCell.swift; sourceTree = "<group>"; };
 		D09AF92F89E2A37C369790FB /* UpdateCheckTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateCheckTests.swift; sourceTree = "<group>"; };
 		D2B191D2207AFED12081FC6F /* PopoverTintSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverTintSettings.swift; sourceTree = "<group>"; };
 		EBEE380CB6A3631813F77B9B /* EnergyFlowMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnergyFlowMode.swift; sourceTree = "<group>"; };
@@ -181,6 +183,7 @@
 				D014F62CBF5CA300F430CDA1 /* TimeEstimateRow.swift */,
 				5E771C0A0B0C4D2E8F901A02 /* SettingsComponents.swift */,
 				5E771C0A0B0C4D2E8F901A04 /* TintRampEditor.swift */,
+				5E771C0A0B0C4D2E8F901A06 /* RingItemCell.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -399,6 +402,7 @@
 				02568E8BE7F9038DBCF40765 /* TimeEstimateRow.swift in Sources */,
 				5E771C0A0B0C4D2E8F901A01 /* SettingsComponents.swift in Sources */,
 				5E771C0A0B0C4D2E8F901A03 /* TintRampEditor.swift in Sources */,
+				5E771C0A0B0C4D2E8F901A05 /* RingItemCell.swift in Sources */,
 				85D69FE970F34B47739CA0BD /* TimeEstimateService.swift in Sources */,
 				5F595B872BFAA1196FE69194 /* UpdateChecker.swift in Sources */,
 				E4A18C0D9B2F47A6C5D81F33 /* UpdateInstaller.swift in Sources */,

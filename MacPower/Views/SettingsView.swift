@@ -706,6 +706,9 @@ struct SettingsView: View {
     @State private var flowEditingMode: EnergyFlowMode = .discharging
     @State private var flowEditingBandID: UUID?
     @State private var flowTintOrigin: PopoverTintPreset?
+    @State private var ringTintOrigin: PopoverTintPreset?
+    @State private var ringEditingBandID: UUID?
+    @State private var ringOptionsItemID: String?
     @State private var showingBluetoothDevices = false
     @State private var showingAuthorSupport = false
     @State private var bluetoothIconEditor: BluetoothIconEdit?
@@ -2980,29 +2983,45 @@ struct SettingsView: View {
     @ViewBuilder
     private var ringsSections: some View {
         Section {
-            ForEach(appState.settings.ringLayoutEntries()) { entry in
-                ringLayoutRow(entry)
+            SettingsPreviewCard(title: "settings.rings.preview") {
+                ringsPanelPreview
             }
-            HStack(alignment: .center, spacing: 12) {
-                Button("settings.rings.bluetooth.add") {
+        }
+
+        ForEach(Array(appState.settings.ringRows.enumerated()), id: \.offset) { rowIndex, row in
+            Section {
+                ringRowItems(rowIndex: rowIndex, row: row)
+            } header: {
+                ringRowHeader(rowIndex)
+            }
+        }
+        ringHiddenSection
+        Section {
+            HStack(spacing: 10) {
+                Button {
+                    appState.settings.addRingRow()
+                } label: {
+                    Label("settings.rings.addRow", systemImage: "plus")
+                }
+                Button {
                     showingBluetoothDevices = true
+                } label: {
+                    Label("settings.rings.bluetooth.addDevice", systemImage: "headphones")
                 }
-                Button("settings.rings.addLineBreak") {
-                    appState.settings.addLineBreak()
-                }
+                Spacer(minLength: 0)
+            }
+            Picker("settings.rings.oddRow.title", selection: $appState.settings.ringOddRow) {
+                Text("settings.rings.oddAlign.title").tag(RingOddRow.align)
+                Text("settings.rings.oddStagger.title").tag(RingOddRow.stagger)
+            }
+            .pickerStyle(.segmented)
+        } footer: {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("settings.rings.dragHint")
                 Text("settings.rings.bluetooth.connectHint")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: .infinity, alignment: .leading)
             }
-            Picker("settings.rings.temperatureUnit", selection: $appState.settings.temperatureUnit) {
-                ForEach(TemperatureUnit.allCases) { unit in
-                    Text(LocalizedStringKey(unit.localizationKey)).tag(unit)
-                }
-            }
-        } header: {
-            Text("settings.rings.layout")
+            .font(.subheadline)
+            .foregroundStyle(.secondary)
         }
         .sheet(isPresented: $showingBluetoothDevices, onDismiss: {
             appState.bluetoothScanWanted = false
@@ -3015,36 +3034,91 @@ struct SettingsView: View {
         }
 
         Section {
-            Picker("settings.icon.tint.preset", selection: ringPresetPickerBinding) {
-                ForEach(PopoverTintPreset.allCases) { preset in
-                    Text(LocalizedStringKey(preset.localizationKey)).tag(PopoverPresetPickerItem.builtin(preset))
-                }
-                if !appState.settings.savedTintLibrary.ring.isEmpty {
-                    Divider()
-                    ForEach(appState.settings.savedTintLibrary.ring) { item in
-                        Text(item.name).tag(PopoverPresetPickerItem.saved(item.id))
+            tintPresetStatusRow(
+                status: ringPresetStatus,
+                canRevert: ringCanRevert,
+                onRevert: revertRingTint,
+                canSave: ringSavedPresetModified,
+                onSave: { _ = appState.settings.updateRingTintPreset() },
+                onSaveAs: {
+                    savePresetName = defaultSaveName(for: .ring)
+                    saveDialog = .ring
+                },
+                onDelete: ringSavedPreset == nil ? nil : {
+                    if let saved = ringSavedPreset {
+                        appState.settings.deleteSavedRingTint(id: saved.id)
                     }
                 }
+            )
+            ringPresetGallery
+            ringColorList
+            if let color = selectedRingColor() {
+                ringColorRampRow(color)
             }
-            presetEditor(
-                toolbar: {
-                    tintPresetSaveControls(
-                        canOverwrite: appState.settings.ringActiveSavedID != nil,
-                        onSave: { _ = appState.settings.updateRingTintPreset() },
-                        onSaveAs: {
-                            savePresetName = defaultSaveName(for: .ring)
-                            saveDialog = .ring
-                        },
-                        deleteID: appState.settings.ringActiveSavedID,
-                        onDelete: { appState.settings.deleteSavedRingTint(id: $0) }
-                    )
-                }
-            ) {
-                ringColorCatalogEditor
-            }
+        } header: {
+            Text("settings.color.header")
+        } footer: {
+            Text("settings.rings.colors.footer")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
         }
 
-        ringAssignmentSection
+        Section {
+            speedHalfStepper(
+                "settings.rings.half.download.title",
+                kilobytes: appState.settings.downloadHalfKilobytes
+            ) { appState.settings.downloadHalfKilobytes = $0 }
+            speedHalfStepper(
+                "settings.rings.half.upload.title",
+                kilobytes: appState.settings.uploadHalfKilobytes
+            ) { appState.settings.uploadHalfKilobytes = $0 }
+            temperatureHalfStepper(title: "settings.rings.half.temperature.title")
+            HStack(spacing: 8) {
+                SettingsRowLabel(title: "settings.rings.half.swap.title", caption: "settings.rings.half.swap.caption")
+                Spacer(minLength: 8)
+                Text(SwapUsageFormat.string(bytes: Double(appState.settings.swapHalfMegabytes) * 1_048_576))
+                    .monospacedDigit()
+                    .foregroundStyle(.secondary)
+                Stepper(
+                    "",
+                    value: Binding(
+                        get: { appState.settings.swapHalfMegabytes },
+                        set: { appState.settings.swapHalfMegabytes = $0 }
+                    ),
+                    in: AppSettings.swapHalfLimit(),
+                    step: AppSettings.swapHalfStep
+                )
+                .labelsHidden()
+                .fixedSize()
+            }
+            HStack(spacing: 8) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("settings.rings.thermal.title")
+                    Text(verbatim: thermalScaleSummary)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer(minLength: 8)
+                Button("settings.rings.thermal.adjust") {
+                    ringScaleSlot = .thermalState
+                }
+                .popover(isPresented: ringScalePresented(.thermalState), arrowEdge: .bottom) {
+                    ringScalePopover(.thermalState)
+                }
+            }
+            Picker("settings.rings.temperatureUnit", selection: $appState.settings.temperatureUnit) {
+                ForEach(TemperatureUnit.allCases) { unit in
+                    Text(LocalizedStringKey(unit.localizationKey)).tag(unit)
+                }
+            }
+            .pickerStyle(.segmented)
+        } header: {
+            Text("settings.rings.scale.header")
+        } footer: {
+            Text("settings.rings.scale.footer")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
 
         Section {
             Picker("settings.icons.preset", selection: ringIconPresetPickerBinding) {
@@ -3080,7 +3154,618 @@ struct SettingsView: View {
                 }
             }
             bluetoothIconSettings
+            ForEach([RingSlot.batteryTemperature, .thermalState]) { slot in
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(LocalizedStringKey(slot.localizationKey))
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                    slotIconColorControls(slot)
+                }
+            }
+        } header: {
+            Text("settings.icon.header")
         }
+    }
+
+    /// The panel's ring grid exactly as the panel draws it, with live readings.
+    /// A row too wide for this column is scaled down to fit.
+    private var ringsPanelPreview: some View {
+        let rows = appState.settings.displayedRingRows(seen: appState.bluetoothDevices)
+        let gear = appState.settings.settingsButtonPlacement.drawsRingGear(
+            host: appState.settings.settingsButtonHost,
+            ringsVisible: appState.settings.showStatusRings
+        )
+        var counts = rows.map(\.count)
+        if gear {
+            if counts.isEmpty { counts = [1] } else { counts[counts.count - 1] += 1 }
+        }
+        let width = PopoverLayout.width(rowCounts: counts) - PopoverLayout.padding * 2
+        let shownRows = counts.filter { $0 > 0 }.count
+        let height = CGFloat(shownRows) * (StatusRingView.diameter + 24) + CGFloat(max(shownRows - 1, 0)) * 10
+        let scale = min(1, 420 / max(width, 1))
+        return Group {
+            if counts.allSatisfy({ $0 == 0 }) {
+                Text("settings.rings.preview.empty")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .padding(.vertical, 12)
+            } else {
+                RingHeaderLayout(rowCounts: counts) {
+                    ForEach(Array(rows.enumerated()), id: \.offset) { _, row in
+                        ForEach(row) { item in
+                            RingItemCell(appState: appState, item: item)
+                        }
+                    }
+                    if gear {
+                        RingSettingsCell(title: Localization.string("settings.title", language: appState.settings.language))
+                    }
+                }
+                .frame(width: width, height: height, alignment: .top)
+                .scaleEffect(scale)
+                .frame(width: width * scale, height: height * scale)
+            }
+        }
+        .allowsHitTesting(false)
+        .accessibilityElement(children: .combine)
+    }
+
+    private func ringIsShown(_ item: RingItem) -> Bool {
+        guard let slot = item.slot else { return true }
+        return appState.settings.enabledRingSlots.contains(slot)
+    }
+
+    private func ringRowHeader(_ rowIndex: Int) -> some View {
+        HStack(spacing: 8) {
+            Text("settings.rings.row \(rowIndex + 1)")
+            Spacer(minLength: 8)
+            if appState.settings.ringRows.count > 1 {
+                Button("settings.rings.removeRow") {
+                    appState.settings.removeRingRow(rowIndex)
+                }
+                .buttonStyle(.link)
+                .font(.subheadline)
+            }
+        }
+        .onDrop(of: [.plainText], delegate: RingItemRowDropDelegate(
+            row: rowIndex,
+            drag: ringItemDrag,
+            move: { id, row in appState.settings.moveRingItem(id: id, toEndOfRow: row) }
+        ))
+    }
+
+    @ViewBuilder
+    private func ringRowItems(rowIndex: Int, row: [RingItem]) -> some View {
+        let shown = row.filter(ringIsShown)
+        if shown.isEmpty {
+            Text("settings.rings.row.empty")
+                .font(.subheadline)
+                .foregroundStyle(.tertiary)
+                .frame(maxWidth: .infinity, minHeight: 28)
+                .overlay {
+                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                        .strokeBorder(Color.secondary.opacity(0.35), style: StrokeStyle(lineWidth: 1, dash: [4, 3]))
+                }
+                .onDrop(of: [.plainText], delegate: RingItemRowDropDelegate(
+                    row: rowIndex,
+                    drag: ringItemDrag,
+                    move: { id, row in appState.settings.moveRingItem(id: id, toEndOfRow: row) }
+                ))
+        }
+        ForEach(shown) { item in
+            ringShownRow(item, rowIndex: rowIndex)
+        }
+    }
+
+    private func ringShownRow(_ item: RingItem, rowIndex: Int) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: "line.3.horizontal")
+                .font(.body)
+                .foregroundStyle(.secondary)
+                .frame(width: 22, height: 22)
+                .contentShape(Rectangle())
+                .onDrag {
+                    ringItemDrag.itemID = item.id
+                    return NSItemProvider(object: item.id as NSString)
+                }
+                .help(Localization.string("settings.rings.dragHint", language: appState.settings.language))
+            ringItemIcon(item)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(ringItemTitle(item))
+                    .lineLimit(1)
+                if let caption = ringItemCaption(item) {
+                    Text(caption)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
+            }
+            Spacer(minLength: 8)
+            if let slot = item.slot, let segment = RingColorSegment(rawValue: slot.rawValue) {
+                ringColorPicker(segment)
+            }
+            if item.slot == nil {
+                Button("settings.rings.bluetooth.options") {
+                    ringOptionsItemID = item.id
+                }
+                .popover(isPresented: Binding(
+                    get: { ringOptionsItemID == item.id },
+                    set: { if !$0, ringOptionsItemID == item.id { ringOptionsItemID = nil } }
+                ), arrowEdge: .bottom) {
+                    ringBluetoothOptions(item)
+                }
+            }
+            ringMoveMenu(item, rowIndex: rowIndex)
+        }
+        .contentShape(Rectangle())
+        .onDrop(of: [.plainText], delegate: RingItemDropDelegate(
+            itemID: item.id,
+            drag: ringItemDrag,
+            move: { id, target in appState.settings.moveRingItem(id: id, to: target) }
+        ))
+    }
+
+    private func ringItemIcon(_ item: RingItem) -> some View {
+        let glyph: GlyphSlot = {
+            if let slot = item.slot {
+                return slot == .speedPair ? .system("arrow.up.arrow.down") : appState.settings.ringIcons.slot(for: slot)
+            }
+            let device = appState.settings.bluetoothRingDevices.first { $0.address == item.address }
+            let ring = device?.rings.first { $0.id == item.ringID }
+            return ring?.shownGlyph(model: device?.model ?? .generic, parts: ring?.parts ?? []) ?? .system("headphones")
+        }()
+        return GlyphSlotView(slot: glyph, systemPointSize: 12, assetSide: 15, prefersMonochrome: true)
+            .frame(width: 24, height: 24)
+            .background(Color.primary.opacity(0.06), in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+            .accessibilityHidden(true)
+    }
+
+    private func ringItemCaption(_ item: RingItem) -> String? {
+        let language = appState.settings.language
+        if item.slot == nil {
+            return Localization.string("settings.rings.bluetooth.caption", language: language)
+        }
+        if item.slot == .speedPair {
+            return Localization.string("settings.rings.speedPair.caption", language: language)
+        }
+        return nil
+    }
+
+    private func ringColorPicker(_ segment: RingColorSegment) -> some View {
+        let tint = appState.settings.ringTint
+        let colors = tint.colors
+        let current = tint.assignments[segment] ?? colors.first?.id
+        let currentScheme = colors.first { $0.id == current }?.scheme
+        return HStack(spacing: 4) {
+            if let currentScheme {
+                TintRampBar(bands: currentScheme.bands, cornerRadius: 2)
+                    .frame(width: 18, height: 8)
+            }
+            Picker(LocalizedStringKey(segment.localizationKey), selection: Binding(
+                get: { current ?? UUID() },
+                set: { id in
+                    appState.settings.ringTint = appState.settings.ringTint.assigning(segment, to: id)
+                }
+            )) {
+                ForEach(Array(colors.enumerated()), id: \.element.id) { index, item in
+                    Text(ringColorTitle(index)).tag(item.id)
+                }
+            }
+            .labelsHidden()
+            .pickerStyle(.menu)
+            .controlSize(.small)
+            .fixedSize()
+        }
+        .help(Localization.string("settings.rings.color.pick", language: appState.settings.language))
+    }
+
+    private func ringMoveMenu(_ item: RingItem, rowIndex: Int) -> some View {
+        let rowCount = appState.settings.ringRows.count
+        return Menu {
+            ForEach(0..<rowCount, id: \.self) { index in
+                if index != rowIndex {
+                    Button(Localization.string("settings.rings.moveToRow %lld", language: appState.settings.language, index + 1)) {
+                        appState.settings.moveRingItem(id: item.id, toEndOfRow: index)
+                    }
+                }
+            }
+            Button("settings.rings.moveToNewRow") {
+                moveRingItemToNewRow(item.id)
+            }
+            Divider()
+            if let slot = item.slot {
+                Button("settings.rings.hide") {
+                    appState.settings.setRingSlot(slot, visible: false)
+                }
+            } else if let address = item.address {
+                Button("settings.rings.bluetooth.remove", role: .destructive) {
+                    appState.settings.removeBluetoothDevice(address: address)
+                }
+            }
+        } label: {
+            Image(systemName: "ellipsis.circle")
+        }
+        .menuStyle(.borderlessButton)
+        .menuIndicator(.hidden)
+        .fixedSize()
+        .help(Localization.string("settings.rings.more", language: appState.settings.language))
+    }
+
+    private func moveRingItemToNewRow(_ id: String) {
+        appState.settings.addRingRow()
+        appState.settings.moveRingItem(id: id, toEndOfRow: appState.settings.ringRows.count - 1)
+    }
+
+    /// Shows a hidden ring at the end of a row, or on a row of its own.
+    private func showRing(_ slot: RingSlot, inRow row: Int?) {
+        let settings = appState.settings
+        settings.setRingSlot(slot, visible: true)
+        let id = RingItem.slot(slot).id
+        if let row {
+            settings.moveRingItem(id: id, toEndOfRow: row)
+        } else {
+            moveRingItemToNewRow(id)
+        }
+    }
+
+    @ViewBuilder
+    private var ringHiddenSection: some View {
+        let hidden = appState.settings.ringCatalog.filter { !appState.settings.enabledRingSlots.contains($0) }
+        if !hidden.isEmpty {
+            Section {
+                ForEach(hidden) { slot in
+                    HStack(spacing: 8) {
+                        ringItemIcon(.slot(slot))
+                            .opacity(0.6)
+                        Text(LocalizedStringKey(slot.localizationKey))
+                            .foregroundStyle(.secondary)
+                        Spacer(minLength: 8)
+                        Menu {
+                            ForEach(0..<appState.settings.ringRows.count, id: \.self) { index in
+                                Button(Localization.string("settings.rings.addToRow %lld", language: appState.settings.language, index + 1)) {
+                                    showRing(slot, inRow: index)
+                                }
+                            }
+                            Button("settings.rings.addToNewRow") {
+                                showRing(slot, inRow: nil)
+                            }
+                        } label: {
+                            Label("settings.rings.show", systemImage: "plus.circle.fill")
+                        }
+                        .menuStyle(.borderlessButton)
+                        .fixedSize()
+                    }
+                }
+            } header: {
+                Text("settings.rings.hiddenGroup")
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func ringBluetoothOptions(_ item: RingItem) -> some View {
+        if let device = appState.settings.bluetoothRingDevices.first(where: { $0.address == item.address }),
+           let ring = device.rings.first(where: { $0.id == item.ringID }) {
+            let index = device.rings.firstIndex(where: { $0.id == ring.id }) ?? 0
+            let catalog: [BluetoothBatteryPart] = device.multi ? [.left, .right, .box] : []
+            VStack(alignment: .leading, spacing: 10) {
+                Text(device.name)
+                    .font(.system(size: 13, weight: .semibold))
+                bluetoothRingEditor(device: device, ring: ring, index: index, catalog: catalog)
+                if device.rings.count < 3, device.multi {
+                    Button("settings.rings.bluetooth.addRing") {
+                        appState.settings.addBluetoothDisplayRing(address: device.address)
+                    }
+                }
+            }
+            .padding(14)
+            .frame(width: 320)
+        }
+    }
+
+    private var thermalScaleSummary: String {
+        let language = appState.settings.language
+        let parts = [
+            ("ring.thermal.nominal", appState.settings.thermalNominalPercent),
+            ("ring.thermal.fair", appState.settings.thermalFairPercent),
+            ("ring.thermal.serious", appState.settings.thermalSeriousPercent),
+            ("ring.thermal.critical", appState.settings.thermalCriticalPercent),
+        ]
+        return parts.map { "\(Localization.string($0.0, language: language)) \($0.1)%" }.joined(separator: " · ")
+    }
+
+    private var ringSavedPreset: SavedTintPreset<RingTintSettings>? {
+        guard let id = appState.settings.ringActiveSavedID else { return nil }
+        return appState.settings.savedTintLibrary.ring.first { $0.id == id }
+    }
+
+    private var ringSavedPresetModified: Bool {
+        guard let saved = ringSavedPreset else { return false }
+        let current = appState.settings.ringTint
+        return saved.payload.colors != current.colors || saved.payload.assignments != current.assignments
+    }
+
+    private var ringPresetStatus: String {
+        let language = appState.settings.language
+        let tint = appState.settings.ringTint
+        if let saved = ringSavedPreset {
+            return ringSavedPresetModified
+                ? Localization.string("settings.tint.status.modified %@", language: language, saved.name)
+                : saved.name
+        }
+        if tint.preset != .custom {
+            return Localization.string(tint.preset.localizationKey, language: language)
+        }
+        if let origin = ringTintOrigin {
+            let name = Localization.string(origin.localizationKey, language: language)
+            return Localization.string("settings.tint.status.modified %@", language: language, name)
+        }
+        return Localization.string("settings.icon.tint.custom", language: language)
+    }
+
+    private var ringCanRevert: Bool {
+        if ringSavedPreset != nil { return ringSavedPresetModified }
+        return appState.settings.ringTint.preset == .custom && ringTintOrigin != nil
+    }
+
+    private func revertRingTint() {
+        ringEditingBandID = nil
+        if let saved = ringSavedPreset {
+            appState.settings.applySavedRingTint(id: saved.id)
+        } else if let origin = ringTintOrigin {
+            appState.settings.applyRingTintPreset(origin)
+        }
+    }
+
+    private var ringPresetGallery: some View {
+        let language = appState.settings.language
+        let tint = appState.settings.ringTint
+        let savedID = appState.settings.ringActiveSavedID
+        let saved = appState.settings.savedTintLibrary.ring
+        let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: 4)
+        return VStack(alignment: .leading, spacing: 10) {
+            LazyVGrid(columns: columns, spacing: 8) {
+                ForEach(PopoverTintPreset.allCases.filter { $0 != .custom }) { preset in
+                    TintPresetChip(
+                        title: Localization.string(preset.localizationKey, language: language),
+                        selected: savedID == nil && tint.preset == preset
+                    ) {
+                        ringEditingBandID = nil
+                        ringTintOrigin = preset
+                        appState.settings.applyRingTintPreset(preset)
+                    } thumbnail: {
+                        ringPresetThumbnail(RingTintSettings.preset(preset))
+                    }
+                }
+            }
+            if !saved.isEmpty {
+                Text("settings.tint.myPresets")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(.secondary)
+                LazyVGrid(columns: columns, spacing: 8) {
+                    ForEach(saved) { item in
+                        TintPresetChip(title: item.name, selected: savedID == item.id) {
+                            ringEditingBandID = nil
+                            ringTintOrigin = nil
+                            appState.settings.applySavedRingTint(id: item.id)
+                        } thumbnail: {
+                            ringPresetThumbnail(item.payload)
+                        }
+                    }
+                }
+            }
+        }
+        .padding(.vertical, 4)
+    }
+
+    private func ringPresetThumbnail(_ tint: RingTintSettings) -> some View {
+        HStack(spacing: 2) {
+            ForEach(tint.colors.prefix(4)) { color in
+                TintRampBar(bands: color.scheme.bands, cornerRadius: 2)
+            }
+        }
+    }
+
+    private func ringColorUsage(_ color: RingColor) -> String {
+        let language = appState.settings.language
+        let tint = appState.settings.ringTint
+        let fallback = tint.colors.first?.id
+        let names = RingColorSegment.allCases
+            .filter { (tint.assignments[$0] ?? fallback) == color.id }
+            .map { Localization.string($0.localizationKey, language: language) }
+        guard !names.isEmpty else {
+            return Localization.string("settings.rings.color.unused", language: language)
+        }
+        let formatter = ListFormatter()
+        formatter.locale = appState.settings.resolvedLocale
+        let list = formatter.string(from: names) ?? names.joined(separator: ", ")
+        return Localization.string("settings.rings.color.usedBy %@", language: language, list)
+    }
+
+    private var ringColorList: some View {
+        let colors = appState.settings.ringTint.colors
+        let selected = selectedRingColor()?.id
+        return VStack(alignment: .leading, spacing: 6) {
+            Text("settings.rings.colors.title")
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(.secondary)
+            VStack(spacing: 0) {
+                ForEach(Array(colors.enumerated()), id: \.element.id) { index, color in
+                    if index > 0 {
+                        Divider().padding(.leading, 64)
+                    }
+                    Button {
+                        ringEditingBandID = nil
+                        ringColorSelectionID = color.id
+                    } label: {
+                        HStack(spacing: 10) {
+                            TintRampBar(bands: color.scheme.bands)
+                                .frame(width: 44, height: 12)
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text(ringColorTitle(index))
+                                    .font(.system(size: 13, weight: selected == color.id ? .semibold : .regular))
+                                Text(ringColorUsage(color))
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(2)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                            Spacer(minLength: 8)
+                            if selected == color.id {
+                                Image(systemName: "checkmark")
+                                    .font(.system(size: 11, weight: .semibold))
+                                    .foregroundStyle(Color.accentColor)
+                            }
+                        }
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 7)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityAddTraits(selected == color.id ? .isSelected : [])
+                }
+            }
+            .background(Color.primary.opacity(0.04), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
+            }
+            HStack(spacing: 10) {
+                Button {
+                    let tint = appState.settings.ringTint
+                    appState.settings.ringTint = tint.addingColor(copying: selected)
+                    ringEditingBandID = nil
+                    ringColorSelectionID = appState.settings.ringTint.colors.last?.id
+                } label: {
+                    Label("settings.rings.color.new", systemImage: "plus")
+                }
+                if let selected, colors.count > 1 {
+                    Button("settings.rings.color.delete", role: .destructive) {
+                        let tint = appState.settings.ringTint
+                        let fallback = tint.colors.first { $0.id != selected }
+                        ringEditingBandID = nil
+                        appState.settings.ringTint = tint.removingColor(id: selected)
+                        ringColorSelectionID = fallback?.id
+                    }
+                }
+                Spacer(minLength: 0)
+            }
+        }
+        .padding(.vertical, 4)
+    }
+
+    private func setRingColorBands(_ id: UUID, _ bands: [MenuBarTintBand]) {
+        let scheme = ValueTintScheme(bands: bands).normalized()
+        appState.settings.ringTint = appState.settings.ringTint.updatingColor(id: id, scheme: scheme)
+    }
+
+    private func ringColorRampRow(_ color: RingColor) -> some View {
+        let language = appState.settings.language
+        let bands = color.scheme.bands
+        let index = appState.settings.ringTint.colors.firstIndex { $0.id == color.id } ?? 0
+        let transition = Binding<TintTransition?>(
+            get: { TintRamp.transition(of: bands) },
+            set: { next in
+                guard let next else { return }
+                setRingColorBands(color.id, TintRamp.applying(next, to: bands))
+            }
+        )
+        return VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 8) {
+                Text(Localization.string("settings.rings.color.edit %@", language: language, ringColorTitle(index)))
+                Spacer(minLength: 8)
+                Text("settings.tint.transition")
+                    .foregroundStyle(.secondary)
+                Picker("settings.tint.transition", selection: transition) {
+                    ForEach(TintTransition.allCases) { item in
+                        Text(LocalizedStringKey(item.localizationKey)).tag(Optional(item))
+                    }
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                .fixedSize()
+            }
+            TintRampEditor(
+                bands: bands,
+                followLabel: "settings.tint.labelColor",
+                language: language,
+                editingID: $ringEditingBandID,
+                onChange: { setRingColorBands(color.id, $0) }
+            ) { band, lower in
+                ringValueSegmentEditor(band, lower: lower, bands: bands) { setRingColorBands(color.id, $0) }
+            }
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Text("settings.rings.ramp.hint")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 8)
+                Button {
+                    if let result = TintRamp.addingBoundary(to: bands) {
+                        setRingColorBands(color.id, result.bands)
+                        ringEditingBandID = result.newID
+                    }
+                } label: {
+                    Label("settings.tint.addBoundary", systemImage: "plus")
+                }
+                .disabled(bands.count >= 8)
+            }
+        }
+        .padding(.vertical, 4)
+    }
+
+    private func ringValueSegmentEditor(
+        _ band: MenuBarTintBand,
+        lower: Int,
+        bands: [MenuBarTintBand],
+        onChange: @escaping ([MenuBarTintBand]) -> Void
+    ) -> some View {
+        let ordered = TintRamp.sorted(bands)
+        let index = ordered.firstIndex { $0.id == band.id }
+        let previous = index.flatMap { $0 > 0 ? ordered[$0 - 1] : nil }
+        return TintSegmentEditor(
+            band: band,
+            lower: lower,
+            previous: previous,
+            language: appState.settings.language,
+            rangeKey: "settings.tint.segment.valueRange %lld %lld",
+            captionKey: "settings.rings.segment.caption",
+            atKey: "settings.tint.color.atValue %lld",
+            followName: "settings.tint.labelColor",
+            followNote: "settings.tint.labelColor.note",
+            canDelete: ordered.count > 1,
+            onChange: { next in onChange(TintRamp.replacing(next, in: bands)) },
+            onDelete: {
+                ringEditingBandID = nil
+                onChange(TintRamp.removing(band.id, from: bands))
+            }
+        ) {
+            ringSegmentPreview(band, lower: lower)
+        }
+    }
+
+    /// A small ring filled to the top of the segment in the segment's colors.
+    private func ringSegmentPreview(_ band: MenuBarTintBand, lower: Int) -> some View {
+        let scheme = ValueTintScheme(bands: [MenuBarTintBand(
+            throughPercent: 100,
+            swatch: band.highRight,
+            blend: band.blend == .slide || band.blend == .slideGradient ? .constant : band.blend,
+            highLeft: band.highLeft
+        )])
+        let colors = scheme.colors(percent: 100)
+        let progress = Double(max(band.throughPercent, 8)) / 100
+        return ZStack {
+            Circle()
+                .stroke(Color.primary.opacity(0.1), lineWidth: 4)
+            Circle()
+                .trim(from: 0, to: progress)
+                .stroke(
+                    AngularGradient(colors: [colors.left, colors.right], center: .center),
+                    style: StrokeStyle(lineWidth: 4, lineCap: .round)
+                )
+                .rotationEffect(.degrees(-90))
+        }
+        .frame(width: 30, height: 30)
+        .padding(4)
     }
 
     @ViewBuilder
@@ -4162,12 +4847,12 @@ struct SettingsView: View {
         return "\(unit.display(celsius))\(unit.symbol)"
     }
 
-    private func temperatureHalfStepper() -> some View {
+    private func temperatureHalfStepper(title: LocalizedStringKey = "settings.rings.half.temperature") -> some View {
         let unit = appState.settings.temperatureUnit
         let bounds = AppSettings.temperatureHalfRange
         let shown = unit.display(appState.settings.temperatureHalfCelsius)
         return topAppStepper(
-            "settings.rings.half.temperature",
+            title,
             value: shown,
             unit: LocalizedStringKey(stringLiteral: unit.symbol),
             range: unit.display(bounds.lowerBound)...unit.display(bounds.upperBound),

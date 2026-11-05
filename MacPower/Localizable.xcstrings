@@ -17450,6 +17450,646 @@
         "it": { "stringUnit": { "state": "translated", "value": "«Colore del testo» è nero in modalità chiara e bianco in modalità scura." } },
         "ru": { "stringUnit": { "state": "translated", "value": "«Цвет текста» — чёрный в светлом режиме и белый в тёмном." } }
       }
+    },
+    "settings.rings.preview": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "In the panel" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "面板里的样子" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "面板裡的樣子" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "パネルでの表示" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "패널에서의 모습" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Dans le panneau" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Im Bereich" } },
+        "es": { "stringUnit": { "state": "translated", "value": "En el panel" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "No painel" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Nel pannello" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "В панели" } }
+      }
+    },
+    "settings.rings.preview.empty": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "No rings are shown right now." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "现在没有显示任何圆环。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "現在沒有顯示任何圓環。" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "現在表示しているリングはありません。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "지금 표시되는 링이 없습니다." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Aucun anneau n’est affiché pour le moment." } },
+        "de": { "stringUnit": { "state": "translated", "value": "Zurzeit werden keine Ringe angezeigt." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Ahora no se muestra ningún anillo." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Nenhum anel está sendo exibido agora." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Al momento non è mostrato alcun anello." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Сейчас кольца не показаны." } }
+      }
+    },
+    "settings.rings.hiddenGroup": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Not Shown" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "没有显示" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "沒有顯示" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "非表示" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "표시 안 함" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Masqués" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Nicht angezeigt" } },
+        "es": { "stringUnit": { "state": "translated", "value": "No mostrados" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Não exibidos" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Non mostrati" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Не показаны" } }
+      }
+    },
+    "settings.rings.row.empty": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Drag a ring here" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "把圆环拖到这里" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "把圓環拖到這裡" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ここにリングをドラッグ" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "여기로 링을 드래그" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Faites glisser un anneau ici" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Ring hierher ziehen" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Arrastra un anillo aquí" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Arraste um anel para cá" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Trascina qui un anello" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Перетащите кольцо сюда" } }
+      }
+    },
+    "settings.rings.bluetooth.addDevice": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Add Bluetooth Device…" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "添加蓝牙设备…" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "新增藍牙裝置…" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Bluetoothデバイスを追加…" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Bluetooth 기기 추가…" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Ajouter un appareil Bluetooth…" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Bluetooth-Gerät hinzufügen…" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Añadir dispositivo Bluetooth…" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Adicionar dispositivo Bluetooth…" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Aggiungi dispositivo Bluetooth…" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Добавить Bluetooth-устройство…" } }
+      }
+    },
+    "settings.rings.oddRow.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "When row 2 is shorter than row 1" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "第 2 行比第 1 行少时" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "第 2 行比第 1 行少時" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "2行目が1行目より少ないとき" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "2행이 1행보다 짧을 때" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Si la ligne 2 est plus courte que la ligne 1" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Wenn Zeile 2 kürzer als Zeile 1 ist" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Si la fila 2 es más corta que la fila 1" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Se a linha 2 for menor que a linha 1" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Se la riga 2 è più corta della riga 1" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Если строка 2 короче строки 1" } }
+      }
+    },
+    "settings.rings.oddAlign.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Aligned" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "左右对齐" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "左右對齊" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "揃える" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "정렬" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Alignés" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Bündig" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Alineados" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Alinhados" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Allineati" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "По краю" } }
+      }
+    },
+    "settings.rings.oddStagger.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "In the Gaps" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "错开插空" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "錯開插空" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "すき間に配置" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "사이에 배치" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Dans les espaces" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Versetzt" } },
+        "es": { "stringUnit": { "state": "translated", "value": "En los huecos" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Nos vãos" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Negli spazi" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Со сдвигом" } }
+      }
+    },
+    "settings.rings.dragHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Drag ≡ to move a ring within a row or to another row." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "按住 ≡ 拖动，可在行内或跨行移动。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "按住 ≡ 拖動，可在行內或跨行移動。" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "≡ をドラッグすると、行内や別の行へ移動できます。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "≡을 드래그해 행 안에서나 다른 행으로 옮길 수 있습니다." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Faites glisser ≡ pour déplacer un anneau dans une ligne ou vers une autre." } },
+        "de": { "stringUnit": { "state": "translated", "value": "Ziehe ≡, um einen Ring innerhalb einer Zeile oder in eine andere zu bewegen." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Arrastra ≡ para mover un anillo dentro de una fila o a otra." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Arraste ≡ para mover um anel na linha ou para outra linha." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Trascina ≡ per spostare un anello nella riga o in un’altra." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Перетаскивайте ≡, чтобы двигать кольцо в строке или между строками." } }
+      }
+    },
+    "settings.rings.bluetooth.options": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Options…" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "选项…" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "選項…" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "オプション…" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "옵션…" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Options…" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Optionen…" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Opciones…" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Opções…" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Opzioni…" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Параметры…" } }
+      }
+    },
+    "settings.rings.bluetooth.caption": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Bluetooth device" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "蓝牙设备" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "藍牙裝置" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Bluetoothデバイス" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Bluetooth 기기" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Appareil Bluetooth" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Bluetooth-Gerät" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Dispositivo Bluetooth" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Dispositivo Bluetooth" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Dispositivo Bluetooth" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Bluetooth-устройство" } }
+      }
+    },
+    "settings.rings.speedPair.caption": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Download and upload in one ring" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "下载和上传合成一圈" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "下載和上傳合成一圈" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ダウンロードとアップロードを1つのリングに" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "다운로드와 업로드를 한 링에" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Téléchargement et envoi dans un anneau" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Download und Upload in einem Ring" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Descarga y subida en un anillo" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Download e upload em um anel" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Download e upload in un anello" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Загрузка и выгрузка в одном кольце" } }
+      }
+    },
+    "settings.rings.color.pick": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Color this ring uses" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "这个圆环用的颜色" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "這個圓環用的顏色" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "このリングの色" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "이 링의 색상" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Couleur de cet anneau" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Farbe dieses Rings" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Color de este anillo" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Cor deste anel" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Colore di questo anello" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Цвет этого кольца" } }
+      }
+    },
+    "settings.rings.moveToRow %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Move to Row %lld" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "移到第 %lld 行" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "移到第 %lld 行" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "%lld 行目に移動" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "%lld행으로 이동" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Déplacer vers la ligne %lld" } },
+        "de": { "stringUnit": { "state": "translated", "value": "In Zeile %lld bewegen" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Mover a la fila %lld" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Mover para a linha %lld" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Sposta nella riga %lld" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Переместить в строку %lld" } }
+      }
+    },
+    "settings.rings.moveToNewRow": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Move to a New Row" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "移到新的一行" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "移到新的一行" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "新しい行に移動" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "새 행으로 이동" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Déplacer vers une nouvelle ligne" } },
+        "de": { "stringUnit": { "state": "translated", "value": "In neue Zeile bewegen" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Mover a una fila nueva" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Mover para uma nova linha" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Sposta in una nuova riga" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Переместить в новую строку" } }
+      }
+    },
+    "settings.rings.hide": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Hide" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "不显示" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "不顯示" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "非表示にする" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "숨기기" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Masquer" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Ausblenden" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Ocultar" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Ocultar" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Nascondi" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Скрыть" } }
+      }
+    },
+    "settings.rings.more": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "More" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "更多" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "更多" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "その他" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "더 보기" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Plus" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Mehr" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Más" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Mais" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Altro" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Ещё" } }
+      }
+    },
+    "settings.rings.addToRow %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Add to Row %lld" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "加到第 %lld 行" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "加到第 %lld 行" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "%lld 行目に追加" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "%lld행에 추가" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Ajouter à la ligne %lld" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Zu Zeile %lld hinzufügen" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Añadir a la fila %lld" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Adicionar à linha %lld" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Aggiungi alla riga %lld" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Добавить в строку %lld" } }
+      }
+    },
+    "settings.rings.addToNewRow": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Add to a New Row" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "加到新的一行" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "加到新的一行" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "新しい行に追加" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "새 행에 추가" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Ajouter à une nouvelle ligne" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Zu neuer Zeile hinzufügen" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Añadir a una fila nueva" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Adicionar a uma nova linha" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Aggiungi a una nuova riga" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Добавить в новую строку" } }
+      }
+    },
+    "settings.rings.show": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Show" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "显示" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "顯示" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "表示" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "표시" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Afficher" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Anzeigen" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Mostrar" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Mostrar" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Mostra" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Показать" } }
+      }
+    },
+    "settings.rings.colors.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Colors in this preset" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "这套预设里的颜色" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "這套預設裡的顏色" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "このプリセットの色" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "이 프리셋의 색상" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Couleurs de ce préréglage" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Farben dieser Voreinstellung" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Colores de este preajuste" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Cores desta predefinição" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Colori di questa preimpostazione" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Цвета этого набора" } }
+      }
+    },
+    "settings.rings.colors.footer": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Click a color to edit it with the same ramp as the menu bar. To change which color a ring uses, pick it next to that ring above." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "点按一种颜色，用和菜单栏一样的色带编辑。哪个圆环用哪种颜色，在上面每个圆环右侧更换。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "點按一種顏色，用和選單列一樣的色帶編輯。哪個圓環用哪種顏色，在上面每個圓環右側更換。" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "色をクリックすると、メニューバーと同じカラーバーで編集できます。リングごとの色は、上の各リングの右側で変更します。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "색상을 클릭하면 메뉴 막대와 같은 색상 막대로 편집할 수 있습니다. 링마다 쓰는 색상은 위의 각 링 오른쪽에서 바꿉니다." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Cliquez sur une couleur pour la modifier avec la même barre que la barre des menus. Pour changer la couleur d’un anneau, choisissez-la à côté de celui-ci plus haut." } },
+        "de": { "stringUnit": { "state": "translated", "value": "Klicke auf eine Farbe, um sie mit derselben Leiste wie die Menüleiste zu bearbeiten. Welche Farbe ein Ring nutzt, wählst du oben neben dem Ring." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Haz clic en un color para editarlo con la misma barra que la barra de menús. Para cambiar el color de un anillo, elígelo junto a ese anillo arriba." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Clique em uma cor para editá-la com a mesma barra da barra de menus. Para mudar a cor de um anel, escolha-a ao lado dele acima." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Fai clic su un colore per modificarlo con la stessa barra della barra dei menu. Per cambiare il colore di un anello, sceglilo accanto a quell’anello qui sopra." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Нажмите на цвет, чтобы изменить его той же полосой, что и для строки меню. Цвет кольца меняется справа от него выше." } }
+      }
+    },
+    "settings.rings.color.unused": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Not used by any ring" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "没有圆环在用" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "沒有圓環在用" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "どのリングも使用していません" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "사용하는 링 없음" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Utilisée par aucun anneau" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Von keinem Ring verwendet" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Ningún anillo la usa" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Nenhum anel usa" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Non usato da alcun anello" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Не используется" } }
+      }
+    },
+    "settings.rings.color.usedBy %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Used by %@" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "%@在用" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "%@在用" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "%@ で使用" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "%@에서 사용" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Utilisée par %@" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Verwendet von %@" } },
+        "es": { "stringUnit": { "state": "translated", "value": "La usan: %@" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Usada por: %@" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Usato da %@" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Используют: %@" } }
+      }
+    },
+    "settings.rings.color.new": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "New Color" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "新建颜色" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "新增顏色" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "新しい色" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "새 색상" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Nouvelle couleur" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Neue Farbe" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Nuevo color" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Nova cor" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Nuovo colore" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Новый цвет" } }
+      }
+    },
+    "settings.rings.color.delete": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Delete Color" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "删除这个颜色" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "刪除這個顏色" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "この色を削除" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "이 색상 삭제" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Supprimer la couleur" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Farbe löschen" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Eliminar color" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Apagar cor" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Elimina colore" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Удалить цвет" } }
+      }
+    },
+    "settings.rings.color.edit %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Edit “%@”" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "编辑「%@」" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "編輯「%@」" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "「%@」を編集" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "‘%@’ 편집" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Modifier « %@ »" } },
+        "de": { "stringUnit": { "state": "translated", "value": "„%@“ bearbeiten" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Editar «%@»" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Editar “%@”" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Modifica «%@»" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Изменить «%@»" } }
+      }
+    },
+    "settings.rings.ramp.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Drag the white handles to change the ranges. Click a segment to change its colors." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "拖动白色把手调整范围，点按色段更改颜色。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "拖動白色把手調整範圍，點按色段更改顏色。" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "白いハンドルをドラッグして範囲を変え、区間をクリックして色を変更します。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "흰색 핸들을 드래그해 범위를 바꾸고, 구간을 클릭해 색상을 바꿉니다." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Faites glisser les poignées blanches pour changer les plages. Cliquez sur un segment pour changer ses couleurs." } },
+        "de": { "stringUnit": { "state": "translated", "value": "Ziehe die weißen Griffe, um die Bereiche zu ändern. Klicke auf einen Abschnitt, um seine Farben zu ändern." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Arrastra los tiradores blancos para cambiar los rangos. Haz clic en un tramo para cambiar sus colores." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Arraste as alças brancas para mudar as faixas. Clique em um trecho para mudar as cores." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Trascina le maniglie bianche per cambiare gli intervalli. Fai clic su un tratto per cambiarne i colori." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Перетаскивайте белые маркеры, чтобы менять диапазоны. Нажмите на отрезок, чтобы изменить его цвета." } }
+      }
+    },
+    "settings.tint.segment.valueRange %lld %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "%lld% – %lld%" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "%lld% – %lld%" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "%lld% – %lld%" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "%lld% – %lld%" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "%lld% – %lld%" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "%lld % – %lld %" } },
+        "de": { "stringUnit": { "state": "translated", "value": "%lld % – %lld %" } },
+        "es": { "stringUnit": { "state": "translated", "value": "%lld % – %lld %" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "%lld% – %lld%" } },
+        "it": { "stringUnit": { "state": "translated", "value": "%lld% – %lld%" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "%lld% – %lld%" } }
+      }
+    },
+    "settings.tint.color.atValue %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "At %lld%" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "%lld% 时" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "%lld% 時" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "%lld% のとき" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "%lld%일 때" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "À %lld %" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Bei %lld %" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Al %lld %" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Em %lld%" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Al %lld%" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "При %lld%" } }
+      }
+    },
+    "settings.rings.segment.caption": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "How the ring looks in this range" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "圆环走到这个范围时，这样显示" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "圓環走到這個範圍時，這樣顯示" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "リングがこの範囲にあるときの表示" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "링이 이 범위일 때의 모습" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "L’anneau dans cette plage" } },
+        "de": { "stringUnit": { "state": "translated", "value": "So sieht der Ring in diesem Bereich aus" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Así se ve el anillo en este rango" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Assim fica o anel nesta faixa" } },
+        "it": { "stringUnit": { "state": "translated", "value": "L’anello in questo intervallo" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Так выглядит кольцо в этом диапазоне" } }
+      }
+    },
+    "settings.rings.half.download.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Download speed for half a ring" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "下载速度到多少时走半圈" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "下載速度到多少時走半圈" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "リング半分になるダウンロード速度" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "링 절반이 되는 다운로드 속도" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Débit descendant pour un demi-anneau" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Download-Rate für einen halben Ring" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Velocidad de descarga para medio anillo" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Velocidade de download para meio anel" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Velocità di download per mezzo anello" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Скорость загрузки на полкольца" } }
+      }
+    },
+    "settings.rings.half.upload.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Upload speed for half a ring" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "上传速度到多少时走半圈" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "上傳速度到多少時走半圈" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "リング半分になるアップロード速度" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "링 절반이 되는 업로드 속도" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Débit montant pour un demi-anneau" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Upload-Rate für einen halben Ring" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Velocidad de subida para medio anillo" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Velocidade de upload para meio anel" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Velocità di upload per mezzo anello" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Скорость выгрузки на полкольца" } }
+      }
+    },
+    "settings.rings.half.temperature.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Battery temperature for half a ring" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "电池温度到多少时走半圈" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "電池溫度到多少時走半圈" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "リング半分になるバッテリー温度" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "링 절반이 되는 배터리 온도" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Température de batterie pour un demi-anneau" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Akkutemperatur für einen halben Ring" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Temperatura de batería para medio anillo" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Temperatura da bateria para meio anel" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Temperatura batteria per mezzo anello" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Температура батареи на полкольца" } }
+      }
+    },
+    "settings.rings.half.swap.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Swap for half a ring" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "交换到多少时走半圈" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "交換到多少時走半圈" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "リング半分になるスワップ" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "링 절반이 되는 스왑" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Swap pour un demi-anneau" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Swap für einen halben Ring" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Intercambio para medio anillo" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Swap para meio anel" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Swap per mezzo anello" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Подкачка на полкольца" } }
+      }
+    },
+    "settings.rings.half.swap.caption": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "A full ring is always all of this Mac’s memory." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "满圈始终是这台 Mac 的全部内存。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "滿圈始終是這台 Mac 的全部記憶體。" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "リング1周は常にこのMacのメモリ全体です。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "링 한 바퀴는 항상 이 Mac의 전체 메모리입니다." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Un anneau complet correspond toujours à toute la mémoire de ce Mac." } },
+        "de": { "stringUnit": { "state": "translated", "value": "Ein voller Ring ist immer der gesamte Speicher dieses Mac." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Un anillo completo es siempre toda la memoria de este Mac." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Um anel completo é sempre toda a memória deste Mac." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Un anello completo è sempre tutta la memoria di questo Mac." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Полное кольцо — это всегда вся память этого Mac." } }
+      }
+    },
+    "settings.rings.thermal.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "How far each thermal state fills" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "热状态各档走到哪里" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "熱狀態各檔走到哪裡" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "熱状態ごとの位置" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "열 상태별 채움 정도" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Remplissage de chaque état thermique" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Füllung je Wärmezustand" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Relleno de cada estado térmico" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Preenchimento de cada estado térmico" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Riempimento per ogni stato termico" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Заполнение для каждого теплового состояния" } }
+      }
+    },
+    "settings.rings.thermal.adjust": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Adjust…" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "调整…" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "調整…" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "調整…" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "조정…" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Ajuster…" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Anpassen…" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Ajustar…" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Ajustar…" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Regola…" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Настроить…" } }
+      }
+    },
+    "settings.rings.scale.header": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Scale" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "刻度" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "刻度" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "目盛り" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "눈금" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Échelle" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Skala" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Escala" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Escala" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Scala" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Шкала" } }
+      }
+    },
+    "settings.rings.scale.footer": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Speed and temperature have no upper limit, but a ring has only one turn, so choose the value that fills half of it." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "速度和温度没有上限，圆环却只有一圈，所以要指定「走到半圈」时对应的数值。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "速度和溫度沒有上限，圓環卻只有一圈，所以要指定「走到半圈」時對應的數值。" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "速度や温度には上限がありませんが、リングは1周しかないので、半分になる値を指定します。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "속도와 온도에는 상한이 없지만 링은 한 바퀴뿐이라, 절반이 되는 값을 정합니다." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "La vitesse et la température n’ont pas de limite, mais un anneau ne fait qu’un tour : choisissez la valeur qui le remplit à moitié." } },
+        "de": { "stringUnit": { "state": "translated", "value": "Geschwindigkeit und Temperatur haben keine Obergrenze, ein Ring aber nur eine Runde. Wähle daher den Wert für einen halben Ring." } },
+        "es": { "stringUnit": { "state": "translated", "value": "La velocidad y la temperatura no tienen límite, pero un anillo solo da una vuelta: elige el valor que llena la mitad." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Velocidade e temperatura não têm limite, mas o anel só dá uma volta: escolha o valor que preenche metade." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Velocità e temperatura non hanno limite, ma un anello ha un solo giro: scegli il valore che ne riempie metà." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "У скорости и температуры нет предела, а у кольца лишь один оборот, поэтому задайте значение для половины кольца." } }
+      }
     }
   },
   "version": "1.0"
