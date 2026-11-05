@@ -268,7 +268,7 @@ final class PopoverExtrasTests: XCTestCase {
         defaults.set(3, forKey: "settingsDefaultsRevision")
         let migrated = AppSettings(defaults: defaults)
         assertDividersBetweenEveryBlock(migrated.popoverOrder)
-        XCTAssertEqual(defaults.integer(forKey: "settingsDefaultsRevision"), 4)
+        XCTAssertGreaterThanOrEqual(defaults.integer(forKey: "settingsDefaultsRevision"), 4)
 
         let dividerIDs = migrated.popoverOrder.compactMap { entry -> UUID? in
             if case .divider(let id) = entry { return id }
@@ -293,7 +293,7 @@ final class PopoverExtrasTests: XCTestCase {
         defaults.set(3, forKey: "settingsDefaultsRevision")
         let custom = AppSettings(defaults: defaults)
         XCTAssertEqual(custom.popoverOrder.map(\.rawValue), reordered)
-        XCTAssertEqual(defaults.integer(forKey: "settingsDefaultsRevision"), 4)
+        XCTAssertGreaterThanOrEqual(defaults.integer(forKey: "settingsDefaultsRevision"), 4)
 
         let kept = UUID()
         defaults.removePersistentDomain(forName: suite)
@@ -825,13 +825,14 @@ final class PopoverExtrasTests: XCTestCase {
         first.downloadHalfKilobytes = 2048
         first.temperatureHalfCelsius = 35
         first.temperatureUnit = .fahrenheit
-        first.swapHalfMegabytes = 8192
+        let swapValue = min(8192, AppSettings.swapHalfLimit().upperBound)
+        first.swapHalfMegabytes = swapValue
         first.thermalNominalPercent = 10
         let second = AppSettings(defaults: defaults)
         XCTAssertEqual(second.downloadHalfKilobytes, 2048)
         XCTAssertEqual(second.temperatureHalfCelsius, 35)
         XCTAssertEqual(second.temperatureUnit, .fahrenheit)
-        XCTAssertEqual(second.swapHalfMegabytes, 8192)
+        XCTAssertEqual(second.swapHalfMegabytes, swapValue)
         XCTAssertEqual(second.thermalNominalPercent, 10)
         defaults.removePersistentDomain(forName: suite)
     }

@@ -591,11 +591,10 @@ final class EnergyMotionStyleTests: XCTestCase {
         settings.showLowPower = false
         settings.showLocalIP = false
         settings.showBatteryCycle = false
-        XCTAssertEqual(settings.settingsButtonPlacement, .ownBlock)
-        XCTAssertTrue(settings.showSettingsBlock)
-        XCTAssertTrue(settings.isSoleVisiblePopoverBlock(.settings))
-        settings.showSettingsBlock = false
-        XCTAssertTrue(settings.showSettingsBlock)
+        XCTAssertEqual(settings.settingsButtonPlacement, .insideBlock)
+        XCTAssertEqual(settings.settingsButtonHost, .batteryCycle)
+        XCTAssertTrue(settings.showBatteryCycle)
+        XCTAssertTrue(settings.isSoleVisiblePopoverBlock(.batteryCycle))
         XCTAssertFalse(settings.showStatusRings)
 
         defaults.set(false, forKey: "showStatusRings")
@@ -1328,12 +1327,12 @@ final class RingColorTests: XCTestCase {
         let shared = tint.assignments[.cpu]
         XCTAssertEqual(tint.assignments[.gpu], shared)
         XCTAssertEqual(tint.assignments[.memory], shared)
-        tint = tint.updatingColor(id: shared!, scheme: tint.cpu.replacingBand(at: 0) { $0.throughPercent = 33 })
+        tint = tint.updatingColor(id: shared!, scheme: tint.cpu.replacingBand(at: 0) { $0.highLeft = .systemOrange })
         XCTAssertEqual(tint.preset, .custom)
-        XCTAssertEqual(tint.cpu.sortedBands[0].throughPercent, 33)
-        XCTAssertEqual(tint.gpu.sortedBands[0].throughPercent, 33)
-        XCTAssertEqual(tint.memory.sortedBands[0].throughPercent, 33)
-        XCTAssertNotEqual(tint.battery.sortedBands[0].throughPercent, 33)
+        XCTAssertEqual(tint.cpu.sortedBands[0].highLeft, .systemOrange)
+        XCTAssertEqual(tint.gpu.sortedBands[0].highLeft, .systemOrange)
+        XCTAssertEqual(tint.memory.sortedBands[0].highLeft, .systemOrange)
+        XCTAssertNotEqual(tint.battery.sortedBands[0].highLeft, .systemOrange)
 
         let batteryID = tint.assignments[.battery]!
         tint = tint.assigning(.disk, to: batteryID)
