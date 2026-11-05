@@ -1,0 +1,34 @@
+name: Pull request
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  catalog:
+    name: Catalog
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check localization and release notes
+        run: python3 scripts/check_catalog.py
+
+  test:
+    name: Build and test
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and test
+        run: |
+          xcodebuild test \
+            -project MacPower.xcodeproj \
+            -scheme MacPower \
+            -destination 'platform=macOS' \
+            -derivedDataPath DerivedData \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY=- \
+            DEVELOPMENT_TEAM= \
+            CODE_SIGNING_ALLOWED=YES
