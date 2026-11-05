@@ -86,6 +86,7 @@ enum MenuBarBatteryRenderer {
         var digitBox: NSRect
         var font: NSFont
         var text: String
+        var kern: CGFloat
         var glyphBox: NSRect
     }
 
@@ -106,30 +107,44 @@ enum MenuBarBatteryRenderer {
     ) -> Metrics {
         let bodyHeight: CGFloat = 12
         let bodyY = (height - bodyHeight) / 2
+        let percentInside = style == .systemPercentInside
         let capWidth: CGFloat = style.isOutlined ? 2 : 1.5
-        let capHeight: CGFloat = style.isOutlined ? bodyHeight : 4
-        let capGap: CGFloat = style.isOutlined ? 1 : 1.22
+        let capHeight: CGFloat = style.isOutlined ? bodyHeight : (percentInside ? 3.95 : 4)
+        let capGap: CGFloat = style.isOutlined ? 1 : (percentInside ? 1.00 : 1.22)
         let showsText = style.showsPercentInside
         let text = showsText ? "\(percent)" : ""
         let digits = text.count
         let fontSize: CGFloat = {
             // The outlined body keeps a 2pt gutter, so the shared size fills the interior.
             if style.isOutlined, showsText { return digits >= 3 ? 7.2 : 8.0 }
-            return digits >= 3 ? 8.6 : 9.4
+            // Beside the bolt the system shrinks three digits to 13px; alone they stay 15px.
+            if digits >= 3 { return glyph != nil ? 9.0 : 10.0 }
+            return 10.2
         }()
+        let insideKnockout = showsText && !style.isOutlined
         let font = percentFont(size: fontSize)
-        let textSize = text.isEmpty
+        var textSize = text.isEmpty
             ? NSSize.zero
             : (text as NSString).size(withAttributes: [.font: font])
+        // The system spaces three inside digits slightly wider than the font does.
+        let kern: CGFloat = insideKnockout && digits >= 3 ? (glyph != nil ? 0.5 : 0.4) : 0
+        if insideKnockout {
+            // Space the knockout by ink so the bolt sits as close to the digits as the system's.
+            let line = CTLineCreateWithAttributedString(NSAttributedString(string: text, attributes: [.font: font, .kern: kern]))
+            textSize.width = CTLineGetBoundsWithOptions(line, [.useGlyphPathBounds]).width
+        }
+        let insideBolt = insideBoltInkSize(digits: digits)
         let glyphAdvance: CGFloat
         switch glyph {
-        case .bolt: glyphAdvance = showsText ? 5.8 : 8.8
+        case .bolt: glyphAdvance = insideKnockout ? insideBolt.width : (showsText ? 5.8 : 8.8)
         case nil: glyphAdvance = 0
         }
-        let gap: CGFloat = (showsText && glyph != nil) ? 0.45 : 0
+        let gap: CGFloat = (showsText && glyph != nil) ? (insideKnockout ? (digits >= 3 ? 1.0 : 0.7) : 0.45) : 0
         let groupWidth = (showsText ? textSize.width : 0) + gap + glyphAdvance
         let bodyWidth: CGFloat = {
             if !showsText { return 23 }
+            // Measured from the system menu-bar battery: 46px at 2x, for two and three digits.
+            if style == .systemPercentInside { return 23 }
             return digits >= 3 ? 24.0 : (style.isOutlined ? 23 : 22.5)
         }()
         let body = NSRect(x: style.isOutlined ? 0 : 0.35, y: bodyY, width: bodyWidth, height: bodyHeight)
@@ -159,6 +174,7 @@ enum MenuBarBatteryRenderer {
             digitBox: digitBox,
             font: font,
             text: text,
+            kern: kern,
             glyphBox: glyphBox
         )
     }
@@ -172,7 +188,6 @@ enum MenuBarBatteryRenderer {
         glyph: MenuBarGlyph?
     ) {
         let body = metrics.body
-        let radius: CGFloat = 3.8
         if style.isOutlined {
             drawOutlinedChargeLevel(
                 body: body,
@@ -189,17 +204,31 @@ enum MenuBarBatteryRenderer {
             }
             return
         }
-        drawChargeLevel(body: body, cap: metrics.cap, percent: percent, fill: fill, radius: radius)
+        let percentInside = style == .systemPercentInside
+        drawChargeLevel(
+            body: body,
+            cap: metrics.cap,
+            percent: percent,
+            fill: fill,
+            bodyPath: percentInside
+                ? NSBezierPath(roundedRect: body, xRadius: 4.04, yRadius: 4.04)
+                : continuousRoundedRect(body, radius: 3.8),
+            backingAlpha: percentInside ? 0.50 : 0.52,
+            terminalAlpha: percentInside ? 0.60 : 0.62,
+            terminalKappa: percentInside ? 0.46 : 0.55228475
+        )
 
         guard !style.showsPercentBeside || glyph != nil else { return }
 
+        // Keep a little of the body under the digits and bolt so the knockout stays antialiased.
+        let knockout = percentInside ? NSColor.black.withAlphaComponent(0.895) : NSColor.black
         NSGraphicsContext.saveGraphicsState()
         NSGraphicsContext.current?.compositingOperation = .destinationOut
-        NSColor.black.setFill()
-        NSColor.black.setStroke()
+        knockout.setFill()
+        knockout.setStroke()
 
         if style.showsPercentInside, !metrics.text.isEmpty {
-            punchCenteredText(metrics.text, font: metrics.font, in: metrics.digitBox)
+            punchCenteredText(metrics.text, font: metrics.font, in: metrics.digitBox, color: knockout, kern: metrics.kern, snapsBaseline: true)
         }
 
         NSGraphicsContext.restoreGraphicsState()
@@ -208,7 +237,7 @@ enum MenuBarBatteryRenderer {
             switch glyph {
             case .bolt:
                 if style.showsPercentInside {
-                    punchChargeMark(in: metrics.glyphBox)
+                    punchChargeMark(in: metrics.glyphBox, digits: metrics.text.count, color: knockout)
                 } else {
                     drawChargeMark(in: body, fill: fill)
                 }
@@ -221,16 +250,18 @@ enum MenuBarBatteryRenderer {
         cap: NSRect,
         percent: CGFloat,
         fill: MenuBarResolvedFill,
-        radius: CGFloat
+        bodyPath: NSBezierPath,
+        backingAlpha: CGFloat,
+        terminalAlpha: CGFloat,
+        terminalKappa: CGFloat
     ) {
         let clamped = min(1, max(0, percent))
-        let bodyPath = NSBezierPath(roundedRect: body, xRadius: radius, yRadius: radius)
-        let capPath = terminalPath(in: cap)
-        let dim = fill.withAlpha(0.62)
+        let capPath = terminalPath(in: cap, kappa: terminalKappa)
+        let dim = fill.withAlpha(terminalAlpha)
 
         NSGraphicsContext.saveGraphicsState()
         bodyPath.addClip()
-        paint(fill.withAlpha(0.52), in: body)
+        paint(fill.withAlpha(backingAlpha), in: body)
         NSGraphicsContext.restoreGraphicsState()
         NSGraphicsContext.saveGraphicsState()
         capPath.addClip()
@@ -277,14 +308,66 @@ enum MenuBarBatteryRenderer {
             paint(fill, in: body.insetBy(dx: 2, dy: 2))
             NSGraphicsContext.restoreGraphicsState()
         }
-        paintTemplate(named: "MenuBarBatteryOutline", in: body, fill: fill)
+        paintOutline(in: body, fill: fill)
         paintTemplate(named: "MenuBarBatteryCap", in: cap, fill: fill)
+    }
+
+    /// A 1pt inside stroke at half opacity, like the native frame.
+    private static func paintOutline(in body: NSRect, fill: MenuBarResolvedFill) {
+        guard let context = NSGraphicsContext.current?.cgContext else { return }
+        let frame = continuousRoundedRect(body, radius: 3.35)
+        NSGraphicsContext.saveGraphicsState()
+        frame.addClip()
+        context.addPath(frame.cgPath)
+        context.setLineWidth(2)
+        context.replacePathWithStrokedPath()
+        context.clip()
+        context.setAlpha(0.5)
+        paint(fill, in: body)
+        NSGraphicsContext.restoreGraphicsState()
     }
 
     private static func outlinedChargePath(body: NSRect, percent: CGFloat) -> NSBezierPath {
         var charged = body.insetBy(dx: 2, dy: 2)
         charged.size.width *= min(1, max(0, percent))
-        return NSBezierPath(roundedRect: charged, xRadius: 1.5, yRadius: 1.5)
+        return continuousRoundedRect(charged, radius: 1.5)
+    }
+
+    /// A rounded rectangle whose corners ease out of the straight edges, like
+    /// SwiftUI's `RoundedRectangle(style: .continuous)`.
+    private static func continuousRoundedRect(_ rect: NSRect, radius: CGFloat) -> NSBezierPath {
+        // Each corner spans 1.52866483 × radius along both edges.
+        let span: CGFloat = 1.52866483
+        let r = max(0, min(radius, min(rect.width, rect.height) / (2 * span)))
+        guard r > 0 else { return NSBezierPath(rect: rect) }
+        let curves: [(CGFloat, CGFloat, CGFloat, CGFloat, CGFloat, CGFloat)] = [
+            (1.08849323, 0, 0.86840694, 0, 0.63149399, 0.07491139),
+            (0.37282383, 0.16905899, 0.16905899, 0.37282383, 0.07491139, 0.63149399),
+            (0, 0.86840694, 0, 1.08849323, 0, span),
+        ]
+        // Corner point, the direction travelled into it, and the direction leaving it.
+        let corners: [(NSPoint, CGVector, CGVector)] = [
+            (NSPoint(x: rect.maxX, y: rect.minY), CGVector(dx: 1, dy: 0), CGVector(dx: 0, dy: 1)),
+            (NSPoint(x: rect.maxX, y: rect.maxY), CGVector(dx: 0, dy: 1), CGVector(dx: -1, dy: 0)),
+            (NSPoint(x: rect.minX, y: rect.maxY), CGVector(dx: -1, dy: 0), CGVector(dx: 0, dy: -1)),
+            (NSPoint(x: rect.minX, y: rect.minY), CGVector(dx: 0, dy: -1), CGVector(dx: 1, dy: 0)),
+        ]
+        let path = NSBezierPath()
+        path.move(to: NSPoint(x: rect.minX + span * r, y: rect.minY))
+        for (corner, incoming, outgoing) in corners {
+            func point(_ before: CGFloat, _ after: CGFloat) -> NSPoint {
+                NSPoint(
+                    x: corner.x - incoming.dx * before * r + outgoing.dx * after * r,
+                    y: corner.y - incoming.dy * before * r + outgoing.dy * after * r
+                )
+            }
+            path.line(to: point(span, 0))
+            for c in curves {
+                path.curve(to: point(c.4, c.5), controlPoint1: point(c.0, c.1), controlPoint2: point(c.2, c.3))
+            }
+        }
+        path.close()
+        return path
     }
 
     private static func paintTemplate(named name: String, in rect: NSRect, fill: MenuBarResolvedFill) {
@@ -322,8 +405,8 @@ enum MenuBarBatteryRenderer {
     }
 
     /// A flat inner edge and a narrow, rounded outer edge, detached from the body.
-    private static func terminalPath(in rect: NSRect) -> NSBezierPath {
-        let quarterArc: CGFloat = 0.55228475
+    private static func terminalPath(in rect: NSRect, kappa: CGFloat) -> NSBezierPath {
+        let quarterArc = kappa
         let path = NSBezierPath()
         path.move(to: NSPoint(x: rect.minX, y: rect.minY))
         path.line(to: NSPoint(x: rect.minX, y: rect.maxY))
@@ -363,19 +446,29 @@ enum MenuBarBatteryRenderer {
             && abs(left.alphaComponent - right.alphaComponent) < 0.004
     }
 
-    private static func punchCenteredText(_ text: String, font: NSFont, in box: NSRect, color: NSColor = .black) {
+    private static func punchCenteredText(
+        _ text: String,
+        font: NSFont,
+        in box: NSRect,
+        color: NSColor = .black,
+        kern: CGFloat = 0,
+        snapsBaseline: Bool = false
+    ) {
         let line = CTLineCreateWithAttributedString(
             NSAttributedString(string: text, attributes: [
                 .font: font,
-                .foregroundColor: color
+                .foregroundColor: color,
+                .kern: kern
             ])
         )
         let bounds = CTLineGetBoundsWithOptions(line, [.useGlyphPathBounds])
         guard let cg = NSGraphicsContext.current?.cgContext else { return }
         cg.saveGState()
+        let baseline = box.midY - bounds.midY
         cg.textPosition = CGPoint(
             x: box.midX - bounds.midX,
-            y: box.midY - bounds.midY
+            // The 2x raster keeps flat digit edges on whole pixels.
+            y: snapsBaseline ? (baseline * 2).rounded() / 2 : baseline
         )
         CTLineDraw(line, cg)
         cg.restoreGState()
@@ -417,30 +510,31 @@ enum MenuBarBatteryRenderer {
         NSGraphicsContext.restoreGraphicsState()
     }
 
-    private static func punchChargeMark(in box: NSRect) {
-        guard let named = NSImage(named: "ChargeMark") else { return }
-        let maxH = min(9.6, box.height - 1.2)
-        let maxW = min(box.width - 0.4, 7.4)
-        let aspect = named.size.width / max(named.size.height, 1)
-        var height = maxH
-        var width = height * aspect
-        if width > maxW {
-            width = maxW
-            height = width / aspect
+    /// Traced from the macOS battery's 2x inside bolt: thin stems whose edges run
+    /// straight through the middle bar, blunt tips, symmetric about the centre.
+    private static let insideBoltOutline: [NSPoint] = [
+        NSPoint(x: 1.13, y: 3.0), NSPoint(x: 0.67, y: 3.0), NSPoint(x: -2.06, y: -0.5), NSPoint(x: -0.21, y: -0.5),
+        NSPoint(x: -1.13, y: -3.0), NSPoint(x: -0.67, y: -3.0), NSPoint(x: 2.06, y: 0.5), NSPoint(x: 0.21, y: 0.5),
+    ]
+
+    private static func insideBoltInkSize(digits: Int) -> NSSize {
+        // The system shrinks the bolt to 12px tall beside three digits, ~15px beside two.
+        let height: CGFloat = digits >= 3 ? 6.0 : 7.3
+        return NSSize(width: height * 4.12 / 6, height: height)
+    }
+
+    private static func punchChargeMark(in box: NSRect, digits: Int, color: NSColor) {
+        let scale = insideBoltInkSize(digits: digits).height / 6
+        let bolt = NSBezierPath()
+        for (i, point) in insideBoltOutline.enumerated() {
+            let p = NSPoint(x: box.midX + point.x * scale, y: box.midY + point.y * scale)
+            if i == 0 { bolt.move(to: p) } else { bolt.line(to: p) }
         }
-        let rect = NSRect(
-            x: box.midX - width / 2,
-            y: box.midY - height / 2,
-            width: width,
-            height: height
-        )
-        named.draw(
-            in: rect,
-            from: .zero,
-            operation: .destinationOut,
-            fraction: 1,
-            respectFlipped: true,
-            hints: [.interpolation: NSImageInterpolation.high]
-        )
+        bolt.close()
+        NSGraphicsContext.saveGraphicsState()
+        NSGraphicsContext.current?.compositingOperation = .destinationOut
+        color.setFill()
+        bolt.fill()
+        NSGraphicsContext.restoreGraphicsState()
     }
 }
