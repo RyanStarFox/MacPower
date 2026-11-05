@@ -293,7 +293,6 @@ struct TintRampEditor<SegmentEditor: View>: View {
         var percent: Int
     }
 
-    private static var space: String { "TintRampEditor" }
     private let barHeight: CGFloat = 26
     private let handleHeight: CGFloat = 34
 
@@ -328,7 +327,29 @@ struct TintRampEditor<SegmentEditor: View>: View {
                         handle(band, width: width)
                     }
                 }
-                .coordinateSpace(name: Self.space)
+                .overlay {
+                    RampMouseSurface(
+                        handles: ordered.dropLast().map { width * Double($0.throughPercent) / 100 },
+                        onDrag: { index, x in
+                            if let target = boundaryTarget(index, x: x, width: width) {
+                                drag = Drag(id: target.id, percent: target.percent)
+                            }
+                        },
+                        onEnd: { index, x in
+                            if let target = boundaryTarget(index, x: x, width: width),
+                               let band = committed.first(where: { $0.id == target.id }),
+                               band.throughPercent != target.percent {
+                                onChange(TintRamp.moving(target.id, to: target.percent, in: committed))
+                            }
+                            drag = nil
+                        },
+                        onClick: { x in
+                            guard width > 0 else { return }
+                            let percent = x / width * 100
+                            editingID = committed.first { Double($0.throughPercent) >= percent }?.id ?? committed.last?.id
+                        }
+                    )
+                }
             }
             .frame(height: handleHeight)
 
@@ -358,7 +379,6 @@ struct TintRampEditor<SegmentEditor: View>: View {
                 }
             }
             .contentShape(Rectangle())
-            .onTapGesture { editingID = band.id }
             .popover(
                 isPresented: Binding(
                     get: { editingID == band.id },
@@ -377,6 +397,15 @@ struct TintRampEditor<SegmentEditor: View>: View {
             .accessibilityAction { editingID = band.id }
     }
 
+    /// Where the split point at `index` lands for a pointer at `x`, kept between its neighbors.
+    private func boundaryTarget(_ index: Int, x: CGFloat, width: CGFloat) -> (id: UUID, percent: Int)? {
+        let ordered = committed
+        guard width > 0, ordered.indices.contains(index), index < ordered.count - 1 else { return nil }
+        let range = TintRamp.boundaryRange(at: index, in: ordered)
+        let raw = Int((x / width * 100).rounded())
+        return (ordered[index].id, min(range.upperBound, max(range.lowerBound, raw)))
+    }
+
     private func handle(_ band: MenuBarTintBand, width: CGFloat) -> some View {
         let index = committed.firstIndex { $0.id == band.id } ?? 0
         let range = TintRamp.boundaryRange(at: index, in: committed)
@@ -391,25 +420,7 @@ struct TintRampEditor<SegmentEditor: View>: View {
                 }
         }
         .frame(width: 22, height: handleHeight)
-        .contentShape(Rectangle())
         .position(x: width * Double(percent) / 100, y: handleHeight / 2)
-        .gesture(
-            DragGesture(minimumDistance: 0, coordinateSpace: .named(Self.space))
-                .onChanged { value in
-                    guard width > 0 else { return }
-                    let raw = Int((value.location.x / width * 100).rounded())
-                    drag = Drag(id: band.id, percent: min(range.upperBound, max(range.lowerBound, raw)))
-                }
-                .onEnded { _ in
-                    if let drag, drag.id == band.id, drag.percent != band.throughPercent {
-                        onChange(TintRamp.moving(band.id, to: drag.percent, in: committed))
-                    }
-                    drag = nil
-                }
-        )
-        .onHover { inside in
-            if inside { NSCursor.resizeLeftRight.push() } else { NSCursor.pop() }
-        }
         .accessibilityElement()
         .accessibilityLabel(Localization.string("settings.tint.boundary", language: language))
         .accessibilityValue("\(percent)%")
@@ -821,5 +832,87 @@ struct TintPresetChip<Thumbnail: View>: View {
         .help(title)
         .accessibilityLabel(title)
         .accessibilityAddTraits(selected ? .isSelected : [])
+    }
+}
+
+/// Takes the mouse over the ramp in AppKit. Inside a grouped Form the list under
+/// the row claimed drags before a SwiftUI drag gesture could start, so the
+/// handles never moved. A click away from a handle selects the segment under it.
+private struct RampMouseSurface: NSViewRepresentable {
+    var handles: [CGFloat]
+    var onDrag: (Int, CGFloat) -> Void
+    var onEnd: (Int, CGFloat) -> Void
+    var onClick: (CGFloat) -> Void
+
+    func makeNSView(context: Context) -> RampMouseView {
+        RampMouseView()
+    }
+
+    func updateNSView(_ view: RampMouseView, context: Context) {
+        view.handles = handles
+        view.onDrag = onDrag
+        view.onEnd = onEnd
+        view.onClick = onClick
+        view.window?.invalidateCursorRects(for: view)
+    }
+}
+
+private final class RampMouseView: NSView {
+    var handles: [CGFloat] = []
+    var onDrag: ((Int, CGFloat) -> Void)?
+    var onEnd: ((Int, CGFloat) -> Void)?
+    var onClick: ((CGFloat) -> Void)?
+    private var active: Int?
+    private var moved = false
+
+    /// How far from a handle's center a press still grabs it.
+    private static let grabDistance: CGFloat = 9
+
+    override var isFlipped: Bool { true }
+    override var mouseDownCanMoveWindow: Bool { false }
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+    override func isAccessibilityElement() -> Bool { false }
+
+    private func pointerX(_ event: NSEvent) -> CGFloat {
+        convert(event.locationInWindow, from: nil).x
+    }
+
+    private func handle(near x: CGFloat) -> Int? {
+        guard let nearest = handles.enumerated().min(by: { abs($0.element - x) < abs($1.element - x) }),
+              abs(nearest.element - x) <= Self.grabDistance else { return nil }
+        return nearest.offset
+    }
+
+    override func mouseDown(with event: NSEvent) {
+        active = handle(near: pointerX(event))
+        moved = false
+        if active != nil { NSCursor.closedHand.set() }
+    }
+
+    override func mouseDragged(with event: NSEvent) {
+        guard let active else { return }
+        moved = true
+        onDrag?(active, pointerX(event))
+    }
+
+    override func mouseUp(with event: NSEvent) {
+        let x = pointerX(event)
+        if let active {
+            if moved { onEnd?(active, x) }
+        } else {
+            onClick?(x)
+        }
+        active = nil
+        moved = false
+        window?.invalidateCursorRects(for: self)
+    }
+
+    override func resetCursorRects() {
+        for x in handles {
+            addCursorRect(
+                NSRect(x: x - Self.grabDistance, y: 0, width: Self.grabDistance * 2, height: bounds.height),
+                cursor: .resizeLeftRight
+            )
+        }
     }
 }

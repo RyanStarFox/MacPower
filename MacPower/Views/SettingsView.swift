@@ -2325,16 +2325,36 @@ struct SettingsView: View {
                 lowPowerMiniButton(strategyTitle, symbol: "chevron.down", symbolFirst: false)
             }
             if visibility != .strategy {
-                lowPowerMiniButton(lowPowerTitle, symbol: "battery.25percent", symbolFirst: true)
+                lowPowerMiniButton(lowPowerTitle, symbol: "", symbolFirst: true)
             }
         }
+    }
+
+    /// The panel's low-power battery: a yellow charge in a neutral frame, drawn
+    /// by the menu bar renderer like the button in the panel.
+    private var lowPowerBatteryGlyph: some View {
+        var snapshot = PowerSnapshot.empty
+        snapshot.percent = 35
+        let appearance = NSAppearance(named: colorScheme == .dark ? .darkAqua : .aqua) ?? NSApp.effectiveAppearance
+        let yellow = NSColor.systemYellow
+        let image = MenuBarBatteryRenderer.image(
+            snapshot: snapshot,
+            style: .outlineFill,
+            fill: MenuBarResolvedFill(left: yellow, right: yellow, isTemplate: false),
+            appearance: appearance,
+            showChargeGlyphs: false
+        )
+        return Image(nsImage: image)
+            .resizable()
+            .aspectRatio(contentMode: .fit)
+            .frame(width: 16, height: 10)
+            .accessibilityHidden(true)
     }
 
     private func lowPowerMiniButton(_ title: String, symbol: String, symbolFirst: Bool) -> some View {
         HStack(spacing: 3) {
             if symbolFirst {
-                Image(systemName: symbol)
-                    .foregroundStyle(.yellow)
+                lowPowerBatteryGlyph
             }
             Text(verbatim: title)
                 .lineLimit(1)
