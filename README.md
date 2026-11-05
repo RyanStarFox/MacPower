@@ -34,7 +34,7 @@ MacBook 菜单栏电池监视器。不进 Dock，点开后是 **Liquid Glass** �
 
 ### 第一步：下载并安装
 
-从 [Releases](https://github.com/RyanStarFox/MacPower/releases) 下载最新的 `MacPower-*.dmg`，打开后把 **MacPower** 拖进 **应用程序**。
+从 [Releases](https://github.com/RyanStarFox/MacPower/releases) 下载最新的 `MacPower-*.dmg`，打开后把 **MacPower** 拖进 **应用程序**。也可以从[百度网盘](https://pan.baidu.com/s/5SnLWWlMTTOdCSo7psQJe7A)下载。
 
 也可以用 Homebrew：
 

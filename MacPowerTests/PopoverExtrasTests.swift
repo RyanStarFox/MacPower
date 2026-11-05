@@ -936,4 +936,27 @@ final class PopoverExtrasTests: XCTestCase {
         XCTAssertFalse(hidden.ringOrder.contains(.thermalState))
         defaults.removePersistentDomain(forName: suite)
     }
+
+    func testNetworkRateIgnoresInterfacesThatAppearOrReset() {
+        let prior = [
+            "en0": NetworkInterfaceRates.Counters(rx: 1_000, tx: 400),
+            "utun0": NetworkInterfaceRates.Counters(rx: 2_000_000_000, tx: 50),
+        ]
+        let current = [
+            "en0": NetworkInterfaceRates.Counters(rx: 2_000, tx: 900),
+            "utun0": NetworkInterfaceRates.Counters(rx: 10, tx: 50),
+            "feth1": NetworkInterfaceRates.Counters(rx: 1_900_000_000, tx: 800_000_000),
+        ]
+        let rates = NetworkInterfaceRates.rates(current: current, previous: prior, elapsed: 1)
+        XCTAssertEqual(rates?.download, 1_000)
+        XCTAssertEqual(rates?.upload, 500)
+        XCTAssertEqual(
+            NetworkInterfaceRates.rates(current: current, previous: nil, elapsed: 1)?.download,
+            0
+        )
+        XCTAssertNil(NetworkInterfaceRates.rates(current: current, previous: prior, elapsed: 0.1))
+        let live = NetworkInterfaceRates.currentCounters()
+        XCTAssertNotNil(live?["en0"])
+        XCTAssertNil(live?["lo0"])
+    }
 }

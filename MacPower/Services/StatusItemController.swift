@@ -20,6 +20,9 @@ final class StatusItemController: NSObject, NSPopoverDelegate, NSMenuDelegate {
     private var lastTooltip: String?
     private var isRefreshingIcon = false
     private var isShowingStatusMenu = false
+    /// Clicks outside a menu-bar popover never reach this accessory app, so
+    /// `.transient` alone leaves the panel up until the status item is clicked again.
+    private var outsideClickMonitors: [Any] = []
     /// Holds the SwiftUI panel so a taller-than-screen layout can scroll
     /// instead of extending past the Dock.
     private let contentScrollView: NSScrollView = {
@@ -221,9 +224,49 @@ final class StatusItemController: NSObject, NSPopoverDelegate, NSMenuDelegate {
         hosting.view.layoutSubtreeIfNeeded()
         restoreScrollFromCurrentFrames()
         popover.contentViewController?.view.window?.makeKey()
+        startOutsideClickMonitoring()
         DispatchQueue.main.async { [weak self] in
             self?.restoreScrollFromCurrentFrames()
         }
+    }
+
+    private func startOutsideClickMonitoring() {
+        stopOutsideClickMonitoring()
+        let mask: NSEvent.EventTypeMask = [.leftMouseDown, .rightMouseDown, .otherMouseDown]
+        if let monitor = NSEvent.addLocalMonitorForEvents(matching: mask, handler: { [weak self] event in
+            self?.closePopoverIfClickIsOutside()
+            return event
+        }) {
+            outsideClickMonitors.append(monitor)
+        }
+        if let monitor = NSEvent.addGlobalMonitorForEvents(matching: mask, handler: { [weak self] _ in
+            Task { @MainActor in
+                self?.closePopoverIfClickIsOutside()
+            }
+        }) {
+            outsideClickMonitors.append(monitor)
+        }
+    }
+
+    private func stopOutsideClickMonitoring() {
+        for monitor in outsideClickMonitors {
+            NSEvent.removeMonitor(monitor)
+        }
+        outsideClickMonitors.removeAll()
+    }
+
+    /// Leave clicks on the panel and the status item alone. The status item's own action toggles the panel.
+    private func closePopoverIfClickIsOutside() {
+        guard popover.isShown else { return }
+        let mouse = NSEvent.mouseLocation
+        if let window = popover.contentViewController?.view.window, window.frame.contains(mouse) {
+            return
+        }
+        if let button = statusItem.button, let window = button.window {
+            let local = button.convert(window.convertPoint(fromScreen: mouse), from: nil)
+            if button.bounds.contains(local) { return }
+        }
+        popover.performClose(nil)
     }
 
     private func showStatusMenu() {
@@ -286,6 +329,7 @@ final class StatusItemController: NSObject, NSPopoverDelegate, NSMenuDelegate {
         }
         setStatusItemHighlighted(true)
         hugMenuBarIfArrowHidden()
+        startOutsideClickMonitoring()
     }
 
     private var popoverWidth: CGFloat {
@@ -424,6 +468,7 @@ final class StatusItemController: NSObject, NSPopoverDelegate, NSMenuDelegate {
     }
 
     func popoverDidClose(_ notification: Notification) {
+        stopOutsideClickMonitoring()
         rememberScrollOffset()
         setStatusItemHighlighted(false)
         var transaction = Transaction()
