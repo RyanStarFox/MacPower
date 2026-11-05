@@ -18,6 +18,13 @@ enum MenuBarBatteryRenderer {
             return nil
         }()
 
+        let neutralFill: MenuBarResolvedFill
+        if fill.isTemplate {
+            neutralFill = fill
+        } else {
+            let color = MenuBarTintSwatch.menuBar.paintNSColor(appearance: appearance)
+            neutralFill = MenuBarResolvedFill(left: color, right: color, isTemplate: false)
+        }
         let height: CGFloat = 16
         let metrics = layout(percent: percent, style: style, glyph: glyph, height: height)
         let size = NSSize(width: metrics.totalWidth, height: height)
@@ -28,6 +35,7 @@ enum MenuBarBatteryRenderer {
                 percent: snapshot.percent / 100,
                 style: style,
                 fill: fill,
+                neutralFill: neutralFill,
                 glyph: glyph
             )
         }
@@ -185,6 +193,7 @@ enum MenuBarBatteryRenderer {
         percent: CGFloat,
         style: MenuBarIconStyle,
         fill: MenuBarResolvedFill,
+        neutralFill: MenuBarResolvedFill,
         glyph: MenuBarGlyph?
     ) {
         let body = metrics.body
@@ -193,14 +202,15 @@ enum MenuBarBatteryRenderer {
                 body: body,
                 cap: metrics.cap,
                 percent: percent,
-                fill: fill
+                fill: fill,
+                neutralFill: neutralFill
             )
             if style.showsPercentInside {
-                drawOutlinedText(metrics: metrics, percent: percent, fill: fill)
+                drawOutlinedText(metrics: metrics, percent: percent, fill: neutralFill)
             }
             if glyph != nil {
                 let target = style.showsPercentInside ? metrics.glyphBox : body
-                drawOutlinedChargeMark(in: target, compact: style.showsPercentInside, fill: fill)
+                drawOutlinedChargeMark(in: target, compact: style.showsPercentInside, fill: neutralFill)
             }
             return
         }
@@ -210,6 +220,7 @@ enum MenuBarBatteryRenderer {
             cap: metrics.cap,
             percent: percent,
             fill: fill,
+            neutralFill: neutralFill,
             bodyPath: percentInside
                 ? NSBezierPath(roundedRect: body, xRadius: 4.04, yRadius: 4.04)
                 : continuousRoundedRect(body, radius: 3.8),
@@ -239,7 +250,7 @@ enum MenuBarBatteryRenderer {
                 if style.showsPercentInside {
                     punchChargeMark(in: metrics.glyphBox, digits: metrics.text.count, color: knockout)
                 } else {
-                    drawChargeMark(in: body, fill: fill)
+                    drawChargeMark(in: body, fill: neutralFill)
                 }
             }
         }
@@ -250,6 +261,7 @@ enum MenuBarBatteryRenderer {
         cap: NSRect,
         percent: CGFloat,
         fill: MenuBarResolvedFill,
+        neutralFill: MenuBarResolvedFill,
         bodyPath: NSBezierPath,
         backingAlpha: CGFloat,
         terminalAlpha: CGFloat,
@@ -257,11 +269,11 @@ enum MenuBarBatteryRenderer {
     ) {
         let clamped = min(1, max(0, percent))
         let capPath = terminalPath(in: cap, kappa: terminalKappa)
-        let dim = fill.withAlpha(terminalAlpha)
+        let dim = neutralFill.withAlpha(terminalAlpha)
 
         NSGraphicsContext.saveGraphicsState()
         bodyPath.addClip()
-        paint(fill.withAlpha(backingAlpha), in: body)
+        paint(neutralFill.withAlpha(backingAlpha), in: body)
         NSGraphicsContext.restoreGraphicsState()
         NSGraphicsContext.saveGraphicsState()
         capPath.addClip()
@@ -300,7 +312,8 @@ enum MenuBarBatteryRenderer {
         body: NSRect,
         cap: NSRect,
         percent: CGFloat,
-        fill: MenuBarResolvedFill
+        fill: MenuBarResolvedFill,
+        neutralFill: MenuBarResolvedFill
     ) {
         if percent > 0 {
             NSGraphicsContext.saveGraphicsState()
@@ -308,8 +321,8 @@ enum MenuBarBatteryRenderer {
             paint(fill, in: body.insetBy(dx: 2, dy: 2))
             NSGraphicsContext.restoreGraphicsState()
         }
-        paintOutline(in: body, fill: fill)
-        paintTemplate(named: "MenuBarBatteryCap", in: cap, fill: fill)
+        paintOutline(in: body, fill: neutralFill)
+        paintTemplate(named: "MenuBarBatteryCap", in: cap, fill: neutralFill)
     }
 
     /// A 1pt inside stroke at half opacity, like the native frame.
