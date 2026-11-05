@@ -4638,6 +4638,38 @@
         }
       }
     },
+    "settings.about.star": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Projekt mit einem Stern markieren" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Star this project" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Dar una estrella al proyecto" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Mettre une étoile au projet" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Metti una stella al progetto" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "プロジェクトにスターを付ける" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "프로젝트에 스타 남기기" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Dar uma estrela ao projeto" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Поставить звезду проекту" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "给我的项目打一颗星星" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "給我的專案點一顆星星" } }
+      }
+    },
+    "settings.about.tip": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Autor unterstützen" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Tip the author" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Invitar al autor" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Soutenir l’auteur" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Sostieni l’autore" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "作者に寄付" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "개발자에게 후원" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Apoiar o autor" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Поддержать автора" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "打赏作者" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "打賞作者" } }
+      }
+    },
     "settings.about.coffee": {
       "extractionState": "manual",
       "localizations": {

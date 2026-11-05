@@ -701,6 +701,7 @@ struct SettingsView: View {
     @State private var flowEditorTarget: FlowEditorTarget = .all
     @State private var saveDialog: SaveTintDialog?
     @State private var showingBluetoothDevices = false
+    @State private var showingAuthorSupport = false
     @State private var bluetoothIconEditor: BluetoothIconEdit?
 
     private enum SaveTintDialog: Identifiable {
@@ -2067,30 +2068,42 @@ struct SettingsView: View {
     @ViewBuilder
     private var aboutSections: some View {
         Section {
-            VStack(spacing: 16) {
-                HStack(spacing: 10) {
-                    aboutLink(
-                        title: "GitHub",
-                        url: UpdateChecker.githubRepoURL
-                    ) {
-                        Image("GitHubMark")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 15, height: 15)
-                    }
-                    aboutLink(
-                        title: Localization.string("settings.about.coffee", language: appState.settings.language),
-                        url: UpdateChecker.koFiURL
-                    ) {
-                        Image(systemName: "cup.and.saucer.fill")
-                            .font(.system(size: 14))
-                            .foregroundStyle(Color(red: 1, green: 0.37, blue: 0.36))
-                    }
+            VStack(spacing: 10) {
+                aboutLink(
+                    title: "GitHub",
+                    url: UpdateChecker.githubRepoURL
+                ) {
+                    Image("GitHubMark")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 15, height: 15)
                 }
-
-                HStack(alignment: .top, spacing: 12) {
-                    paymentCode(image: "WeChatPay", titleKey: "settings.about.wechat")
-                    paymentCode(image: "Alipay", titleKey: "settings.about.alipay")
+                aboutLink(
+                    title: "Gitee",
+                    url: UpdateChecker.giteeRepoURL
+                ) {
+                    Image(systemName: "g.circle.fill")
+                        .font(.system(size: 15))
+                        .foregroundStyle(Color(red: 0.78, green: 0.11, blue: 0.14))
+                }
+                aboutLink(
+                    title: Localization.string("settings.about.star", language: appState.settings.language),
+                    url: UpdateChecker.githubRepoURL
+                ) {
+                    Image(systemName: "star.fill")
+                        .font(.system(size: 14))
+                        .foregroundStyle(Color(red: 0.98, green: 0.76, blue: 0.18))
+                }
+                aboutButton(
+                    title: Localization.string("settings.about.tip", language: appState.settings.language),
+                    action: { showingAuthorSupport = true }
+                ) {
+                    Image(systemName: "cup.and.saucer.fill")
+                        .font(.system(size: 14))
+                        .foregroundStyle(Color(red: 1, green: 0.37, blue: 0.36))
+                }
+                .popover(isPresented: $showingAuthorSupport, arrowEdge: .bottom) {
+                    authorSupportPopover
                 }
             }
             .padding(.vertical, 4)
@@ -2103,20 +2116,55 @@ struct SettingsView: View {
         }
     }
 
-    private func aboutLink<Icon: View>(title: String, url: URL, @ViewBuilder icon: () -> Icon) -> some View {
-        Link(destination: url) {
-            HStack(spacing: 7) {
-                icon()
-                Text(title)
-                    .font(.callout.weight(.medium))
-                    .lineLimit(1)
+    private var authorSupportPopover: some View {
+        VStack(spacing: 16) {
+            aboutLink(
+                title: Localization.string("settings.about.coffee", language: appState.settings.language),
+                url: UpdateChecker.koFiURL
+            ) {
+                Image(systemName: "cup.and.saucer.fill")
+                    .font(.system(size: 14))
+                    .foregroundStyle(Color(red: 1, green: 0.37, blue: 0.36))
             }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 8)
-            .background(.quaternary.opacity(0.55), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+            HStack(alignment: .top, spacing: 12) {
+                paymentCode(image: "WeChatPay", titleKey: "settings.about.wechat")
+                paymentCode(image: "Alipay", titleKey: "settings.about.alipay")
+            }
+        }
+        .padding(16)
+        .frame(width: 460)
+    }
+
+    private func aboutButton<Icon: View>(
+        title: String,
+        action: @escaping () -> Void,
+        @ViewBuilder icon: () -> Icon
+    ) -> some View {
+        Button(action: action) {
+            aboutChrome(title: title, icon: icon)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(title)
+    }
+
+    private func aboutLink<Icon: View>(title: String, url: URL, @ViewBuilder icon: () -> Icon) -> some View {
+        Link(destination: url) {
+            aboutChrome(title: title, icon: icon)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(title)
+    }
+
+    private func aboutChrome<Icon: View>(title: String, @ViewBuilder icon: () -> Icon) -> some View {
+        HStack(spacing: 7) {
+            icon()
+            Text(title)
+                .font(.callout.weight(.medium))
+                .lineLimit(1)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 8)
+        .background(.quaternary.opacity(0.55), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
     }
 
     private func paymentCode(image: String, titleKey: String) -> some View {

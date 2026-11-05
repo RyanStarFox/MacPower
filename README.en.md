@@ -36,7 +36,7 @@ A menu-bar battery monitor for MacBook. It stays out of the Dock and opens a **L
 
 ### Step 1: Download and install
 
-Download the latest `MacPower-*.dmg` from [Releases](https://github.com/RyanStarFox/MacPower/releases), open it, and drag **MacPower** into **Applications**.
+Download the latest `MacPower-*.dmg` from [Releases](https://github.com/RyanStarFox/MacPower/releases), open it, and drag **MacPower** into **Applications**. The same disk image is also on [Baidu Netdisk](https://pan.baidu.com/s/5SnLWWlMTTOdCSo7psQJe7A).
 
 Or use Homebrew:
 

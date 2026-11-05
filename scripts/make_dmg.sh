@@ -2,7 +2,7 @@
 set -euo pipefail
 
 root="$(cd "$(dirname "$0")/.." && pwd)"
-version="${1:-2.1.1}"
+version="${1:-2.1.2}"
 derived="$root/dist/DerivedData"
 app="$derived/Build/Products/Release/MacPower.app"
 stage="$root/dist/dmg-root"

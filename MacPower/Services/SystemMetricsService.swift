@@ -15,7 +15,7 @@ final class SystemMetricsService {
     private var lastSwapBytes: Double = 0
     private var lastDownload: Double = 0
     private var lastUpload: Double = 0
-    private var lastNetworkBytes: (rx: UInt64, tx: UInt64, time: TimeInterval)?
+    private var lastNetworkSample: (counters: [String: NetworkInterfaceRates.Counters], time: TimeInterval)?
     private var lastPublished: SystemSnapshot?
     private var lastDiskRead: ContinuousClock.Instant?
     private var gpuEntries: [io_object_t] = []
@@ -120,7 +120,7 @@ final class SystemMetricsService {
             lastSwap = reading.percent
             lastSwapBytes = reading.usedBytes
         }
-        if wanted.network, let rates = Self.networkRates(since: &lastNetworkBytes) {
+        if wanted.network, let rates = Self.networkRates(since: &lastNetworkSample) {
             lastDownload = rates.download
             lastUpload = rates.upload
         }
@@ -222,35 +222,18 @@ final class SystemMetricsService {
         return (percent, used)
     }
 
-    private static func networkRates(since previous: inout (rx: UInt64, tx: UInt64, time: TimeInterval)?) -> (download: Double, upload: Double)? {
-        guard let totals = interfaceBytes() else { return nil }
+    private static func networkRates(
+        since previous: inout (counters: [String: NetworkInterfaceRates.Counters], time: TimeInterval)?
+    ) -> (download: Double, upload: Double)? {
+        guard let current = NetworkInterfaceRates.currentCounters() else { return nil }
         let now = Date().timeIntervalSinceReferenceDate
-        defer { previous = (totals.rx, totals.tx, now) }
-        guard let previous else { return (0, 0) }
-        let elapsed = now - previous.time
-        guard elapsed > 0.2 else { return nil }
-        let download = Double(totals.rx &- previous.rx) / elapsed
-        let upload = Double(totals.tx &- previous.tx) / elapsed
-        return (max(0, download), max(0, upload))
-    }
-
-    private static func interfaceBytes() -> (rx: UInt64, tx: UInt64)? {
-        var pointer: UnsafeMutablePointer<ifaddrs>?
-        guard getifaddrs(&pointer) == 0, let first = pointer else { return nil }
-        defer { freeifaddrs(first) }
-        var rx: UInt64 = 0
-        var tx: UInt64 = 0
-        var cursor: UnsafeMutablePointer<ifaddrs>? = first
-        while let item = cursor {
-            let flags = Int32(item.pointee.ifa_flags)
-            if flags & IFF_LOOPBACK == 0, flags & IFF_UP != 0, let data = item.pointee.ifa_data {
-                let stats = data.assumingMemoryBound(to: if_data.self).pointee
-                rx += UInt64(stats.ifi_ibytes)
-                tx += UInt64(stats.ifi_obytes)
-            }
-            cursor = item.pointee.ifa_next
-        }
-        return (rx, tx)
+        let prior = previous
+        previous = (current, now)
+        return NetworkInterfaceRates.rates(
+            current: current,
+            previous: prior?.counters,
+            elapsed: prior.map { now - $0.time } ?? 0
+        )
     }
 
     /// Walks the accelerator tree once, then reads only `PerformanceStatistics` from the entries that have it.
@@ -359,5 +342,82 @@ final class SystemMetricsService {
             }
         }
         return best.map { .value($0) } ?? .missing
+    }
+}
+
+/// Per-interface 64-bit counters. A summed total treats a new virtual interface,
+/// or a 32-bit counter wrapping, as throughput for the whole interval.
+enum NetworkInterfaceRates {
+    struct Counters: Equatable, Sendable {
+        var rx: UInt64
+        var tx: UInt64
+    }
+
+    static func rates(
+        current: [String: Counters],
+        previous: [String: Counters]?,
+        elapsed: TimeInterval
+    ) -> (download: Double, upload: Double)? {
+        guard let previous else { return (0, 0) }
+        guard elapsed > 0.2, elapsed.isFinite else { return nil }
+        var download: Double = 0
+        var upload: Double = 0
+        for (name, now) in current {
+            guard let prior = previous[name] else { continue }
+            download += increased(now.rx, from: prior.rx)
+            upload += increased(now.tx, from: prior.tx)
+        }
+        return (download / elapsed, upload / elapsed)
+    }
+
+    /// A counter that moves backwards was reset. It is not a wrapped total.
+    static func increased(_ current: UInt64, from prior: UInt64) -> Double {
+        guard current >= prior else { return 0 }
+        return Double(current - prior)
+    }
+
+    static func currentCounters() -> [String: Counters]? {
+        var name: [Int32] = [CTL_NET, PF_ROUTE, 0, 0, NET_RT_IFLIST2, 0]
+        var length = 0
+        for _ in 0..<3 {
+            guard sysctl(&name, u_int(name.count), nil, &length, nil, 0) == 0, length > 0 else { return nil }
+            var buffer = [UInt8](repeating: 0, count: length)
+            let copied = length
+            let result = buffer.withUnsafeMutableBytes { raw -> Int32 in
+                guard let base = raw.baseAddress else { return -1 }
+                return sysctl(&name, u_int(name.count), base, &length, nil, 0)
+            }
+            if result == 0 {
+                return parseCounters(buffer, length: min(copied, length))
+            }
+            guard errno == ENOMEM else { return nil }
+        }
+        return nil
+    }
+
+    private static func parseCounters(_ buffer: [UInt8], length: Int) -> [String: Counters] {
+        var counters: [String: Counters] = [:]
+        buffer.withUnsafeBytes { raw in
+            var offset = 0
+            while offset + MemoryLayout<if_msghdr>.size <= length {
+                let header = raw.loadUnaligned(fromByteOffset: offset, as: if_msghdr.self)
+                let messageLength = Int(header.ifm_msglen)
+                guard messageLength > 0, offset + messageLength <= length else { break }
+                if header.ifm_type == RTM_IFINFO2, offset + MemoryLayout<if_msghdr2>.size <= length {
+                    let info = raw.loadUnaligned(fromByteOffset: offset, as: if_msghdr2.self)
+                    if info.ifm_flags & IFF_LOOPBACK == 0 {
+                        var ifname = [CChar](repeating: 0, count: Int(IF_NAMESIZE))
+                        if if_indextoname(UInt32(info.ifm_index), &ifname) != nil {
+                            counters[String(cString: ifname)] = Counters(
+                                rx: info.ifm_data.ifi_ibytes,
+                                tx: info.ifm_data.ifi_obytes
+                            )
+                        }
+                    }
+                }
+                offset += messageLength
+            }
+        }
+        return counters
     }
 }
