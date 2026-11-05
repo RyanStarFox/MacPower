@@ -1,13 +1,13 @@
 {
-  "zh-Hans": "• 设置改成侧边栏\n• 有边框的菜单栏电池图标重画了，电量显示在里面时数字更小\n• 点面板外面就会关上\n• 刚打开面板时，上传和下载不会再突然变得很高\n• 关于页有 GitHub、Gitee 和给项目加一颗星。打赏里有咖啡、微信和支付宝",
-  "zh-Hant": "• 設定改成側邊欄\n• 有邊框的選單列電池圖示重畫了，電量顯示在裡面時數字更小\n• 點面板外面就會關上\n• 剛打開面板時，上傳和下載不會再突然變得很高\n• 關於頁有 GitHub、Gitee 和給專案加一顆星。打賞裡有咖啡、微信和支付寶",
-  "en": "• Settings uses a sidebar\n• The outlined menu-bar battery is redrawn, and the percent inside it is smaller\n• Clicking outside the panel closes it\n• Opening the panel no longer spikes upload and download\n• About has GitHub, Gitee, and a star link. Tips include coffee, WeChat, and Alipay",
-  "ja": "• 設定がサイドバーになりました\n• 枠ありのメニューバー電池アイコンを描き直し、中のパーセントを小さくしました\n• パネルの外をクリックすると閉じます\n• パネルを開いた直後に、アップロードとダウンロードが急に大きくならなくなりました\n• 情報ページに GitHub、Gitee、スターがあります。投げ銭にはコーヒー、WeChat、Alipay があります",
-  "ko": "• 설정이 사이드바가 되었습니다\n• 테두리 있는 메뉴 막대 배터리 아이콘을 다시 그렸고, 안의 퍼센트는 더 작아졌습니다\n• 패널 바깥을 클릭하면 닫힙니다\n• 패널을 열 때 업로드와 다운로드가 갑자기 치솟지 않습니다\n• 정보 페이지에 GitHub, Gitee, 스타가 있습니다. 후원에는 커피, WeChat, Alipay가 있습니다",
-  "fr": "• Les réglages utilisent une barre latérale\n• L’icône de batterie encadrée est redessinée, et le pourcentage à l’intérieur est plus petit\n• Un clic en dehors du panneau le ferme\n• Ouvrir le panneau ne fait plus bondir l’envoi ni la réception\n• À propos contient GitHub, Gitee et une étoile. Le pourboire propose le café, WeChat et Alipay",
-  "de": "• Die Einstellungen haben eine Seitenleiste\n• Das umrandete Batteriesymbol ist neu gezeichnet, die Prozentzahl darin ist kleiner\n• Ein Klick außerhalb schließt das Panel\n• Beim Öffnen schnellen Upload und Download nicht mehr hoch\n• Die Info-Seite enthält GitHub, Gitee und einen Stern. Trinkgeld umfasst Kaffee, WeChat und Alipay",
-  "es": "• Los ajustes usan una barra lateral\n• El icono de batería con borde se redibujó y el porcentaje interior es más pequeño\n• Un clic fuera del panel lo cierra\n• Al abrir el panel, la subida y la bajada ya no se disparan\n• Acerca de incluye GitHub, Gitee y una estrella. La propina ofrece café, WeChat y Alipay",
-  "pt-BR": "• Os ajustes usam uma barra lateral\n• O ícone de bateria com contorno foi redesenhado, e a porcentagem dentro dele ficou menor\n• Um clique fora do painel o fecha\n• Ao abrir o painel, o envio e o download não disparam mais\n• A página Sobre tem GitHub, Gitee e uma estrela. A gorjeta inclui café, WeChat e Alipay",
-  "it": "• Le impostazioni usano una barra laterale\n• L’icona della batteria con bordo è ridisegnata e la percentuale interna è più piccola\n• Un clic fuori dal pannello lo chiude\n• All’apertura, upload e download non schizzano più\n• La pagina Informazioni ha GitHub, Gitee e una stella. La mancia include caffè, WeChat e Alipay",
-  "ru": "• Настройки открываются боковой панелью\n• Контурный значок батареи перерисован, процент внутри стал меньше\n• Щелчок вне панели её закрывает\n• При открытии панели отдача и загрузка больше не подскакивают\n• На странице «О программе» есть GitHub, Gitee и звезда. Чаевые: кофе, WeChat и Alipay"
+  "zh-Hans": "• 无边框、数字在内的菜单栏电池对齐了系统：数字大小、圆角、正极和宽度都按系统来，闪电也按系统样子重画",
+  "zh-Hant": "• 無邊框、數字在內的選單列電池對齊了系統：數字大小、圓角、正極和寬度都按系統來，閃電也按系統樣子重畫",
+  "en": "• The borderless menu-bar battery with the percent inside now matches the system: digit size, corners, terminal, and width follow the system, and the bolt is redrawn to match",
+  "ja": "• 枠なしで数字が内側にあるメニューバー電池をシステムに合わせました。数字の大きさ、角丸、端子、幅を揃え、稲妻もシステムと同じ形に描き直しました",
+  "ko": "• 테두리 없이 숫자가 안에 있는 메뉴 막대 배터리를 시스템과 맞췄습니다. 숫자 크기, 모서리, 단자, 너비를 맞추고 번개도 시스템과 같게 다시 그렸습니다",
+  "fr": "• La batterie sans bord de la barre des menus, avec le pourcentage à l’intérieur, suit maintenant le système : taille des chiffres, coins, borne et largeur, et l’éclair est redessiné comme le système",
+  "de": "• Die rahmenlose Menüleisten-Batterie mit Prozent innen entspricht jetzt dem System: Zifferngröße, Ecken, Pol und Breite, und der Blitz ist wie im System neu gezeichnet",
+  "es": "• La batería sin borde de la barra de menús, con el porcentaje dentro, ahora sigue al sistema: tamaño de los números, esquinas, borne y anchura, y el rayo se redibujó como en el sistema",
+  "pt-BR": "• A bateria sem borda da barra de menus, com a porcentagem dentro, agora segue o sistema: tamanho dos números, cantos, polo e largura, e o raio foi redesenhado como no sistema",
+  "it": "• La batteria senza bordo nella barra dei menu, con la percentuale dentro, ora segue il sistema: dimensione delle cifre, angoli, polo e larghezza, e il fulmine è ridisegnato come nel sistema",
+  "ru": "• Безрамочная батарея в строке меню с процентом внутри теперь как в системе: размер цифр, скругления, контакт и ширина, а молния перерисована по образцу системы"
 }
