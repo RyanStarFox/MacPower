@@ -467,6 +467,9 @@ struct TintSegmentEditor<Preview: View>: View {
     var followName: LocalizedStringKey
     var followNote: LocalizedStringKey?
     var canDelete: Bool
+    /// Where this segment's top may move, or nil for the top segment, which always ends at 100%.
+    var upperRange: ClosedRange<Int>?
+    var onSetUpper: (Int) -> Void
     var onChange: (MenuBarTintBand) -> Void
     var onDelete: () -> Void
     @ViewBuilder var preview: Preview
@@ -531,6 +534,27 @@ struct TintSegmentEditor<Preview: View>: View {
                 }
             }
 
+            if let upperRange, upperRange.lowerBound < upperRange.upperBound {
+                HStack(spacing: 8) {
+                    Text("settings.tint.segment.endsAt")
+                        .font(.system(size: 12))
+                    Spacer(minLength: 8)
+                    Text(verbatim: "\(band.throughPercent)%")
+                        .font(.system(size: 12).monospacedDigit())
+                        .foregroundStyle(.secondary)
+                    Stepper(
+                        Localization.string("settings.tint.segment.endsAt", language: language),
+                        value: Binding(get: { band.throughPercent }, set: onSetUpper),
+                        in: upperRange
+                    )
+                    .labelsHidden()
+                    .fixedSize()
+                }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 5)
+                .background(Color.primary.opacity(0.04), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+            }
+
             VStack(alignment: .leading, spacing: 6) {
                 sectionTitle("settings.tint.effect")
                 LazyVGrid(columns: [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)], spacing: 8) {
@@ -564,7 +588,7 @@ struct TintSegmentEditor<Preview: View>: View {
             }
         }
         .padding(16)
-        .frame(width: 380)
+        .frame(width: 400)
     }
 
     private func sectionTitle(_ key: LocalizedStringKey) -> some View {
@@ -582,7 +606,7 @@ struct TintSegmentEditor<Preview: View>: View {
         } label: {
             HStack(spacing: 8) {
                 TintEffectThumbnail(blend: blend)
-                    .frame(width: 44, height: 22)
+                    .frame(width: 60, height: 22)
                 VStack(alignment: .leading, spacing: 1) {
                     Text(LocalizedStringKey(Self.effectTitleKey(blend)))
                         .font(.system(size: 12, weight: selected ? .semibold : .regular))

@@ -18170,6 +18170,38 @@
         "it": { "stringUnit": { "state": "translated", "value": "Apri «%@» nelle impostazioni" } },
         "ru": { "stringUnit": { "state": "translated", "value": "Открыть «%@» в настройках" } }
       }
+    },
+    "settings.icons.footer": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Click an icon to pick another symbol or upload an image." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "点按图标可以换成别的系统图标，或者上传图片。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "點按圖示可以換成別的系統圖示，或者上傳圖片。" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "アイコンをクリックすると、別のシンボルを選んだり画像をアップロードしたりできます。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "아이콘을 클릭해 다른 심볼을 고르거나 이미지를 올릴 수 있습니다." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Cliquez sur une icône pour choisir un autre symbole ou importer une image." } },
+        "de": { "stringUnit": { "state": "translated", "value": "Klicke auf ein Symbol, um ein anderes zu wählen oder ein Bild hochzuladen." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Haz clic en un icono para elegir otro símbolo o subir una imagen." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Clique em um ícone para escolher outro símbolo ou enviar uma imagem." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Fai clic su un’icona per sceglierne un’altra o caricare un’immagine." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Нажмите на значок, чтобы выбрать другой символ или загрузить изображение." } }
+      }
+    },
+    "settings.tint.segment.endsAt": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "This segment ends at" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "这一段到" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "這一段到" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "この区間の上限" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "이 구간의 끝" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Ce segment s’arrête à" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Abschnitt endet bei" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Este tramo termina en" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Este trecho termina em" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Questo tratto finisce a" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Отрезок заканчивается на" } }
+      }
     }
   },
   "version": "1.0"

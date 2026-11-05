@@ -713,7 +713,6 @@ struct SettingsView: View {
     @State private var pane: Pane
     @State private var tutorialPage: TutorialPage = .start
     @State private var ringColorSelectionID: UUID?
-    @State private var flowEditorTarget: FlowEditorTarget = .all
     @State private var saveDialog: SaveTintDialog?
     @State private var menuBarTintOrigin: MenuBarTintPreset?
     @State private var showsAllMenuBarPresets = false
@@ -2542,18 +2541,6 @@ struct SettingsView: View {
         .frame(width: 460)
     }
 
-    private func aboutButton<Icon: View>(
-        title: String,
-        action: @escaping () -> Void,
-        @ViewBuilder icon: () -> Icon
-    ) -> some View {
-        Button(action: action) {
-            aboutChrome(title: title, icon: icon)
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(title)
-    }
-
     private func aboutLink<Icon: View>(title: String, url: URL, @ViewBuilder icon: () -> Icon) -> some View {
         Link(destination: url) {
             aboutChrome(title: title, icon: icon)
@@ -2812,6 +2799,33 @@ struct SettingsView: View {
         )
     }
 
+    /// Save, save as, and delete for an icon pack, on one trailing row.
+    private func iconPresetActions(
+        canOverwrite: Bool,
+        onSave: @escaping () -> Void,
+        onSaveAs: @escaping () -> Void,
+        deleteID: UUID?,
+        onDelete: @escaping (UUID) -> Void
+    ) -> some View {
+        HStack(spacing: 8) {
+            Spacer(minLength: 0)
+            if canOverwrite {
+                Button("settings.tint.save", action: onSave)
+            }
+            Button("settings.tint.saveAsPreset", action: onSaveAs)
+            if let deleteID {
+                Button {
+                    onDelete(deleteID)
+                } label: {
+                    Image(systemName: "trash")
+                }
+                .buttonStyle(.borderless)
+                .help(Localization.string("settings.tint.delete", language: appState.settings.language))
+                .accessibilityLabel(Text("settings.tint.delete"))
+            }
+        }
+    }
+
     /// "Preset  Sunset · Edited" with the actions that make sense right now.
     private func tintPresetStatusRow(
         status: String,
@@ -3000,6 +3014,8 @@ struct SettingsView: View {
             followName: "settings.tint.menuBarDefault",
             followNote: "settings.tint.menuBarDefault.note",
             canDelete: ordered.count > 1,
+            upperRange: index.flatMap { $0 < ordered.count - 1 ? TintRamp.boundaryRange(at: $0, in: ordered) : nil },
+            onSetUpper: { setMenuBarBands(TintRamp.moving(band.id, to: $0, in: appState.settings.menuBarTint.bands)) },
             onChange: { next in
                 setMenuBarBands(TintRamp.replacing(next, in: appState.settings.menuBarTint.bands))
             },
@@ -3184,27 +3200,24 @@ struct SettingsView: View {
                     }
                 }
             }
-            presetEditor(
-                toolbar: {
-                    iconPresetEditorCaption(
-                        canOverwrite: appState.settings.ringActiveSavedIconID != nil,
-                        onSave: { _ = appState.settings.updateRingIconPreset() },
-                        onSaveAs: {
-                            savePresetName = defaultSaveName(for: .ringIcon)
-                            saveDialog = .ringIcon
-                        },
-                        deleteID: appState.settings.ringActiveSavedIconID,
-                        onDelete: { appState.settings.deleteSavedRingIcon(id: $0) }
-                    )
-                }
-            ) {
+            VStack(spacing: 16) {
                 let slots = RingSlot.iconSlots
-                VStack(spacing: 16) {
-                    ringIconSlotRow(Array(slots.prefix(4)))
-                    ringIconSlotRow(Array(slots.dropFirst(4).prefix(4)))
-                    ringIconSlotRow(Array(slots.dropFirst(8)))
-                }
+                ringIconSlotRow(Array(slots.prefix(4)))
+                ringIconSlotRow(Array(slots.dropFirst(4).prefix(4)))
+                ringIconSlotRow(Array(slots.dropFirst(8)))
             }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 6)
+            iconPresetActions(
+                canOverwrite: appState.settings.ringActiveSavedIconID != nil,
+                onSave: { _ = appState.settings.updateRingIconPreset() },
+                onSaveAs: {
+                    savePresetName = defaultSaveName(for: .ringIcon)
+                    saveDialog = .ringIcon
+                },
+                deleteID: appState.settings.ringActiveSavedIconID,
+                onDelete: { appState.settings.deleteSavedRingIcon(id: $0) }
+            )
             bluetoothIconSettings
             ForEach([RingSlot.batteryTemperature, .thermalState]) { slot in
                 VStack(alignment: .leading, spacing: 6) {
@@ -3216,6 +3229,10 @@ struct SettingsView: View {
             }
         } header: {
             Text("settings.icon.header")
+        } footer: {
+            Text("settings.icons.footer")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
         }
     }
 
@@ -3332,7 +3349,10 @@ struct SettingsView: View {
                 }
             }
             Spacer(minLength: 8)
-            if let slot = item.slot, let segment = RingColorSegment(rawValue: slot.rawValue) {
+            if item.slot == .speedPair {
+                ringColorPicker(.download, symbol: "arrow.down")
+                ringColorPicker(.upload, symbol: "arrow.up")
+            } else if let slot = item.slot, let segment = RingColorSegment(rawValue: slot.rawValue) {
                 ringColorPicker(segment)
             }
             if item.slot == nil {
@@ -3382,12 +3402,17 @@ struct SettingsView: View {
         return nil
     }
 
-    private func ringColorPicker(_ segment: RingColorSegment) -> some View {
+    private func ringColorPicker(_ segment: RingColorSegment, symbol: String? = nil) -> some View {
         let tint = appState.settings.ringTint
         let colors = tint.colors
         let current = tint.assignments[segment] ?? colors.first?.id
         let currentScheme = colors.first { $0.id == current }?.scheme
         return HStack(spacing: 4) {
+            if let symbol {
+                Image(systemName: symbol)
+                    .font(.system(size: 9, weight: .semibold))
+                    .foregroundStyle(.secondary)
+            }
             if let currentScheme {
                 TintRampBar(bands: currentScheme.bands, cornerRadius: 2)
                     .frame(width: 18, height: 8)
@@ -3785,6 +3810,8 @@ struct SettingsView: View {
             followName: "settings.tint.labelColor",
             followNote: "settings.tint.labelColor.note",
             canDelete: ordered.count > 1,
+            upperRange: index.flatMap { $0 < ordered.count - 1 ? TintRamp.boundaryRange(at: $0, in: ordered) : nil },
+            onSetUpper: { onChange(TintRamp.moving(band.id, to: $0, in: bands)) },
             onChange: { next in onChange(TintRamp.replacing(next, in: bands)) },
             onDelete: {
                 ringEditingBandID = nil
@@ -3884,29 +3911,29 @@ struct SettingsView: View {
                     }
                 }
             }
-            presetEditor(
-                toolbar: {
-                    iconPresetEditorCaption(
-                        canOverwrite: appState.settings.flowActiveSavedIconID != nil,
-                        onSave: { _ = appState.settings.updateFlowIconPreset() },
-                        onSaveAs: {
-                            savePresetName = defaultSaveName(for: .flowIcon)
-                            saveDialog = .flowIcon
-                        },
-                        deleteID: appState.settings.flowActiveSavedIconID,
-                        onDelete: { appState.settings.deleteSavedFlowIcon(id: $0) }
-                    )
-                }
-            ) {
-                HStack(spacing: 10) {
-                    ForEach(FlowIconRole.allCases) { role in
-                        flowIconSlotControl(role)
-                    }
+            HStack(alignment: .top, spacing: 10) {
+                ForEach(FlowIconRole.allCases) { role in
+                    flowIconSlotControl(role)
                 }
             }
+            .padding(.vertical, 6)
+            iconPresetActions(
+                canOverwrite: appState.settings.flowActiveSavedIconID != nil,
+                onSave: { _ = appState.settings.updateFlowIconPreset() },
+                onSaveAs: {
+                    savePresetName = defaultSaveName(for: .flowIcon)
+                    saveDialog = .flowIcon
+                },
+                deleteID: appState.settings.flowActiveSavedIconID,
+                onDelete: { appState.settings.deleteSavedFlowIcon(id: $0) }
+            )
             FlowIconSizeControl(settings: appState.settings)
         } header: {
             Text("settings.icon.header")
+        } footer: {
+            Text("settings.icons.footer")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
         }
 
         Section {
@@ -4206,6 +4233,8 @@ struct SettingsView: View {
             followName: "settings.tint.labelColor",
             followNote: "settings.tint.labelColor.note",
             canDelete: ordered.count > 1,
+            upperRange: index.flatMap { $0 < ordered.count - 1 ? TintRamp.boundaryRange(at: $0, in: ordered) : nil },
+            onSetUpper: { onChange(TintRamp.moving(band.id, to: $0, in: bands)) },
             onChange: { next in onChange(TintRamp.replacing(next, in: bands)) },
             onDelete: {
                 onClose()
@@ -4286,72 +4315,6 @@ struct SettingsView: View {
                 }
             }
         )
-    }
-
-    /// Preset controls stay visible. These panes used to collapse the editor and
-    /// force it shut again whenever the settings tab changed.
-    @ViewBuilder
-    private func presetEditor<Toolbar: View, Content: View>(
-        @ViewBuilder toolbar: () -> Toolbar,
-        @ViewBuilder content: () -> Content
-    ) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            toolbar()
-            content()
-        }
-    }
-
-    @ViewBuilder
-    private func tintPresetSaveControls(
-        canOverwrite: Bool,
-        onSave: @escaping () -> Void,
-        onSaveAs: @escaping () -> Void,
-        deleteID: UUID?,
-        onDelete: @escaping (UUID) -> Void
-    ) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack(spacing: 8) {
-                if canOverwrite {
-                    Button("settings.tint.save", action: onSave)
-                }
-                Button("settings.tint.saveAs", action: onSaveAs)
-                if let deleteID {
-                    Button("settings.tint.delete", role: .destructive) {
-                        onDelete(deleteID)
-                    }
-                }
-                Spacer(minLength: 0)
-            }
-            if !canOverwrite {
-                Text("settings.icons.builtinEditNote")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
-        }
-    }
-
-    @ViewBuilder
-    private func iconPresetEditorCaption(
-        canOverwrite: Bool,
-        onSave: @escaping () -> Void,
-        onSaveAs: @escaping () -> Void,
-        deleteID: UUID?,
-        onDelete: @escaping (UUID) -> Void
-    ) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("settings.icons.clickToChange")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            tintPresetSaveControls(
-                canOverwrite: canOverwrite,
-                onSave: onSave,
-                onSaveAs: onSaveAs,
-                deleteID: deleteID,
-                onDelete: onDelete
-            )
-        }
     }
 
     private var iconSlotColumnWidth: CGFloat { 56 }
@@ -4465,19 +4428,6 @@ struct SettingsView: View {
                     appState.settings.ipScopes.insert(scope)
                 } else {
                     appState.settings.ipScopes.remove(scope)
-                }
-            }
-        )
-    }
-
-    private func ipFamilyBinding(_ family: IPAddressFamily) -> Binding<Bool> {
-        Binding(
-            get: { appState.settings.ipFamilies.contains(family) },
-            set: { enabled in
-                if enabled {
-                    appState.settings.ipFamilies.insert(family)
-                } else {
-                    appState.settings.ipFamilies.remove(family)
                 }
             }
         )
@@ -4781,93 +4731,6 @@ struct SettingsView: View {
         }
     }
 
-    @ViewBuilder
-    private func ringLayoutRow(_ entry: RingLayoutEntry) -> some View {
-        switch entry.kind {
-        case .lineBreak:
-            HStack(spacing: 8) {
-                layoutDragHandle(entry.id)
-                Text("settings.rings.lineBreak")
-                    .foregroundStyle(Color(nsColor: .separatorColor))
-                Spacer(minLength: 8)
-                Button {
-                    appState.settings.removeLineBreak(entry.id)
-                } label: {
-                    Image(systemName: "minus.circle.fill")
-                        .foregroundStyle(.secondary)
-                }
-                .buttonStyle(.borderless)
-                .help(LocalizedStringKey("settings.rings.joinRow"))
-            }
-            .onDrop(of: [.plainText], delegate: layoutDropDelegate(entry.id))
-        case .slot(let slot):
-            ringOrderRow(slot)
-        case .bluetooth(let address, let ringID):
-            if let device = appState.settings.bluetoothRingDevices.first(where: { $0.address == address }),
-               let ring = device.rings.first(where: { $0.id == ringID }) {
-                let index = device.rings.firstIndex(where: { $0.id == ringID }) ?? 0
-                let catalog: [BluetoothBatteryPart] = device.multi ? [.left, .right, .box] : []
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack(spacing: 8) {
-                        layoutDragHandle(entry.id)
-                        Text(device.name)
-                            .lineLimit(1)
-                        Spacer(minLength: 8)
-                        Button("settings.rings.bluetooth.remove") {
-                            appState.settings.removeBluetoothDevice(address: address)
-                        }
-                    }
-                    bluetoothRingEditor(device: device, ring: ring, index: index, catalog: catalog)
-                        .padding(.leading, 36)
-                }
-                .onDrop(of: [.plainText], delegate: layoutDropDelegate(entry.id))
-            }
-        }
-    }
-
-    private func layoutDragHandle(_ id: String) -> some View {
-        Image(systemName: "line.3.horizontal")
-            .font(.body)
-            .foregroundStyle(.secondary)
-            .frame(width: 28, height: 22)
-            .contentShape(Rectangle())
-            .onDrag {
-                ringItemDrag.itemID = id
-                return NSItemProvider(object: id as NSString)
-            }
-    }
-
-    private func layoutDropDelegate(_ id: String) -> RingItemDropDelegate {
-        RingItemDropDelegate(
-            itemID: id,
-            drag: ringItemDrag,
-            move: { item, target in
-                appState.settings.moveRingLayoutEntry(id: item, to: target)
-            }
-        )
-    }
-
-    private func ringOrderRow(_ slot: RingSlot) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack(spacing: 8) {
-                layoutDragHandle("slot:\(slot.rawValue)")
-                Toggle(isOn: ringVisibilityBinding(slot)) {
-                    HStack(spacing: 6) {
-                        Text(LocalizedStringKey(slot.localizationKey))
-                        if ringHasScale(slot) {
-                            ringScaleButton(slot)
-                        }
-                    }
-                }
-            }
-            if slot == .batteryTemperature || slot == .thermalState {
-                slotIconColorControls(slot)
-                    .padding(.leading, 36)
-            }
-        }
-        .onDrop(of: [.plainText], delegate: layoutDropDelegate("slot:\(slot.rawValue)"))
-    }
-
     private func slotIconColorControls(_ slot: RingSlot) -> some View {
         let stored = appState.settings.slotIconColors[slot.rawValue]
         return VStack(alignment: .leading, spacing: 4) {
@@ -4894,11 +4757,6 @@ struct SettingsView: View {
         }
     }
 
-    private func temperatureReading(_ celsius: Int) -> String {
-        let unit = appState.settings.temperatureUnit
-        return "\(unit.display(celsius))\(unit.symbol)"
-    }
-
     private func temperatureHalfStepper(title: LocalizedStringKey = "settings.rings.half.temperature") -> some View {
         let unit = appState.settings.temperatureUnit
         let bounds = AppSettings.temperatureHalfRange
@@ -4912,54 +4770,6 @@ struct SettingsView: View {
         ) { displayed in
             let celsius = unit.storedCelsius(fromDisplayed: displayed)
             appState.settings.temperatureHalfCelsius = min(max(celsius, bounds.lowerBound), bounds.upperBound)
-        }
-    }
-
-    private func ringScaleSummary(_ slot: RingSlot) -> String? {
-        switch slot {
-        case .download:
-            NetworkRateFormat.midpointLabel(kilobytesPerSecond: appState.settings.downloadHalfKilobytes)
-        case .upload:
-            NetworkRateFormat.midpointLabel(kilobytesPerSecond: appState.settings.uploadHalfKilobytes)
-        case .batteryTemperature:
-            Localization.string(
-                "settings.rings.scale.temperature %@",
-                language: appState.settings.language,
-                temperatureReading(appState.settings.temperatureHalfCelsius)
-            )
-        case .swap:
-            SwapUsageFormat.string(bytes: Double(appState.settings.swapHalfMegabytes) * 1_048_576)
-        case .thermalState:
-            "\(appState.settings.thermalNominalPercent)–\(appState.settings.thermalCriticalPercent)%"
-        default:
-            nil
-        }
-    }
-
-    private func ringHasScale(_ slot: RingSlot) -> Bool {
-        switch slot {
-        case .download, .upload, .speedPair, .batteryTemperature, .thermalState, .swap:
-            true
-        default:
-            false
-        }
-    }
-
-    private func ringScaleButton(_ slot: RingSlot) -> some View {
-        Button {
-            ringScaleSlot = slot
-        } label: {
-            Image(systemName: "slider.horizontal.3")
-                .font(.system(size: 12, weight: .medium))
-                .frame(width: 22, height: 16)
-                .contentShape(Rectangle())
-        }
-        .buttonStyle(.borderless)
-        .foregroundStyle(.secondary)
-        .help(LocalizedStringKey("settings.rings.scale"))
-        .accessibilityLabel(Text(LocalizedStringKey("settings.rings.scale")))
-        .popover(isPresented: ringScalePresented(slot), arrowEdge: .bottom) {
-            ringScalePopover(slot)
         }
     }
 
@@ -5061,15 +4871,8 @@ struct SettingsView: View {
         .frame(width: 300)
     }
 
-    private func ringVisibilityBinding(_ slot: RingSlot) -> Binding<Bool> {
-        Binding(
-            get: { appState.settings.ringOrder.contains(slot) },
-            set: { appState.settings.setRingSlot(slot, visible: $0) }
-        )
-    }
-
     private func ringIconSlotRow(_ rings: [RingSlot]) -> some View {
-        HStack(spacing: 18) {
+        HStack(alignment: .top, spacing: 18) {
             ForEach(rings) { ring in
                 ringIconSlotControl(ring)
             }
@@ -5107,23 +4910,6 @@ struct SettingsView: View {
                 ),
                 width: column
             )
-            if let summary = ringScaleSummary(ring) {
-                Button {
-                    ringScaleSlot = ring
-                } label: {
-                    Text(summary)
-                        .font(.caption2.monospacedDigit())
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.6)
-                        .frame(width: column)
-                }
-                .buttonStyle(.plain)
-                .help(LocalizedStringKey("settings.rings.scale"))
-                .popover(isPresented: ringScalePresented(ring), arrowEdge: .bottom) {
-                    ringScalePopover(ring)
-                }
-            }
         }
         .frame(width: column)
     }
@@ -5333,44 +5119,6 @@ struct SettingsView: View {
         )
     }
 
-    private var ringPresetPickerBinding: Binding<PopoverPresetPickerItem> {
-        Binding(
-            get: {
-                if let id = appState.settings.ringActiveSavedID {
-                    return .saved(id)
-                }
-                return .builtin(appState.settings.ringTint.preset)
-            },
-            set: { item in
-                switch item {
-                case .builtin(let preset):
-                    appState.settings.applyRingTintPreset(preset)
-                case .saved(let id):
-                    appState.settings.applySavedRingTint(id: id)
-                }
-            }
-        )
-    }
-
-    private var flowPresetPickerBinding: Binding<PopoverPresetPickerItem> {
-        Binding(
-            get: {
-                if let id = appState.settings.flowActiveSavedID {
-                    return .saved(id)
-                }
-                return .builtin(appState.settings.flowTint.preset)
-            },
-            set: { item in
-                switch item {
-                case .builtin(let preset):
-                    appState.settings.applyFlowTintPreset(preset)
-                case .saved(let id):
-                    appState.settings.applySavedFlowTint(id: id)
-                }
-            }
-        )
-    }
-
     private func defaultSaveName(for dialog: SaveTintDialog) -> String {
         let base = Localization.string("settings.tint.save.defaultName", language: appState.settings.language)
         let count: Int = {
@@ -5427,297 +5175,6 @@ struct SettingsView: View {
         )
     }
 
-    private func editableValueTintBandRow(
-        _ band: MenuBarTintBand,
-        scheme: ValueTintScheme,
-        update: @escaping (ValueTintScheme) -> Void
-    ) -> some View {
-        let range = scheme.percentRange(for: band.id)
-        return VStack(alignment: .leading, spacing: 8) {
-            HStack(alignment: .center, spacing: 8) {
-                TintPercentEditor(
-                    value: band.throughPercent,
-                    range: range,
-                    onCommit: { update(scheme.replacingBand(id: band.id, throughPercent: $0)) }
-                )
-
-                Spacer(minLength: 8)
-
-                Picker("settings.icon.tint.blend", selection: Binding(
-                    get: { band.blend },
-                    set: { update(scheme.replacingBand(id: band.id, blend: $0)) }
-                )) {
-                    ForEach(MenuBarTintBlend.allCases) { blend in
-                        Text(LocalizedStringKey(blend.localizationKey)).tag(blend)
-                    }
-                }
-                .labelsHidden()
-                .fixedSize()
-
-                if scheme.bands.count > 1 {
-                    Button {
-                        update(scheme.removingBand(id: band.id))
-                    } label: {
-                        Image(systemName: "minus.circle.fill")
-                            .foregroundStyle(.secondary)
-                    }
-                    .buttonStyle(.borderless)
-                    .help(LocalizedStringKey("settings.icon.tint.remove"))
-                }
-            }
-
-            valueTintWells(band, scheme: scheme, update: update)
-        }
-        .padding(.vertical, 2)
-    }
-
-    @ViewBuilder
-    private func valueTintWells(
-        _ band: MenuBarTintBand,
-        scheme: ValueTintScheme,
-        update: @escaping (ValueTintScheme) -> Void
-    ) -> some View {
-        switch band.blend {
-        case .constant:
-            HStack(spacing: 8) {
-                Spacer()
-                valueTintWell(label: "settings.icon.tint.color", band: band, scheme: scheme, keyPath: \.highRight, update: update)
-            }
-        case .slide:
-            HStack(spacing: 12) {
-                Spacer()
-                valueTintWell(label: "settings.icon.tint.low", band: band, scheme: scheme, keyPath: \.lowRight, update: update)
-                valueTintWell(label: "settings.icon.tint.high", band: band, scheme: scheme, keyPath: \.highRight, update: update)
-            }
-        case .gradient:
-            HStack(spacing: 12) {
-                Spacer()
-                valueTintWell(label: "settings.icon.tint.left", band: band, scheme: scheme, keyPath: \.highLeft, update: update)
-                valueTintWell(label: "settings.icon.tint.right", band: band, scheme: scheme, keyPath: \.highRight, update: update)
-            }
-        case .slideGradient:
-            VStack(alignment: .trailing, spacing: 6) {
-                HStack(spacing: 12) {
-                    valueTintWell(label: "settings.icon.tint.lowLeft", band: band, scheme: scheme, keyPath: \.lowLeft, update: update)
-                    valueTintWell(label: "settings.icon.tint.lowRight", band: band, scheme: scheme, keyPath: \.lowRight, update: update)
-                }
-                HStack(spacing: 12) {
-                    valueTintWell(label: "settings.icon.tint.highLeft", band: band, scheme: scheme, keyPath: \.highLeft, update: update)
-                    valueTintWell(label: "settings.icon.tint.highRight", band: band, scheme: scheme, keyPath: \.highRight, update: update)
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .trailing)
-        }
-    }
-
-    private func valueTintWell(
-        label: LocalizedStringKey,
-        band: MenuBarTintBand,
-        scheme: ValueTintScheme,
-        keyPath: WritableKeyPath<MenuBarTintBand, MenuBarTintSwatch>,
-        update: @escaping (ValueTintScheme) -> Void
-    ) -> some View {
-        let swatch = band[keyPath: keyPath]
-        return HStack(spacing: 5) {
-            Text(label)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            if !swatch.followsMenuBar {
-                ColorPicker(
-                    label,
-                    selection: Binding(
-                        get: { swatch.color },
-                        set: { color in
-                            update(scheme.replacingBand(at: scheme.sortedBands.firstIndex(where: { $0.id == band.id }) ?? 0) { band in
-                                band[keyPath: keyPath] = .from(color: color)
-                                if band.blend == .constant {
-                                    let s = MenuBarTintSwatch.from(color: color)
-                                    band.highRight = s
-                                    band.highLeft = s
-                                    band.lowRight = s
-                                    band.lowLeft = s
-                                }
-                            })
-                        }
-                    ),
-                    supportsOpacity: false
-                )
-                .labelsHidden()
-                .fixedSize()
-            }
-            Toggle(isOn: Binding(
-                get: { swatch.followsMenuBar },
-                set: { follows in
-                    let next: MenuBarTintSwatch = follows ? .menuBar : .systemGreen
-                    update(scheme.replacingBand(at: scheme.sortedBands.firstIndex(where: { $0.id == band.id }) ?? 0) { band in
-                        band[keyPath: keyPath] = next
-                        if band.blend == .constant {
-                            band.highRight = next
-                            band.highLeft = next
-                            band.lowRight = next
-                            band.lowLeft = next
-                        }
-                    })
-                }
-            )) {
-                Text("settings.icon.tint.menuBarColor")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            .toggleStyle(.checkbox)
-        }
-    }
-
-    private func mergedTintBandRow(
-        _ band: MergedTintBand,
-        apply: @escaping (Int, (inout MenuBarTintBand) -> Void) -> Void,
-        onRemove: @escaping () -> Void
-    ) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(alignment: .center, spacing: 8) {
-                MergedTintPercentEditor(
-                    value: band.throughPercent,
-                    range: 1...100,
-                    onCommit: { percent in
-                        apply(band.id) { $0.throughPercent = percent }
-                    }
-                )
-
-                Spacer(minLength: 8)
-
-                Picker("settings.icon.tint.blend", selection: Binding(
-                    get: { band.blend },
-                    set: { blend in
-                        guard let blend else { return }
-                        apply(band.id) { $0.blend = blend }
-                    }
-                )) {
-                    Text("-").tag(Optional<MenuBarTintBlend>.none)
-                    ForEach(MenuBarTintBlend.allCases) { blend in
-                        Text(LocalizedStringKey(blend.localizationKey)).tag(Optional.some(blend))
-                    }
-                }
-                .labelsHidden()
-                .fixedSize()
-
-                if band.presentInAll {
-                    Button(action: onRemove) {
-                        Image(systemName: "minus.circle.fill")
-                            .foregroundStyle(.secondary)
-                    }
-                    .buttonStyle(.borderless)
-                    .help(LocalizedStringKey("settings.icon.tint.remove"))
-                }
-            }
-
-            mergedTintWells(band, apply: apply)
-        }
-        .padding(.vertical, 2)
-    }
-
-    @ViewBuilder
-    private func mergedTintWells(
-        _ band: MergedTintBand,
-        apply: @escaping (Int, (inout MenuBarTintBand) -> Void) -> Void
-    ) -> some View {
-        let blend = band.blend ?? .constant
-        switch blend {
-        case .constant:
-            HStack(spacing: 8) {
-                Spacer()
-                mergedTintWell(label: "settings.icon.tint.color", swatch: band.highRight) { swatch in
-                    apply(band.id) { band in
-                        band.highRight = swatch
-                        band.highLeft = swatch
-                        band.lowRight = swatch
-                        band.lowLeft = swatch
-                    }
-                }
-            }
-        case .slide:
-            HStack(spacing: 12) {
-                Spacer()
-                mergedTintWell(label: "settings.icon.tint.low", swatch: band.lowRight) { swatch in
-                    apply(band.id) { $0.lowRight = swatch }
-                }
-                mergedTintWell(label: "settings.icon.tint.high", swatch: band.highRight) { swatch in
-                    apply(band.id) { $0.highRight = swatch }
-                }
-            }
-        case .gradient:
-            HStack(spacing: 12) {
-                Spacer()
-                mergedTintWell(label: "settings.icon.tint.left", swatch: band.highLeft) { swatch in
-                    apply(band.id) { $0.highLeft = swatch }
-                }
-                mergedTintWell(label: "settings.icon.tint.right", swatch: band.highRight) { swatch in
-                    apply(band.id) { $0.highRight = swatch }
-                }
-            }
-        case .slideGradient:
-            VStack(alignment: .trailing, spacing: 6) {
-                HStack(spacing: 12) {
-                    mergedTintWell(label: "settings.icon.tint.lowLeft", swatch: band.lowLeft) { swatch in
-                        apply(band.id) { $0.lowLeft = swatch }
-                    }
-                    mergedTintWell(label: "settings.icon.tint.lowRight", swatch: band.lowRight) { swatch in
-                        apply(band.id) { $0.lowRight = swatch }
-                    }
-                }
-                HStack(spacing: 12) {
-                    mergedTintWell(label: "settings.icon.tint.highLeft", swatch: band.highLeft) { swatch in
-                        apply(band.id) { $0.highLeft = swatch }
-                    }
-                    mergedTintWell(label: "settings.icon.tint.highRight", swatch: band.highRight) { swatch in
-                        apply(band.id) { $0.highRight = swatch }
-                    }
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .trailing)
-        }
-    }
-
-    private func mergedTintWell(
-        label: LocalizedStringKey,
-        swatch: MenuBarTintSwatch?,
-        onChange: @escaping (MenuBarTintSwatch) -> Void
-    ) -> some View {
-        HStack(spacing: 5) {
-            Text(label)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            if swatch == nil {
-                Text("-")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .frame(width: 28, alignment: .center)
-            }
-            if swatch?.followsMenuBar != true {
-                ColorPicker(
-                    label,
-                    selection: Binding(
-                        get: { swatch?.color ?? .gray },
-                        set: { onChange(.from(color: $0)) }
-                    ),
-                    supportsOpacity: false
-                )
-                .labelsHidden()
-                .fixedSize()
-            }
-            Toggle(isOn: Binding(
-                get: { swatch?.followsMenuBar ?? false },
-                set: { follows in
-                    onChange(follows ? .menuBar : .systemGreen)
-                }
-            )) {
-                Text("settings.icon.tint.menuBarColor")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            .toggleStyle(.checkbox)
-        }
-    }
-
     private func selectedRingColor() -> RingColor? {
         let colors = appState.settings.ringTint.colors
         if let id = ringColorSelectionID, let color = colors.first(where: { $0.id == id }) {
@@ -5732,116 +5189,6 @@ struct SettingsView: View {
             language: appState.settings.language,
             index + 1
         )
-    }
-
-    private func ringColorMenuLabel(index: Int, color: RingColor) -> some View {
-        let pair = color.scheme.colors(percent: 80)
-        return HStack(spacing: 6) {
-            Capsule()
-                .fill(LinearGradient(colors: [pair.left, pair.right], startPoint: .leading, endPoint: .trailing))
-                .frame(width: 28, height: 10)
-            Text(ringColorTitle(index))
-        }
-    }
-
-    @ViewBuilder
-    private var ringColorCatalogEditor: some View {
-        let tint = appState.settings.ringTint
-        if let color = selectedRingColor() {
-            HStack(spacing: 8) {
-                Picker("settings.tint.colors", selection: Binding(
-                    get: { color.id },
-                    set: { ringColorSelectionID = $0 }
-                )) {
-                    ForEach(Array(tint.colors.enumerated()), id: \.element.id) { index, item in
-                        ringColorMenuLabel(index: index, color: item).tag(item.id)
-                    }
-                }
-                Button {
-                    appState.settings.ringTint = tint.addingColor(copying: color.id)
-                    ringColorSelectionID = appState.settings.ringTint.colors.last?.id
-                } label: {
-                    Image(systemName: "plus")
-                }
-                .help(LocalizedStringKey("settings.tint.addColor"))
-                Button {
-                    let fallback = tint.colors.first { $0.id != color.id }
-                    appState.settings.ringTint = tint.removingColor(id: color.id)
-                    ringColorSelectionID = fallback?.id
-                } label: {
-                    Image(systemName: "minus")
-                }
-                .disabled(tint.colors.count < 2)
-                .help(LocalizedStringKey("settings.tint.removeColor"))
-            }
-
-            let scheme = color.scheme
-            ForEach(scheme.sortedBands) { band in
-                editableValueTintBandRow(band, scheme: scheme) { next in
-                    appState.settings.ringTint = appState.settings.ringTint.updatingColor(id: color.id, scheme: next)
-                }
-            }
-            Button("settings.icon.tint.add") {
-                appState.settings.ringTint = appState.settings.ringTint.updatingColor(
-                    id: color.id,
-                    scheme: scheme.addingBand()
-                )
-            }
-        }
-    }
-
-    @ViewBuilder
-    private var ringAssignmentSection: some View {
-        let colors = appState.settings.ringTint.colors
-        if let fallback = colors.first?.id {
-            let segments = Array(RingColorSegment.allCases)
-            let split = (segments.count + 1) / 2
-            // One row, so the grouped card keeps the same bottom inset as the
-            // preset sections. A section header drops that inset.
-            Section {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("settings.tint.assignments")
-                        .font(.body.weight(.semibold))
-                    HStack(alignment: .top, spacing: 16) {
-                        ringAssignmentColumn(segments: Array(segments.prefix(split)), colors: colors, fallback: fallback)
-                        ringAssignmentColumn(segments: Array(segments.suffix(from: split)), colors: colors, fallback: fallback)
-                    }
-                }
-                .padding(.vertical, 4)
-            }
-        }
-    }
-
-    private func ringAssignmentColumn(segments: [RingColorSegment], colors: [RingColor], fallback: UUID) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            ForEach(segments) { segment in
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(LocalizedStringKey(segment.localizationKey))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    Picker(LocalizedStringKey(segment.localizationKey), selection: Binding(
-                        get: { appState.settings.ringTint.assignments[segment] ?? fallback },
-                        set: { id in
-                            appState.settings.ringTint = appState.settings.ringTint.assigning(segment, to: id)
-                        }
-                    )) {
-                        ForEach(Array(colors.enumerated()), id: \.element.id) { index, item in
-                            ringColorMenuLabel(index: index, color: item).tag(item.id)
-                        }
-                    }
-                    .labelsHidden()
-                    .pickerStyle(.menu)
-                    .controlSize(.small)
-                }
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-    }
-
-    private func applyFlowAllBand(at index: Int, mutate: (inout MenuBarTintBand) -> Void) {
-        appState.settings.flowTint = appState.settings.flowTint.mapAll { scheme in
-            scheme.replacingBand(at: index, mutate: mutate)
-        }
     }
 
     private var versionLabel: String {
@@ -5864,146 +5211,6 @@ struct SettingsView: View {
             get: { appState.launchAtLoginEnabled },
             set: { appState.setLaunchAtLogin($0) }
         )
-    }
-}
-
-private struct TintPercentEditor: View {
-    let value: Int
-    let range: ClosedRange<Int>
-    let onCommit: (Int) -> Void
-
-    @State private var draft: String
-    @State private var focused = false
-
-    init(value: Int, range: ClosedRange<Int>, onCommit: @escaping (Int) -> Void) {
-        self.value = value
-        self.range = range
-        self.onCommit = onCommit
-        _draft = State(initialValue: "\(value)")
-    }
-
-    private var locked: Bool { range.lowerBound == range.upperBound }
-
-    var body: some View {
-        HStack(alignment: .center, spacing: 6) {
-            Stepper("", value: Binding(
-                get: { value },
-                set: { next in
-                    onCommit(next)
-                    draft = "\(next)"
-                }
-            ), in: range)
-            .labelsHidden()
-            .controlSize(.small)
-            .fixedSize()
-            .disabled(locked)
-
-            Text("≤")
-                .foregroundStyle(.secondary)
-
-            CenteredPercentField(
-                text: $draft,
-                isEnabled: !locked,
-                isFocused: $focused,
-                onCommit: commit
-            )
-            .frame(width: 44, height: 22)
-
-            Text("%")
-                .foregroundStyle(.secondary)
-        }
-        .onAppear { draft = "\(value)" }
-        .onChange(of: value) { _, newValue in
-            if !focused { draft = "\(newValue)" }
-        }
-    }
-
-    private func commit() {
-        let next = MenuBarTintPercentInput.commit(draft, range: range, fallback: value)
-        draft = "\(next)"
-        if next != value {
-            onCommit(next)
-        }
-    }
-}
-
-/// Percent field for merged "all" editors. `nil` shows "-" until the user types a number.
-private struct MergedTintPercentEditor: View {
-    let value: Int?
-    let range: ClosedRange<Int>
-    let onCommit: (Int) -> Void
-
-    @State private var draft: String
-    @State private var focused = false
-
-    init(value: Int?, range: ClosedRange<Int>, onCommit: @escaping (Int) -> Void) {
-        self.value = value
-        self.range = range
-        self.onCommit = onCommit
-        _draft = State(initialValue: value.map(String.init) ?? "-")
-    }
-
-    var body: some View {
-        HStack(alignment: .center, spacing: 6) {
-            if let value {
-                Stepper("", value: Binding(
-                    get: { value },
-                    set: { next in
-                        onCommit(next)
-                        draft = "\(next)"
-                    }
-                ), in: range)
-                .labelsHidden()
-                .controlSize(.small)
-                .fixedSize()
-            } else {
-                Stepper("", value: .constant(50), in: range)
-                    .labelsHidden()
-                    .controlSize(.small)
-                    .fixedSize()
-                    .disabled(true)
-            }
-
-            Text("≤")
-                .foregroundStyle(.secondary)
-
-            CenteredPercentField(
-                text: $draft,
-                isEnabled: true,
-                isFocused: $focused,
-                onCommit: commit
-            )
-            .frame(width: 44, height: 22)
-
-            Text("%")
-                .foregroundStyle(.secondary)
-        }
-        .onAppear { draft = value.map(String.init) ?? "-" }
-        .onChange(of: value) { _, newValue in
-            if !focused { draft = newValue.map(String.init) ?? "-" }
-        }
-    }
-
-    private func commit() {
-        let trimmed = draft.trimmingCharacters(in: .whitespacesAndNewlines)
-        if trimmed.isEmpty || trimmed == "-" {
-            draft = value.map(String.init) ?? "-"
-            return
-        }
-        let fallback = value ?? range.lowerBound
-        let next = MenuBarTintPercentInput.commit(draft, range: range, fallback: fallback)
-        // Only apply when the user typed a parseable number (not junk reverting to fallback while mixed).
-        if value == nil {
-            let digits = trimmed.filter(\.isNumber)
-            guard !digits.isEmpty else {
-                draft = "-"
-                return
-            }
-        }
-        draft = "\(next)"
-        if next != value {
-            onCommit(next)
-        }
     }
 }
 

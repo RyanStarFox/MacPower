@@ -1698,3 +1698,73 @@ final class RibbonMorphTests: XCTestCase {
         return snapshot
     }
 }
+
+/// The color ramp shared by the menu bar, energy flow and ring color pages.
+final class TintRampTests: XCTestCase {
+    private var defaultBands: [MenuBarTintBand] { MenuBarTintScheme.systemDefault.bands }
+
+    func testBoundaryStaysBetweenItsNeighbors() {
+        let ordered = TintRamp.sorted(defaultBands)
+        XCTAssertEqual(TintRamp.boundaryRange(at: 0, in: ordered), 1...19)
+        XCTAssertEqual(TintRamp.boundaryRange(at: 1, in: ordered), 11...99)
+    }
+
+    func testAddingBoundarySplitsTheWidestSegment() throws {
+        let result = try XCTUnwrap(TintRamp.addingBoundary(to: defaultBands))
+        let ordered = TintRamp.sorted(result.bands)
+        XCTAssertEqual(ordered.map(\.throughPercent), [10, 20, 60, 100])
+        XCTAssertEqual(ordered[2].id, result.newID)
+        XCTAssertEqual(ordered[2].highRight, .menuBar)
+    }
+
+    func testSplittingASlideKeepsTheColorAtTheSplit() throws {
+        let band = MenuBarTintBand(throughPercent: 100, swatch: .systemYellow, blend: .slide, lowRight: .systemRed)
+        let result = try XCTUnwrap(TintRamp.addingBoundary(to: [band]))
+        let ordered = TintRamp.sorted(result.bands)
+        let middle = MenuBarTintMix.mix(.systemRed, .systemYellow, t: 0.5)
+        XCTAssertEqual(ordered[0].lowRight, .systemRed)
+        XCTAssertEqual(ordered[0].highRight, middle)
+        XCTAssertEqual(ordered[1].lowRight, middle)
+        XCTAssertEqual(ordered[1].highRight, .systemYellow)
+    }
+
+    func testTwoSegmentsAreEnough() {
+        let two = TintRamp.removing(defaultBands[1].id, from: defaultBands)
+        XCTAssertEqual(TintRamp.sorted(two).map(\.throughPercent), [10, 100])
+        let one = TintRamp.removing(two[0].id, from: two)
+        XCTAssertEqual(one.map(\.throughPercent), [100])
+        XCTAssertEqual(TintRamp.removing(one[0].id, from: one).count, 1)
+    }
+
+    func testRemovingTheTopSegmentHandsItsRangeDown() {
+        let top = TintRamp.sorted(defaultBands).last!
+        let next = TintRamp.sorted(TintRamp.removing(top.id, from: defaultBands))
+        XCTAssertEqual(next.map(\.throughPercent), [10, 100])
+        XCTAssertEqual(next.last?.highRight, .systemYellow)
+    }
+
+    func testSmoothStartsEachSegmentWhereTheOneBelowEnds() {
+        XCTAssertEqual(TintRamp.transition(of: defaultBands), .stepped)
+        let smooth = TintRamp.applying(.smooth, to: defaultBands)
+        XCTAssertEqual(TintRamp.transition(of: smooth), .smooth)
+        XCTAssertEqual(smooth[1].lowRight, .systemRed)
+        XCTAssertEqual(smooth[2].lowRight, .systemYellow)
+        let stepped = TintRamp.applying(.stepped, to: smooth)
+        XCTAssertEqual(TintRamp.transition(of: stepped), .stepped)
+        XCTAssertEqual(stepped.map(\.highRight), defaultBands.map(\.highRight))
+    }
+
+    func testSwitchingASlideToLeftRightKeepsBothColors() {
+        let band = MenuBarTintBand(throughPercent: 100, swatch: .systemYellow, blend: .slide, lowRight: .systemRed)
+        let next = TintRamp.settingBlend(.gradient, of: band, previous: nil)
+        XCTAssertEqual(next.blend, .gradient)
+        XCTAssertEqual(next.highLeft, .systemRed)
+        XCTAssertEqual(next.highRight, .systemYellow)
+    }
+
+    func testSolidColorFillsEverySide() {
+        let band = MenuBarTintBand(throughPercent: 100, swatch: .systemGreen)
+        let next = TintRamp.setting(\.highRight, to: .systemOrange, in: band)
+        XCTAssertEqual([next.lowLeft, next.lowRight, next.highLeft, next.highRight], Array(repeating: .systemOrange, count: 4))
+    }
+}
