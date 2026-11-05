@@ -12,9 +12,9 @@
 
 需要开发者账号的写在「有开发者账号之后做」，买到之前不要开工。已发布的版本用版本号做标题，例如 `2.1.2`。还没发布的改动先放在「下一个版本」下面。发布时把「下一个版本」改成确定的版本号，并在它上面重新放一个空的「下一个版本」。
 
-和本项目相关的 skill 都放在 `docs/skills/`。现在有两份：改任务清单看 `macpower-todo.md`，发版看 `macpower-release.md`。
+和本项目相关的 skill 都放在 `docs/skills/`。现在有三份：改任务清单看 `macpower-todo.md`，发版看 `macpower-release.md`，把当前分支合进 `main` 看 `macpower-merge.md`。
 
-仓库里的这份是远端副本。本机还各有一份，任务清单在 `~/.cursor/skills/macpower-todo/SKILL.md`，发版在 `~/.cursor/skills/macpower-release/SKILL.md`。改 skill 时两处都要改，内容保持一致。只改一边，下次按 skill 做事就会和仓库里的约定分开。
+仓库里的这份是远端副本。本机还各有一份，任务清单在 `~/.cursor/skills/macpower-todo/SKILL.md`，发版在 `~/.cursor/skills/macpower-release/SKILL.md`，合并在 `~/.cursor/skills/macpower-merge/SKILL.md`。改 skill 时两处都要改，内容保持一致。只改一边，下次按 skill 做事就会和仓库里的约定分开。
 
 ## 自定义
 
