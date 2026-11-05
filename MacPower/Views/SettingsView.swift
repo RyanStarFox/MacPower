@@ -1870,6 +1870,7 @@ struct SettingsView: View {
         .background(SettingsFormWidthLock())
     }
 
+
     @ViewBuilder
     private var generalSections: some View {
         Section {
@@ -1881,31 +1882,49 @@ struct SettingsView: View {
                 Text("settings.language") + Text("（文/A）")
             }
             Toggle("settings.launchAtLogin", isOn: launchAtLoginBinding)
+        }
+
+        Section {
+            HStack(spacing: 10) {
+                SettingsAppIcon(size: 36)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(verbatim: "MacPower \(AppState.marketingVersion)")
+                        .fontWeight(.semibold)
+                    if appState.isCheckingForUpdates {
+                        Text("settings.updates.checking")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                Spacer(minLength: 8)
+                Button("settings.updates.check") {
+                    appState.checkForUpdates(reason: .manual)
+                }
+                .disabled(appState.isCheckingForUpdates)
+            }
             Toggle(
-                "settings.updates.automatic",
                 isOn: Binding(
                     get: { appState.settings.automaticallyCheckForUpdates },
                     set: { appState.setAutomaticUpdateChecking($0, checkNow: true) }
                 )
-            )
+            ) {
+                SettingsRowLabel(title: "settings.updates.automatic", caption: "settings.updates.automatic.caption")
+            }
+        } header: {
+            Text("settings.updates.header")
         }
 
         Section {
-            Button("settings.updates.check") {
-                appState.checkForUpdates(reason: .manual)
+            HStack(spacing: 12) {
+                SettingsRowLabel(title: "settings.quit", caption: "settings.quit.caption")
+                Spacer(minLength: 8)
+                Button(role: .destructive) {
+                    NSApp.terminate(nil)
+                } label: {
+                    Text("settings.quit.button")
+                        .foregroundStyle(.red)
+                }
             }
-            .buttonStyle(.plain)
-            .frame(maxWidth: .infinity)
-            .disabled(appState.isCheckingForUpdates)
-        }
-
-        Section {
-            Button("settings.quit") {
-                NSApp.terminate(nil)
-            }
-            .buttonStyle(.plain)
-            .foregroundStyle(.red)
-            .frame(maxWidth: .infinity)
         }
     }
 
@@ -1944,77 +1963,315 @@ struct SettingsView: View {
         }
     }
 
+
     @ViewBuilder
     private var localIPSections: some View {
         Section {
-            ForEach(IPAddressScope.allCases) { scope in
-                Toggle(LocalizedStringKey(scope.localizationKey), isOn: ipScopeBinding(scope))
+            SettingsPreviewCard(title: "settings.preview.panel") {
+                LocalIPSection(
+                    rows: tutorialIPRows.filter {
+                        appState.settings.ipScopes.contains($0.scope)
+                            && appState.settings.ipFamilies.contains($0.family)
+                    },
+                    language: appState.settings.language,
+                    panelWidth: PopoverLayout.width
+                )
+                .frame(width: PopoverLayout.width - PopoverLayout.padding * 2, alignment: .leading)
+                .allowsHitTesting(false)
             }
-            ForEach(IPAddressFamily.allCases) { family in
-                Toggle(LocalizedStringKey(family.localizationKey), isOn: ipFamilyBinding(family))
+        }
+        Section {
+            ForEach(IPAddressScope.allCases) { scope in
+                Toggle(isOn: ipScopeBinding(scope)) {
+                    SettingsRowLabel(
+                        title: LocalizedStringKey(scope.localizationKey),
+                        caption: LocalizedStringKey(ipScopeCaptionKey(scope))
+                    )
+                }
             }
         } header: {
-            Text("settings.localIP.options")
+            Text("settings.localIP.scopes")
+        }
+        Section {
+            Picker(selection: ipFamilyChoiceBinding) {
+                Text(verbatim: "IPv4").tag(IPFamilyChoice.ipv4)
+                Text(verbatim: "IPv6").tag(IPFamilyChoice.ipv6)
+                Text("settings.localIP.families.both").tag(IPFamilyChoice.both)
+            } label: {
+                SettingsRowLabel(title: "settings.localIP.families.show", caption: "settings.localIP.families.caption")
+            }
+            .pickerStyle(.segmented)
+        } header: {
+            Text("settings.localIP.families")
         }
     }
+
+    private enum IPFamilyChoice: Hashable {
+        case ipv4, ipv6, both
+    }
+
+    private var ipFamilyChoiceBinding: Binding<IPFamilyChoice> {
+        Binding(
+            get: {
+                let families = appState.settings.ipFamilies
+                if families.contains(.ipv4), families.contains(.ipv6) { return .both }
+                return families.contains(.ipv6) ? .ipv6 : .ipv4
+            },
+            set: { choice in
+                switch choice {
+                case .ipv4: appState.settings.ipFamilies = [.ipv4]
+                case .ipv6: appState.settings.ipFamilies = [.ipv6]
+                case .both: appState.settings.ipFamilies = [.ipv4, .ipv6]
+                }
+            }
+        )
+    }
+
+    private func ipScopeCaptionKey(_ scope: IPAddressScope) -> String {
+        switch scope {
+        case .local: "settings.localIP.scope.local.caption"
+        case .publicAddress: "settings.localIP.scope.public.caption"
+        case .loopback: "settings.localIP.scope.loopback.caption"
+        case .linkLocal: "settings.localIP.scope.linkLocal.caption"
+        }
+    }
+
 
     @ViewBuilder
     private var topAppsSections: some View {
         Section {
+            HStack(spacing: 10) {
+                ForEach(TopAppsChartStyle.allCases) { style in
+                    SettingsChoiceCard(
+                        title: LocalizedStringKey(style.localizationKey),
+                        selected: appState.settings.topAppsChart == style,
+                        action: { appState.settings.topAppsChart = style }
+                    ) {
+                        topAppsChartThumbnail(style)
+                    }
+                }
+            }
+        } header: {
+            Text("settings.topApps.chart.header")
+        } footer: {
+            Text("tutorial.topApps.view")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        Section {
             topAppStepper(
-                "settings.topApps.window",
+                "settings.topApps.window.title",
+                caption: "settings.topApps.window.caption",
                 value: appState.settings.topAppWindowMinutes,
                 unit: "settings.topApps.minutes",
                 range: AppSettings.topAppWindowRange,
                 step: 1
             ) { appState.settings.topAppWindowMinutes = $0 }
             topAppStepper(
-                "settings.topApps.interval",
+                "settings.topApps.interval.title",
                 value: appState.settings.topAppIntervalSeconds,
                 unit: "settings.topApps.seconds",
                 range: AppSettings.topAppIntervalRange,
                 step: 5
             ) { appState.settings.topAppIntervalSeconds = $0 }
             topAppStepper(
-                "settings.topApps.limit",
+                "settings.topApps.limit.title",
                 value: appState.settings.topAppLimit,
                 unit: nil,
                 range: AppSettings.topAppLimitRange,
                 step: 1
             ) { appState.settings.topAppLimit = $0 }
-            Picker("settings.topApps.chart", selection: $appState.settings.topAppsChart) {
-                ForEach(TopAppsChartStyle.allCases) { style in
-                    Text(LocalizedStringKey(style.localizationKey)).tag(style)
-                }
-            }
+        } header: {
+            Text("settings.topApps.how")
+        } footer: {
+            Text("settings.topApps.footer")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
+
+    /// A small drawing of each chart style: three apps, the busiest first.
+    @ViewBuilder
+    private func topAppsChartThumbnail(_ style: TopAppsChartStyle) -> some View {
+        let shares: [CGFloat] = [1, 0.57, 0.16]
+        let values = ["12.4", "7.1", "2.0"]
+        switch style {
+        case .list:
+            VStack(spacing: 5) {
+                ForEach(0..<3, id: \.self) { index in
+                    HStack(spacing: 6) {
+                        Capsule().fill(Color.primary.opacity(0.22)).frame(width: 30, height: 5)
+                        Spacer(minLength: 4)
+                        Text(verbatim: values[index])
+                            .font(.system(size: 9))
+                            .monospacedDigit()
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+        case .bars:
+            VStack(alignment: .leading, spacing: 7) {
+                ForEach(0..<3, id: \.self) { index in
+                    Capsule()
+                        .fill(Color.accentColor)
+                        .frame(width: 64 * shares[index], height: 5)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            }
+        case .columns:
+            HStack(alignment: .bottom, spacing: 9) {
+                ForEach(0..<3, id: \.self) { index in
+                    RoundedRectangle(cornerRadius: 2, style: .continuous)
+                        .fill(Color.accentColor)
+                        .frame(width: 12, height: 34 * shares[index] + 2)
+                }
+            }
+            .frame(height: 38, alignment: .bottom)
+        }
+    }
+
 
     @ViewBuilder
     private var lowPowerSections: some View {
         Section {
-            Picker("settings.lowPower.layout", selection: $appState.settings.lowPowerButtonLayout) {
+            HStack(spacing: 10) {
+                ForEach(LowPowerButtonVisibility.allCases) { visibility in
+                    SettingsChoiceCard(
+                        title: LocalizedStringKey(visibility.localizationKey),
+                        selected: appState.settings.lowPowerButtonVisibility == visibility,
+                        action: { appState.settings.lowPowerButtonVisibility = visibility }
+                    ) {
+                        lowPowerButtonsThumbnail(visibility)
+                    }
+                }
+            }
+        } header: {
+            Text("settings.lowPower.buttons.header")
+        } footer: {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("tutorial.lowPower.strategy")
+                Text("tutorial.lowPower.now")
+            }
+            .font(.subheadline)
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
+        }
+        Section {
+            HStack(spacing: 10) {
                 ForEach(LowPowerButtonLayout.allCases) { layout in
-                    Text(LocalizedStringKey(layout.localizationKey)).tag(layout)
+                    SettingsChoiceCard(
+                        title: LocalizedStringKey(layout.localizationKey),
+                        selected: appState.settings.lowPowerButtonLayout == layout,
+                        action: { appState.settings.lowPowerButtonLayout = layout }
+                    ) {
+                        lowPowerLayoutThumbnail(layout)
+                    }
                 }
             }
             .disabled(appState.settings.lowPowerButtonVisibility != .both)
-            Picker("settings.lowPower.buttons", selection: $appState.settings.lowPowerButtonVisibility) {
-                ForEach(LowPowerButtonVisibility.allCases) { visibility in
-                    Text(LocalizedStringKey(visibility.localizationKey)).tag(visibility)
-                }
+        } header: {
+            Text("settings.lowPower.layout.header")
+        } footer: {
+            Text("settings.lowPower.layout.note")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    /// The panel's buttons as each choice would show them, with the current strategy's name.
+    private func lowPowerButtonsThumbnail(_ visibility: LowPowerButtonVisibility) -> some View {
+        let language = appState.settings.language
+        let strategy = appState.settings.lowPowerStrategy ?? appState.lowPowerPreset ?? .onlyBattery
+        let strategyTitle = Localization.string(strategy.shortLocalizationKey, language: language)
+        let lowPowerTitle = Localization.string("popover.lowPower.now", language: language)
+        return HStack(spacing: 5) {
+            if visibility != .lowPower {
+                lowPowerMiniButton(strategyTitle, symbol: "chevron.down", symbolFirst: false)
+            }
+            if visibility != .strategy {
+                lowPowerMiniButton(lowPowerTitle, symbol: "battery.25percent", symbolFirst: true)
             }
         }
     }
 
+    private func lowPowerMiniButton(_ title: String, symbol: String, symbolFirst: Bool) -> some View {
+        HStack(spacing: 3) {
+            if symbolFirst {
+                Image(systemName: symbol)
+                    .foregroundStyle(.yellow)
+            }
+            Text(verbatim: title)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+            if !symbolFirst {
+                Image(systemName: symbol)
+                    .font(.system(size: 7, weight: .bold))
+            }
+        }
+        .font(.system(size: 10))
+        .padding(.horizontal, 6)
+        .frame(maxWidth: .infinity, minHeight: 22)
+        .background(Color.primary.opacity(0.07), in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+    }
+
+    @ViewBuilder
+    private func lowPowerLayoutThumbnail(_ layout: LowPowerButtonLayout) -> some View {
+        let block = RoundedRectangle(cornerRadius: 5, style: .continuous)
+        switch layout {
+        case .fitTwoPerRow:
+            HStack(spacing: 6) {
+                block.fill(Color.primary.opacity(0.09)).frame(height: 20)
+                block.fill(Color.primary.opacity(0.09)).frame(height: 20)
+            }
+        case .alwaysOnePerRow:
+            VStack(spacing: 5) {
+                block.fill(Color.primary.opacity(0.09)).frame(height: 16)
+                block.fill(Color.primary.opacity(0.09)).frame(height: 16)
+            }
+        }
+    }
+
+
     @ViewBuilder
     private var batteryCycleSections: some View {
         Section {
-            Picker("settings.batteryCycle.format", selection: $appState.settings.batteryCapacityStyle) {
+            SettingsPreviewCard(title: "settings.preview.panel") {
+                cycleTutorialPreview
+            }
+        }
+        Section {
+            HStack(spacing: 10) {
                 ForEach(BatteryCapacityStyle.allCases) { style in
-                    Text(LocalizedStringKey(style.localizationKey)).tag(style)
+                    SettingsChoiceCard(
+                        title: LocalizedStringKey(style.localizationKey),
+                        selected: appState.settings.batteryCapacityStyle == style,
+                        action: { appState.settings.batteryCapacityStyle = style }
+                    ) {
+                        Text(verbatim: capacitySample(style))
+                            .font(.system(size: 15, weight: .semibold))
+                            .monospacedDigit()
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.6)
+                    }
                 }
             }
+        } header: {
+            Text("settings.batteryCycle.format")
+        }
+    }
+
+    /// The capacity the panel would show in each format, from this Mac's battery when it has one.
+    private func capacitySample(_ style: BatteryCapacityStyle) -> String {
+        let full = appState.snapshot.fullChargeMilliAmpHours ?? 4820
+        let design = appState.snapshot.designCapacityMilliAmpHours ?? 5400
+        let percent = design > 0 ? Int((Double(full) / Double(design) * 100).rounded()) : 100
+        let milliampHours = "\(full.formatted()) mAh"
+        switch style {
+        case .percent: return "\(percent)%"
+        case .milliampHours: return milliampHours
+        case .both: return "\(percent)% · \(full.formatted())"
         }
     }
 
@@ -2040,8 +2297,10 @@ struct SettingsView: View {
         }
     }
 
+
     private func topAppStepper(
         _ title: LocalizedStringKey,
+        caption: LocalizedStringKey? = nil,
         value: Int,
         unit: LocalizedStringKey?,
         range: ClosedRange<Int>,
@@ -2049,7 +2308,7 @@ struct SettingsView: View {
         set: @escaping (Int) -> Void
     ) -> some View {
         HStack(spacing: 8) {
-            Text(title)
+            SettingsRowLabel(title: title, caption: caption)
             Spacer(minLength: 8)
             HStack(spacing: 4) {
                 Text("\(value)")
@@ -2065,54 +2324,67 @@ struct SettingsView: View {
         }
     }
 
+
     @ViewBuilder
     private var aboutSections: some View {
+        let language = appState.settings.language
         Section {
-            VStack(spacing: 10) {
-                aboutLink(
-                    title: "GitHub",
-                    url: UpdateChecker.githubRepoURL
+            VStack(spacing: 6) {
+                SettingsAppIcon(size: 72)
+                Text(verbatim: "MacPower")
+                    .font(.system(size: 20, weight: .bold))
+                Text(versionLabel)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 10)
+        }
+
+        Section {
+            SettingsLinkRow(
+                title: "GitHub",
+                caption: Localization.string("settings.about.github.caption", language: language),
+                url: UpdateChecker.githubRepoURL
+            ) {
+                Image("GitHubMark")
+                    .renderingMode(.template)
+                    .resizable()
+                    .scaledToFit()
+                    .foregroundStyle(.white)
+                    .frame(width: 13, height: 13)
+                    .frame(width: 22, height: 22)
+                    .background(Color(white: 0.12).gradient, in: RoundedRectangle(cornerRadius: 5, style: .continuous))
+            }
+            SettingsLinkRow(
+                title: "Gitee",
+                caption: Localization.string("settings.about.gitee.caption", language: language),
+                url: UpdateChecker.giteeRepoURL
+            ) {
+                SettingsRowTile(symbol: "g.circle.fill", color: Color(red: 0.78, green: 0.11, blue: 0.14))
+            }
+            SettingsLinkRow(
+                title: Localization.string("settings.about.star", language: language),
+                caption: nil,
+                url: UpdateChecker.githubRepoURL
+            ) {
+                SettingsRowTile(symbol: "star.fill", color: Color(red: 0.98, green: 0.70, blue: 0.10))
+            }
+            Button {
+                showingAuthorSupport = true
+            } label: {
+                SettingsLeadingRow(
+                    title: Localization.string("settings.about.tip", language: language),
+                    caption: Localization.string("settings.about.tip.caption", language: language),
+                    trailingSymbol: "chevron.right"
                 ) {
-                    Image("GitHubMark")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 15, height: 15)
-                }
-                aboutLink(
-                    title: "Gitee",
-                    url: UpdateChecker.giteeRepoURL
-                ) {
-                    Image(systemName: "g.circle.fill")
-                        .font(.system(size: 15))
-                        .foregroundStyle(Color(red: 0.78, green: 0.11, blue: 0.14))
-                }
-                aboutLink(
-                    title: Localization.string("settings.about.star", language: appState.settings.language),
-                    url: UpdateChecker.githubRepoURL
-                ) {
-                    Image(systemName: "star.fill")
-                        .font(.system(size: 14))
-                        .foregroundStyle(Color(red: 0.98, green: 0.76, blue: 0.18))
-                }
-                aboutButton(
-                    title: Localization.string("settings.about.tip", language: appState.settings.language),
-                    action: { showingAuthorSupport = true }
-                ) {
-                    Image(systemName: "cup.and.saucer.fill")
-                        .font(.system(size: 14))
-                        .foregroundStyle(Color(red: 1, green: 0.37, blue: 0.36))
-                }
-                .popover(isPresented: $showingAuthorSupport, arrowEdge: .bottom) {
-                    authorSupportPopover
+                    SettingsRowTile(symbol: "cup.and.saucer.fill", color: Color(red: 1, green: 0.37, blue: 0.36))
                 }
             }
-            .padding(.vertical, 4)
-        } footer: {
-            Text(versionLabel)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .frame(maxWidth: .infinity)
-                .padding(.top, 2)
+            .buttonStyle(.plain)
+            .popover(isPresented: $showingAuthorSupport, arrowEdge: .trailing) {
+                authorSupportPopover
+            }
         }
     }
 

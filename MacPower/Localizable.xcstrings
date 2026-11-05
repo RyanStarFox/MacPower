@@ -15994,6 +15994,454 @@
         "zh-Hans": { "stringUnit": { "state": "translated", "value": "跟随电量" } },
         "zh-Hant": { "stringUnit": { "state": "translated", "value": "跟隨電量" } }
       }
+    },
+    "settings.updates.header": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Software Update" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "软件更新" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "軟體更新" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ソフトウェア・アップデート" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "소프트웨어 업데이트" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Mise à jour de logiciels" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Softwareupdate" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Actualización de software" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Atualização de Software" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Aggiornamento software" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Обновление ПО" } }
+      }
+    },
+    "settings.updates.checking": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Checking…" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "正在检查…" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "正在檢查…" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "確認中…" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "확인 중…" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Vérification…" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Wird geprüft …" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Comprobando…" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Verificando…" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Verifica in corso…" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Проверка…" } }
+      }
+    },
+    "settings.updates.automatic.caption": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Looks for a new version every hour." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "打开后每小时检查一次新版本。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "開啟後每小時檢查一次新版本。" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "オンにすると1時間ごとに新しいバージョンを確認します。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "켜면 매시간 새 버전을 확인합니다." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Recherche une nouvelle version toutes les heures." } },
+        "de": { "stringUnit": { "state": "translated", "value": "Sucht stündlich nach einer neuen Version." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Busca una versión nueva cada hora." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Procura uma nova versão a cada hora." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Cerca una nuova versione ogni ora." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Проверяет наличие новой версии каждый час." } }
+      }
+    },
+    "settings.quit.caption": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "The menu bar icon goes away until you open MacPower again." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "菜单栏图标会消失，再次打开 MacPower 即可恢复。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "選單列圖示會消失，再次打開 MacPower 即可恢復。" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "メニューバーのアイコンが消えます。MacPower をもう一度開くと戻ります。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "메뉴 막대 아이콘이 사라집니다. MacPower를 다시 열면 돌아옵니다." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "L’icône de la barre des menus disparaît jusqu’à ce que vous rouvriez MacPower." } },
+        "de": { "stringUnit": { "state": "translated", "value": "Das Symbol in der Menüleiste verschwindet, bis du MacPower wieder öffnest." } },
+        "es": { "stringUnit": { "state": "translated", "value": "El icono de la barra de menús desaparece hasta que vuelvas a abrir MacPower." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "O ícone da barra de menus some até você abrir o MacPower de novo." } },
+        "it": { "stringUnit": { "state": "translated", "value": "L’icona nella barra dei menu sparisce finché non riapri MacPower." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Значок в строке меню исчезнет, пока вы снова не откроете MacPower." } }
+      }
+    },
+    "settings.quit.button": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Quit" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "退出" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "結束" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "終了" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "종료" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Quitter" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Beenden" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Salir" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Encerrar" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Esci" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Завершить" } }
+      }
+    },
+    "settings.about.github.caption": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Source code, issues and releases" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "源代码、问题反馈和版本记录" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "原始碼、問題回報和版本紀錄" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ソースコード、問題の報告、リリース" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "소스 코드, 문제 보고, 릴리스" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Code source, problèmes et versions" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Quellcode, Fehlerberichte und Versionen" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Código fuente, incidencias y versiones" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Código-fonte, problemas e versões" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Codice sorgente, segnalazioni e versioni" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Исходный код, сообщения об ошибках и выпуски" } }
+      }
+    },
+    "settings.about.gitee.caption": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Mirror of the repository" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "仓库镜像" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "倉庫鏡像" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "リポジトリのミラー" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "저장소 미러" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Miroir du dépôt" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Spiegel des Repositorys" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Réplica del repositorio" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Espelho do repositório" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Mirror del repository" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Зеркало репозитория" } }
+      }
+    },
+    "settings.about.tip.caption": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Coffee, WeChat or Alipay" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "咖啡、微信或支付宝" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "咖啡、微信或支付寶" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "コーヒー、WeChat、Alipay" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "커피, WeChat, Alipay" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Café, WeChat ou Alipay" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Kaffee, WeChat oder Alipay" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Café, WeChat o Alipay" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Café, WeChat ou Alipay" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Caffè, WeChat o Alipay" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Кофе, WeChat или Alipay" } }
+      }
+    },
+    "settings.preview.panel": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "In the panel" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "面板里的样子" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "面板裡的樣子" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "パネルでの表示" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "패널에서 보이는 모습" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Dans le panneau" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Im Bedienfeld" } },
+        "es": { "stringUnit": { "state": "translated", "value": "En el panel" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "No painel" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Nel pannello" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "В панели" } }
+      }
+    },
+    "settings.localIP.scopes": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Addresses to show" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "显示哪些地址" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "顯示哪些位址" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "表示するアドレス" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "표시할 주소" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Adresses à afficher" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Angezeigte Adressen" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Direcciones que se muestran" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Endereços exibidos" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Indirizzi da mostrare" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Какие адреса показывать" } }
+      }
+    },
+    "settings.localIP.scope.local.caption": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Addresses on your local network, such as 192.168.x.x." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "局域网里的地址，比如 192.168.x.x。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "區域網路裡的位址，例如 192.168.x.x。" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ローカルネットワーク上のアドレス（192.168.x.x など）。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "로컬 네트워크의 주소(예: 192.168.x.x)." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Adresses de votre réseau local, comme 192.168.x.x." } },
+        "de": { "stringUnit": { "state": "translated", "value": "Adressen im lokalen Netzwerk, etwa 192.168.x.x." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Direcciones de tu red local, como 192.168.x.x." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Endereços da sua rede local, como 192.168.x.x." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Indirizzi della rete locale, come 192.168.x.x." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Адреса в локальной сети, например 192.168.x.x." } }
+      }
+    },
+    "settings.localIP.scope.public.caption": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "The address the internet sees. Looked up online; shows “Failed” when it can’t be found." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "互联网上看到的你的地址，需要联网查询；查不到时显示「获取失败」。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "網際網路上看到的你的位址，需要連網查詢；查不到時顯示「取得失敗」。" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "インターネットから見えるアドレス。オンラインで調べます。取得できないときは「取得失敗」と表示します。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "인터넷에서 보이는 주소입니다. 온라인으로 조회하며, 찾지 못하면 ‘가져오기 실패’로 표시됩니다." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "L’adresse vue depuis Internet. Recherchée en ligne ; affiche « Échec » si elle est introuvable." } },
+        "de": { "stringUnit": { "state": "translated", "value": "Die Adresse, die das Internet sieht. Wird online abgefragt; zeigt „Fehlgeschlagen“, wenn sie nicht gefunden wird." } },
+        "es": { "stringUnit": { "state": "translated", "value": "La dirección que ve internet. Se consulta en línea; muestra «Error» si no se encuentra." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "O endereço visto pela internet. Consultado on-line; mostra “Falhou” quando não é encontrado." } },
+        "it": { "stringUnit": { "state": "translated", "value": "L’indirizzo visto da internet. Viene cercato online; se non si trova mostra «Non riuscito»." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Адрес, который видит интернет. Запрашивается онлайн; если не найден, показывается «Ошибка»." } }
+      }
+    },
+    "settings.localIP.scope.loopback.caption": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "The address this Mac uses for itself, usually 127.0.0.1." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "这台 Mac 自己用的地址，通常是 127.0.0.1。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "這台 Mac 自己用的位址，通常是 127.0.0.1。" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "この Mac が自分自身に使うアドレス。通常は 127.0.0.1。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "이 Mac이 자기 자신에게 쓰는 주소로, 보통 127.0.0.1입니다." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "L’adresse que ce Mac utilise pour lui-même, en général 127.0.0.1." } },
+        "de": { "stringUnit": { "state": "translated", "value": "Die Adresse, die dieser Mac für sich selbst nutzt, meist 127.0.0.1." } },
+        "es": { "stringUnit": { "state": "translated", "value": "La dirección que este Mac usa para sí mismo, normalmente 127.0.0.1." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "O endereço que este Mac usa para si mesmo, geralmente 127.0.0.1." } },
+        "it": { "stringUnit": { "state": "translated", "value": "L’indirizzo che questo Mac usa per sé stesso, di solito 127.0.0.1." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Адрес, который этот Mac использует сам для себя, обычно 127.0.0.1." } }
+      }
+    },
+    "settings.localIP.scope.linkLocal.caption": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Addresses that only work on the same network segment, starting with 169.254 or fe80." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "只在同一段网络里有效的地址，以 169.254 或 fe80 开头。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "只在同一段網路裡有效的位址，以 169.254 或 fe80 開頭。" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "同じネットワーク区間でのみ有効なアドレス。169.254 または fe80 で始まります。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "같은 네트워크 구간에서만 쓰이는 주소로, 169.254 또는 fe80으로 시작합니다." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Adresses valables uniquement sur le même segment réseau, commençant par 169.254 ou fe80." } },
+        "de": { "stringUnit": { "state": "translated", "value": "Adressen, die nur im selben Netzwerksegment gelten, beginnend mit 169.254 oder fe80." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Direcciones válidas solo en el mismo segmento de red; empiezan por 169.254 o fe80." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Endereços válidos só no mesmo segmento de rede, começando por 169.254 ou fe80." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Indirizzi validi solo nello stesso segmento di rete, che iniziano con 169.254 o fe80." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Адреса, действующие только в пределах одного сегмента сети; начинаются с 169.254 или fe80." } }
+      }
+    },
+    "settings.localIP.families": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Address format" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "地址格式" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "位址格式" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "アドレスの形式" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "주소 형식" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Format des adresses" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Adressformat" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Formato de dirección" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Formato do endereço" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Formato degli indirizzi" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Формат адреса" } }
+      }
+    },
+    "settings.localIP.families.show": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Show" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "显示" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "顯示" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "表示" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "표시" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Afficher" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Anzeigen" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Mostrar" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Mostrar" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Mostra" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Показывать" } }
+      }
+    },
+    "settings.localIP.families.caption": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "IPv4 is the familiar four numbers; IPv6 is longer, with colons." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "IPv4 是常见的四段数字；IPv6 更长，带冒号。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "IPv4 是常見的四段數字；IPv6 較長，帶冒號。" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "IPv4 はおなじみの4つの数字、IPv6 はコロンを含む長い形式です。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "IPv4는 익숙한 네 개의 숫자이고, IPv6는 콜론이 있는 더 긴 형식입니다." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "IPv4 : les quatre nombres habituels ; IPv6 : plus long, avec des deux-points." } },
+        "de": { "stringUnit": { "state": "translated", "value": "IPv4 sind die bekannten vier Zahlen, IPv6 ist länger und enthält Doppelpunkte." } },
+        "es": { "stringUnit": { "state": "translated", "value": "IPv4 son los cuatro números habituales; IPv6 es más largo y lleva dos puntos." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "IPv4 são os quatro números conhecidos; IPv6 é mais longo, com dois-pontos." } },
+        "it": { "stringUnit": { "state": "translated", "value": "IPv4 sono i soliti quattro numeri; IPv6 è più lungo, con i due punti." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "IPv4 — привычные четыре числа; IPv6 длиннее и содержит двоеточия." } }
+      }
+    },
+    "settings.localIP.families.both": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Both" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "都显示" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "都顯示" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "両方" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "모두" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Les deux" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Beide" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Ambos" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Ambos" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Entrambi" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Оба" } }
+      }
+    },
+    "settings.lowPower.buttons.header": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Buttons in the panel" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "面板里显示哪些按钮" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "面板裡顯示哪些按鈕" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "パネルに表示するボタン" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "패널에 표시할 버튼" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Boutons dans le panneau" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Tasten im Bedienfeld" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Botones en el panel" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Botões no painel" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Pulsanti nel pannello" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Кнопки в панели" } }
+      }
+    },
+    "settings.lowPower.layout.header": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "When both are shown" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "两个都显示时怎么排" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "兩個都顯示時怎麼排" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "両方表示するときの並べ方" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "둘 다 표시할 때 배치" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Quand les deux sont affichés" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Wenn beide angezeigt werden" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Cuando se muestran los dos" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Quando os dois aparecem" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Quando sono visibili entrambi" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Если показаны обе" } }
+      }
+    },
+    "settings.lowPower.layout.note": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Only applies when both buttons are shown." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "只显示一个按钮时，这一项不用选。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "只顯示一個按鈕時，這一項不用選。" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ボタンを1つだけ表示するときは選ぶ必要はありません。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "버튼을 하나만 표시할 때는 고를 필요가 없습니다." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "S’applique seulement quand les deux boutons sont affichés." } },
+        "de": { "stringUnit": { "state": "translated", "value": "Gilt nur, wenn beide Tasten angezeigt werden." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Solo se aplica cuando se muestran los dos botones." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Só vale quando os dois botões aparecem." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Vale solo quando sono visibili entrambi i pulsanti." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Действует, только когда показаны обе кнопки." } }
+      }
+    },
+    "settings.topApps.chart.header": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "How the panel shows it" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "面板里怎么显示" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "面板裡怎麼顯示" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "パネルでの表示方法" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "패널에서 보이는 방식" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Affichage dans le panneau" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Darstellung im Bedienfeld" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Cómo se muestra en el panel" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Como aparece no painel" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Come appare nel pannello" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Как показывать в панели" } }
+      }
+    },
+    "settings.topApps.window.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Average over the last" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "取最近多久的平均" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "取最近多久的平均" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "直近どれだけの平均を取るか" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "최근 얼마 동안의 평균" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Moyenne sur les dernières" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Durchschnitt über die letzten" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Promedio de los últimos" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Média dos últimos" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Media degli ultimi" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Среднее за последние" } }
+      }
+    },
+    "settings.topApps.window.caption": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Longer is steadier; shorter shows what just happened." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "越长越平稳，越短越能反映刚才的情况。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "越長越平穩，越短越能反映剛才的情況。" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "長いほど安定し、短いほど直前の様子がわかります。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "길수록 안정적이고, 짧을수록 방금 상황을 잘 보여 줍니다." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Plus long, c’est plus stable ; plus court, c’est plus réactif." } },
+        "de": { "stringUnit": { "state": "translated", "value": "Länger ist ruhiger, kürzer zeigt, was gerade passiert ist." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Más largo es más estable; más corto refleja lo que acaba de pasar." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Mais longo é mais estável; mais curto mostra o que acabou de acontecer." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Più lungo è più stabile; più breve mostra cosa è appena successo." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Чем дольше, тем ровнее; чем короче, тем ближе к тому, что было только что." } }
+      }
+    },
+    "settings.topApps.interval.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Sample every" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "每隔多久统计一次" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "每隔多久統計一次" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "集計の間隔" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "집계 간격" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Échantillonner toutes les" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Erfassen alle" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Muestrear cada" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Amostrar a cada" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Campiona ogni" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Замер каждые" } }
+      }
+    },
+    "settings.topApps.limit.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Apps to list" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "列出前几名" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "列出前幾名" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "表示するアプリの数" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "표시할 앱 수" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Apps à afficher" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Angezeigte Apps" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Apps que se muestran" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Apps listados" } },
+        "it": { "stringUnit": { "state": "translated", "value": "App da mostrare" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Сколько приложений показывать" } }
+      }
+    },
+    "settings.topApps.how": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "How it’s counted" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "怎么统计" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "怎麼統計" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "集計方法" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "집계 방법" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Mode de calcul" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Berechnung" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Cómo se calcula" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Como é calculado" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Come viene calcolato" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Как считается" } }
+      }
+    },
+    "settings.topApps.footer": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Energy impact uses the same method as Activity Monitor, but over a different window and refresh time, so the numbers are close rather than identical." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "「对能耗的影响」和活动监视器用的是同一套算法，但两边的统计时段和刷新时间不同，所以数字接近而不会完全一样。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "「對能耗的影響」和活動監視器用的是同一套演算法，但兩邊的統計時段和更新時間不同，所以數字接近而不會完全一樣。" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "「エネルギー影響」はアクティビティモニタと同じ方法ですが、集計期間と更新時間が異なるため、数値は近くても完全には一致しません。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "‘에너지 영향’은 활성 상태 보기와 같은 방법이지만 집계 기간과 새로 고침 시간이 달라, 숫자가 비슷하되 똑같지는 않습니다." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "L’impact énergétique suit la même méthode que le Moniteur d’activité, mais sur une autre période et un autre rythme d’actualisation : les chiffres sont proches sans être identiques." } },
+        "de": { "stringUnit": { "state": "translated", "value": "Die Energiewirkung nutzt dieselbe Methode wie die Aktivitätsanzeige, aber mit anderem Zeitraum und anderer Aktualisierung, daher sind die Zahlen ähnlich, aber nicht gleich." } },
+        "es": { "stringUnit": { "state": "translated", "value": "El impacto energético usa el mismo método que el Monitor de Actividad, pero con otro intervalo y otra frecuencia de actualización, así que las cifras se parecen sin ser idénticas." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "O impacto energético usa o mesmo método do Monitor de Atividade, mas com outro período e outra atualização, então os números ficam próximos, não idênticos." } },
+        "it": { "stringUnit": { "state": "translated", "value": "L’impatto energetico usa lo stesso metodo di Monitoraggio Attività, ma con un altro intervallo e un altro aggiornamento, quindi i numeri sono vicini ma non identici." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "«Влияние на энергию» считается так же, как в Мониторинге системы, но за другой период и с другим обновлением, поэтому числа близки, но не совпадают." } }
+      }
     }
   },
   "version": "1.0"
