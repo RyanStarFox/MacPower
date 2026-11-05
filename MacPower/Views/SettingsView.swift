@@ -678,6 +678,21 @@ struct SettingsView: View {
         case start, panel, menuBar, rings, flow, topApps, lowPower, localIP, batteryCycle
         var id: String { rawValue }
 
+        /// The settings page this tutorial page explains.
+        var settingsPane: Pane? {
+            switch self {
+            case .start: nil
+            case .panel: .panel
+            case .menuBar: .menuBar
+            case .rings: .rings
+            case .flow: .flow
+            case .topApps: .topApps
+            case .lowPower: .lowPower
+            case .localIP: .localIP
+            case .batteryCycle: .batteryCycle
+            }
+        }
+
         var titleKey: String {
             switch self {
             case .start: "tutorial.page.start"
@@ -698,8 +713,16 @@ struct SettingsView: View {
     @State private var pane: Pane
     @State private var tutorialPage: TutorialPage = .start
     @State private var ringColorSelectionID: UUID?
-    @State private var flowEditorTarget: FlowEditorTarget = .all
     @State private var saveDialog: SaveTintDialog?
+    @State private var menuBarTintOrigin: MenuBarTintPreset?
+    @State private var showsAllMenuBarPresets = false
+    @State private var menuBarEditingBandID: UUID?
+    @State private var flowEditingMode: EnergyFlowMode = .discharging
+    @State private var flowEditingBandID: UUID?
+    @State private var flowTintOrigin: PopoverTintPreset?
+    @State private var ringTintOrigin: PopoverTintPreset?
+    @State private var ringEditingBandID: UUID?
+    @State private var ringOptionsItemID: String?
     @State private var showingBluetoothDevices = false
     @State private var showingAuthorSupport = false
     @State private var bluetoothIconEditor: BluetoothIconEdit?
@@ -886,61 +909,98 @@ struct SettingsView: View {
         .background(Color(nsColor: .windowBackgroundColor))
     }
 
+    /// The tutorial as a short book: a contents menu, one page at a time, and
+    /// buttons to turn the page or jump to the settings it describes.
     private var tutorialPane: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            tutorialPagePicker
-                .padding(.horizontal, 22)
-                .padding(.top, 8)
+        let pages = TutorialPage.allCases
+        let index = pages.firstIndex(of: tutorialPage) ?? 0
+        let language = appState.settings.language
+        return VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: 8) {
+                Menu {
+                    ForEach(pages) { page in
+                        Button {
+                            tutorialPage = page
+                        } label: {
+                            if page == tutorialPage {
+                                Label(Localization.string(page.titleKey, language: language), systemImage: "checkmark")
+                            } else {
+                                Text(Localization.string(page.titleKey, language: language))
+                            }
+                        }
+                    }
+                } label: {
+                    Label("tutorial.contents", systemImage: "list.bullet")
+                }
+                .fixedSize()
+                Spacer(minLength: 8)
+                Text(Localization.string("tutorial.pageOf %lld %lld", language: language, index + 1, pages.count))
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .monospacedDigit()
+            }
+            .padding(.horizontal, 22)
+            .padding(.top, 8)
+            .padding(.bottom, 4)
+
             ScrollView {
-                tutorialPageContent
-                    .padding(.horizontal, 22)
-                    .padding(.top, 16)
-                    .padding(.bottom, 20)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                VStack(alignment: .leading, spacing: 16) {
+                    if tutorialPage != .start {
+                        Text(LocalizedStringKey(tutorialPage.titleKey))
+                            .font(.system(size: 17, weight: .semibold))
+                            .accessibilityAddTraits(.isHeader)
+                    }
+                    tutorialPageContent
+                    if let target = tutorialPage.settingsPane {
+                        Button {
+                            pane = target
+                        } label: {
+                            HStack(spacing: 3) {
+                                Text(Localization.string(
+                                    "tutorial.openSettings %@",
+                                    language: language,
+                                    Localization.string(tutorialPage.titleKey, language: language)
+                                ))
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 10, weight: .semibold))
+                            }
+                        }
+                        .buttonStyle(.link)
+                    }
+                }
+                .padding(.horizontal, 22)
+                .padding(.top, 12)
+                .padding(.bottom, 20)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .id(tutorialPage)
             }
             .scrollBounceBehavior(.basedOnSize)
-            if appState.showsWelcomeGuide {
-                Button("welcome.done") {
-                    appState.completeWelcomeGuide()
+
+            Divider()
+            HStack(spacing: 10) {
+                Button("tutorial.previous") {
+                    tutorialPage = pages[max(index - 1, 0)]
                 }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
-                .keyboardShortcut(.defaultAction)
-                .padding(.horizontal, 22)
-                .padding(.top, 4)
-                .padding(.bottom, 16)
+                .disabled(index == 0)
+                Spacer(minLength: 8)
+                if appState.showsWelcomeGuide {
+                    Button("welcome.done") {
+                        appState.completeWelcomeGuide()
+                    }
+                    .keyboardShortcut(index == pages.count - 1 ? .defaultAction : nil)
+                }
+                if index < pages.count - 1 {
+                    Button("tutorial.next") {
+                        tutorialPage = pages[index + 1]
+                    }
+                    .keyboardShortcut(.defaultAction)
+                }
             }
+            .controlSize(.large)
+            .padding(.horizontal, 22)
+            .padding(.vertical, 12)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-    }
-
-    private var tutorialPagePicker: some View {
-        ScrollView(.horizontal) {
-            HStack(spacing: 6) {
-                ForEach(TutorialPage.allCases) { page in
-                    let selected = tutorialPage == page
-                    Button {
-                        tutorialPage = page
-                    } label: {
-                        Text(LocalizedStringKey(page.titleKey))
-                            .font(.system(size: 12, weight: selected ? .semibold : .regular))
-                            .foregroundStyle(selected ? Color.accentColor : Color.primary)
-                            .lineLimit(1)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 5)
-                            .background {
-                                Capsule(style: .continuous)
-                                    .fill(selected ? Color.accentColor.opacity(0.16) : Color.primary.opacity(0.06))
-                            }
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityAddTraits(selected ? .isSelected : [])
-                }
-            }
-            .padding(.vertical, 2)
-        }
-        .scrollIndicators(.hidden)
-        .scrollBounceBehavior(.basedOnSize, axes: .horizontal)
     }
 
     @ViewBuilder
@@ -1061,6 +1121,7 @@ struct SettingsView: View {
         )
         return HStack(spacing: 0) {
             Image(nsImage: image)
+                .renderingMode(image.isTemplate ? .template : .original)
             if appState.settings.digitPlacement == .beside {
                 Text(" \(Int(appState.snapshot.percent.rounded()))%")
                     .font(.body)
@@ -1870,6 +1931,7 @@ struct SettingsView: View {
         .background(SettingsFormWidthLock())
     }
 
+
     @ViewBuilder
     private var generalSections: some View {
         Section {
@@ -1881,41 +1943,83 @@ struct SettingsView: View {
                 Text("settings.language") + Text("（文/A）")
             }
             Toggle("settings.launchAtLogin", isOn: launchAtLoginBinding)
+        }
+
+        Section {
+            HStack(spacing: 10) {
+                SettingsAppIcon(size: 36)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(verbatim: "MacPower \(AppState.marketingVersion)")
+                        .fontWeight(.semibold)
+                    if appState.isCheckingForUpdates {
+                        Text("settings.updates.checking")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                Spacer(minLength: 8)
+                Button("settings.updates.check") {
+                    appState.checkForUpdates(reason: .manual)
+                }
+                .disabled(appState.isCheckingForUpdates)
+            }
             Toggle(
-                "settings.updates.automatic",
                 isOn: Binding(
                     get: { appState.settings.automaticallyCheckForUpdates },
                     set: { appState.setAutomaticUpdateChecking($0, checkNow: true) }
                 )
-            )
+            ) {
+                SettingsRowLabel(title: "settings.updates.automatic", caption: "settings.updates.automatic.caption")
+            }
+        } header: {
+            Text("settings.updates.header")
         }
 
         Section {
-            Button("settings.updates.check") {
-                appState.checkForUpdates(reason: .manual)
+            HStack(spacing: 12) {
+                SettingsRowLabel(title: "settings.quit", caption: "settings.quit.caption")
+                Spacer(minLength: 8)
+                Button(role: .destructive) {
+                    NSApp.terminate(nil)
+                } label: {
+                    Text("settings.quit.button")
+                        .foregroundStyle(.red)
+                }
             }
-            .buttonStyle(.plain)
-            .frame(maxWidth: .infinity)
-            .disabled(appState.isCheckingForUpdates)
-        }
-
-        Section {
-            Button("settings.quit") {
-                NSApp.terminate(nil)
-            }
-            .buttonStyle(.plain)
-            .foregroundStyle(.red)
-            .frame(maxWidth: .infinity)
         }
     }
+
 
     @ViewBuilder
     private var panelSections: some View {
         Section {
-            Toggle("settings.popover.arrow", isOn: $appState.settings.showPopoverArrow)
-                .onChange(of: appState.settings.showPopoverArrow) { _, _ in
-                    appState.onPopoverChromeChange?()
-                }
+            SettingsPreviewCard(title: "settings.preview.panel") {
+                panelPreviewSchematic
+            }
+        }
+        Section {
+            ForEach(appState.settings.popoverOrder) { entry in
+                popoverOrderEntry(entry)
+            }
+            Button {
+                appState.settings.addPopoverDivider()
+            } label: {
+                Label("settings.popover.addDivider", systemImage: "plus")
+            }
+        } header: {
+            Text("settings.popover.contents")
+        } footer: {
+            Text("settings.popover.order.footer")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+        Section {
+            Toggle(isOn: $appState.settings.showPopoverArrow) {
+                SettingsRowLabel(title: "settings.popover.arrow", caption: "tutorial.panel.arrow")
+            }
+            .onChange(of: appState.settings.showPopoverArrow) { _, _ in
+                appState.onPopoverChromeChange?()
+            }
             Picker("settings.button.placement", selection: $appState.settings.settingsButtonPlacement) {
                 ForEach(SettingsButtonPlacement.allCases) { placement in
                     Text(LocalizedStringKey(placement.localizationKey)).tag(placement)
@@ -1927,94 +2031,401 @@ struct SettingsView: View {
                         Text(LocalizedStringKey(host.localizationKey)).tag(host)
                     }
                 }
-            }
-        }
-
-        Section {
-            ForEach(appState.settings.popoverOrder) { entry in
-                popoverOrderEntry(entry)
-            }
-            Button {
-                appState.settings.addPopoverDivider()
-            } label: {
-                Label("settings.popover.addDivider", systemImage: "plus")
+                .padding(.leading, 16)
             }
         } header: {
-            Text("settings.popover.order")
+            Text("settings.popover.appearance")
+        } footer: {
+            Text("settings.button.footer")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
         }
     }
+
+    /// The panel's blocks in their current order, as a small outline: hidden
+    /// blocks drop out, dividers show as rules, and a gear marks the settings button.
+    private var panelPreviewSchematic: some View {
+        VStack(alignment: .leading, spacing: 7) {
+            ForEach(appState.settings.popoverOrder) { entry in
+                panelPreviewLine(entry)
+            }
+        }
+        .padding(10)
+        .frame(width: 240, alignment: .leading)
+        .background(Color(nsColor: .windowBackgroundColor), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .strokeBorder(Color.primary.opacity(0.1), lineWidth: 0.5)
+        }
+        .shadow(color: .black.opacity(0.08), radius: 6, y: 2)
+    }
+
+    @ViewBuilder
+    private func panelPreviewLine(_ entry: PopoverEntry) -> some View {
+        let placement = appState.settings.settingsButtonPlacement
+        switch entry {
+        case .block(let block):
+            if popoverVisibilityBinding(block).wrappedValue, block != .settings || placement == .ownBlock {
+                let icon = popoverBlockIcon(block)
+                HStack(spacing: 6) {
+                    SettingsSidebarIcon(glyph: icon.glyph, palette: icon.palette, size: 16)
+                    Text(LocalizedStringKey(block.localizationKey))
+                        .font(.system(size: 11))
+                    Spacer(minLength: 4)
+                    if placement == .insideBlock, appState.settings.settingsButtonHost.rawValue == block.rawValue {
+                        Image(systemName: "gearshape")
+                            .font(.system(size: 10))
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+        case .divider:
+            Divider()
+        }
+    }
+
+    /// The sidebar's icon for each panel block, so the list matches the pages.
+    private func popoverBlockIcon(_ block: PopoverBlock) -> (glyph: SettingsSidebarGlyph, palette: SettingsIconPalette) {
+        switch block {
+        case .rings: (.symbol("circle.circle", extent: 0.62, weight: .medium), .blue)
+        case .flow: (.symbol("bolt.fill", extent: 0.64, weight: .medium), .cyan)
+        case .topApps: (.symbol("chart.bar.fill", extent: 0.58, weight: .medium), .blue)
+        case .lowPower: (.symbol("leaf.fill", extent: 0.6, weight: .medium), .green)
+        case .localIP: (.symbol("network", extent: 0.65, weight: .regular), .blue)
+        case .batteryCycle: (.symbol("arrow.triangle.2.circlepath", extent: 0.64, weight: .medium), .gray)
+        case .settings: (.gear, .gray)
+        }
+    }
+
 
     @ViewBuilder
     private var localIPSections: some View {
         Section {
-            ForEach(IPAddressScope.allCases) { scope in
-                Toggle(LocalizedStringKey(scope.localizationKey), isOn: ipScopeBinding(scope))
+            SettingsPreviewCard(title: "settings.preview.panel") {
+                LocalIPSection(
+                    rows: tutorialIPRows.filter {
+                        appState.settings.ipScopes.contains($0.scope)
+                            && appState.settings.ipFamilies.contains($0.family)
+                    },
+                    language: appState.settings.language,
+                    panelWidth: PopoverLayout.width
+                )
+                .frame(width: PopoverLayout.width - PopoverLayout.padding * 2, alignment: .leading)
+                .allowsHitTesting(false)
             }
-            ForEach(IPAddressFamily.allCases) { family in
-                Toggle(LocalizedStringKey(family.localizationKey), isOn: ipFamilyBinding(family))
+        }
+        Section {
+            ForEach(IPAddressScope.allCases) { scope in
+                Toggle(isOn: ipScopeBinding(scope)) {
+                    SettingsRowLabel(
+                        title: LocalizedStringKey(scope.localizationKey),
+                        caption: LocalizedStringKey(ipScopeCaptionKey(scope))
+                    )
+                }
             }
         } header: {
-            Text("settings.localIP.options")
+            Text("settings.localIP.scopes")
+        }
+        Section {
+            Picker(selection: ipFamilyChoiceBinding) {
+                Text(verbatim: "IPv4").tag(IPFamilyChoice.ipv4)
+                Text(verbatim: "IPv6").tag(IPFamilyChoice.ipv6)
+                Text("settings.localIP.families.both").tag(IPFamilyChoice.both)
+            } label: {
+                SettingsRowLabel(title: "settings.localIP.families.show", caption: "settings.localIP.families.caption")
+            }
+            .pickerStyle(.segmented)
+        } header: {
+            Text("settings.localIP.families")
         }
     }
+
+    private enum IPFamilyChoice: Hashable {
+        case ipv4, ipv6, both
+    }
+
+    private var ipFamilyChoiceBinding: Binding<IPFamilyChoice> {
+        Binding(
+            get: {
+                let families = appState.settings.ipFamilies
+                if families.contains(.ipv4), families.contains(.ipv6) { return .both }
+                return families.contains(.ipv6) ? .ipv6 : .ipv4
+            },
+            set: { choice in
+                switch choice {
+                case .ipv4: appState.settings.ipFamilies = [.ipv4]
+                case .ipv6: appState.settings.ipFamilies = [.ipv6]
+                case .both: appState.settings.ipFamilies = [.ipv4, .ipv6]
+                }
+            }
+        )
+    }
+
+    private func ipScopeCaptionKey(_ scope: IPAddressScope) -> String {
+        switch scope {
+        case .local: "settings.localIP.scope.local.caption"
+        case .publicAddress: "settings.localIP.scope.public.caption"
+        case .loopback: "settings.localIP.scope.loopback.caption"
+        case .linkLocal: "settings.localIP.scope.linkLocal.caption"
+        }
+    }
+
 
     @ViewBuilder
     private var topAppsSections: some View {
         Section {
+            HStack(spacing: 10) {
+                ForEach(TopAppsChartStyle.allCases) { style in
+                    SettingsChoiceCard(
+                        title: LocalizedStringKey(style.localizationKey),
+                        selected: appState.settings.topAppsChart == style,
+                        action: { appState.settings.topAppsChart = style }
+                    ) {
+                        topAppsChartThumbnail(style)
+                    }
+                }
+            }
+        } header: {
+            Text("settings.topApps.chart.header")
+        } footer: {
+            Text("tutorial.topApps.view")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        Section {
             topAppStepper(
-                "settings.topApps.window",
+                "settings.topApps.window.title",
+                caption: "settings.topApps.window.caption",
                 value: appState.settings.topAppWindowMinutes,
                 unit: "settings.topApps.minutes",
                 range: AppSettings.topAppWindowRange,
                 step: 1
             ) { appState.settings.topAppWindowMinutes = $0 }
             topAppStepper(
-                "settings.topApps.interval",
+                "settings.topApps.interval.title",
                 value: appState.settings.topAppIntervalSeconds,
                 unit: "settings.topApps.seconds",
                 range: AppSettings.topAppIntervalRange,
                 step: 5
             ) { appState.settings.topAppIntervalSeconds = $0 }
             topAppStepper(
-                "settings.topApps.limit",
+                "settings.topApps.limit.title",
                 value: appState.settings.topAppLimit,
                 unit: nil,
                 range: AppSettings.topAppLimitRange,
                 step: 1
             ) { appState.settings.topAppLimit = $0 }
-            Picker("settings.topApps.chart", selection: $appState.settings.topAppsChart) {
-                ForEach(TopAppsChartStyle.allCases) { style in
-                    Text(LocalizedStringKey(style.localizationKey)).tag(style)
-                }
-            }
+        } header: {
+            Text("settings.topApps.how")
+        } footer: {
+            Text("settings.topApps.footer")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
+
+    /// A small drawing of each chart style: three apps, the busiest first.
+    @ViewBuilder
+    private func topAppsChartThumbnail(_ style: TopAppsChartStyle) -> some View {
+        let shares: [CGFloat] = [1, 0.57, 0.16]
+        let values = ["12.4", "7.1", "2.0"]
+        switch style {
+        case .list:
+            VStack(spacing: 5) {
+                ForEach(0..<3, id: \.self) { index in
+                    HStack(spacing: 6) {
+                        Capsule().fill(Color.primary.opacity(0.22)).frame(width: 30, height: 5)
+                        Spacer(minLength: 4)
+                        Text(verbatim: values[index])
+                            .font(.system(size: 9))
+                            .monospacedDigit()
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+        case .bars:
+            VStack(alignment: .leading, spacing: 7) {
+                ForEach(0..<3, id: \.self) { index in
+                    Capsule()
+                        .fill(Color.accentColor)
+                        .frame(width: 64 * shares[index], height: 5)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            }
+        case .columns:
+            HStack(alignment: .bottom, spacing: 9) {
+                ForEach(0..<3, id: \.self) { index in
+                    RoundedRectangle(cornerRadius: 2, style: .continuous)
+                        .fill(Color.accentColor)
+                        .frame(width: 12, height: 34 * shares[index] + 2)
+                }
+            }
+            .frame(height: 38, alignment: .bottom)
+        }
+    }
+
 
     @ViewBuilder
     private var lowPowerSections: some View {
         Section {
-            Picker("settings.lowPower.layout", selection: $appState.settings.lowPowerButtonLayout) {
+            HStack(spacing: 10) {
+                ForEach(LowPowerButtonVisibility.allCases) { visibility in
+                    SettingsChoiceCard(
+                        title: LocalizedStringKey(visibility.localizationKey),
+                        selected: appState.settings.lowPowerButtonVisibility == visibility,
+                        action: { appState.settings.lowPowerButtonVisibility = visibility }
+                    ) {
+                        lowPowerButtonsThumbnail(visibility)
+                    }
+                }
+            }
+        } header: {
+            Text("settings.lowPower.buttons.header")
+        } footer: {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("tutorial.lowPower.strategy")
+                Text("tutorial.lowPower.now")
+            }
+            .font(.subheadline)
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
+        }
+        Section {
+            HStack(spacing: 10) {
                 ForEach(LowPowerButtonLayout.allCases) { layout in
-                    Text(LocalizedStringKey(layout.localizationKey)).tag(layout)
+                    SettingsChoiceCard(
+                        title: LocalizedStringKey(layout.localizationKey),
+                        selected: appState.settings.lowPowerButtonLayout == layout,
+                        action: { appState.settings.lowPowerButtonLayout = layout }
+                    ) {
+                        lowPowerLayoutThumbnail(layout)
+                    }
                 }
             }
             .disabled(appState.settings.lowPowerButtonVisibility != .both)
-            Picker("settings.lowPower.buttons", selection: $appState.settings.lowPowerButtonVisibility) {
-                ForEach(LowPowerButtonVisibility.allCases) { visibility in
-                    Text(LocalizedStringKey(visibility.localizationKey)).tag(visibility)
-                }
+        } header: {
+            Text("settings.lowPower.layout.header")
+        } footer: {
+            Text("settings.lowPower.layout.note")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    /// The panel's buttons as each choice would show them, with the current strategy's name.
+    private func lowPowerButtonsThumbnail(_ visibility: LowPowerButtonVisibility) -> some View {
+        let language = appState.settings.language
+        let strategy = appState.settings.lowPowerStrategy ?? appState.lowPowerPreset ?? .onlyBattery
+        let strategyTitle = Localization.string(strategy.shortLocalizationKey, language: language)
+        let lowPowerTitle = Localization.string("popover.lowPower.now", language: language)
+        return HStack(spacing: 5) {
+            if visibility != .lowPower {
+                lowPowerMiniButton(strategyTitle, symbol: "chevron.down", symbolFirst: false)
+            }
+            if visibility != .strategy {
+                lowPowerMiniButton(lowPowerTitle, symbol: "", symbolFirst: true)
             }
         }
     }
 
+    /// The panel's low-power battery: a yellow charge in a neutral frame, drawn
+    /// by the menu bar renderer like the button in the panel.
+    private var lowPowerBatteryGlyph: some View {
+        var snapshot = PowerSnapshot.empty
+        snapshot.percent = 35
+        let appearance = NSAppearance(named: colorScheme == .dark ? .darkAqua : .aqua) ?? NSApp.effectiveAppearance
+        let yellow = NSColor.systemYellow
+        let image = MenuBarBatteryRenderer.image(
+            snapshot: snapshot,
+            style: .outlineFill,
+            fill: MenuBarResolvedFill(left: yellow, right: yellow, isTemplate: false),
+            appearance: appearance,
+            showChargeGlyphs: false
+        )
+        return Image(nsImage: image)
+            .resizable()
+            .aspectRatio(contentMode: .fit)
+            .frame(width: 16, height: 10)
+            .accessibilityHidden(true)
+    }
+
+    private func lowPowerMiniButton(_ title: String, symbol: String, symbolFirst: Bool) -> some View {
+        HStack(spacing: 3) {
+            if symbolFirst {
+                lowPowerBatteryGlyph
+            }
+            Text(verbatim: title)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+            if !symbolFirst {
+                Image(systemName: symbol)
+                    .font(.system(size: 7, weight: .bold))
+            }
+        }
+        .font(.system(size: 10))
+        .padding(.horizontal, 6)
+        .frame(maxWidth: .infinity, minHeight: 22)
+        .background(Color.primary.opacity(0.07), in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+    }
+
+    @ViewBuilder
+    private func lowPowerLayoutThumbnail(_ layout: LowPowerButtonLayout) -> some View {
+        let block = RoundedRectangle(cornerRadius: 5, style: .continuous)
+        switch layout {
+        case .fitTwoPerRow:
+            HStack(spacing: 6) {
+                block.fill(Color.primary.opacity(0.09)).frame(height: 20)
+                block.fill(Color.primary.opacity(0.09)).frame(height: 20)
+            }
+        case .alwaysOnePerRow:
+            VStack(spacing: 5) {
+                block.fill(Color.primary.opacity(0.09)).frame(height: 16)
+                block.fill(Color.primary.opacity(0.09)).frame(height: 16)
+            }
+        }
+    }
+
+
     @ViewBuilder
     private var batteryCycleSections: some View {
         Section {
-            Picker("settings.batteryCycle.format", selection: $appState.settings.batteryCapacityStyle) {
+            SettingsPreviewCard(title: "settings.preview.panel") {
+                cycleTutorialPreview
+            }
+        }
+        Section {
+            HStack(spacing: 10) {
                 ForEach(BatteryCapacityStyle.allCases) { style in
-                    Text(LocalizedStringKey(style.localizationKey)).tag(style)
+                    SettingsChoiceCard(
+                        title: LocalizedStringKey(style.localizationKey),
+                        selected: appState.settings.batteryCapacityStyle == style,
+                        action: { appState.settings.batteryCapacityStyle = style }
+                    ) {
+                        Text(verbatim: capacitySample(style))
+                            .font(.system(size: 15, weight: .semibold))
+                            .monospacedDigit()
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.6)
+                    }
                 }
             }
+        } header: {
+            Text("settings.batteryCycle.format")
+        }
+    }
+
+    /// The capacity the panel would show in each format, from this Mac's battery when it has one.
+    private func capacitySample(_ style: BatteryCapacityStyle) -> String {
+        let full = appState.snapshot.fullChargeMilliAmpHours ?? 4820
+        let design = appState.snapshot.designCapacityMilliAmpHours ?? 5400
+        let percent = design > 0 ? Int((Double(full) / Double(design) * 100).rounded()) : 100
+        let milliampHours = "\(full.formatted()) mAh"
+        switch style {
+        case .percent: return "\(percent)%"
+        case .milliampHours: return milliampHours
+        case .both: return "\(percent)% · \(full.formatted())"
         }
     }
 
@@ -2040,8 +2451,10 @@ struct SettingsView: View {
         }
     }
 
+
     private func topAppStepper(
         _ title: LocalizedStringKey,
+        caption: LocalizedStringKey? = nil,
         value: Int,
         unit: LocalizedStringKey?,
         range: ClosedRange<Int>,
@@ -2049,7 +2462,7 @@ struct SettingsView: View {
         set: @escaping (Int) -> Void
     ) -> some View {
         HStack(spacing: 8) {
-            Text(title)
+            SettingsRowLabel(title: title, caption: caption)
             Spacer(minLength: 8)
             HStack(spacing: 4) {
                 Text("\(value)")
@@ -2065,54 +2478,67 @@ struct SettingsView: View {
         }
     }
 
+
     @ViewBuilder
     private var aboutSections: some View {
+        let language = appState.settings.language
         Section {
-            VStack(spacing: 10) {
-                aboutLink(
-                    title: "GitHub",
-                    url: UpdateChecker.githubRepoURL
+            VStack(spacing: 6) {
+                SettingsAppIcon(size: 72)
+                Text(verbatim: "MacPower")
+                    .font(.system(size: 20, weight: .bold))
+                Text(versionLabel)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 10)
+        }
+
+        Section {
+            SettingsLinkRow(
+                title: "GitHub",
+                caption: Localization.string("settings.about.github.caption", language: language),
+                url: UpdateChecker.githubRepoURL
+            ) {
+                Image("GitHubMark")
+                    .renderingMode(.template)
+                    .resizable()
+                    .scaledToFit()
+                    .foregroundStyle(.white)
+                    .frame(width: 13, height: 13)
+                    .frame(width: 22, height: 22)
+                    .background(Color(white: 0.12).gradient, in: RoundedRectangle(cornerRadius: 5, style: .continuous))
+            }
+            SettingsLinkRow(
+                title: "Gitee",
+                caption: Localization.string("settings.about.gitee.caption", language: language),
+                url: UpdateChecker.giteeRepoURL
+            ) {
+                SettingsRowTile(symbol: "g.circle.fill", color: Color(red: 0.78, green: 0.11, blue: 0.14))
+            }
+            SettingsLinkRow(
+                title: Localization.string("settings.about.star", language: language),
+                caption: nil,
+                url: UpdateChecker.githubRepoURL
+            ) {
+                SettingsRowTile(symbol: "star.fill", color: Color(red: 0.98, green: 0.70, blue: 0.10))
+            }
+            Button {
+                showingAuthorSupport = true
+            } label: {
+                SettingsLeadingRow(
+                    title: Localization.string("settings.about.tip", language: language),
+                    caption: Localization.string("settings.about.tip.caption", language: language),
+                    trailingSymbol: "chevron.right"
                 ) {
-                    Image("GitHubMark")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 15, height: 15)
-                }
-                aboutLink(
-                    title: "Gitee",
-                    url: UpdateChecker.giteeRepoURL
-                ) {
-                    Image(systemName: "g.circle.fill")
-                        .font(.system(size: 15))
-                        .foregroundStyle(Color(red: 0.78, green: 0.11, blue: 0.14))
-                }
-                aboutLink(
-                    title: Localization.string("settings.about.star", language: appState.settings.language),
-                    url: UpdateChecker.githubRepoURL
-                ) {
-                    Image(systemName: "star.fill")
-                        .font(.system(size: 14))
-                        .foregroundStyle(Color(red: 0.98, green: 0.76, blue: 0.18))
-                }
-                aboutButton(
-                    title: Localization.string("settings.about.tip", language: appState.settings.language),
-                    action: { showingAuthorSupport = true }
-                ) {
-                    Image(systemName: "cup.and.saucer.fill")
-                        .font(.system(size: 14))
-                        .foregroundStyle(Color(red: 1, green: 0.37, blue: 0.36))
-                }
-                .popover(isPresented: $showingAuthorSupport, arrowEdge: .bottom) {
-                    authorSupportPopover
+                    SettingsRowTile(symbol: "cup.and.saucer.fill", color: Color(red: 1, green: 0.37, blue: 0.36))
                 }
             }
-            .padding(.vertical, 4)
-        } footer: {
-            Text(versionLabel)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .frame(maxWidth: .infinity)
-                .padding(.top, 2)
+            .buttonStyle(.plain)
+            .popover(isPresented: $showingAuthorSupport, arrowEdge: .trailing) {
+                authorSupportPopover
+            }
         }
     }
 
@@ -2133,18 +2559,6 @@ struct SettingsView: View {
         }
         .padding(16)
         .frame(width: 460)
-    }
-
-    private func aboutButton<Icon: View>(
-        title: String,
-        action: @escaping () -> Void,
-        @ViewBuilder icon: () -> Icon
-    ) -> some View {
-        Button(action: action) {
-            aboutChrome(title: title, icon: icon)
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(title)
     }
 
     private func aboutLink<Icon: View>(title: String, url: URL, @ViewBuilder icon: () -> Icon) -> some View {
@@ -2191,275 +2605,517 @@ struct SettingsView: View {
     @ViewBuilder
     private var menuBarSections: some View {
         Section {
+            SettingsPreviewCard(title: "settings.menuBar.preview.current") {
+                VStack(spacing: 12) {
+                    menuBarStripPreview
+                    Divider()
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("settings.menuBar.preview.levels")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                        menuBarLevelsPreview
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            }
+        }
+
+        Section {
             Picker("settings.icon.border", selection: $appState.settings.iconOutlined) {
                 Text("settings.icon.border.off").tag(false)
                 Text("settings.icon.border.on").tag(true)
             }
+            .pickerStyle(.segmented)
             Picker("settings.icon.digits", selection: $appState.settings.digitPlacement) {
                 ForEach(MenuBarDigitPlacement.allCases) { placement in
                     Text(LocalizedStringKey(placement.localizationKey)).tag(placement)
                 }
             }
-            Toggle("settings.icon.chargeGlyphs", isOn: $appState.settings.showChargeGlyphs)
+            .pickerStyle(.segmented)
+            Toggle(isOn: $appState.settings.showChargeGlyphs) {
+                SettingsRowLabel(title: "settings.icon.chargeGlyphs", caption: "settings.icon.chargeGlyphs.caption")
+            }
+        } header: {
+            Text("settings.icon.header")
         }
 
         Section {
-            Picker("settings.icon.tint.preset", selection: menuBarPresetPickerBinding) {
-                ForEach(MenuBarTintPreset.pickerCases) { preset in
-                    Text(LocalizedStringKey(preset.localizationKey)).tag(MenuBarPresetPickerItem.builtin(preset))
-                }
-                if !appState.settings.savedTintLibrary.menuBar.isEmpty {
-                    Divider()
-                    ForEach(appState.settings.savedTintLibrary.menuBar) { item in
-                        Text(item.name).tag(MenuBarPresetPickerItem.saved(item.id))
-                    }
-                }
-            }
-            presetEditor(
-                toolbar: {
-                    tintPresetSaveControls(
-                        canOverwrite: appState.settings.menuBarActiveSavedID != nil,
-                        onSave: { _ = appState.settings.updateMenuBarTintPreset() },
-                        onSaveAs: {
-                            savePresetName = defaultSaveName(for: .menuBar)
-                            saveDialog = .menuBar
-                        },
-                        deleteID: appState.settings.menuBarActiveSavedID,
-                        onDelete: { appState.settings.deleteSavedMenuBarTint(id: $0) }
+            menuBarPresetStatusRow
+            menuBarPresetGallery
+            if appState.settings.menuBarTint.preset != .off {
+                Toggle(isOn: menuBarOnBatteryOnlyBinding) {
+                    SettingsRowLabel(
+                        title: "settings.icon.tint.onBatteryOnly",
+                        caption: "settings.icon.tint.onBatteryOnly.caption"
                     )
                 }
-            ) {
-                if appState.settings.menuBarTint.preset != .off {
-                    Picker("settings.icon.tint.when", selection: tintModeBinding) {
-                        ForEach(MenuBarTintMode.allCases) { mode in
-                            Text(LocalizedStringKey(mode.localizationKey)).tag(mode)
-                        }
-                    }
-                    ForEach(appState.settings.menuBarTint.sortedBands) { band in
-                        editableTintBandRow(band)
-                    }
-                    Button("settings.icon.tint.add") {
-                        appState.settings.menuBarTint = appState.settings.menuBarTint.addingBand()
-                    }
-                }
+                menuBarRampRow
+            }
+        } header: {
+            Text("settings.color.header")
+        } footer: {
+            if appState.settings.menuBarTint.preset == .off {
+                Text("settings.icon.tint.offNote")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
             }
         }
     }
 
-    private var menuBarPresetPickerBinding: Binding<MenuBarPresetPickerItem> {
-        Binding(
-            get: {
-                if let id = appState.settings.menuBarActiveSavedID {
-                    return .saved(id)
+    /// A slice of the menu bar over a soft wallpaper, with the real status icon in it.
+    private var menuBarStripPreview: some View {
+        HStack(spacing: 14) {
+            Spacer(minLength: 0)
+            Image(systemName: "wifi")
+            Image(systemName: "switch.2")
+            menuBarStatusIcon
+            Text(Date(), format: .dateTime.weekday(.abbreviated).hour().minute())
+                .monospacedDigit()
+        }
+        .font(.system(size: 13, weight: .medium))
+        .padding(.horizontal, 12)
+        .frame(height: 26)
+        .background(.bar, in: RoundedRectangle(cornerRadius: 7, style: .continuous))
+        .padding(.horizontal, 12)
+        .padding(.top, 10)
+        .padding(.bottom, 26)
+        .background(
+            LinearGradient(
+                colors: [
+                    Color(red: 0.42, green: 0.62, blue: 0.94),
+                    Color(red: 0.74, green: 0.62, blue: 0.93),
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            ),
+            in: RoundedRectangle(cornerRadius: 9, style: .continuous)
+        )
+        .accessibilityElement(children: .combine)
+    }
+
+    private struct MenuBarLevelSample: Identifiable {
+        var id: String
+        var percent: Double
+        var flowMode: EnergyFlowMode
+    }
+
+    private var menuBarLevelSamples: [MenuBarLevelSample] {
+        [
+            MenuBarLevelSample(id: "5", percent: 5, flowMode: .discharging),
+            MenuBarLevelSample(id: "15", percent: 15, flowMode: .discharging),
+            MenuBarLevelSample(id: "50", percent: 50, flowMode: .discharging),
+            MenuBarLevelSample(id: "100", percent: 100, flowMode: .discharging),
+            MenuBarLevelSample(id: "charging", percent: 60, flowMode: .charging),
+        ]
+    }
+
+    private var menuBarLevelsPreview: some View {
+        HStack(alignment: .bottom, spacing: 4) {
+            ForEach(menuBarLevelSamples) { sample in
+                VStack(spacing: 6) {
+                    menuBarGlyph(percent: sample.percent, flowMode: sample.flowMode, scheme: appState.settings.menuBarTint, scale: 1.35)
+                    Group {
+                        if sample.flowMode == .charging {
+                            Text("settings.menuBar.preview.charging")
+                        } else {
+                            Text(verbatim: "\(Int(sample.percent))%")
+                        }
+                    }
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
                 }
-                return .builtin(appState.settings.menuBarTint.preset)
+                .frame(maxWidth: .infinity)
+            }
+        }
+        .id(colorScheme)
+    }
+
+    /// The battery exactly as the status item would draw it with `scheme`.
+    private func menuBarGlyph(percent: Double, flowMode: EnergyFlowMode, scheme: MenuBarTintScheme, scale: CGFloat) -> some View {
+        let appearance = NSApp.effectiveAppearance
+        let snapshot = tutorialPowerSnapshot(percent: percent, flowMode: flowMode)
+        let fill = scheme.fill(percent: percent, flowMode: flowMode, appearance: appearance)
+        let style = appState.settings.iconStyle
+        let image = MenuBarBatteryRenderer.image(
+            snapshot: snapshot,
+            style: style,
+            fill: fill,
+            appearance: appearance,
+            showChargeGlyphs: appState.settings.showChargeGlyphs
+        )
+        return HStack(spacing: 2) {
+            Image(nsImage: image)
+                .renderingMode(fill.isTemplate ? .template : .original)
+                .resizable()
+                .interpolation(.high)
+                .frame(width: image.size.width * scale, height: image.size.height * scale)
+            if style.showsPercentBeside {
+                Text(verbatim: "\(Int(percent))%")
+                    .font(.system(size: 11 * scale, weight: .medium))
+                    .monospacedDigit()
+            }
+        }
+        .foregroundStyle(.primary)
+        .frame(height: 16 * scale + 2)
+    }
+
+    private var menuBarSavedPreset: SavedTintPreset<MenuBarTintScheme>? {
+        guard let id = appState.settings.menuBarActiveSavedID else { return nil }
+        return appState.settings.savedTintLibrary.menuBar.first { $0.id == id }
+    }
+
+    private var menuBarSavedPresetModified: Bool {
+        guard let saved = menuBarSavedPreset else { return false }
+        let current = appState.settings.menuBarTint
+        return saved.payload.bands != current.bands || saved.payload.mode != current.mode
+    }
+
+    private var menuBarPresetStatus: String {
+        let language = appState.settings.language
+        let tint = appState.settings.menuBarTint
+        if let saved = menuBarSavedPreset {
+            return menuBarSavedPresetModified
+                ? Localization.string("settings.tint.status.modified %@", language: language, saved.name)
+                : saved.name
+        }
+        if tint.preset != .custom {
+            return Localization.string(tint.preset.localizationKey, language: language)
+        }
+        if let origin = menuBarTintOrigin {
+            let name = Localization.string(origin.localizationKey, language: language)
+            return Localization.string("settings.tint.status.modified %@", language: language, name)
+        }
+        return Localization.string("settings.icon.tint.custom", language: language)
+    }
+
+    private var menuBarCanRevert: Bool {
+        if menuBarSavedPreset != nil { return menuBarSavedPresetModified }
+        return appState.settings.menuBarTint.preset == .custom && menuBarTintOrigin != nil
+    }
+
+    private var menuBarPresetStatusRow: some View {
+        tintPresetStatusRow(
+            status: menuBarPresetStatus,
+            canRevert: menuBarCanRevert,
+            onRevert: {
+                menuBarEditingBandID = nil
+                if let saved = menuBarSavedPreset {
+                    appState.settings.applySavedMenuBarTint(id: saved.id)
+                } else if let origin = menuBarTintOrigin {
+                    appState.settings.applyTintPreset(origin)
+                }
             },
-            set: { item in
-                switch item {
-                case .builtin(let preset):
-                    appState.settings.applyTintPreset(preset)
-                case .saved(let id):
-                    appState.settings.applySavedMenuBarTint(id: id)
+            canSave: menuBarSavedPresetModified,
+            onSave: { _ = appState.settings.updateMenuBarTintPreset() },
+            onSaveAs: {
+                savePresetName = defaultSaveName(for: .menuBar)
+                saveDialog = .menuBar
+            },
+            onDelete: menuBarSavedPreset == nil ? nil : {
+                if let saved = menuBarSavedPreset {
+                    appState.settings.deleteSavedMenuBarTint(id: saved.id)
                 }
             }
         )
     }
 
-    private var tintModeBinding: Binding<MenuBarTintMode> {
+    /// Save, save as, and delete for an icon pack, on one trailing row.
+    private func iconPresetActions(
+        canOverwrite: Bool,
+        onSave: @escaping () -> Void,
+        onSaveAs: @escaping () -> Void,
+        deleteID: UUID?,
+        onDelete: @escaping (UUID) -> Void
+    ) -> some View {
+        HStack(spacing: 8) {
+            Spacer(minLength: 0)
+            if canOverwrite {
+                Button("settings.tint.save", action: onSave)
+            }
+            Button("settings.tint.saveAsPreset", action: onSaveAs)
+            if let deleteID {
+                Button {
+                    onDelete(deleteID)
+                } label: {
+                    Image(systemName: "trash")
+                }
+                .buttonStyle(.borderless)
+                .help(Localization.string("settings.tint.delete", language: appState.settings.language))
+                .accessibilityLabel(Text("settings.tint.delete"))
+            }
+        }
+    }
+
+    /// "Preset  Sunset · Edited" with the actions that make sense right now.
+    private func tintPresetStatusRow(
+        status: String,
+        canRevert: Bool,
+        onRevert: @escaping () -> Void,
+        canSave: Bool,
+        onSave: @escaping () -> Void,
+        onSaveAs: @escaping () -> Void,
+        onDelete: (() -> Void)?
+    ) -> some View {
+        HStack(spacing: 8) {
+            Text("settings.tint.presetLabel")
+            Text(status)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+            Spacer(minLength: 8)
+            if canRevert {
+                Button("settings.tint.revert", action: onRevert)
+            }
+            if canSave {
+                Button("settings.tint.save", action: onSave)
+            }
+            Button("settings.tint.saveAsPreset", action: onSaveAs)
+            if let onDelete {
+                Button(action: onDelete) {
+                    Image(systemName: "trash")
+                }
+                .buttonStyle(.borderless)
+                .help(Localization.string("settings.tint.delete", language: appState.settings.language))
+                .accessibilityLabel(Text("settings.tint.delete"))
+            }
+        }
+    }
+
+    private static let featuredMenuBarPresets: [MenuBarTintPreset] = [
+        .systemDefault, .defaultSlide, .defaultGradient, .batteryLevel, .smoothLevel,
+        .sunset, .ocean, .aurora, .lava, .off,
+    ]
+
+    private var menuBarPresetGallery: some View {
+        let language = appState.settings.language
+        let tint = appState.settings.menuBarTint
+        let savedID = appState.settings.menuBarActiveSavedID
+        let allPresets = MenuBarTintPreset.pickerCases.filter { $0 != .custom }
+        let saved = appState.settings.savedTintLibrary.menuBar
+        let needsAll = savedID != nil || (tint.preset != .custom && !Self.featuredMenuBarPresets.contains(tint.preset))
+        let expanded = showsAllMenuBarPresets || needsAll
+        let presets = expanded ? allPresets : Self.featuredMenuBarPresets
+        let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: 5)
+        return VStack(alignment: .leading, spacing: 10) {
+            LazyVGrid(columns: columns, spacing: 8) {
+                ForEach(presets) { preset in
+                    TintPresetChip(
+                        title: Localization.string(preset.localizationKey, language: language),
+                        selected: savedID == nil && tint.preset == preset
+                    ) {
+                        menuBarEditingBandID = nil
+                        menuBarTintOrigin = preset
+                        appState.settings.applyTintPreset(preset)
+                    } thumbnail: {
+                        TintRampBar(bands: MenuBarTintScheme.preset(preset).bands)
+                    }
+                }
+            }
+            if expanded, !saved.isEmpty {
+                Text("settings.tint.myPresets")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(.secondary)
+                LazyVGrid(columns: columns, spacing: 8) {
+                    ForEach(saved) { item in
+                        TintPresetChip(title: item.name, selected: savedID == item.id) {
+                            menuBarEditingBandID = nil
+                            menuBarTintOrigin = nil
+                            appState.settings.applySavedMenuBarTint(id: item.id)
+                        } thumbnail: {
+                            TintRampBar(bands: item.payload.bands)
+                        }
+                    }
+                }
+            }
+            if !needsAll {
+                Button {
+                    showsAllMenuBarPresets.toggle()
+                } label: {
+                    if expanded {
+                        Text("settings.tint.showFewer")
+                    } else if saved.isEmpty {
+                        Text(Localization.string("settings.tint.showAll %lld", language: language, allPresets.count))
+                    } else {
+                        Text(Localization.string("settings.tint.showAllAndMine %lld", language: language, allPresets.count))
+                    }
+                }
+                .buttonStyle(.link)
+                .font(.subheadline)
+            }
+        }
+        .padding(.vertical, 4)
+    }
+
+    private var menuBarOnBatteryOnlyBinding: Binding<Bool> {
         Binding(
-            get: { appState.settings.menuBarTint.mode },
-            set: { mode in
+            get: { appState.settings.menuBarTint.mode == .onBattery },
+            set: { onBatteryOnly in
                 var scheme = appState.settings.menuBarTint.markedCustom()
-                scheme.mode = mode
+                scheme.mode = onBatteryOnly ? .onBattery : .always
                 appState.settings.menuBarTint = scheme
             }
         )
     }
 
-    private func editableTintBandRow(_ band: MenuBarTintBand) -> some View {
-        let range = appState.settings.menuBarTint.percentRange(for: band.id)
-        return VStack(alignment: .leading, spacing: 8) {
-            HStack(alignment: .center, spacing: 8) {
-                TintPercentEditor(
-                    value: band.throughPercent,
-                    range: range,
-                    onCommit: { appState.settings.menuBarTint = appState.settings.menuBarTint.replacingBand(id: band.id, throughPercent: $0) }
-                )
-
-                Spacer(minLength: 8)
-
-                Picker("settings.icon.tint.blend", selection: tintBlendBinding(band.id)) {
-                    ForEach(MenuBarTintBlend.allCases) { blend in
-                        Text(LocalizedStringKey(blend.localizationKey)).tag(blend)
-                    }
-                }
-                .labelsHidden()
-                .fixedSize()
-
-                if appState.settings.menuBarTint.bands.count > 1 {
-                    Button {
-                        appState.settings.menuBarTint = appState.settings.menuBarTint.removingBand(id: band.id)
-                    } label: {
-                        Image(systemName: "minus.circle.fill")
-                            .foregroundStyle(.secondary)
-                    }
-                    .buttonStyle(.borderless)
-                    .help(LocalizedStringKey("settings.icon.tint.remove"))
-                }
-            }
-
-            tintWells(band)
-        }
-        .padding(.vertical, 2)
-    }
-
-    @ViewBuilder
-    private func tintWells(_ band: MenuBarTintBand) -> some View {
-        switch band.blend {
-        case .constant:
-            HStack(spacing: 8) {
-                Spacer()
-                tintWell(label: "settings.icon.tint.color", bandID: band.id, swatch: band.highRight, keyPath: \.highRight)
-            }
-        case .slide:
-            HStack(spacing: 12) {
-                Spacer()
-                tintWell(label: "settings.icon.tint.low", bandID: band.id, swatch: band.lowRight, keyPath: \.lowRight)
-                tintWell(label: "settings.icon.tint.high", bandID: band.id, swatch: band.highRight, keyPath: \.highRight)
-            }
-        case .gradient:
-            HStack(spacing: 12) {
-                Spacer()
-                tintWell(label: "settings.icon.tint.left", bandID: band.id, swatch: band.highLeft, keyPath: \.highLeft)
-                tintWell(label: "settings.icon.tint.right", bandID: band.id, swatch: band.highRight, keyPath: \.highRight)
-            }
-        case .slideGradient:
-            VStack(alignment: .trailing, spacing: 6) {
-                HStack(spacing: 12) {
-                    tintWell(label: "settings.icon.tint.lowLeft", bandID: band.id, swatch: band.lowLeft, keyPath: \.lowLeft)
-                    tintWell(label: "settings.icon.tint.lowRight", bandID: band.id, swatch: band.lowRight, keyPath: \.lowRight)
-                }
-                HStack(spacing: 12) {
-                    tintWell(label: "settings.icon.tint.highLeft", bandID: band.id, swatch: band.highLeft, keyPath: \.highLeft)
-                    tintWell(label: "settings.icon.tint.highRight", bandID: band.id, swatch: band.highRight, keyPath: \.highRight)
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .trailing)
-        }
-    }
-
-    private func tintWell(
-        label: LocalizedStringKey,
-        bandID: UUID,
-        swatch: MenuBarTintSwatch,
-        keyPath: WritableKeyPath<MenuBarTintBand, MenuBarTintSwatch>
-    ) -> some View {
-        HStack(spacing: 5) {
-            Text(label)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            if !swatch.followsMenuBar {
-                ColorPicker(
-                    label,
-                    selection: tintColorBinding(bandID, keyPath),
-                    supportsOpacity: false
-                )
-                .labelsHidden()
-                .fixedSize()
-            }
-            Toggle(isOn: tintFollowsMenuBarBinding(bandID, keyPath)) {
-                Text("settings.icon.tint.menuBarColor")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            .toggleStyle(.checkbox)
-        }
-    }
-
-    private func tintBlendBinding(_ id: UUID) -> Binding<MenuBarTintBlend> {
+    private var menuBarTransitionBinding: Binding<TintTransition?> {
         Binding(
-            get: { appState.settings.menuBarTint.bands.first(where: { $0.id == id })?.blend ?? .constant },
-            set: { blend in
-                appState.settings.menuBarTint = appState.settings.menuBarTint.replacingBand(id: id, blend: blend)
+            get: { TintRamp.transition(of: appState.settings.menuBarTint.bands) },
+            set: { transition in
+                guard let transition else { return }
+                setMenuBarBands(TintRamp.applying(transition, to: appState.settings.menuBarTint.bands))
             }
         )
     }
 
-    private func tintColorBinding(
-        _ id: UUID,
-        _ keyPath: WritableKeyPath<MenuBarTintBand, MenuBarTintSwatch>
-    ) -> Binding<Color> {
-        Binding(
-            get: {
-                appState.settings.menuBarTint.bands.first(where: { $0.id == id })?[keyPath: keyPath].color ?? .primary
-            },
-            set: { color in
-                replaceSwatch(id: id, keyPath: keyPath, swatch: .from(color: color))
-            }
-        )
-    }
-
-    private func tintFollowsMenuBarBinding(
-        _ id: UUID,
-        _ keyPath: WritableKeyPath<MenuBarTintBand, MenuBarTintSwatch>
-    ) -> Binding<Bool> {
-        Binding(
-            get: {
-                appState.settings.menuBarTint.bands.first(where: { $0.id == id })?[keyPath: keyPath].followsMenuBar ?? false
-            },
-            set: { follows in
-                replaceSwatch(id: id, keyPath: keyPath, swatch: follows ? .menuBar : .systemGreen)
-            }
-        )
-    }
-
-    private func replaceSwatch(
-        id: UUID,
-        keyPath: WritableKeyPath<MenuBarTintBand, MenuBarTintSwatch>,
-        swatch: MenuBarTintSwatch
-    ) {
+    private func setMenuBarBands(_ bands: [MenuBarTintBand]) {
         var scheme = appState.settings.menuBarTint.markedCustom()
-        scheme.bands = scheme.bands.map { band in
-            guard band.id == id else { return band }
-            var next = band
-            next[keyPath: keyPath] = swatch
-            if next.blend == .constant {
-                next.highRight = swatch
-                next.highLeft = swatch
-                next.lowRight = swatch
-                next.lowLeft = swatch
-            }
-            return next
-        }
+        scheme.bands = bands
         appState.settings.menuBarTint = scheme.normalized()
+    }
+
+    private var menuBarRampRow: some View {
+        let bands = appState.settings.menuBarTint.bands
+        let language = appState.settings.language
+        return VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 8) {
+                Text("settings.icon.tint.byCharge")
+                Spacer(minLength: 8)
+                Text("settings.tint.transition")
+                    .foregroundStyle(.secondary)
+                Picker("settings.tint.transition", selection: menuBarTransitionBinding) {
+                    ForEach(TintTransition.allCases) { transition in
+                        Text(LocalizedStringKey(transition.localizationKey)).tag(Optional(transition))
+                    }
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                .fixedSize()
+            }
+            TintRampEditor(
+                bands: bands,
+                followLabel: "settings.tint.menuBarDefault",
+                language: language,
+                editingID: $menuBarEditingBandID,
+                onChange: setMenuBarBands
+            ) { band, lower in
+                menuBarSegmentEditor(band, lower: lower)
+            }
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Text("settings.tint.ramp.hint")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 8)
+                Button {
+                    if let result = TintRamp.addingBoundary(to: bands) {
+                        setMenuBarBands(result.bands)
+                        menuBarEditingBandID = result.newID
+                    }
+                } label: {
+                    Label("settings.tint.addBoundary", systemImage: "plus")
+                }
+                .disabled(bands.count >= 8)
+            }
+        }
+        .padding(.vertical, 4)
+    }
+
+    private func menuBarSegmentEditor(_ band: MenuBarTintBand, lower: Int) -> some View {
+        let ordered = TintRamp.sorted(appState.settings.menuBarTint.bands)
+        let index = ordered.firstIndex { $0.id == band.id }
+        let previous = index.flatMap { $0 > 0 ? ordered[$0 - 1] : nil }
+        return TintSegmentEditor(
+            band: band,
+            lower: lower,
+            previous: previous,
+            language: appState.settings.language,
+            rangeKey: "settings.tint.segment.range %lld %lld",
+            captionKey: "settings.tint.segment.caption",
+            atKey: "settings.tint.color.at %lld",
+            followName: "settings.tint.menuBarDefault",
+            followNote: "settings.tint.menuBarDefault.note",
+            canDelete: ordered.count > 1,
+            upperRange: index.flatMap { $0 < ordered.count - 1 ? TintRamp.boundaryRange(at: $0, in: ordered) : nil },
+            onSetUpper: { setMenuBarBands(TintRamp.moving(band.id, to: $0, in: appState.settings.menuBarTint.bands)) },
+            onChange: { next in
+                setMenuBarBands(TintRamp.replacing(next, in: appState.settings.menuBarTint.bands))
+            },
+            onDelete: {
+                menuBarEditingBandID = nil
+                setMenuBarBands(TintRamp.removing(band.id, from: appState.settings.menuBarTint.bands))
+            }
+        ) {
+            menuBarSegmentPreview(band, lower: lower)
+        }
+    }
+
+    /// The icon at the bottom and top of a segment, so the effect is visible at a glance.
+    private func menuBarSegmentPreview(_ band: MenuBarTintBand, lower: Int) -> some View {
+        var scheme = appState.settings.menuBarTint.markedCustom()
+        scheme.mode = .always
+        let low = Double(min(band.throughPercent, lower + 1))
+        let high = Double(band.throughPercent)
+        return HStack(spacing: 4) {
+            if band.blend.slides, low < high {
+                menuBarGlyph(percent: low, flowMode: .discharging, scheme: scheme, scale: 1.2)
+                Image(systemName: "arrow.right")
+                    .font(.system(size: 9, weight: .semibold))
+                    .foregroundStyle(.tertiary)
+            }
+            menuBarGlyph(percent: high, flowMode: .discharging, scheme: scheme, scale: 1.2)
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 6)
+        .background(Color.primary.opacity(0.05), in: RoundedRectangle(cornerRadius: 7, style: .continuous))
     }
 
     @ViewBuilder
     private var ringsSections: some View {
         Section {
-            ForEach(appState.settings.ringLayoutEntries()) { entry in
-                ringLayoutRow(entry)
+            SettingsPreviewCard(title: "settings.rings.preview") {
+                ringsPanelPreview
             }
-            HStack(alignment: .center, spacing: 12) {
-                Button("settings.rings.bluetooth.add") {
+            .task {
+                // Headphone levels are read only while the panel is open; read once for the preview.
+                if !appState.settings.bluetoothRingDevices.isEmpty {
+                    await appState.refreshBluetoothNow()
+                }
+            }
+        }
+
+        ForEach(Array(appState.settings.ringRows.enumerated()), id: \.offset) { rowIndex, row in
+            Section {
+                ringRowItems(rowIndex: rowIndex, row: row)
+            } header: {
+                ringRowHeader(rowIndex)
+            }
+        }
+        ringHiddenSection
+        Section {
+            HStack(spacing: 10) {
+                Button {
+                    appState.settings.addRingRow()
+                } label: {
+                    Label("settings.rings.addRow", systemImage: "plus")
+                }
+                Button {
                     showingBluetoothDevices = true
+                } label: {
+                    Label("settings.rings.bluetooth.addDevice", systemImage: "headphones")
                 }
-                Button("settings.rings.addLineBreak") {
-                    appState.settings.addLineBreak()
-                }
+                Spacer(minLength: 0)
+            }
+            Picker("settings.rings.oddRow.title", selection: $appState.settings.ringOddRow) {
+                Text("settings.rings.oddAlign.title").tag(RingOddRow.align)
+                Text("settings.rings.oddStagger.title").tag(RingOddRow.stagger)
+            }
+            .pickerStyle(.segmented)
+        } footer: {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("settings.rings.dragHint")
                 Text("settings.rings.bluetooth.connectHint")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: .infinity, alignment: .leading)
             }
-            Picker("settings.rings.temperatureUnit", selection: $appState.settings.temperatureUnit) {
-                ForEach(TemperatureUnit.allCases) { unit in
-                    Text(LocalizedStringKey(unit.localizationKey)).tag(unit)
-                }
-            }
-        } header: {
-            Text("settings.rings.layout")
+            .font(.subheadline)
+            .foregroundStyle(.secondary)
         }
         .sheet(isPresented: $showingBluetoothDevices, onDismiss: {
             appState.bluetoothScanWanted = false
@@ -2472,36 +3128,91 @@ struct SettingsView: View {
         }
 
         Section {
-            Picker("settings.icon.tint.preset", selection: ringPresetPickerBinding) {
-                ForEach(PopoverTintPreset.allCases) { preset in
-                    Text(LocalizedStringKey(preset.localizationKey)).tag(PopoverPresetPickerItem.builtin(preset))
-                }
-                if !appState.settings.savedTintLibrary.ring.isEmpty {
-                    Divider()
-                    ForEach(appState.settings.savedTintLibrary.ring) { item in
-                        Text(item.name).tag(PopoverPresetPickerItem.saved(item.id))
+            tintPresetStatusRow(
+                status: ringPresetStatus,
+                canRevert: ringCanRevert,
+                onRevert: revertRingTint,
+                canSave: ringSavedPresetModified,
+                onSave: { _ = appState.settings.updateRingTintPreset() },
+                onSaveAs: {
+                    savePresetName = defaultSaveName(for: .ring)
+                    saveDialog = .ring
+                },
+                onDelete: ringSavedPreset == nil ? nil : {
+                    if let saved = ringSavedPreset {
+                        appState.settings.deleteSavedRingTint(id: saved.id)
                     }
                 }
+            )
+            ringPresetGallery
+            ringColorList
+            if let color = selectedRingColor() {
+                ringColorRampRow(color)
             }
-            presetEditor(
-                toolbar: {
-                    tintPresetSaveControls(
-                        canOverwrite: appState.settings.ringActiveSavedID != nil,
-                        onSave: { _ = appState.settings.updateRingTintPreset() },
-                        onSaveAs: {
-                            savePresetName = defaultSaveName(for: .ring)
-                            saveDialog = .ring
-                        },
-                        deleteID: appState.settings.ringActiveSavedID,
-                        onDelete: { appState.settings.deleteSavedRingTint(id: $0) }
-                    )
-                }
-            ) {
-                ringColorCatalogEditor
-            }
+        } header: {
+            Text("settings.color.header")
+        } footer: {
+            Text("settings.rings.colors.footer")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
         }
 
-        ringAssignmentSection
+        Section {
+            speedHalfStepper(
+                "settings.rings.half.download.title",
+                kilobytes: appState.settings.downloadHalfKilobytes
+            ) { appState.settings.downloadHalfKilobytes = $0 }
+            speedHalfStepper(
+                "settings.rings.half.upload.title",
+                kilobytes: appState.settings.uploadHalfKilobytes
+            ) { appState.settings.uploadHalfKilobytes = $0 }
+            temperatureHalfStepper(title: "settings.rings.half.temperature.title")
+            HStack(spacing: 8) {
+                SettingsRowLabel(title: "settings.rings.half.swap.title", caption: "settings.rings.half.swap.caption")
+                Spacer(minLength: 8)
+                Text(SwapUsageFormat.string(bytes: Double(appState.settings.swapHalfMegabytes) * 1_048_576))
+                    .monospacedDigit()
+                    .foregroundStyle(.secondary)
+                Stepper(
+                    "",
+                    value: Binding(
+                        get: { appState.settings.swapHalfMegabytes },
+                        set: { appState.settings.swapHalfMegabytes = $0 }
+                    ),
+                    in: AppSettings.swapHalfLimit(),
+                    step: AppSettings.swapHalfStep
+                )
+                .labelsHidden()
+                .fixedSize()
+            }
+            HStack(spacing: 8) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("settings.rings.thermal.title")
+                    Text(verbatim: thermalScaleSummary)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer(minLength: 8)
+                Button("settings.rings.thermal.adjust") {
+                    ringScaleSlot = .thermalState
+                }
+                .popover(isPresented: ringScalePresented(.thermalState), arrowEdge: .bottom) {
+                    ringScalePopover(.thermalState)
+                }
+            }
+            Picker("settings.rings.temperatureUnit", selection: $appState.settings.temperatureUnit) {
+                ForEach(TemperatureUnit.allCases) { unit in
+                    Text(LocalizedStringKey(unit.localizationKey)).tag(unit)
+                }
+            }
+            .pickerStyle(.segmented)
+        } header: {
+            Text("settings.rings.scale.header")
+        } footer: {
+            Text("settings.rings.scale.footer")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
 
         Section {
             Picker("settings.icons.preset", selection: ringIconPresetPickerBinding) {
@@ -2515,100 +3226,703 @@ struct SettingsView: View {
                     }
                 }
             }
-            presetEditor(
-                toolbar: {
-                    iconPresetEditorCaption(
-                        canOverwrite: appState.settings.ringActiveSavedIconID != nil,
-                        onSave: { _ = appState.settings.updateRingIconPreset() },
-                        onSaveAs: {
-                            savePresetName = defaultSaveName(for: .ringIcon)
-                            saveDialog = .ringIcon
-                        },
-                        deleteID: appState.settings.ringActiveSavedIconID,
-                        onDelete: { appState.settings.deleteSavedRingIcon(id: $0) }
-                    )
-                }
-            ) {
+            VStack(spacing: 16) {
                 let slots = RingSlot.iconSlots
-                VStack(spacing: 16) {
-                    ringIconSlotRow(Array(slots.prefix(4)))
-                    ringIconSlotRow(Array(slots.dropFirst(4).prefix(4)))
-                    ringIconSlotRow(Array(slots.dropFirst(8)))
+                ringIconSlotRow(Array(slots.prefix(4)))
+                ringIconSlotRow(Array(slots.dropFirst(4).prefix(4)))
+                ringIconSlotRow(Array(slots.dropFirst(8)))
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 6)
+            iconPresetActions(
+                canOverwrite: appState.settings.ringActiveSavedIconID != nil,
+                onSave: { _ = appState.settings.updateRingIconPreset() },
+                onSaveAs: {
+                    savePresetName = defaultSaveName(for: .ringIcon)
+                    saveDialog = .ringIcon
+                },
+                deleteID: appState.settings.ringActiveSavedIconID,
+                onDelete: { appState.settings.deleteSavedRingIcon(id: $0) }
+            )
+            bluetoothIconSettings
+            ForEach([RingSlot.batteryTemperature, .thermalState]) { slot in
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(LocalizedStringKey(slot.localizationKey))
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                    slotIconColorControls(slot)
                 }
             }
-            bluetoothIconSettings
+        } header: {
+            Text("settings.icon.header")
+        } footer: {
+            Text("settings.icons.footer")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
         }
+    }
+
+    /// The panel's ring grid exactly as the panel draws it, with live readings.
+    /// A row too wide for this column is scaled down to fit.
+    private var ringsPanelPreview: some View {
+        let rows = appState.settings.displayedRingRows(seen: appState.bluetoothDevices)
+        let gear = appState.settings.settingsButtonPlacement.drawsRingGear(
+            host: appState.settings.settingsButtonHost,
+            ringsVisible: appState.settings.showStatusRings
+        )
+        var counts = rows.map(\.count)
+        if gear {
+            if counts.isEmpty { counts = [1] } else { counts[counts.count - 1] += 1 }
+        }
+        let width = PopoverLayout.width(rowCounts: counts) - PopoverLayout.padding * 2
+        let shownRows = counts.filter { $0 > 0 }.count
+        let height = CGFloat(shownRows) * (StatusRingView.diameter + 24) + CGFloat(max(shownRows - 1, 0)) * 10
+        let scale = min(1, 420 / max(width, 1))
+        return Group {
+            if counts.allSatisfy({ $0 == 0 }) {
+                Text("settings.rings.preview.empty")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .padding(.vertical, 12)
+            } else {
+                RingHeaderLayout(rowCounts: counts) {
+                    ForEach(Array(rows.enumerated()), id: \.offset) { _, row in
+                        ForEach(row) { item in
+                            RingItemCell(appState: appState, item: item)
+                        }
+                    }
+                    if gear {
+                        RingSettingsCell(title: Localization.string("settings.title", language: appState.settings.language))
+                    }
+                }
+                .frame(width: width, height: height, alignment: .top)
+                .scaleEffect(scale)
+                .frame(width: width * scale, height: height * scale)
+            }
+        }
+        .allowsHitTesting(false)
+        .accessibilityElement(children: .combine)
+    }
+
+    private func ringIsShown(_ item: RingItem) -> Bool {
+        guard let slot = item.slot else { return true }
+        return appState.settings.enabledRingSlots.contains(slot)
+    }
+
+    private func ringRowHeader(_ rowIndex: Int) -> some View {
+        HStack(spacing: 8) {
+            Text("settings.rings.row \(rowIndex + 1)")
+            Spacer(minLength: 8)
+            if appState.settings.ringRows.count > 1 {
+                Button("settings.rings.removeRow") {
+                    appState.settings.removeRingRow(rowIndex)
+                }
+                .buttonStyle(.link)
+                .font(.subheadline)
+            }
+        }
+        .onDrop(of: [.plainText], delegate: RingItemRowDropDelegate(
+            row: rowIndex,
+            drag: ringItemDrag,
+            move: { id, row in appState.settings.moveRingItem(id: id, toEndOfRow: row) }
+        ))
+    }
+
+    @ViewBuilder
+    private func ringRowItems(rowIndex: Int, row: [RingItem]) -> some View {
+        let shown = row.filter(ringIsShown)
+        if shown.isEmpty {
+            Text("settings.rings.row.empty")
+                .font(.subheadline)
+                .foregroundStyle(.tertiary)
+                .frame(maxWidth: .infinity, minHeight: 28)
+                .overlay {
+                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                        .strokeBorder(Color.secondary.opacity(0.35), style: StrokeStyle(lineWidth: 1, dash: [4, 3]))
+                }
+                .onDrop(of: [.plainText], delegate: RingItemRowDropDelegate(
+                    row: rowIndex,
+                    drag: ringItemDrag,
+                    move: { id, row in appState.settings.moveRingItem(id: id, toEndOfRow: row) }
+                ))
+        }
+        ForEach(shown) { item in
+            ringShownRow(item, rowIndex: rowIndex)
+        }
+    }
+
+    private func ringShownRow(_ item: RingItem, rowIndex: Int) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: "line.3.horizontal")
+                .font(.body)
+                .foregroundStyle(.secondary)
+                .frame(width: 22, height: 22)
+                .contentShape(Rectangle())
+                .onDrag {
+                    ringItemDrag.itemID = item.id
+                    return NSItemProvider(object: item.id as NSString)
+                }
+                .help(Localization.string("settings.rings.dragHint", language: appState.settings.language))
+            ringItemIcon(item)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(ringItemTitle(item))
+                    .lineLimit(1)
+                if let caption = ringItemCaption(item) {
+                    Text(caption)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
+            }
+            Spacer(minLength: 8)
+            if item.slot == .speedPair {
+                ringColorPicker(.download, symbol: "arrow.down")
+                ringColorPicker(.upload, symbol: "arrow.up")
+            } else if let slot = item.slot, let segment = RingColorSegment(rawValue: slot.rawValue) {
+                ringColorPicker(segment)
+            }
+            if item.slot == nil {
+                Button("settings.rings.bluetooth.options") {
+                    ringOptionsItemID = item.id
+                }
+                .popover(isPresented: Binding(
+                    get: { ringOptionsItemID == item.id },
+                    set: { if !$0, ringOptionsItemID == item.id { ringOptionsItemID = nil } }
+                ), arrowEdge: .bottom) {
+                    ringBluetoothOptions(item)
+                }
+            }
+            ringMoveMenu(item, rowIndex: rowIndex)
+        }
+        .contentShape(Rectangle())
+        .onDrop(of: [.plainText], delegate: RingItemDropDelegate(
+            itemID: item.id,
+            drag: ringItemDrag,
+            move: { id, target in appState.settings.moveRingItem(id: id, to: target) }
+        ))
+    }
+
+    private func ringItemIcon(_ item: RingItem) -> some View {
+        let glyph: GlyphSlot = {
+            if let slot = item.slot {
+                return slot == .speedPair ? .system("arrow.up.arrow.down") : appState.settings.ringIcons.slot(for: slot)
+            }
+            let device = appState.settings.bluetoothRingDevices.first { $0.address == item.address }
+            let ring = device?.rings.first { $0.id == item.ringID }
+            return ring?.shownGlyph(model: device?.model ?? .generic, parts: ring?.parts ?? []) ?? .system("headphones")
+        }()
+        return GlyphSlotView(slot: glyph, systemPointSize: 12, assetSide: 15, prefersMonochrome: true)
+            .frame(width: 24, height: 24)
+            .background(Color.primary.opacity(0.06), in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+            .accessibilityHidden(true)
+    }
+
+    private func ringItemCaption(_ item: RingItem) -> String? {
+        let language = appState.settings.language
+        if item.slot == nil {
+            return Localization.string("settings.rings.bluetooth.caption", language: language)
+        }
+        if item.slot == .speedPair {
+            return Localization.string("settings.rings.speedPair.caption", language: language)
+        }
+        return nil
+    }
+
+    private func ringColorPicker(_ segment: RingColorSegment, symbol: String? = nil) -> some View {
+        let tint = appState.settings.ringTint
+        let colors = tint.colors
+        let current = tint.assignments[segment] ?? colors.first?.id
+        let currentScheme = colors.first { $0.id == current }?.scheme
+        return HStack(spacing: 4) {
+            if let symbol {
+                Image(systemName: symbol)
+                    .font(.system(size: 9, weight: .semibold))
+                    .foregroundStyle(.secondary)
+            }
+            if let currentScheme {
+                TintRampBar(bands: currentScheme.bands, cornerRadius: 2)
+                    .frame(width: 18, height: 8)
+            }
+            Picker(LocalizedStringKey(segment.localizationKey), selection: Binding(
+                get: { current ?? UUID() },
+                set: { id in
+                    appState.settings.ringTint = appState.settings.ringTint.assigning(segment, to: id)
+                }
+            )) {
+                ForEach(Array(colors.enumerated()), id: \.element.id) { index, item in
+                    Text(ringColorTitle(index)).tag(item.id)
+                }
+            }
+            .labelsHidden()
+            .pickerStyle(.menu)
+            .controlSize(.small)
+            .fixedSize()
+        }
+        .help(Localization.string("settings.rings.color.pick", language: appState.settings.language))
+    }
+
+    private func ringMoveMenu(_ item: RingItem, rowIndex: Int) -> some View {
+        let rowCount = appState.settings.ringRows.count
+        return Menu {
+            ForEach(0..<rowCount, id: \.self) { index in
+                if index != rowIndex {
+                    Button(Localization.string("settings.rings.moveToRow %lld", language: appState.settings.language, index + 1)) {
+                        appState.settings.moveRingItem(id: item.id, toEndOfRow: index)
+                    }
+                }
+            }
+            Button("settings.rings.moveToNewRow") {
+                moveRingItemToNewRow(item.id)
+            }
+            Divider()
+            if let slot = item.slot {
+                Button("settings.rings.hide") {
+                    appState.settings.setRingSlot(slot, visible: false)
+                }
+            } else if let address = item.address {
+                Button("settings.rings.bluetooth.remove", role: .destructive) {
+                    appState.settings.removeBluetoothDevice(address: address)
+                }
+            }
+        } label: {
+            Image(systemName: "ellipsis.circle")
+        }
+        .menuStyle(.borderlessButton)
+        .menuIndicator(.hidden)
+        .fixedSize()
+        .help(Localization.string("settings.rings.more", language: appState.settings.language))
+    }
+
+    private func moveRingItemToNewRow(_ id: String) {
+        appState.settings.addRingRow()
+        appState.settings.moveRingItem(id: id, toEndOfRow: appState.settings.ringRows.count - 1)
+    }
+
+    /// Shows a hidden ring at the end of a row, or on a row of its own.
+    private func showRing(_ slot: RingSlot, inRow row: Int?) {
+        let settings = appState.settings
+        settings.setRingSlot(slot, visible: true)
+        let id = RingItem.slot(slot).id
+        if let row {
+            settings.moveRingItem(id: id, toEndOfRow: row)
+        } else {
+            moveRingItemToNewRow(id)
+        }
+    }
+
+    @ViewBuilder
+    private var ringHiddenSection: some View {
+        let hidden = appState.settings.ringCatalog.filter { !appState.settings.enabledRingSlots.contains($0) }
+        if !hidden.isEmpty {
+            Section {
+                ForEach(hidden) { slot in
+                    HStack(spacing: 8) {
+                        ringItemIcon(.slot(slot))
+                            .opacity(0.6)
+                        Text(LocalizedStringKey(slot.localizationKey))
+                            .foregroundStyle(.secondary)
+                        Spacer(minLength: 8)
+                        Menu {
+                            ForEach(0..<appState.settings.ringRows.count, id: \.self) { index in
+                                Button(Localization.string("settings.rings.addToRow %lld", language: appState.settings.language, index + 1)) {
+                                    showRing(slot, inRow: index)
+                                }
+                            }
+                            Button("settings.rings.addToNewRow") {
+                                showRing(slot, inRow: nil)
+                            }
+                        } label: {
+                            Label("settings.rings.show", systemImage: "plus.circle.fill")
+                        }
+                        .menuStyle(.borderlessButton)
+                        .fixedSize()
+                    }
+                }
+            } header: {
+                Text("settings.rings.hiddenGroup")
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func ringBluetoothOptions(_ item: RingItem) -> some View {
+        if let device = appState.settings.bluetoothRingDevices.first(where: { $0.address == item.address }),
+           let ring = device.rings.first(where: { $0.id == item.ringID }) {
+            let index = device.rings.firstIndex(where: { $0.id == ring.id }) ?? 0
+            let catalog: [BluetoothBatteryPart] = device.multi ? [.left, .right, .box] : []
+            VStack(alignment: .leading, spacing: 10) {
+                Text(device.name)
+                    .font(.system(size: 13, weight: .semibold))
+                bluetoothRingEditor(device: device, ring: ring, index: index, catalog: catalog)
+                if device.rings.count < 3, device.multi {
+                    Button("settings.rings.bluetooth.addRing") {
+                        appState.settings.addBluetoothDisplayRing(address: device.address)
+                    }
+                }
+            }
+            .padding(14)
+            .frame(width: 320)
+        }
+    }
+
+    private var thermalScaleSummary: String {
+        let language = appState.settings.language
+        let parts = [
+            ("ring.thermal.nominal", appState.settings.thermalNominalPercent),
+            ("ring.thermal.fair", appState.settings.thermalFairPercent),
+            ("ring.thermal.serious", appState.settings.thermalSeriousPercent),
+            ("ring.thermal.critical", appState.settings.thermalCriticalPercent),
+        ]
+        return parts.map { "\(Localization.string($0.0, language: language)) \($0.1)%" }.joined(separator: " · ")
+    }
+
+    private var ringSavedPreset: SavedTintPreset<RingTintSettings>? {
+        guard let id = appState.settings.ringActiveSavedID else { return nil }
+        return appState.settings.savedTintLibrary.ring.first { $0.id == id }
+    }
+
+    private var ringSavedPresetModified: Bool {
+        guard let saved = ringSavedPreset else { return false }
+        let current = appState.settings.ringTint
+        return saved.payload.colors != current.colors || saved.payload.assignments != current.assignments
+    }
+
+    private var ringPresetStatus: String {
+        let language = appState.settings.language
+        let tint = appState.settings.ringTint
+        if let saved = ringSavedPreset {
+            return ringSavedPresetModified
+                ? Localization.string("settings.tint.status.modified %@", language: language, saved.name)
+                : saved.name
+        }
+        if tint.preset != .custom {
+            return Localization.string(tint.preset.localizationKey, language: language)
+        }
+        if let origin = ringTintOrigin {
+            let name = Localization.string(origin.localizationKey, language: language)
+            return Localization.string("settings.tint.status.modified %@", language: language, name)
+        }
+        return Localization.string("settings.icon.tint.custom", language: language)
+    }
+
+    private var ringCanRevert: Bool {
+        if ringSavedPreset != nil { return ringSavedPresetModified }
+        return appState.settings.ringTint.preset == .custom && ringTintOrigin != nil
+    }
+
+    private func revertRingTint() {
+        ringEditingBandID = nil
+        if let saved = ringSavedPreset {
+            appState.settings.applySavedRingTint(id: saved.id)
+        } else if let origin = ringTintOrigin {
+            appState.settings.applyRingTintPreset(origin)
+        }
+    }
+
+    private var ringPresetGallery: some View {
+        let language = appState.settings.language
+        let tint = appState.settings.ringTint
+        let savedID = appState.settings.ringActiveSavedID
+        let saved = appState.settings.savedTintLibrary.ring
+        let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: 4)
+        return VStack(alignment: .leading, spacing: 10) {
+            LazyVGrid(columns: columns, spacing: 8) {
+                ForEach(PopoverTintPreset.allCases.filter { $0 != .custom }) { preset in
+                    TintPresetChip(
+                        title: Localization.string(preset.localizationKey, language: language),
+                        selected: savedID == nil && tint.preset == preset
+                    ) {
+                        ringEditingBandID = nil
+                        ringTintOrigin = preset
+                        appState.settings.applyRingTintPreset(preset)
+                    } thumbnail: {
+                        ringPresetThumbnail(RingTintSettings.preset(preset))
+                    }
+                }
+            }
+            if !saved.isEmpty {
+                Text("settings.tint.myPresets")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(.secondary)
+                LazyVGrid(columns: columns, spacing: 8) {
+                    ForEach(saved) { item in
+                        TintPresetChip(title: item.name, selected: savedID == item.id) {
+                            ringEditingBandID = nil
+                            ringTintOrigin = nil
+                            appState.settings.applySavedRingTint(id: item.id)
+                        } thumbnail: {
+                            ringPresetThumbnail(item.payload)
+                        }
+                    }
+                }
+            }
+        }
+        .padding(.vertical, 4)
+    }
+
+    private func ringPresetThumbnail(_ tint: RingTintSettings) -> some View {
+        HStack(spacing: 2) {
+            ForEach(tint.colors.prefix(4)) { color in
+                TintRampBar(bands: color.scheme.bands, cornerRadius: 2)
+            }
+        }
+    }
+
+    private func ringColorUsage(_ color: RingColor) -> String {
+        let language = appState.settings.language
+        let tint = appState.settings.ringTint
+        let fallback = tint.colors.first?.id
+        let names = RingColorSegment.allCases
+            .filter { (tint.assignments[$0] ?? fallback) == color.id }
+            .map { Localization.string($0.localizationKey, language: language) }
+        guard !names.isEmpty else {
+            return Localization.string("settings.rings.color.unused", language: language)
+        }
+        let formatter = ListFormatter()
+        formatter.locale = appState.settings.resolvedLocale
+        let list = formatter.string(from: names) ?? names.joined(separator: ", ")
+        return Localization.string("settings.rings.color.usedBy %@", language: language, list)
+    }
+
+    private var ringColorList: some View {
+        let colors = appState.settings.ringTint.colors
+        let selected = selectedRingColor()?.id
+        return VStack(alignment: .leading, spacing: 6) {
+            Text("settings.rings.colors.title")
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(.secondary)
+            VStack(spacing: 0) {
+                ForEach(Array(colors.enumerated()), id: \.element.id) { index, color in
+                    if index > 0 {
+                        Divider().padding(.leading, 64)
+                    }
+                    Button {
+                        ringEditingBandID = nil
+                        ringColorSelectionID = color.id
+                    } label: {
+                        HStack(spacing: 10) {
+                            TintRampBar(bands: color.scheme.bands)
+                                .frame(width: 44, height: 12)
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text(ringColorTitle(index))
+                                    .font(.system(size: 13, weight: selected == color.id ? .semibold : .regular))
+                                Text(ringColorUsage(color))
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(2)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                            Spacer(minLength: 8)
+                            if selected == color.id {
+                                Image(systemName: "checkmark")
+                                    .font(.system(size: 11, weight: .semibold))
+                                    .foregroundStyle(Color.accentColor)
+                            }
+                        }
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 7)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityAddTraits(selected == color.id ? .isSelected : [])
+                }
+            }
+            .background(Color.primary.opacity(0.04), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
+            }
+            HStack(spacing: 10) {
+                Button {
+                    let tint = appState.settings.ringTint
+                    appState.settings.ringTint = tint.addingColor(copying: selected)
+                    ringEditingBandID = nil
+                    ringColorSelectionID = appState.settings.ringTint.colors.last?.id
+                } label: {
+                    Label("settings.rings.color.new", systemImage: "plus")
+                }
+                if let selected, colors.count > 1 {
+                    Button("settings.rings.color.delete", role: .destructive) {
+                        let tint = appState.settings.ringTint
+                        let fallback = tint.colors.first { $0.id != selected }
+                        ringEditingBandID = nil
+                        appState.settings.ringTint = tint.removingColor(id: selected)
+                        ringColorSelectionID = fallback?.id
+                    }
+                }
+                Spacer(minLength: 0)
+            }
+        }
+        .padding(.vertical, 4)
+    }
+
+    private func setRingColorBands(_ id: UUID, _ bands: [MenuBarTintBand]) {
+        let scheme = ValueTintScheme(bands: bands).normalized()
+        appState.settings.ringTint = appState.settings.ringTint.updatingColor(id: id, scheme: scheme)
+    }
+
+    private func ringColorRampRow(_ color: RingColor) -> some View {
+        let language = appState.settings.language
+        let bands = color.scheme.bands
+        let index = appState.settings.ringTint.colors.firstIndex { $0.id == color.id } ?? 0
+        let transition = Binding<TintTransition?>(
+            get: { TintRamp.transition(of: bands) },
+            set: { next in
+                guard let next else { return }
+                setRingColorBands(color.id, TintRamp.applying(next, to: bands))
+            }
+        )
+        return VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 8) {
+                Text(Localization.string("settings.rings.color.edit %@", language: language, ringColorTitle(index)))
+                Spacer(minLength: 8)
+                Text("settings.tint.transition")
+                    .foregroundStyle(.secondary)
+                Picker("settings.tint.transition", selection: transition) {
+                    ForEach(TintTransition.allCases) { item in
+                        Text(LocalizedStringKey(item.localizationKey)).tag(Optional(item))
+                    }
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                .fixedSize()
+            }
+            TintRampEditor(
+                bands: bands,
+                followLabel: "settings.tint.labelColor",
+                language: language,
+                editingID: $ringEditingBandID,
+                onChange: { setRingColorBands(color.id, $0) }
+            ) { band, lower in
+                ringValueSegmentEditor(band, lower: lower, bands: bands) { setRingColorBands(color.id, $0) }
+            }
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Text("settings.rings.ramp.hint")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 8)
+                Button {
+                    if let result = TintRamp.addingBoundary(to: bands) {
+                        setRingColorBands(color.id, result.bands)
+                        ringEditingBandID = result.newID
+                    }
+                } label: {
+                    Label("settings.tint.addBoundary", systemImage: "plus")
+                }
+                .disabled(bands.count >= 8)
+            }
+        }
+        .padding(.vertical, 4)
+    }
+
+    private func ringValueSegmentEditor(
+        _ band: MenuBarTintBand,
+        lower: Int,
+        bands: [MenuBarTintBand],
+        onChange: @escaping ([MenuBarTintBand]) -> Void
+    ) -> some View {
+        let ordered = TintRamp.sorted(bands)
+        let index = ordered.firstIndex { $0.id == band.id }
+        let previous = index.flatMap { $0 > 0 ? ordered[$0 - 1] : nil }
+        return TintSegmentEditor(
+            band: band,
+            lower: lower,
+            previous: previous,
+            language: appState.settings.language,
+            rangeKey: "settings.tint.segment.valueRange %lld %lld",
+            captionKey: "settings.rings.segment.caption",
+            atKey: "settings.tint.color.atValue %lld",
+            followName: "settings.tint.labelColor",
+            followNote: "settings.tint.labelColor.note",
+            canDelete: ordered.count > 1,
+            upperRange: index.flatMap { $0 < ordered.count - 1 ? TintRamp.boundaryRange(at: $0, in: ordered) : nil },
+            onSetUpper: { onChange(TintRamp.moving(band.id, to: $0, in: bands)) },
+            onChange: { next in onChange(TintRamp.replacing(next, in: bands)) },
+            onDelete: {
+                ringEditingBandID = nil
+                onChange(TintRamp.removing(band.id, from: bands))
+            }
+        ) {
+            ringSegmentPreview(band, lower: lower)
+        }
+    }
+
+    /// A small ring filled to the top of the segment in the segment's colors.
+    private func ringSegmentPreview(_ band: MenuBarTintBand, lower: Int) -> some View {
+        let scheme = ValueTintScheme(bands: [MenuBarTintBand(
+            throughPercent: 100,
+            swatch: band.highRight,
+            blend: band.blend == .slide || band.blend == .slideGradient ? .constant : band.blend,
+            highLeft: band.highLeft
+        )])
+        let colors = scheme.colors(percent: 100)
+        let progress = Double(max(band.throughPercent, 8)) / 100
+        return ZStack {
+            Circle()
+                .stroke(Color.primary.opacity(0.1), lineWidth: 4)
+            Circle()
+                .trim(from: 0, to: progress)
+                .stroke(
+                    AngularGradient(colors: [colors.left, colors.right], center: .center),
+                    style: StrokeStyle(lineWidth: 4, lineCap: .round)
+                )
+                .rotationEffect(.degrees(-90))
+        }
+        .frame(width: 30, height: 30)
+        .padding(4)
     }
 
     @ViewBuilder
     private var flowSections: some View {
         Section {
-            Picker("settings.icon.tint.preset", selection: flowPresetPickerBinding) {
-                ForEach(PopoverTintPreset.allCases) { preset in
-                    Text(LocalizedStringKey(preset.localizationKey)).tag(PopoverPresetPickerItem.builtin(preset))
-                }
-                if !appState.settings.savedTintLibrary.flow.isEmpty {
-                    Divider()
-                    ForEach(appState.settings.savedTintLibrary.flow) { item in
-                        Text(item.name).tag(PopoverPresetPickerItem.saved(item.id))
-                    }
-                }
+            SettingsPreviewCard(verbatim: flowPreviewTitle) {
+                flowStatePreview
             }
-            presetEditor(
-                toolbar: {
-                    tintPresetSaveControls(
-                        canOverwrite: appState.settings.flowActiveSavedID != nil,
-                        onSave: { _ = appState.settings.updateFlowTintPreset() },
-                        onSaveAs: {
-                            savePresetName = defaultSaveName(for: .flow)
-                            saveDialog = .flow
-                        },
-                        deleteID: appState.settings.flowActiveSavedID,
-                        onDelete: { appState.settings.deleteSavedFlowTint(id: $0) }
-                    )
-                }
-            ) {
-                Picker("settings.tint.selection", selection: $flowEditorTarget) {
-                    ForEach(FlowEditorTarget.allCases) { target in
-                        Text(LocalizedStringKey(target.localizationKey)).tag(target)
-                    }
-                }
-                if flowEditorTarget == .all {
-                    ForEach(TintSchemeMerge.bands(from: appState.settings.flowTint.allSchemes)) { band in
-                        mergedTintBandRow(
-                            band,
-                            apply: applyFlowAllBand,
-                            onRemove: {
-                                appState.settings.flowTint = appState.settings.flowTint.mapAll { $0.removingBand(at: band.id) }
-                            }
-                        )
-                    }
-                    Button("settings.icon.tint.add") {
-                        appState.settings.flowTint = appState.settings.flowTint.mapAll { $0.addingBand() }
-                    }
-                } else if let mode = flowEditorTarget.mode {
-                    let scheme = appState.settings.flowTint.scheme(for: mode)
-                    ForEach(scheme.sortedBands) { band in
-                        editableValueTintBandRow(band, scheme: scheme) { next in
-                            appState.settings.flowTint = appState.settings.flowTint.replacing(mode, with: next)
+        }
+
+        Section {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("settings.flow.chooseState")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 4), spacing: 8) {
+                    ForEach(Self.flowModes, id: \.self) { mode in
+                        TintPresetChip(
+                            title: Localization.string(Self.flowModeKey(mode), language: appState.settings.language),
+                            selected: flowEditingMode == mode
+                        ) {
+                            flowEditingBandID = nil
+                            flowEditingMode = mode
+                        } thumbnail: {
+                            TintRampBar(bands: appState.settings.flowTint.scheme(for: mode).bands)
                         }
                     }
-                    Button("settings.icon.tint.add") {
-                        appState.settings.flowTint = appState.settings.flowTint.replacing(mode, with: scheme.addingBand())
-                    }
-                }
-
-                Toggle(isOn: motionColorEnabledBinding) {
-                    Text("settings.flow.tint.motionColor")
-                }
-                if appState.settings.flowTint.motionColor != nil {
-                    ColorPicker(
-                        "settings.flow.tint.motionColor",
-                        selection: motionColorBinding,
-                        supportsOpacity: false
-                    )
                 }
             }
+            .padding(.vertical, 4)
+
+            tintPresetStatusRow(
+                status: flowPresetStatus,
+                canRevert: flowCanRevert,
+                onRevert: revertFlowTint,
+                canSave: flowSavedPresetModified,
+                onSave: { _ = appState.settings.updateFlowTintPreset() },
+                onSaveAs: {
+                    savePresetName = defaultSaveName(for: .flow)
+                    saveDialog = .flow
+                },
+                onDelete: flowSavedPreset == nil ? nil : {
+                    if let saved = flowSavedPreset {
+                        appState.settings.deleteSavedFlowTint(id: saved.id)
+                    }
+                }
+            )
+            flowPresetGallery
+            flowRampRow
+            flowMotionColorRow
+        } header: {
+            Text("settings.color.header")
         }
 
         Section {
@@ -2623,27 +3937,29 @@ struct SettingsView: View {
                     }
                 }
             }
-            presetEditor(
-                toolbar: {
-                    iconPresetEditorCaption(
-                        canOverwrite: appState.settings.flowActiveSavedIconID != nil,
-                        onSave: { _ = appState.settings.updateFlowIconPreset() },
-                        onSaveAs: {
-                            savePresetName = defaultSaveName(for: .flowIcon)
-                            saveDialog = .flowIcon
-                        },
-                        deleteID: appState.settings.flowActiveSavedIconID,
-                        onDelete: { appState.settings.deleteSavedFlowIcon(id: $0) }
-                    )
-                }
-            ) {
-                HStack(spacing: 10) {
-                    ForEach(FlowIconRole.allCases) { role in
-                        flowIconSlotControl(role)
-                    }
+            HStack(alignment: .top, spacing: 10) {
+                ForEach(FlowIconRole.allCases) { role in
+                    flowIconSlotControl(role)
                 }
             }
+            .padding(.vertical, 6)
+            iconPresetActions(
+                canOverwrite: appState.settings.flowActiveSavedIconID != nil,
+                onSave: { _ = appState.settings.updateFlowIconPreset() },
+                onSaveAs: {
+                    savePresetName = defaultSaveName(for: .flowIcon)
+                    saveDialog = .flowIcon
+                },
+                deleteID: appState.settings.flowActiveSavedIconID,
+                onDelete: { appState.settings.deleteSavedFlowIcon(id: $0) }
+            )
             FlowIconSizeControl(settings: appState.settings)
+        } header: {
+            Text("settings.icon.header")
+        } footer: {
+            Text("settings.icons.footer")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
         }
 
         Section {
@@ -2658,8 +3974,335 @@ struct SettingsView: View {
                 }
             }
             .disabled(appState.settings.motionStyle == .off)
-            Toggle("settings.motion.pulseIcons", isOn: $appState.settings.pulseFlowIcons)
+            Toggle(isOn: $appState.settings.pulseFlowIcons) {
+                SettingsRowLabel(title: "settings.motion.pulseIcons", caption: "settings.motion.pulseIcons.note")
+            }
+        } header: {
+            Text("settings.motion.header")
+        } footer: {
+            Text(LocalizedStringKey(Self.motionNoteKey(appState.settings.motionStyle)))
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
         }
+    }
+
+    private static let flowModes: [EnergyFlowMode] = [.charging, .discharging, .adapterHold, .underpowered]
+
+    private static func flowModeKey(_ mode: EnergyFlowMode) -> String {
+        switch mode {
+        case .charging: "settings.flow.tint.charging"
+        case .discharging: "settings.flow.tint.discharging"
+        case .adapterHold: "settings.flow.tint.hold"
+        case .underpowered: "settings.flow.tint.underpowered"
+        }
+    }
+
+    private static func motionNoteKey(_ style: EnergyMotionStyle) -> String {
+        switch style {
+        case .sheen: "settings.motion.note.sheen"
+        case .filaments, .filamentsSolid, .filamentsWhite: "settings.motion.note.filaments"
+        case .particles, .particlesSolid, .particlesWhite: "settings.motion.note.particles"
+        case .off: "settings.motion.note.off"
+        }
+    }
+
+    private var flowPreviewTitle: String {
+        let language = appState.settings.language
+        let state = Localization.string(Self.flowModeKey(flowEditingMode), language: language)
+        return Localization.string("settings.flow.preview %@", language: language, state)
+    }
+
+    /// The panel's energy ribbon in the state being edited, at this Mac's charge.
+    private var flowStatePreview: some View {
+        EnergyFlowView(
+            snapshot: flowPreviewSnapshot(flowEditingMode),
+            theme: AppTheme.resolved(palette: appState.settings.palette, colorScheme: colorScheme),
+            flowTint: appState.settings.flowTint,
+            flowIcons: appState.settings.flowIcons,
+            isAnimating: false,
+            motion: appState.settings.motionStyle,
+            motionFrameRate: appState.settings.motionFrameRate,
+            pulseFlowIcons: appState.settings.pulseFlowIcons,
+            flowIconScale: appState.settings.flowIconScale,
+            language: appState.settings.language,
+            showsFooter: true
+        )
+        .frame(width: PopoverLayout.width - PopoverLayout.padding * 2, alignment: .leading)
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+
+    private func flowPreviewSnapshot(_ mode: EnergyFlowMode) -> PowerSnapshot {
+        let live = appState.snapshot
+        let percent = live.hasBattery && live.percent >= 1 ? live.percent : 62
+        var snapshot = tutorialPowerSnapshot(percent: percent, flowMode: mode)
+        switch mode {
+        case .charging:
+            snapshot.adapterInWatts = 45
+            snapshot.systemLoadWatts = 18
+            snapshot.batteryWatts = 27
+            snapshot.timeToFullMinutes = 72
+        case .discharging:
+            snapshot.timeToEmptyMinutes = 245
+        case .adapterHold:
+            snapshot.adapterInWatts = 14
+            snapshot.systemLoadWatts = 14
+            snapshot.batteryWatts = 0
+        case .underpowered:
+            snapshot.adapterCeilingWatts = 30
+            snapshot.adapterInWatts = 28
+            snapshot.systemLoadWatts = 40
+            snapshot.batteryWatts = -12
+            snapshot.timeToEmptyMinutes = 300
+        }
+        return snapshot
+    }
+
+    private var flowSavedPreset: SavedTintPreset<FlowTintSettings>? {
+        guard let id = appState.settings.flowActiveSavedID else { return nil }
+        return appState.settings.savedTintLibrary.flow.first { $0.id == id }
+    }
+
+    private static func sameFlowColors(_ a: FlowTintSettings, _ b: FlowTintSettings) -> Bool {
+        a.charging == b.charging && a.discharging == b.discharging
+            && a.adapterHold == b.adapterHold && a.underpowered == b.underpowered
+            && a.motionColor == b.motionColor
+    }
+
+    private var flowSavedPresetModified: Bool {
+        guard let saved = flowSavedPreset else { return false }
+        return !Self.sameFlowColors(saved.payload, appState.settings.flowTint)
+    }
+
+    private var flowPresetStatus: String {
+        let language = appState.settings.language
+        let tint = appState.settings.flowTint
+        if let saved = flowSavedPreset {
+            return flowSavedPresetModified
+                ? Localization.string("settings.tint.status.modified %@", language: language, saved.name)
+                : saved.name
+        }
+        if tint.preset != .custom {
+            return Localization.string(tint.preset.localizationKey, language: language)
+        }
+        if let origin = flowTintOrigin {
+            let name = Localization.string(origin.localizationKey, language: language)
+            return Localization.string("settings.tint.status.modified %@", language: language, name)
+        }
+        return Localization.string("settings.icon.tint.custom", language: language)
+    }
+
+    private var flowCanRevert: Bool {
+        if flowSavedPreset != nil { return flowSavedPresetModified }
+        return appState.settings.flowTint.preset == .custom && flowTintOrigin != nil
+    }
+
+    private func revertFlowTint() {
+        flowEditingBandID = nil
+        if let saved = flowSavedPreset {
+            appState.settings.applySavedFlowTint(id: saved.id)
+        } else if let origin = flowTintOrigin {
+            appState.settings.applyFlowTintPreset(origin)
+        }
+    }
+
+    private var flowPresetGallery: some View {
+        let language = appState.settings.language
+        let tint = appState.settings.flowTint
+        let savedID = appState.settings.flowActiveSavedID
+        let saved = appState.settings.savedTintLibrary.flow
+        let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: 4)
+        return VStack(alignment: .leading, spacing: 10) {
+            LazyVGrid(columns: columns, spacing: 8) {
+                ForEach(PopoverTintPreset.allCases.filter { $0 != .custom }) { preset in
+                    TintPresetChip(
+                        title: Localization.string(preset.localizationKey, language: language),
+                        selected: savedID == nil && tint.preset == preset
+                    ) {
+                        flowEditingBandID = nil
+                        flowTintOrigin = preset
+                        appState.settings.applyFlowTintPreset(preset)
+                    } thumbnail: {
+                        flowPresetThumbnail(FlowTintSettings.preset(preset))
+                    }
+                }
+            }
+            if !saved.isEmpty {
+                Text("settings.tint.myPresets")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(.secondary)
+                LazyVGrid(columns: columns, spacing: 8) {
+                    ForEach(saved) { item in
+                        TintPresetChip(title: item.name, selected: savedID == item.id) {
+                            flowEditingBandID = nil
+                            flowTintOrigin = nil
+                            appState.settings.applySavedFlowTint(id: item.id)
+                        } thumbnail: {
+                            flowPresetThumbnail(item.payload)
+                        }
+                    }
+                }
+            }
+            Text("settings.flow.presetOrder")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(.vertical, 4)
+    }
+
+    /// Four short bars, one per state, in the order the state cards use.
+    private func flowPresetThumbnail(_ tint: FlowTintSettings) -> some View {
+        HStack(spacing: 2) {
+            ForEach(Self.flowModes, id: \.self) { mode in
+                TintRampBar(bands: tint.scheme(for: mode).bands, cornerRadius: 2)
+            }
+        }
+    }
+
+    private func setFlowBands(_ bands: [MenuBarTintBand]) {
+        let scheme = ValueTintScheme(bands: bands).normalized()
+        appState.settings.flowTint = appState.settings.flowTint.replacing(flowEditingMode, with: scheme)
+    }
+
+    private var flowTransitionBinding: Binding<TintTransition?> {
+        Binding(
+            get: { TintRamp.transition(of: appState.settings.flowTint.scheme(for: flowEditingMode).bands) },
+            set: { transition in
+                guard let transition else { return }
+                setFlowBands(TintRamp.applying(transition, to: appState.settings.flowTint.scheme(for: flowEditingMode).bands))
+            }
+        )
+    }
+
+    private var flowRampRow: some View {
+        let language = appState.settings.language
+        let scheme = appState.settings.flowTint.scheme(for: flowEditingMode)
+        let bands = scheme.bands
+        let state = Localization.string(Self.flowModeKey(flowEditingMode), language: language)
+        return VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 8) {
+                Text(Localization.string("settings.flow.byCharge %@", language: language, state))
+                Spacer(minLength: 8)
+                Text("settings.tint.transition")
+                    .foregroundStyle(.secondary)
+                Picker("settings.tint.transition", selection: flowTransitionBinding) {
+                    ForEach(TintTransition.allCases) { transition in
+                        Text(LocalizedStringKey(transition.localizationKey)).tag(Optional(transition))
+                    }
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                .fixedSize()
+            }
+            TintRampEditor(
+                bands: bands,
+                followLabel: "settings.tint.labelColor",
+                language: language,
+                editingID: $flowEditingBandID,
+                onChange: setFlowBands
+            ) { band, lower in
+                valueSegmentEditor(
+                    band,
+                    lower: lower,
+                    bands: bands,
+                    captionKey: "settings.flow.segment.caption",
+                    onChange: setFlowBands,
+                    onClose: { flowEditingBandID = nil }
+                )
+            }
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Text("settings.tint.ramp.hint")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 8)
+                Button {
+                    if let result = TintRamp.addingBoundary(to: bands) {
+                        setFlowBands(result.bands)
+                        flowEditingBandID = result.newID
+                    }
+                } label: {
+                    Label("settings.tint.addBoundary", systemImage: "plus")
+                }
+                .disabled(bands.count >= 8)
+            }
+            Button("settings.flow.applyToAll") {
+                let source = appState.settings.flowTint.scheme(for: flowEditingMode)
+                appState.settings.flowTint = appState.settings.flowTint.mapAll { _ in source }
+            }
+            .disabled(Self.flowModes.allSatisfy { appState.settings.flowTint.scheme(for: $0) == scheme })
+        }
+        .padding(.vertical, 4)
+    }
+
+    /// The segment popover for schemes that color the panel rather than the menu bar.
+    private func valueSegmentEditor(
+        _ band: MenuBarTintBand,
+        lower: Int,
+        bands: [MenuBarTintBand],
+        captionKey: LocalizedStringKey,
+        onChange: @escaping ([MenuBarTintBand]) -> Void,
+        onClose: @escaping () -> Void
+    ) -> some View {
+        let ordered = TintRamp.sorted(bands)
+        let index = ordered.firstIndex { $0.id == band.id }
+        let previous = index.flatMap { $0 > 0 ? ordered[$0 - 1] : nil }
+        return TintSegmentEditor(
+            band: band,
+            lower: lower,
+            previous: previous,
+            language: appState.settings.language,
+            rangeKey: "settings.tint.segment.range %lld %lld",
+            captionKey: captionKey,
+            atKey: "settings.tint.color.at %lld",
+            followName: "settings.tint.labelColor",
+            followNote: "settings.tint.labelColor.note",
+            canDelete: ordered.count > 1,
+            upperRange: index.flatMap { $0 < ordered.count - 1 ? TintRamp.boundaryRange(at: $0, in: ordered) : nil },
+            onSetUpper: { onChange(TintRamp.moving(band.id, to: $0, in: bands)) },
+            onChange: { next in onChange(TintRamp.replacing(next, in: bands)) },
+            onDelete: {
+                onClose()
+                onChange(TintRamp.removing(band.id, from: bands))
+            }
+        ) {
+            TintBandFill(band: band)
+                .frame(width: 56, height: 16)
+                .clipShape(Capsule())
+                .overlay { Capsule().strokeBorder(Color.primary.opacity(0.14), lineWidth: 0.5) }
+        }
+    }
+
+    private enum MotionColorChoice: Hashable {
+        case ribbon, custom
+    }
+
+    private var motionColorChoiceBinding: Binding<MotionColorChoice> {
+        Binding(
+            get: { motionColorEnabledBinding.wrappedValue ? .custom : .ribbon },
+            set: { motionColorEnabledBinding.wrappedValue = $0 == .custom }
+        )
+    }
+
+    private var flowMotionColorRow: some View {
+        HStack(spacing: 8) {
+            Text("settings.flow.motionColor")
+            Spacer(minLength: 8)
+            if appState.settings.flowTint.motionColor != nil {
+                ColorPicker("settings.flow.motionColor", selection: motionColorBinding, supportsOpacity: false)
+                    .labelsHidden()
+                    .fixedSize()
+            }
+            Picker("settings.flow.motionColor", selection: motionColorChoiceBinding) {
+                Text("settings.flow.motionColor.ribbon").tag(MotionColorChoice.ribbon)
+                Text("settings.flow.motionColor.custom").tag(MotionColorChoice.custom)
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+            .fixedSize()
+        }
+        .disabled(appState.settings.motionStyle.pigment == nil)
     }
 
     private var ringIconPresetPickerBinding: Binding<RingIconPresetPickerItem> {
@@ -2700,72 +4343,6 @@ struct SettingsView: View {
         )
     }
 
-    /// Preset controls stay visible. These panes used to collapse the editor and
-    /// force it shut again whenever the settings tab changed.
-    @ViewBuilder
-    private func presetEditor<Toolbar: View, Content: View>(
-        @ViewBuilder toolbar: () -> Toolbar,
-        @ViewBuilder content: () -> Content
-    ) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            toolbar()
-            content()
-        }
-    }
-
-    @ViewBuilder
-    private func tintPresetSaveControls(
-        canOverwrite: Bool,
-        onSave: @escaping () -> Void,
-        onSaveAs: @escaping () -> Void,
-        deleteID: UUID?,
-        onDelete: @escaping (UUID) -> Void
-    ) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack(spacing: 8) {
-                if canOverwrite {
-                    Button("settings.tint.save", action: onSave)
-                }
-                Button("settings.tint.saveAs", action: onSaveAs)
-                if let deleteID {
-                    Button("settings.tint.delete", role: .destructive) {
-                        onDelete(deleteID)
-                    }
-                }
-                Spacer(minLength: 0)
-            }
-            if !canOverwrite {
-                Text("settings.icons.builtinEditNote")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
-        }
-    }
-
-    @ViewBuilder
-    private func iconPresetEditorCaption(
-        canOverwrite: Bool,
-        onSave: @escaping () -> Void,
-        onSaveAs: @escaping () -> Void,
-        deleteID: UUID?,
-        onDelete: @escaping (UUID) -> Void
-    ) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("settings.icons.clickToChange")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            tintPresetSaveControls(
-                canOverwrite: canOverwrite,
-                onSave: onSave,
-                onSaveAs: onSaveAs,
-                deleteID: deleteID,
-                onDelete: onDelete
-            )
-        }
-    }
-
     private var iconSlotColumnWidth: CGFloat { 56 }
 
     private func iconZoomSlider(value: Binding<Double>, width: CGFloat? = nil) -> some View {
@@ -2796,18 +4373,22 @@ struct SettingsView: View {
         }
     }
 
+
     private func popoverOrderRow(_ block: PopoverBlock) -> some View {
         let entry = PopoverEntry.block(block)
+        let icon = popoverBlockIcon(block)
         return HStack(spacing: 8) {
             popoverDragHandle {
                 popoverDrag.entry = entry
                 return NSItemProvider(object: entry.rawValue as NSString)
             }
+            SettingsSidebarIcon(glyph: icon.glyph, palette: icon.palette, size: 22)
             Toggle(LocalizedStringKey(block.localizationKey), isOn: popoverVisibilityBinding(block))
                 .disabled(appState.settings.isSoleVisiblePopoverBlock(block))
         }
         .onDrop(of: [.plainText], delegate: popoverDropDelegate(for: entry))
     }
+
 
     private func popoverDividerRow(_ id: UUID) -> some View {
         let entry = PopoverEntry.divider(id)
@@ -2816,9 +4397,12 @@ struct SettingsView: View {
                 popoverDrag.entry = entry
                 return NSItemProvider(object: entry.rawValue as NSString)
             }
+            SettingsDashedRule()
             Text("settings.popover.divider")
+                .font(.subheadline)
                 .foregroundStyle(.secondary)
-            Spacer(minLength: 8)
+                .fixedSize()
+            SettingsDashedRule()
             Button {
                 appState.settings.removePopoverDivider(id: id)
             } label: {
@@ -2870,19 +4454,6 @@ struct SettingsView: View {
                     appState.settings.ipScopes.insert(scope)
                 } else {
                     appState.settings.ipScopes.remove(scope)
-                }
-            }
-        )
-    }
-
-    private func ipFamilyBinding(_ family: IPAddressFamily) -> Binding<Bool> {
-        Binding(
-            get: { appState.settings.ipFamilies.contains(family) },
-            set: { enabled in
-                if enabled {
-                    appState.settings.ipFamilies.insert(family)
-                } else {
-                    appState.settings.ipFamilies.remove(family)
                 }
             }
         )
@@ -3186,93 +4757,6 @@ struct SettingsView: View {
         }
     }
 
-    @ViewBuilder
-    private func ringLayoutRow(_ entry: RingLayoutEntry) -> some View {
-        switch entry.kind {
-        case .lineBreak:
-            HStack(spacing: 8) {
-                layoutDragHandle(entry.id)
-                Text("settings.rings.lineBreak")
-                    .foregroundStyle(Color(nsColor: .separatorColor))
-                Spacer(minLength: 8)
-                Button {
-                    appState.settings.removeLineBreak(entry.id)
-                } label: {
-                    Image(systemName: "minus.circle.fill")
-                        .foregroundStyle(.secondary)
-                }
-                .buttonStyle(.borderless)
-                .help(LocalizedStringKey("settings.rings.joinRow"))
-            }
-            .onDrop(of: [.plainText], delegate: layoutDropDelegate(entry.id))
-        case .slot(let slot):
-            ringOrderRow(slot)
-        case .bluetooth(let address, let ringID):
-            if let device = appState.settings.bluetoothRingDevices.first(where: { $0.address == address }),
-               let ring = device.rings.first(where: { $0.id == ringID }) {
-                let index = device.rings.firstIndex(where: { $0.id == ringID }) ?? 0
-                let catalog: [BluetoothBatteryPart] = device.multi ? [.left, .right, .box] : []
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack(spacing: 8) {
-                        layoutDragHandle(entry.id)
-                        Text(device.name)
-                            .lineLimit(1)
-                        Spacer(minLength: 8)
-                        Button("settings.rings.bluetooth.remove") {
-                            appState.settings.removeBluetoothDevice(address: address)
-                        }
-                    }
-                    bluetoothRingEditor(device: device, ring: ring, index: index, catalog: catalog)
-                        .padding(.leading, 36)
-                }
-                .onDrop(of: [.plainText], delegate: layoutDropDelegate(entry.id))
-            }
-        }
-    }
-
-    private func layoutDragHandle(_ id: String) -> some View {
-        Image(systemName: "line.3.horizontal")
-            .font(.body)
-            .foregroundStyle(.secondary)
-            .frame(width: 28, height: 22)
-            .contentShape(Rectangle())
-            .onDrag {
-                ringItemDrag.itemID = id
-                return NSItemProvider(object: id as NSString)
-            }
-    }
-
-    private func layoutDropDelegate(_ id: String) -> RingItemDropDelegate {
-        RingItemDropDelegate(
-            itemID: id,
-            drag: ringItemDrag,
-            move: { item, target in
-                appState.settings.moveRingLayoutEntry(id: item, to: target)
-            }
-        )
-    }
-
-    private func ringOrderRow(_ slot: RingSlot) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack(spacing: 8) {
-                layoutDragHandle("slot:\(slot.rawValue)")
-                Toggle(isOn: ringVisibilityBinding(slot)) {
-                    HStack(spacing: 6) {
-                        Text(LocalizedStringKey(slot.localizationKey))
-                        if ringHasScale(slot) {
-                            ringScaleButton(slot)
-                        }
-                    }
-                }
-            }
-            if slot == .batteryTemperature || slot == .thermalState {
-                slotIconColorControls(slot)
-                    .padding(.leading, 36)
-            }
-        }
-        .onDrop(of: [.plainText], delegate: layoutDropDelegate("slot:\(slot.rawValue)"))
-    }
-
     private func slotIconColorControls(_ slot: RingSlot) -> some View {
         let stored = appState.settings.slotIconColors[slot.rawValue]
         return VStack(alignment: .leading, spacing: 4) {
@@ -3299,17 +4783,12 @@ struct SettingsView: View {
         }
     }
 
-    private func temperatureReading(_ celsius: Int) -> String {
-        let unit = appState.settings.temperatureUnit
-        return "\(unit.display(celsius))\(unit.symbol)"
-    }
-
-    private func temperatureHalfStepper() -> some View {
+    private func temperatureHalfStepper(title: LocalizedStringKey = "settings.rings.half.temperature") -> some View {
         let unit = appState.settings.temperatureUnit
         let bounds = AppSettings.temperatureHalfRange
         let shown = unit.display(appState.settings.temperatureHalfCelsius)
         return topAppStepper(
-            "settings.rings.half.temperature",
+            title,
             value: shown,
             unit: LocalizedStringKey(stringLiteral: unit.symbol),
             range: unit.display(bounds.lowerBound)...unit.display(bounds.upperBound),
@@ -3317,54 +4796,6 @@ struct SettingsView: View {
         ) { displayed in
             let celsius = unit.storedCelsius(fromDisplayed: displayed)
             appState.settings.temperatureHalfCelsius = min(max(celsius, bounds.lowerBound), bounds.upperBound)
-        }
-    }
-
-    private func ringScaleSummary(_ slot: RingSlot) -> String? {
-        switch slot {
-        case .download:
-            NetworkRateFormat.midpointLabel(kilobytesPerSecond: appState.settings.downloadHalfKilobytes)
-        case .upload:
-            NetworkRateFormat.midpointLabel(kilobytesPerSecond: appState.settings.uploadHalfKilobytes)
-        case .batteryTemperature:
-            Localization.string(
-                "settings.rings.scale.temperature %@",
-                language: appState.settings.language,
-                temperatureReading(appState.settings.temperatureHalfCelsius)
-            )
-        case .swap:
-            SwapUsageFormat.string(bytes: Double(appState.settings.swapHalfMegabytes) * 1_048_576)
-        case .thermalState:
-            "\(appState.settings.thermalNominalPercent)–\(appState.settings.thermalCriticalPercent)%"
-        default:
-            nil
-        }
-    }
-
-    private func ringHasScale(_ slot: RingSlot) -> Bool {
-        switch slot {
-        case .download, .upload, .speedPair, .batteryTemperature, .thermalState, .swap:
-            true
-        default:
-            false
-        }
-    }
-
-    private func ringScaleButton(_ slot: RingSlot) -> some View {
-        Button {
-            ringScaleSlot = slot
-        } label: {
-            Image(systemName: "slider.horizontal.3")
-                .font(.system(size: 12, weight: .medium))
-                .frame(width: 22, height: 16)
-                .contentShape(Rectangle())
-        }
-        .buttonStyle(.borderless)
-        .foregroundStyle(.secondary)
-        .help(LocalizedStringKey("settings.rings.scale"))
-        .accessibilityLabel(Text(LocalizedStringKey("settings.rings.scale")))
-        .popover(isPresented: ringScalePresented(slot), arrowEdge: .bottom) {
-            ringScalePopover(slot)
         }
     }
 
@@ -3466,15 +4897,8 @@ struct SettingsView: View {
         .frame(width: 300)
     }
 
-    private func ringVisibilityBinding(_ slot: RingSlot) -> Binding<Bool> {
-        Binding(
-            get: { appState.settings.ringOrder.contains(slot) },
-            set: { appState.settings.setRingSlot(slot, visible: $0) }
-        )
-    }
-
     private func ringIconSlotRow(_ rings: [RingSlot]) -> some View {
-        HStack(spacing: 18) {
+        HStack(alignment: .top, spacing: 18) {
             ForEach(rings) { ring in
                 ringIconSlotControl(ring)
             }
@@ -3512,23 +4936,6 @@ struct SettingsView: View {
                 ),
                 width: column
             )
-            if let summary = ringScaleSummary(ring) {
-                Button {
-                    ringScaleSlot = ring
-                } label: {
-                    Text(summary)
-                        .font(.caption2.monospacedDigit())
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.6)
-                        .frame(width: column)
-                }
-                .buttonStyle(.plain)
-                .help(LocalizedStringKey("settings.rings.scale"))
-                .popover(isPresented: ringScalePresented(ring), arrowEdge: .bottom) {
-                    ringScalePopover(ring)
-                }
-            }
         }
         .frame(width: column)
     }
@@ -3738,44 +5145,6 @@ struct SettingsView: View {
         )
     }
 
-    private var ringPresetPickerBinding: Binding<PopoverPresetPickerItem> {
-        Binding(
-            get: {
-                if let id = appState.settings.ringActiveSavedID {
-                    return .saved(id)
-                }
-                return .builtin(appState.settings.ringTint.preset)
-            },
-            set: { item in
-                switch item {
-                case .builtin(let preset):
-                    appState.settings.applyRingTintPreset(preset)
-                case .saved(let id):
-                    appState.settings.applySavedRingTint(id: id)
-                }
-            }
-        )
-    }
-
-    private var flowPresetPickerBinding: Binding<PopoverPresetPickerItem> {
-        Binding(
-            get: {
-                if let id = appState.settings.flowActiveSavedID {
-                    return .saved(id)
-                }
-                return .builtin(appState.settings.flowTint.preset)
-            },
-            set: { item in
-                switch item {
-                case .builtin(let preset):
-                    appState.settings.applyFlowTintPreset(preset)
-                case .saved(let id):
-                    appState.settings.applySavedFlowTint(id: id)
-                }
-            }
-        )
-    }
-
     private func defaultSaveName(for dialog: SaveTintDialog) -> String {
         let base = Localization.string("settings.tint.save.defaultName", language: appState.settings.language)
         let count: Int = {
@@ -3832,297 +5201,6 @@ struct SettingsView: View {
         )
     }
 
-    private func editableValueTintBandRow(
-        _ band: MenuBarTintBand,
-        scheme: ValueTintScheme,
-        update: @escaping (ValueTintScheme) -> Void
-    ) -> some View {
-        let range = scheme.percentRange(for: band.id)
-        return VStack(alignment: .leading, spacing: 8) {
-            HStack(alignment: .center, spacing: 8) {
-                TintPercentEditor(
-                    value: band.throughPercent,
-                    range: range,
-                    onCommit: { update(scheme.replacingBand(id: band.id, throughPercent: $0)) }
-                )
-
-                Spacer(minLength: 8)
-
-                Picker("settings.icon.tint.blend", selection: Binding(
-                    get: { band.blend },
-                    set: { update(scheme.replacingBand(id: band.id, blend: $0)) }
-                )) {
-                    ForEach(MenuBarTintBlend.allCases) { blend in
-                        Text(LocalizedStringKey(blend.localizationKey)).tag(blend)
-                    }
-                }
-                .labelsHidden()
-                .fixedSize()
-
-                if scheme.bands.count > 1 {
-                    Button {
-                        update(scheme.removingBand(id: band.id))
-                    } label: {
-                        Image(systemName: "minus.circle.fill")
-                            .foregroundStyle(.secondary)
-                    }
-                    .buttonStyle(.borderless)
-                    .help(LocalizedStringKey("settings.icon.tint.remove"))
-                }
-            }
-
-            valueTintWells(band, scheme: scheme, update: update)
-        }
-        .padding(.vertical, 2)
-    }
-
-    @ViewBuilder
-    private func valueTintWells(
-        _ band: MenuBarTintBand,
-        scheme: ValueTintScheme,
-        update: @escaping (ValueTintScheme) -> Void
-    ) -> some View {
-        switch band.blend {
-        case .constant:
-            HStack(spacing: 8) {
-                Spacer()
-                valueTintWell(label: "settings.icon.tint.color", band: band, scheme: scheme, keyPath: \.highRight, update: update)
-            }
-        case .slide:
-            HStack(spacing: 12) {
-                Spacer()
-                valueTintWell(label: "settings.icon.tint.low", band: band, scheme: scheme, keyPath: \.lowRight, update: update)
-                valueTintWell(label: "settings.icon.tint.high", band: band, scheme: scheme, keyPath: \.highRight, update: update)
-            }
-        case .gradient:
-            HStack(spacing: 12) {
-                Spacer()
-                valueTintWell(label: "settings.icon.tint.left", band: band, scheme: scheme, keyPath: \.highLeft, update: update)
-                valueTintWell(label: "settings.icon.tint.right", band: band, scheme: scheme, keyPath: \.highRight, update: update)
-            }
-        case .slideGradient:
-            VStack(alignment: .trailing, spacing: 6) {
-                HStack(spacing: 12) {
-                    valueTintWell(label: "settings.icon.tint.lowLeft", band: band, scheme: scheme, keyPath: \.lowLeft, update: update)
-                    valueTintWell(label: "settings.icon.tint.lowRight", band: band, scheme: scheme, keyPath: \.lowRight, update: update)
-                }
-                HStack(spacing: 12) {
-                    valueTintWell(label: "settings.icon.tint.highLeft", band: band, scheme: scheme, keyPath: \.highLeft, update: update)
-                    valueTintWell(label: "settings.icon.tint.highRight", band: band, scheme: scheme, keyPath: \.highRight, update: update)
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .trailing)
-        }
-    }
-
-    private func valueTintWell(
-        label: LocalizedStringKey,
-        band: MenuBarTintBand,
-        scheme: ValueTintScheme,
-        keyPath: WritableKeyPath<MenuBarTintBand, MenuBarTintSwatch>,
-        update: @escaping (ValueTintScheme) -> Void
-    ) -> some View {
-        let swatch = band[keyPath: keyPath]
-        return HStack(spacing: 5) {
-            Text(label)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            if !swatch.followsMenuBar {
-                ColorPicker(
-                    label,
-                    selection: Binding(
-                        get: { swatch.color },
-                        set: { color in
-                            update(scheme.replacingBand(at: scheme.sortedBands.firstIndex(where: { $0.id == band.id }) ?? 0) { band in
-                                band[keyPath: keyPath] = .from(color: color)
-                                if band.blend == .constant {
-                                    let s = MenuBarTintSwatch.from(color: color)
-                                    band.highRight = s
-                                    band.highLeft = s
-                                    band.lowRight = s
-                                    band.lowLeft = s
-                                }
-                            })
-                        }
-                    ),
-                    supportsOpacity: false
-                )
-                .labelsHidden()
-                .fixedSize()
-            }
-            Toggle(isOn: Binding(
-                get: { swatch.followsMenuBar },
-                set: { follows in
-                    let next: MenuBarTintSwatch = follows ? .menuBar : .systemGreen
-                    update(scheme.replacingBand(at: scheme.sortedBands.firstIndex(where: { $0.id == band.id }) ?? 0) { band in
-                        band[keyPath: keyPath] = next
-                        if band.blend == .constant {
-                            band.highRight = next
-                            band.highLeft = next
-                            band.lowRight = next
-                            band.lowLeft = next
-                        }
-                    })
-                }
-            )) {
-                Text("settings.icon.tint.menuBarColor")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            .toggleStyle(.checkbox)
-        }
-    }
-
-    private func mergedTintBandRow(
-        _ band: MergedTintBand,
-        apply: @escaping (Int, (inout MenuBarTintBand) -> Void) -> Void,
-        onRemove: @escaping () -> Void
-    ) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(alignment: .center, spacing: 8) {
-                MergedTintPercentEditor(
-                    value: band.throughPercent,
-                    range: 1...100,
-                    onCommit: { percent in
-                        apply(band.id) { $0.throughPercent = percent }
-                    }
-                )
-
-                Spacer(minLength: 8)
-
-                Picker("settings.icon.tint.blend", selection: Binding(
-                    get: { band.blend },
-                    set: { blend in
-                        guard let blend else { return }
-                        apply(band.id) { $0.blend = blend }
-                    }
-                )) {
-                    Text("-").tag(Optional<MenuBarTintBlend>.none)
-                    ForEach(MenuBarTintBlend.allCases) { blend in
-                        Text(LocalizedStringKey(blend.localizationKey)).tag(Optional.some(blend))
-                    }
-                }
-                .labelsHidden()
-                .fixedSize()
-
-                if band.presentInAll {
-                    Button(action: onRemove) {
-                        Image(systemName: "minus.circle.fill")
-                            .foregroundStyle(.secondary)
-                    }
-                    .buttonStyle(.borderless)
-                    .help(LocalizedStringKey("settings.icon.tint.remove"))
-                }
-            }
-
-            mergedTintWells(band, apply: apply)
-        }
-        .padding(.vertical, 2)
-    }
-
-    @ViewBuilder
-    private func mergedTintWells(
-        _ band: MergedTintBand,
-        apply: @escaping (Int, (inout MenuBarTintBand) -> Void) -> Void
-    ) -> some View {
-        let blend = band.blend ?? .constant
-        switch blend {
-        case .constant:
-            HStack(spacing: 8) {
-                Spacer()
-                mergedTintWell(label: "settings.icon.tint.color", swatch: band.highRight) { swatch in
-                    apply(band.id) { band in
-                        band.highRight = swatch
-                        band.highLeft = swatch
-                        band.lowRight = swatch
-                        band.lowLeft = swatch
-                    }
-                }
-            }
-        case .slide:
-            HStack(spacing: 12) {
-                Spacer()
-                mergedTintWell(label: "settings.icon.tint.low", swatch: band.lowRight) { swatch in
-                    apply(band.id) { $0.lowRight = swatch }
-                }
-                mergedTintWell(label: "settings.icon.tint.high", swatch: band.highRight) { swatch in
-                    apply(band.id) { $0.highRight = swatch }
-                }
-            }
-        case .gradient:
-            HStack(spacing: 12) {
-                Spacer()
-                mergedTintWell(label: "settings.icon.tint.left", swatch: band.highLeft) { swatch in
-                    apply(band.id) { $0.highLeft = swatch }
-                }
-                mergedTintWell(label: "settings.icon.tint.right", swatch: band.highRight) { swatch in
-                    apply(band.id) { $0.highRight = swatch }
-                }
-            }
-        case .slideGradient:
-            VStack(alignment: .trailing, spacing: 6) {
-                HStack(spacing: 12) {
-                    mergedTintWell(label: "settings.icon.tint.lowLeft", swatch: band.lowLeft) { swatch in
-                        apply(band.id) { $0.lowLeft = swatch }
-                    }
-                    mergedTintWell(label: "settings.icon.tint.lowRight", swatch: band.lowRight) { swatch in
-                        apply(band.id) { $0.lowRight = swatch }
-                    }
-                }
-                HStack(spacing: 12) {
-                    mergedTintWell(label: "settings.icon.tint.highLeft", swatch: band.highLeft) { swatch in
-                        apply(band.id) { $0.highLeft = swatch }
-                    }
-                    mergedTintWell(label: "settings.icon.tint.highRight", swatch: band.highRight) { swatch in
-                        apply(band.id) { $0.highRight = swatch }
-                    }
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .trailing)
-        }
-    }
-
-    private func mergedTintWell(
-        label: LocalizedStringKey,
-        swatch: MenuBarTintSwatch?,
-        onChange: @escaping (MenuBarTintSwatch) -> Void
-    ) -> some View {
-        HStack(spacing: 5) {
-            Text(label)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            if swatch == nil {
-                Text("-")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .frame(width: 28, alignment: .center)
-            }
-            if swatch?.followsMenuBar != true {
-                ColorPicker(
-                    label,
-                    selection: Binding(
-                        get: { swatch?.color ?? .gray },
-                        set: { onChange(.from(color: $0)) }
-                    ),
-                    supportsOpacity: false
-                )
-                .labelsHidden()
-                .fixedSize()
-            }
-            Toggle(isOn: Binding(
-                get: { swatch?.followsMenuBar ?? false },
-                set: { follows in
-                    onChange(follows ? .menuBar : .systemGreen)
-                }
-            )) {
-                Text("settings.icon.tint.menuBarColor")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            .toggleStyle(.checkbox)
-        }
-    }
-
     private func selectedRingColor() -> RingColor? {
         let colors = appState.settings.ringTint.colors
         if let id = ringColorSelectionID, let color = colors.first(where: { $0.id == id }) {
@@ -4137,116 +5215,6 @@ struct SettingsView: View {
             language: appState.settings.language,
             index + 1
         )
-    }
-
-    private func ringColorMenuLabel(index: Int, color: RingColor) -> some View {
-        let pair = color.scheme.colors(percent: 80)
-        return HStack(spacing: 6) {
-            Capsule()
-                .fill(LinearGradient(colors: [pair.left, pair.right], startPoint: .leading, endPoint: .trailing))
-                .frame(width: 28, height: 10)
-            Text(ringColorTitle(index))
-        }
-    }
-
-    @ViewBuilder
-    private var ringColorCatalogEditor: some View {
-        let tint = appState.settings.ringTint
-        if let color = selectedRingColor() {
-            HStack(spacing: 8) {
-                Picker("settings.tint.colors", selection: Binding(
-                    get: { color.id },
-                    set: { ringColorSelectionID = $0 }
-                )) {
-                    ForEach(Array(tint.colors.enumerated()), id: \.element.id) { index, item in
-                        ringColorMenuLabel(index: index, color: item).tag(item.id)
-                    }
-                }
-                Button {
-                    appState.settings.ringTint = tint.addingColor(copying: color.id)
-                    ringColorSelectionID = appState.settings.ringTint.colors.last?.id
-                } label: {
-                    Image(systemName: "plus")
-                }
-                .help(LocalizedStringKey("settings.tint.addColor"))
-                Button {
-                    let fallback = tint.colors.first { $0.id != color.id }
-                    appState.settings.ringTint = tint.removingColor(id: color.id)
-                    ringColorSelectionID = fallback?.id
-                } label: {
-                    Image(systemName: "minus")
-                }
-                .disabled(tint.colors.count < 2)
-                .help(LocalizedStringKey("settings.tint.removeColor"))
-            }
-
-            let scheme = color.scheme
-            ForEach(scheme.sortedBands) { band in
-                editableValueTintBandRow(band, scheme: scheme) { next in
-                    appState.settings.ringTint = appState.settings.ringTint.updatingColor(id: color.id, scheme: next)
-                }
-            }
-            Button("settings.icon.tint.add") {
-                appState.settings.ringTint = appState.settings.ringTint.updatingColor(
-                    id: color.id,
-                    scheme: scheme.addingBand()
-                )
-            }
-        }
-    }
-
-    @ViewBuilder
-    private var ringAssignmentSection: some View {
-        let colors = appState.settings.ringTint.colors
-        if let fallback = colors.first?.id {
-            let segments = Array(RingColorSegment.allCases)
-            let split = (segments.count + 1) / 2
-            // One row, so the grouped card keeps the same bottom inset as the
-            // preset sections. A section header drops that inset.
-            Section {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("settings.tint.assignments")
-                        .font(.body.weight(.semibold))
-                    HStack(alignment: .top, spacing: 16) {
-                        ringAssignmentColumn(segments: Array(segments.prefix(split)), colors: colors, fallback: fallback)
-                        ringAssignmentColumn(segments: Array(segments.suffix(from: split)), colors: colors, fallback: fallback)
-                    }
-                }
-                .padding(.vertical, 4)
-            }
-        }
-    }
-
-    private func ringAssignmentColumn(segments: [RingColorSegment], colors: [RingColor], fallback: UUID) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            ForEach(segments) { segment in
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(LocalizedStringKey(segment.localizationKey))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    Picker(LocalizedStringKey(segment.localizationKey), selection: Binding(
-                        get: { appState.settings.ringTint.assignments[segment] ?? fallback },
-                        set: { id in
-                            appState.settings.ringTint = appState.settings.ringTint.assigning(segment, to: id)
-                        }
-                    )) {
-                        ForEach(Array(colors.enumerated()), id: \.element.id) { index, item in
-                            ringColorMenuLabel(index: index, color: item).tag(item.id)
-                        }
-                    }
-                    .labelsHidden()
-                    .pickerStyle(.menu)
-                    .controlSize(.small)
-                }
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-    }
-
-    private func applyFlowAllBand(at index: Int, mutate: (inout MenuBarTintBand) -> Void) {
-        appState.settings.flowTint = appState.settings.flowTint.mapAll { scheme in
-            scheme.replacingBand(at: index, mutate: mutate)
-        }
     }
 
     private var versionLabel: String {
@@ -4269,146 +5237,6 @@ struct SettingsView: View {
             get: { appState.launchAtLoginEnabled },
             set: { appState.setLaunchAtLogin($0) }
         )
-    }
-}
-
-private struct TintPercentEditor: View {
-    let value: Int
-    let range: ClosedRange<Int>
-    let onCommit: (Int) -> Void
-
-    @State private var draft: String
-    @State private var focused = false
-
-    init(value: Int, range: ClosedRange<Int>, onCommit: @escaping (Int) -> Void) {
-        self.value = value
-        self.range = range
-        self.onCommit = onCommit
-        _draft = State(initialValue: "\(value)")
-    }
-
-    private var locked: Bool { range.lowerBound == range.upperBound }
-
-    var body: some View {
-        HStack(alignment: .center, spacing: 6) {
-            Stepper("", value: Binding(
-                get: { value },
-                set: { next in
-                    onCommit(next)
-                    draft = "\(next)"
-                }
-            ), in: range)
-            .labelsHidden()
-            .controlSize(.small)
-            .fixedSize()
-            .disabled(locked)
-
-            Text("≤")
-                .foregroundStyle(.secondary)
-
-            CenteredPercentField(
-                text: $draft,
-                isEnabled: !locked,
-                isFocused: $focused,
-                onCommit: commit
-            )
-            .frame(width: 44, height: 22)
-
-            Text("%")
-                .foregroundStyle(.secondary)
-        }
-        .onAppear { draft = "\(value)" }
-        .onChange(of: value) { _, newValue in
-            if !focused { draft = "\(newValue)" }
-        }
-    }
-
-    private func commit() {
-        let next = MenuBarTintPercentInput.commit(draft, range: range, fallback: value)
-        draft = "\(next)"
-        if next != value {
-            onCommit(next)
-        }
-    }
-}
-
-/// Percent field for merged "all" editors. `nil` shows "-" until the user types a number.
-private struct MergedTintPercentEditor: View {
-    let value: Int?
-    let range: ClosedRange<Int>
-    let onCommit: (Int) -> Void
-
-    @State private var draft: String
-    @State private var focused = false
-
-    init(value: Int?, range: ClosedRange<Int>, onCommit: @escaping (Int) -> Void) {
-        self.value = value
-        self.range = range
-        self.onCommit = onCommit
-        _draft = State(initialValue: value.map(String.init) ?? "-")
-    }
-
-    var body: some View {
-        HStack(alignment: .center, spacing: 6) {
-            if let value {
-                Stepper("", value: Binding(
-                    get: { value },
-                    set: { next in
-                        onCommit(next)
-                        draft = "\(next)"
-                    }
-                ), in: range)
-                .labelsHidden()
-                .controlSize(.small)
-                .fixedSize()
-            } else {
-                Stepper("", value: .constant(50), in: range)
-                    .labelsHidden()
-                    .controlSize(.small)
-                    .fixedSize()
-                    .disabled(true)
-            }
-
-            Text("≤")
-                .foregroundStyle(.secondary)
-
-            CenteredPercentField(
-                text: $draft,
-                isEnabled: true,
-                isFocused: $focused,
-                onCommit: commit
-            )
-            .frame(width: 44, height: 22)
-
-            Text("%")
-                .foregroundStyle(.secondary)
-        }
-        .onAppear { draft = value.map(String.init) ?? "-" }
-        .onChange(of: value) { _, newValue in
-            if !focused { draft = newValue.map(String.init) ?? "-" }
-        }
-    }
-
-    private func commit() {
-        let trimmed = draft.trimmingCharacters(in: .whitespacesAndNewlines)
-        if trimmed.isEmpty || trimmed == "-" {
-            draft = value.map(String.init) ?? "-"
-            return
-        }
-        let fallback = value ?? range.lowerBound
-        let next = MenuBarTintPercentInput.commit(draft, range: range, fallback: fallback)
-        // Only apply when the user typed a parseable number (not junk reverting to fallback while mixed).
-        if value == nil {
-            let digits = trimmed.filter(\.isNumber)
-            guard !digits.isEmpty else {
-                draft = "-"
-                return
-            }
-        }
-        draft = "\(next)"
-        if next != value {
-            onCommit(next)
-        }
     }
 }
 
@@ -4667,6 +5495,16 @@ private struct JustifiedBody: NSViewRepresentable {
             ]
         )
         field.invalidateIntrinsicContentSize()
+    }
+
+    /// Wrap to the width SwiftUI offers on the first pass. Waiting for
+    /// `layout()` left the first frame as one long, clipped line.
+    func sizeThatFits(_ proposal: ProposedViewSize, nsView field: JustifiedTextField, context: Context) -> CGSize? {
+        guard let width = proposal.width, width.isFinite, width > 0 else { return nil }
+        field.preferredMaxLayoutWidth = width
+        let bounds = NSRect(x: 0, y: 0, width: width, height: .greatestFiniteMagnitude)
+        let height = field.cell?.cellSize(forBounds: bounds).height ?? field.intrinsicContentSize.height
+        return CGSize(width: width, height: ceil(height))
     }
 }
 

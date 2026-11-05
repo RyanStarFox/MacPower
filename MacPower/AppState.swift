@@ -120,13 +120,14 @@ final class AppState {
         metricsService.setPopoverOpen(open)
         syncPopoverExtras()
         syncLocalIP(fetchPublic: open)
-        if open, !settings.bluetoothRingDevices.isEmpty {
-            Task { await self.refreshBluetoothNow() }
-        }
+        syncBluetoothMonitoring()
     }
 
+    /// Each read runs `system_profiler`, a whole process, so the 8-second loop
+    /// runs only while its result is on screen: the panel is open, or the device
+    /// picker is. It used to run all day for anyone with a headphone ring.
     func syncBluetoothMonitoring() {
-        let needed = bluetoothScanWanted || !settings.bluetoothRingDevices.isEmpty
+        let needed = bluetoothScanWanted || (isPopoverOpen && !settings.bluetoothRingDevices.isEmpty)
         if needed {
             guard bluetoothTask == nil else { return }
             bluetoothTask = Task { [weak self] in
