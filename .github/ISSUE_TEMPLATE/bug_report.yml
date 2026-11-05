@@ -1,0 +1,55 @@
+name: 问题反馈
+description: 菜单栏、圆环、安装或更新出现异常
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: input
+    id: macos
+    attributes:
+      label: macOS 版本
+      description: 苹果菜单 → 关于本机。例如 15.6 或 26.0。
+      placeholder: "26.0"
+    validations:
+      required: true
+  - type: input
+    id: model
+    attributes:
+      label: 机型
+      description: 关于本机里的型号和芯片。
+      placeholder: "MacBook Pro 14 英寸，M4"
+    validations:
+      required: true
+  - type: dropdown
+    id: where
+    attributes:
+      label: 出现在哪里
+      multiple: true
+      options:
+        - 电量圆环
+        - CPU
+        - GPU
+        - 内存
+        - 磁盘
+        - 上传下载
+        - 蓝牙设备
+        - 能量流
+        - 菜单栏图标
+        - 设置
+        - 安装或更新
+        - 其他
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: 发生了什么
+      description: 看到的数字、图标或提示原文。
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 怎样出现的
+      description: 打开面板、切换充电、登录启动之类的操作。没有固定步骤可以留空。
+    validations:
+      required: false
