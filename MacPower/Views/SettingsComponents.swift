@@ -24,12 +24,22 @@ struct SettingsRowLabel: View {
 
 /// The preview at the top of a page: a short caption over the live content on a raised card.
 struct SettingsPreviewCard<Content: View>: View {
-    var title: LocalizedStringKey
-    @ViewBuilder var content: Content
+    private var title: Text
+    private var content: Content
+
+    init(title: LocalizedStringKey, @ViewBuilder content: () -> Content) {
+        self.title = Text(title)
+        self.content = content()
+    }
+
+    init(verbatim title: String, @ViewBuilder content: () -> Content) {
+        self.title = Text(verbatim: title)
+        self.content = content()
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(title)
+            title
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
             content

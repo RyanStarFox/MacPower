@@ -703,6 +703,9 @@ struct SettingsView: View {
     @State private var menuBarTintOrigin: MenuBarTintPreset?
     @State private var showsAllMenuBarPresets = false
     @State private var menuBarEditingBandID: UUID?
+    @State private var flowEditingMode: EnergyFlowMode = .discharging
+    @State private var flowEditingBandID: UUID?
+    @State private var flowTintOrigin: PopoverTintPreset?
     @State private var showingBluetoothDevices = false
     @State private var showingAuthorSupport = false
     @State private var bluetoothIconEditor: BluetoothIconEdit?
@@ -2729,34 +2732,56 @@ struct SettingsView: View {
     }
 
     private var menuBarPresetStatusRow: some View {
+        tintPresetStatusRow(
+            status: menuBarPresetStatus,
+            canRevert: menuBarCanRevert,
+            onRevert: {
+                menuBarEditingBandID = nil
+                if let saved = menuBarSavedPreset {
+                    appState.settings.applySavedMenuBarTint(id: saved.id)
+                } else if let origin = menuBarTintOrigin {
+                    appState.settings.applyTintPreset(origin)
+                }
+            },
+            canSave: menuBarSavedPresetModified,
+            onSave: { _ = appState.settings.updateMenuBarTintPreset() },
+            onSaveAs: {
+                savePresetName = defaultSaveName(for: .menuBar)
+                saveDialog = .menuBar
+            },
+            onDelete: menuBarSavedPreset == nil ? nil : {
+                if let saved = menuBarSavedPreset {
+                    appState.settings.deleteSavedMenuBarTint(id: saved.id)
+                }
+            }
+        )
+    }
+
+    /// "Preset  Sunset · Edited" with the actions that make sense right now.
+    private func tintPresetStatusRow(
+        status: String,
+        canRevert: Bool,
+        onRevert: @escaping () -> Void,
+        canSave: Bool,
+        onSave: @escaping () -> Void,
+        onSaveAs: @escaping () -> Void,
+        onDelete: (() -> Void)?
+    ) -> some View {
         HStack(spacing: 8) {
             Text("settings.tint.presetLabel")
-            Text(menuBarPresetStatus)
+            Text(status)
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
             Spacer(minLength: 8)
-            if menuBarCanRevert {
-                Button("settings.tint.revert") {
-                    if let saved = menuBarSavedPreset {
-                        appState.settings.applySavedMenuBarTint(id: saved.id)
-                    } else if let origin = menuBarTintOrigin {
-                        appState.settings.applyTintPreset(origin)
-                    }
-                }
+            if canRevert {
+                Button("settings.tint.revert", action: onRevert)
             }
-            if menuBarSavedPresetModified {
-                Button("settings.tint.save") {
-                    _ = appState.settings.updateMenuBarTintPreset()
-                }
+            if canSave {
+                Button("settings.tint.save", action: onSave)
             }
-            Button("settings.tint.saveAsPreset") {
-                savePresetName = defaultSaveName(for: .menuBar)
-                saveDialog = .menuBar
-            }
-            if let saved = menuBarSavedPreset {
-                Button {
-                    appState.settings.deleteSavedMenuBarTint(id: saved.id)
-                } label: {
+            Button("settings.tint.saveAsPreset", action: onSaveAs)
+            if let onDelete {
+                Button(action: onDelete) {
                     Image(systemName: "trash")
                 }
                 .buttonStyle(.borderless)
@@ -3061,72 +3086,53 @@ struct SettingsView: View {
     @ViewBuilder
     private var flowSections: some View {
         Section {
-            Picker("settings.icon.tint.preset", selection: flowPresetPickerBinding) {
-                ForEach(PopoverTintPreset.allCases) { preset in
-                    Text(LocalizedStringKey(preset.localizationKey)).tag(PopoverPresetPickerItem.builtin(preset))
-                }
-                if !appState.settings.savedTintLibrary.flow.isEmpty {
-                    Divider()
-                    ForEach(appState.settings.savedTintLibrary.flow) { item in
-                        Text(item.name).tag(PopoverPresetPickerItem.saved(item.id))
-                    }
-                }
+            SettingsPreviewCard(verbatim: flowPreviewTitle) {
+                flowStatePreview
             }
-            presetEditor(
-                toolbar: {
-                    tintPresetSaveControls(
-                        canOverwrite: appState.settings.flowActiveSavedID != nil,
-                        onSave: { _ = appState.settings.updateFlowTintPreset() },
-                        onSaveAs: {
-                            savePresetName = defaultSaveName(for: .flow)
-                            saveDialog = .flow
-                        },
-                        deleteID: appState.settings.flowActiveSavedID,
-                        onDelete: { appState.settings.deleteSavedFlowTint(id: $0) }
-                    )
-                }
-            ) {
-                Picker("settings.tint.selection", selection: $flowEditorTarget) {
-                    ForEach(FlowEditorTarget.allCases) { target in
-                        Text(LocalizedStringKey(target.localizationKey)).tag(target)
-                    }
-                }
-                if flowEditorTarget == .all {
-                    ForEach(TintSchemeMerge.bands(from: appState.settings.flowTint.allSchemes)) { band in
-                        mergedTintBandRow(
-                            band,
-                            apply: applyFlowAllBand,
-                            onRemove: {
-                                appState.settings.flowTint = appState.settings.flowTint.mapAll { $0.removingBand(at: band.id) }
-                            }
-                        )
-                    }
-                    Button("settings.icon.tint.add") {
-                        appState.settings.flowTint = appState.settings.flowTint.mapAll { $0.addingBand() }
-                    }
-                } else if let mode = flowEditorTarget.mode {
-                    let scheme = appState.settings.flowTint.scheme(for: mode)
-                    ForEach(scheme.sortedBands) { band in
-                        editableValueTintBandRow(band, scheme: scheme) { next in
-                            appState.settings.flowTint = appState.settings.flowTint.replacing(mode, with: next)
+        }
+
+        Section {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("settings.flow.chooseState")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 4), spacing: 8) {
+                    ForEach(Self.flowModes, id: \.self) { mode in
+                        TintPresetChip(
+                            title: Localization.string(Self.flowModeKey(mode), language: appState.settings.language),
+                            selected: flowEditingMode == mode
+                        ) {
+                            flowEditingBandID = nil
+                            flowEditingMode = mode
+                        } thumbnail: {
+                            TintRampBar(bands: appState.settings.flowTint.scheme(for: mode).bands)
                         }
                     }
-                    Button("settings.icon.tint.add") {
-                        appState.settings.flowTint = appState.settings.flowTint.replacing(mode, with: scheme.addingBand())
-                    }
-                }
-
-                Toggle(isOn: motionColorEnabledBinding) {
-                    Text("settings.flow.tint.motionColor")
-                }
-                if appState.settings.flowTint.motionColor != nil {
-                    ColorPicker(
-                        "settings.flow.tint.motionColor",
-                        selection: motionColorBinding,
-                        supportsOpacity: false
-                    )
                 }
             }
+            .padding(.vertical, 4)
+
+            tintPresetStatusRow(
+                status: flowPresetStatus,
+                canRevert: flowCanRevert,
+                onRevert: revertFlowTint,
+                canSave: flowSavedPresetModified,
+                onSave: { _ = appState.settings.updateFlowTintPreset() },
+                onSaveAs: {
+                    savePresetName = defaultSaveName(for: .flow)
+                    saveDialog = .flow
+                },
+                onDelete: flowSavedPreset == nil ? nil : {
+                    if let saved = flowSavedPreset {
+                        appState.settings.deleteSavedFlowTint(id: saved.id)
+                    }
+                }
+            )
+            flowPresetGallery
+            flowRampRow
+            flowMotionColorRow
+        } header: {
+            Text("settings.color.header")
         }
 
         Section {
@@ -3162,6 +3168,8 @@ struct SettingsView: View {
                 }
             }
             FlowIconSizeControl(settings: appState.settings)
+        } header: {
+            Text("settings.icon.header")
         }
 
         Section {
@@ -3176,8 +3184,333 @@ struct SettingsView: View {
                 }
             }
             .disabled(appState.settings.motionStyle == .off)
-            Toggle("settings.motion.pulseIcons", isOn: $appState.settings.pulseFlowIcons)
+            Toggle(isOn: $appState.settings.pulseFlowIcons) {
+                SettingsRowLabel(title: "settings.motion.pulseIcons", caption: "settings.motion.pulseIcons.note")
+            }
+        } header: {
+            Text("settings.motion.header")
+        } footer: {
+            Text(LocalizedStringKey(Self.motionNoteKey(appState.settings.motionStyle)))
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
         }
+    }
+
+    private static let flowModes: [EnergyFlowMode] = [.charging, .discharging, .adapterHold, .underpowered]
+
+    private static func flowModeKey(_ mode: EnergyFlowMode) -> String {
+        switch mode {
+        case .charging: "settings.flow.tint.charging"
+        case .discharging: "settings.flow.tint.discharging"
+        case .adapterHold: "settings.flow.tint.hold"
+        case .underpowered: "settings.flow.tint.underpowered"
+        }
+    }
+
+    private static func motionNoteKey(_ style: EnergyMotionStyle) -> String {
+        switch style {
+        case .sheen: "settings.motion.note.sheen"
+        case .filaments, .filamentsSolid, .filamentsWhite: "settings.motion.note.filaments"
+        case .particles, .particlesSolid, .particlesWhite: "settings.motion.note.particles"
+        case .off: "settings.motion.note.off"
+        }
+    }
+
+    private var flowPreviewTitle: String {
+        let language = appState.settings.language
+        let state = Localization.string(Self.flowModeKey(flowEditingMode), language: language)
+        return Localization.string("settings.flow.preview %@", language: language, state)
+    }
+
+    /// The panel's energy ribbon in the state being edited, at this Mac's charge.
+    private var flowStatePreview: some View {
+        EnergyFlowView(
+            snapshot: flowPreviewSnapshot(flowEditingMode),
+            theme: AppTheme.resolved(palette: appState.settings.palette, colorScheme: colorScheme),
+            flowTint: appState.settings.flowTint,
+            flowIcons: appState.settings.flowIcons,
+            isAnimating: false,
+            motion: appState.settings.motionStyle,
+            motionFrameRate: appState.settings.motionFrameRate,
+            pulseFlowIcons: appState.settings.pulseFlowIcons,
+            flowIconScale: appState.settings.flowIconScale,
+            language: appState.settings.language,
+            showsFooter: true
+        )
+        .frame(width: PopoverLayout.width - PopoverLayout.padding * 2, alignment: .leading)
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+
+    private func flowPreviewSnapshot(_ mode: EnergyFlowMode) -> PowerSnapshot {
+        let live = appState.snapshot
+        let percent = live.hasBattery && live.percent >= 1 ? live.percent : 62
+        var snapshot = tutorialPowerSnapshot(percent: percent, flowMode: mode)
+        switch mode {
+        case .charging:
+            snapshot.adapterInWatts = 45
+            snapshot.systemLoadWatts = 18
+            snapshot.batteryWatts = 27
+            snapshot.timeToFullMinutes = 72
+        case .discharging:
+            snapshot.timeToEmptyMinutes = 245
+        case .adapterHold:
+            snapshot.adapterInWatts = 14
+            snapshot.systemLoadWatts = 14
+            snapshot.batteryWatts = 0
+        case .underpowered:
+            snapshot.adapterCeilingWatts = 30
+            snapshot.adapterInWatts = 28
+            snapshot.systemLoadWatts = 40
+            snapshot.batteryWatts = -12
+            snapshot.timeToEmptyMinutes = 300
+        }
+        return snapshot
+    }
+
+    private var flowSavedPreset: SavedTintPreset<FlowTintSettings>? {
+        guard let id = appState.settings.flowActiveSavedID else { return nil }
+        return appState.settings.savedTintLibrary.flow.first { $0.id == id }
+    }
+
+    private static func sameFlowColors(_ a: FlowTintSettings, _ b: FlowTintSettings) -> Bool {
+        a.charging == b.charging && a.discharging == b.discharging
+            && a.adapterHold == b.adapterHold && a.underpowered == b.underpowered
+            && a.motionColor == b.motionColor
+    }
+
+    private var flowSavedPresetModified: Bool {
+        guard let saved = flowSavedPreset else { return false }
+        return !Self.sameFlowColors(saved.payload, appState.settings.flowTint)
+    }
+
+    private var flowPresetStatus: String {
+        let language = appState.settings.language
+        let tint = appState.settings.flowTint
+        if let saved = flowSavedPreset {
+            return flowSavedPresetModified
+                ? Localization.string("settings.tint.status.modified %@", language: language, saved.name)
+                : saved.name
+        }
+        if tint.preset != .custom {
+            return Localization.string(tint.preset.localizationKey, language: language)
+        }
+        if let origin = flowTintOrigin {
+            let name = Localization.string(origin.localizationKey, language: language)
+            return Localization.string("settings.tint.status.modified %@", language: language, name)
+        }
+        return Localization.string("settings.icon.tint.custom", language: language)
+    }
+
+    private var flowCanRevert: Bool {
+        if flowSavedPreset != nil { return flowSavedPresetModified }
+        return appState.settings.flowTint.preset == .custom && flowTintOrigin != nil
+    }
+
+    private func revertFlowTint() {
+        flowEditingBandID = nil
+        if let saved = flowSavedPreset {
+            appState.settings.applySavedFlowTint(id: saved.id)
+        } else if let origin = flowTintOrigin {
+            appState.settings.applyFlowTintPreset(origin)
+        }
+    }
+
+    private var flowPresetGallery: some View {
+        let language = appState.settings.language
+        let tint = appState.settings.flowTint
+        let savedID = appState.settings.flowActiveSavedID
+        let saved = appState.settings.savedTintLibrary.flow
+        let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: 4)
+        return VStack(alignment: .leading, spacing: 10) {
+            LazyVGrid(columns: columns, spacing: 8) {
+                ForEach(PopoverTintPreset.allCases.filter { $0 != .custom }) { preset in
+                    TintPresetChip(
+                        title: Localization.string(preset.localizationKey, language: language),
+                        selected: savedID == nil && tint.preset == preset
+                    ) {
+                        flowEditingBandID = nil
+                        flowTintOrigin = preset
+                        appState.settings.applyFlowTintPreset(preset)
+                    } thumbnail: {
+                        flowPresetThumbnail(FlowTintSettings.preset(preset))
+                    }
+                }
+            }
+            if !saved.isEmpty {
+                Text("settings.tint.myPresets")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(.secondary)
+                LazyVGrid(columns: columns, spacing: 8) {
+                    ForEach(saved) { item in
+                        TintPresetChip(title: item.name, selected: savedID == item.id) {
+                            flowEditingBandID = nil
+                            flowTintOrigin = nil
+                            appState.settings.applySavedFlowTint(id: item.id)
+                        } thumbnail: {
+                            flowPresetThumbnail(item.payload)
+                        }
+                    }
+                }
+            }
+            Text("settings.flow.presetOrder")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(.vertical, 4)
+    }
+
+    /// Four short bars, one per state, in the order the state cards use.
+    private func flowPresetThumbnail(_ tint: FlowTintSettings) -> some View {
+        HStack(spacing: 2) {
+            ForEach(Self.flowModes, id: \.self) { mode in
+                TintRampBar(bands: tint.scheme(for: mode).bands, cornerRadius: 2)
+            }
+        }
+    }
+
+    private func setFlowBands(_ bands: [MenuBarTintBand]) {
+        let scheme = ValueTintScheme(bands: bands).normalized()
+        appState.settings.flowTint = appState.settings.flowTint.replacing(flowEditingMode, with: scheme)
+    }
+
+    private var flowTransitionBinding: Binding<TintTransition?> {
+        Binding(
+            get: { TintRamp.transition(of: appState.settings.flowTint.scheme(for: flowEditingMode).bands) },
+            set: { transition in
+                guard let transition else { return }
+                setFlowBands(TintRamp.applying(transition, to: appState.settings.flowTint.scheme(for: flowEditingMode).bands))
+            }
+        )
+    }
+
+    private var flowRampRow: some View {
+        let language = appState.settings.language
+        let scheme = appState.settings.flowTint.scheme(for: flowEditingMode)
+        let bands = scheme.bands
+        let state = Localization.string(Self.flowModeKey(flowEditingMode), language: language)
+        return VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 8) {
+                Text(Localization.string("settings.flow.byCharge %@", language: language, state))
+                Spacer(minLength: 8)
+                Text("settings.tint.transition")
+                    .foregroundStyle(.secondary)
+                Picker("settings.tint.transition", selection: flowTransitionBinding) {
+                    ForEach(TintTransition.allCases) { transition in
+                        Text(LocalizedStringKey(transition.localizationKey)).tag(Optional(transition))
+                    }
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                .fixedSize()
+            }
+            TintRampEditor(
+                bands: bands,
+                followLabel: "settings.tint.labelColor",
+                language: language,
+                editingID: $flowEditingBandID,
+                onChange: setFlowBands
+            ) { band, lower in
+                valueSegmentEditor(
+                    band,
+                    lower: lower,
+                    bands: bands,
+                    captionKey: "settings.flow.segment.caption",
+                    onChange: setFlowBands,
+                    onClose: { flowEditingBandID = nil }
+                )
+            }
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Text("settings.tint.ramp.hint")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 8)
+                Button {
+                    if let result = TintRamp.addingBoundary(to: bands) {
+                        setFlowBands(result.bands)
+                        flowEditingBandID = result.newID
+                    }
+                } label: {
+                    Label("settings.tint.addBoundary", systemImage: "plus")
+                }
+                .disabled(bands.count >= 8)
+            }
+            Button("settings.flow.applyToAll") {
+                let source = appState.settings.flowTint.scheme(for: flowEditingMode)
+                appState.settings.flowTint = appState.settings.flowTint.mapAll { _ in source }
+            }
+            .disabled(Self.flowModes.allSatisfy { appState.settings.flowTint.scheme(for: $0) == scheme })
+        }
+        .padding(.vertical, 4)
+    }
+
+    /// The segment popover for schemes that color the panel rather than the menu bar.
+    private func valueSegmentEditor(
+        _ band: MenuBarTintBand,
+        lower: Int,
+        bands: [MenuBarTintBand],
+        captionKey: LocalizedStringKey,
+        onChange: @escaping ([MenuBarTintBand]) -> Void,
+        onClose: @escaping () -> Void
+    ) -> some View {
+        let ordered = TintRamp.sorted(bands)
+        let index = ordered.firstIndex { $0.id == band.id }
+        let previous = index.flatMap { $0 > 0 ? ordered[$0 - 1] : nil }
+        return TintSegmentEditor(
+            band: band,
+            lower: lower,
+            previous: previous,
+            language: appState.settings.language,
+            rangeKey: "settings.tint.segment.range %lld %lld",
+            captionKey: captionKey,
+            atKey: "settings.tint.color.at %lld",
+            followName: "settings.tint.labelColor",
+            followNote: "settings.tint.labelColor.note",
+            canDelete: ordered.count > 1,
+            onChange: { next in onChange(TintRamp.replacing(next, in: bands)) },
+            onDelete: {
+                onClose()
+                onChange(TintRamp.removing(band.id, from: bands))
+            }
+        ) {
+            TintBandFill(band: band)
+                .frame(width: 56, height: 16)
+                .clipShape(Capsule())
+                .overlay { Capsule().strokeBorder(Color.primary.opacity(0.14), lineWidth: 0.5) }
+        }
+    }
+
+    private enum MotionColorChoice: Hashable {
+        case ribbon, custom
+    }
+
+    private var motionColorChoiceBinding: Binding<MotionColorChoice> {
+        Binding(
+            get: { motionColorEnabledBinding.wrappedValue ? .custom : .ribbon },
+            set: { motionColorEnabledBinding.wrappedValue = $0 == .custom }
+        )
+    }
+
+    private var flowMotionColorRow: some View {
+        HStack(spacing: 8) {
+            Text("settings.flow.motionColor")
+            Spacer(minLength: 8)
+            if appState.settings.flowTint.motionColor != nil {
+                ColorPicker("settings.flow.motionColor", selection: motionColorBinding, supportsOpacity: false)
+                    .labelsHidden()
+                    .fixedSize()
+            }
+            Picker("settings.flow.motionColor", selection: motionColorChoiceBinding) {
+                Text("settings.flow.motionColor.ribbon").tag(MotionColorChoice.ribbon)
+                Text("settings.flow.motionColor.custom").tag(MotionColorChoice.custom)
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+            .fixedSize()
+        }
+        .disabled(appState.settings.motionStyle.pigment == nil)
     }
 
     private var ringIconPresetPickerBinding: Binding<RingIconPresetPickerItem> {

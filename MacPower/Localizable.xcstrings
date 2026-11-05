@@ -17258,6 +17258,198 @@
         "it": { "stringUnit": { "state": "translated", "value": "Verde" } },
         "ru": { "stringUnit": { "state": "translated", "value": "Зелёный" } }
       }
+    },
+    "settings.flow.chooseState": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Choose a state to adjust" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "选择要调整的状态" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "選擇要調整的狀態" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "調整する状態を選択" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "조정할 상태 선택" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Choisissez l’état à régler" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Wähle einen Zustand zum Anpassen" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Elige el estado que quieres ajustar" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Escolha o estado a ajustar" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Scegli lo stato da regolare" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Выберите состояние для настройки" } }
+      }
+    },
+    "settings.flow.preview %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Preview · %@" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "预览 · %@" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "預覽 · %@" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "プレビュー · %@" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "미리보기 · %@" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Aperçu · %@" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Vorschau · %@" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Vista previa · %@" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Pré-visualização · %@" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Anteprima · %@" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Просмотр · %@" } }
+      }
+    },
+    "settings.flow.presetOrder": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Bars from left to right: Charging, On battery, Adapter hold, Underpowered." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "色条从左到右依次是：充电中、使用电池、电源维持、功率不足。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "色條從左到右依次是：充電中、使用電池、電源維持、功率不足。" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "バーは左から順に、充電中、バッテリー使用、電源維持、電力不足です。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "막대는 왼쪽부터 충전 중, 배터리 사용, 전원 유지, 전력 부족입니다." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Barres de gauche à droite : en charge, sur batterie, maintien secteur, puissance insuffisante." } },
+        "de": { "stringUnit": { "state": "translated", "value": "Balken von links nach rechts: Lädt, Akku, Netzteil hält, Zu wenig Leistung." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Barras de izquierda a derecha: cargando, con batería, mantenimiento, potencia insuficiente." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Barras da esquerda para a direita: carregando, na bateria, manutenção, potência insuficiente." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Barre da sinistra a destra: in carica, a batteria, mantenimento, potenza insufficiente." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Полосы слева направо: зарядка, от батареи, удержание, недостаток мощности." } }
+      }
+    },
+    "settings.flow.byCharge %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Color by charge while “%@”" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "「%@」时按电量变色" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "「%@」時按電量變色" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "「%@」のとき充電量で色分け" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "‘%@’일 때 충전량별 색상" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Couleur selon la charge « %@ »" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Farbe nach Ladestand bei „%@“" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Color según la carga en «%@»" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Cor pela carga em “%@”" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Colore in base alla carica in «%@»" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Цвет по заряду в режиме «%@»" } }
+      }
+    },
+    "settings.flow.segment.caption": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "How the ribbon looks when the charge is in this range" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "电量落在这个范围时，能量带这样显示" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "電量落在這個範圍時，能量帶這樣顯示" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "充電量がこの範囲にあるときのエネルギーバー" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "충전량이 이 범위일 때의 에너지 띠" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Le ruban quand la charge est dans cette plage" } },
+        "de": { "stringUnit": { "state": "translated", "value": "So sieht das Band in diesem Bereich aus" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Así se ve la banda con la carga en este rango" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Assim fica a faixa com a carga nesta faixa" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Il nastro quando la carica è in questo intervallo" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Так выглядит лента при заряде в этом диапазоне" } }
+      }
+    },
+    "settings.flow.applyToAll": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Use These Colors for All 4 States" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "把这套颜色用到全部 4 种状态" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "把這套顏色用到全部 4 種狀態" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "この色を4つの状態すべてに使う" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "이 색상을 4가지 상태 모두에 사용" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Utiliser ces couleurs pour les 4 états" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Diese Farben für alle 4 Zustände verwenden" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Usar estos colores en los 4 estados" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Usar estas cores nos 4 estados" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Usa questi colori per tutti e 4 gli stati" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Использовать эти цвета для всех 4 состояний" } }
+      }
+    },
+    "settings.flow.motionColor": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Particle and line color" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "粒子和细线的颜色" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "粒子和細線的顏色" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "粒子と線の色" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "입자와 선 색상" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Couleur des particules et des lignes" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Farbe von Partikeln und Linien" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Color de partículas y líneas" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Cor das partículas e linhas" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Colore di particelle e linee" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Цвет частиц и линий" } }
+      }
+    },
+    "settings.flow.motionColor.ribbon": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Match Ribbon" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "跟随能量带" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "跟隨能量帶" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "バーに合わせる" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "띠와 같게" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Comme le ruban" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Wie das Band" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Como la banda" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Igual à faixa" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Come il nastro" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Как у ленты" } }
+      }
+    },
+    "settings.flow.motionColor.custom": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Custom" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "自选颜色" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "自選顏色" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "カスタム" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "직접 선택" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Personnalisée" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Eigene" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Personalizado" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Personalizada" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Personalizzato" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Свой" } }
+      }
+    },
+    "settings.motion.header": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Motion" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "动效" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "動效" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "アニメーション" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "움직임" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Animation" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Animation" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Animación" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Animação" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Animazione" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Анимация" } }
+      }
+    },
+    "settings.tint.labelColor": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Label Color" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "文字颜色" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "文字顏色" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ラベルの色" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "레이블 색상" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Couleur du texte" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Textfarbe" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Color del texto" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Cor do texto" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Colore del testo" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Цвет текста" } }
+      }
+    },
+    "settings.tint.labelColor.note": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "“Label Color” is black in Light mode and white in Dark mode." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "「文字颜色」在浅色模式下是黑色，在深色模式下是白色。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "「文字顏色」在淺色模式下是黑色，在深色模式下是白色。" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "「ラベルの色」はライトモードでは黒、ダークモードでは白です。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "‘레이블 색상’은 라이트 모드에서 검은색, 다크 모드에서 흰색입니다." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "« Couleur du texte » est noire en mode clair et blanche en mode sombre." } },
+        "de": { "stringUnit": { "state": "translated", "value": "„Textfarbe“ ist im hellen Modus schwarz und im dunklen Modus weiß." } },
+        "es": { "stringUnit": { "state": "translated", "value": "«Color del texto» es negro en modo claro y blanco en modo oscuro." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "“Cor do texto” é preta no modo claro e branca no modo escuro." } },
+        "it": { "stringUnit": { "state": "translated", "value": "«Colore del testo» è nero in modalità chiara e bianco in modalità scura." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "«Цвет текста» — чёрный в светлом режиме и белый в тёмном." } }
+      }
     }
   },
   "version": "1.0"
