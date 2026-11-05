@@ -16506,6 +16506,758 @@
         "it": { "stringUnit": { "state": "translated", "value": "Ovunque si trovi, un clic destro sull’icona nella barra dei menu apre sempre le impostazioni." } },
         "ru": { "stringUnit": { "state": "translated", "value": "Где бы она ни была, правый щелчок по значку в строке меню всегда открывает настройки." } }
       }
+    },
+    "settings.menuBar.preview.current": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Your icon now" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "你现在的图标" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "你現在的圖示" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "現在のアイコン" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "현재 아이콘" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Votre icône actuelle" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Dein aktuelles Symbol" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Tu icono actual" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Seu ícone agora" } },
+        "it": { "stringUnit": { "state": "translated", "value": "La tua icona attuale" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Ваш значок сейчас" } }
+      }
+    },
+    "settings.menuBar.preview.levels": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "At different charge levels" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "不同电量下" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "不同電量下" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "充電量ごとの表示" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "충전량별 모습" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Selon le niveau de charge" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Bei verschiedenen Ladeständen" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Según el nivel de carga" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Em diferentes níveis de carga" } },
+        "it": { "stringUnit": { "state": "translated", "value": "A diversi livelli di carica" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "При разном заряде" } }
+      }
+    },
+    "settings.menuBar.preview.charging": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Charging" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "充电中" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "充電中" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "充電中" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "충전 중" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "En charge" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Lädt" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Cargando" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Carregando" } },
+        "it": { "stringUnit": { "state": "translated", "value": "In carica" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Заряжается" } }
+      }
+    },
+    "settings.icon.header": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Icon" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "图标" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "圖示" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "アイコン" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "아이콘" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Icône" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Symbol" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Icono" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Ícone" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Icona" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Значок" } }
+      }
+    },
+    "settings.icon.chargeGlyphs.caption": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "A bolt appears on the icon while charging." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "充电时图标上出现闪电。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "充電時圖示上會出現閃電。" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "充電中はアイコンに稲妻が表示されます。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "충전 중에는 아이콘에 번개 표시가 나타납니다." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Un éclair apparaît sur l’icône pendant la charge." } },
+        "de": { "stringUnit": { "state": "translated", "value": "Beim Laden erscheint ein Blitz im Symbol." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Aparece un rayo en el icono mientras carga." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Um raio aparece no ícone durante a carga." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Durante la carica sull’icona compare un fulmine." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Во время зарядки на значке появляется молния." } }
+      }
+    },
+    "settings.color.header": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Color" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "颜色" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "顏色" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "カラー" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "색상" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Couleur" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Farbe" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Color" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Cor" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Colore" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Цвет" } }
+      }
+    },
+    "settings.tint.presetLabel": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Preset" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "预设" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "預設" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "プリセット" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "프리셋" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Préréglage" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Voreinstellung" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Preajuste" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Predefinição" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Preimpostazione" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Набор" } }
+      }
+    },
+    "settings.tint.status.modified %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "%@ · Edited" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "%@ · 已修改" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "%@ · 已修改" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "%@ · 変更済み" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "%@ · 수정됨" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "%@ · modifié" } },
+        "de": { "stringUnit": { "state": "translated", "value": "%@ · geändert" } },
+        "es": { "stringUnit": { "state": "translated", "value": "%@ · modificado" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "%@ · modificado" } },
+        "it": { "stringUnit": { "state": "translated", "value": "%@ · modificato" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "%@ · изменён" } }
+      }
+    },
+    "settings.tint.revert": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Revert" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "还原" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "還原" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "元に戻す" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "되돌리기" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Rétablir" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Zurücksetzen" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Revertir" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Reverter" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Ripristina" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Вернуть" } }
+      }
+    },
+    "settings.tint.saveAsPreset": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Save as Preset…" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "存为预设…" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "存為預設…" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "プリセットとして保存…" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "프리셋으로 저장…" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Enregistrer comme préréglage…" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Als Voreinstellung sichern…" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Guardar como preajuste…" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Salvar como predefinição…" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Salva come preimpostazione…" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Сохранить как набор…" } }
+      }
+    },
+    "settings.tint.myPresets": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "My Presets" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "我的预设" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "我的預設" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "マイプリセット" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "내 프리셋" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Mes préréglages" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Meine Voreinstellungen" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Mis preajustes" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Minhas predefinições" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Le mie preimpostazioni" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Мои наборы" } }
+      }
+    },
+    "settings.tint.showAll %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Show All %lld Presets" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "显示全部 %lld 个预设" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "顯示全部 %lld 個預設" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "%lld 個のプリセットをすべて表示" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "프리셋 %lld개 모두 보기" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Afficher les %lld préréglages" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Alle %lld Voreinstellungen zeigen" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Mostrar los %lld preajustes" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Mostrar todas as %lld predefinições" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Mostra tutte le %lld preimpostazioni" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Показать все наборы (%lld)" } }
+      }
+    },
+    "settings.tint.showAllAndMine %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Show All %lld Presets and My Presets" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "显示全部 %lld 个预设和我的预设" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "顯示全部 %lld 個預設和我的預設" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "%lld 個のプリセットとマイプリセットをすべて表示" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "프리셋 %lld개와 내 프리셋 모두 보기" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Afficher les %lld préréglages et les miens" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Alle %lld Voreinstellungen und meine zeigen" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Mostrar los %lld preajustes y los míos" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Mostrar as %lld predefinições e as minhas" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Mostra tutte le %lld preimpostazioni e le mie" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Показать все наборы (%lld) и мои" } }
+      }
+    },
+    "settings.tint.showFewer": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Show Fewer" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "收起" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "收起" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "表示を減らす" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "간단히 보기" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Afficher moins" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Weniger zeigen" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Mostrar menos" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Mostrar menos" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Mostra meno" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Свернуть" } }
+      }
+    },
+    "settings.icon.tint.onBatteryOnly": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Change Color Only on Battery" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "仅在使用电池时变色" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "僅在使用電池時變色" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "バッテリー使用時のみ色を変える" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "배터리 사용 중에만 색상 변경" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Changer de couleur seulement sur batterie" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Farbe nur im Akkubetrieb ändern" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Cambiar de color solo con batería" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Mudar de cor só na bateria" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Cambia colore solo a batteria" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Менять цвет только от батареи" } }
+      }
+    },
+    "settings.icon.tint.onBatteryOnly.caption": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "When plugged in, the icon keeps the menu bar’s default color." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "接上电源时，图标保持菜单栏默认颜色。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "接上電源時，圖示保持選單列預設顏色。" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "電源に接続中は、アイコンはメニューバーの標準の色のままです。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "전원에 연결되어 있으면 아이콘은 메뉴 막대 기본 색상을 유지합니다." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Sur secteur, l’icône garde la couleur par défaut de la barre des menus." } },
+        "de": { "stringUnit": { "state": "translated", "value": "Am Netzteil behält das Symbol die Standardfarbe der Menüleiste." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Conectado a la corriente, el icono mantiene el color predeterminado de la barra de menús." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Conectado à energia, o ícone mantém a cor padrão da barra de menus." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Con l’alimentatore collegato, l’icona mantiene il colore predefinito della barra dei menu." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "При подключении к сети значок остаётся цвета строки меню по умолчанию." } }
+      }
+    },
+    "settings.icon.tint.offNote": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "With color turned off, the icon always uses the menu bar’s default color." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "关闭后，图标始终使用菜单栏默认颜色。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "關閉後，圖示始終使用選單列預設顏色。" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "オフにすると、アイコンは常にメニューバーの標準の色になります。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "끄면 아이콘은 항상 메뉴 막대 기본 색상을 사용합니다." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Désactivé, l’icône utilise toujours la couleur par défaut de la barre des menus." } },
+        "de": { "stringUnit": { "state": "translated", "value": "Ausgeschaltet verwendet das Symbol immer die Standardfarbe der Menüleiste." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Desactivado, el icono usa siempre el color predeterminado de la barra de menús." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Desligado, o ícone sempre usa a cor padrão da barra de menus." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Disattivato, l’icona usa sempre il colore predefinito della barra dei menu." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Если выключено, значок всегда цвета строки меню по умолчанию." } }
+      }
+    },
+    "settings.icon.tint.byCharge": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Color by Charge" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "按电量变色" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "按電量變色" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "充電量で色分け" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "충전량별 색상" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Couleur selon la charge" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Farbe nach Ladestand" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Color según la carga" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Cor pela carga" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Colore in base alla carica" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Цвет по заряду" } }
+      }
+    },
+    "settings.tint.transition": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Transition" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "过渡" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "過渡" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "切り替え" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "전환" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Transition" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Übergang" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Transición" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Transição" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Transizione" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Переход" } }
+      }
+    },
+    "settings.tint.transition.stepped": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Stepped" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "分段" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "分段" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "段階" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "단계" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Par paliers" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Stufen" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Por tramos" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Em faixas" } },
+        "it": { "stringUnit": { "state": "translated", "value": "A fasce" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Ступени" } }
+      }
+    },
+    "settings.tint.transition.smooth": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Smooth" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "平滑" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "平滑" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "なめらか" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "부드럽게" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Progressive" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Fließend" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Suave" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Suave" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Graduale" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Плавно" } }
+      }
+    },
+    "settings.tint.ramp.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Drag the white handles to change the ranges. Click a segment to change its colors." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "拖动白色把手调整电量范围，点按色段更改颜色。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "拖動白色把手調整電量範圍，點按色段更改顏色。" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "白いハンドルをドラッグして範囲を変え、区間をクリックして色を変更します。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "흰색 핸들을 드래그해 범위를 바꾸고, 구간을 클릭해 색상을 바꿉니다." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Faites glisser les poignées blanches pour changer les plages. Cliquez sur un segment pour changer ses couleurs." } },
+        "de": { "stringUnit": { "state": "translated", "value": "Ziehe die weißen Griffe, um die Bereiche zu ändern. Klicke auf einen Abschnitt, um seine Farben zu ändern." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Arrastra los tiradores blancos para cambiar los rangos. Haz clic en un tramo para cambiar sus colores." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Arraste as alças brancas para mudar as faixas. Clique em um trecho para mudar as cores." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Trascina le maniglie bianche per cambiare gli intervalli. Fai clic su un tratto per cambiarne i colori." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Перетаскивайте белые маркеры, чтобы менять диапазоны. Нажмите на отрезок, чтобы изменить его цвета." } }
+      }
+    },
+    "settings.tint.addBoundary": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Add Split Point" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "添加分界点" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "新增分界點" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "区切りを追加" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "구분점 추가" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Ajouter un seuil" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Grenze hinzufügen" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Añadir corte" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Adicionar divisão" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Aggiungi soglia" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Добавить границу" } }
+      }
+    },
+    "settings.tint.boundary": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Split point" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "分界点" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "分界點" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "区切り" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "구분점" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Seuil" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Grenze" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Corte" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Divisão" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Soglia" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Граница" } }
+      }
+    },
+    "settings.tint.menuBarDefault": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Menu Bar Default" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "菜单栏默认色" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "選單列預設色" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "メニューバーの標準色" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "메뉴 막대 기본 색상" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Couleur de la barre des menus" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Menüleisten-Standard" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Color de la barra de menús" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Cor da barra de menus" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Colore della barra dei menu" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Цвет строки меню" } }
+      }
+    },
+    "settings.tint.menuBarDefault.note": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "“Menu Bar Default” is black in a light menu bar and white in a dark one." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "「菜单栏默认色」在浅色菜单栏里是黑色，在深色菜单栏里是白色。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "「選單列預設色」在淺色選單列中是黑色，在深色選單列中是白色。" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "「メニューバーの標準色」は、明るいメニューバーでは黒、暗いメニューバーでは白です。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "‘메뉴 막대 기본 색상’은 밝은 메뉴 막대에서는 검은색, 어두운 메뉴 막대에서는 흰색입니다." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "« Couleur de la barre des menus » est noire dans une barre claire et blanche dans une barre sombre." } },
+        "de": { "stringUnit": { "state": "translated", "value": "„Menüleisten-Standard“ ist in einer hellen Menüleiste schwarz und in einer dunklen weiß." } },
+        "es": { "stringUnit": { "state": "translated", "value": "«Color de la barra de menús» es negro en una barra clara y blanco en una oscura." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "“Cor da barra de menus” é preta numa barra clara e branca numa barra escura." } },
+        "it": { "stringUnit": { "state": "translated", "value": "«Colore della barra dei menu» è nero in una barra chiara e bianco in una scura." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "«Цвет строки меню» — чёрный в светлой строке меню и белый в тёмной." } }
+      }
+    },
+    "settings.tint.segment.range %lld %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Charge %lld% – %lld%" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "电量 %lld% – %lld%" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "電量 %lld% – %lld%" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "充電量 %lld% – %lld%" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "충전량 %lld% – %lld%" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Charge %lld % – %lld %" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Ladestand %lld % – %lld %" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Carga %lld % – %lld %" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Carga %lld% – %lld%" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Carica %lld% – %lld%" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Заряд %lld% – %lld%" } }
+      }
+    },
+    "settings.tint.segment.caption": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "How the icon looks when the charge is in this range" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "电量落在这个范围时，图标这样显示" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "電量落在這個範圍時，圖示這樣顯示" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "充電量がこの範囲にあるときのアイコン" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "충전량이 이 범위일 때의 아이콘" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "L’icône quand la charge est dans cette plage" } },
+        "de": { "stringUnit": { "state": "translated", "value": "So sieht das Symbol in diesem Bereich aus" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Así se ve el icono con la carga en este rango" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Assim fica o ícone com a carga nesta faixa" } },
+        "it": { "stringUnit": { "state": "translated", "value": "L’icona quando la carica è in questo intervallo" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Так выглядит значок при заряде в этом диапазоне" } }
+      }
+    },
+    "settings.tint.segment.delete": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Delete Segment" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "删除此段" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "刪除此段" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "この区間を削除" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "이 구간 삭제" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Supprimer le segment" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Abschnitt löschen" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Eliminar tramo" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Apagar trecho" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Elimina tratto" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Удалить отрезок" } }
+      }
+    },
+    "settings.tint.effect": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Effect" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "效果" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "效果" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "効果" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "효과" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Effet" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Effekt" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Efecto" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Efeito" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Effetto" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Эффект" } }
+      }
+    },
+    "settings.tint.effect.constant": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Solid" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "纯色" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "純色" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "単色" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "단색" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Uni" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Einfarbig" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Sólido" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Sólido" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Tinta unita" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Сплошной" } }
+      }
+    },
+    "settings.tint.effect.constant.caption": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "One color for the whole range" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "整段一个颜色" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "整段一個顏色" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "範囲全体で1色" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "구간 전체가 한 색상" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Une couleur pour toute la plage" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Eine Farbe für den ganzen Bereich" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Un color para todo el rango" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Uma cor para a faixa toda" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Un colore per tutto l’intervallo" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Один цвет на весь диапазон" } }
+      }
+    },
+    "settings.tint.effect.slide": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Changes with Charge" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "随电量变化" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "隨電量變化" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "充電量で変化" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "충전량에 따라 변화" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Suit la charge" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Mit Ladestand" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Cambia con la carga" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Muda com a carga" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Cambia con la carica" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Меняется с зарядом" } }
+      }
+    },
+    "settings.tint.effect.slide.caption": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Fades from one color to another" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "从一个颜色慢慢变成另一个" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "從一個顏色慢慢變成另一個" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ある色から別の色へ徐々に変化" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "한 색상에서 다른 색상으로 서서히 변화" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Passe d’une couleur à l’autre" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Geht von einer Farbe in eine andere über" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Pasa de un color a otro" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Passa de uma cor a outra" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Passa da un colore all’altro" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Плавно переходит из одного цвета в другой" } }
+      }
+    },
+    "settings.tint.effect.gradient": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Left to Right" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "左右渐变" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "左右漸層" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "左右グラデーション" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "좌우 그라데이션" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "De gauche à droite" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Links nach rechts" } },
+        "es": { "stringUnit": { "state": "translated", "value": "De izquierda a derecha" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Da esquerda à direita" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Da sinistra a destra" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Слева направо" } }
+      }
+    },
+    "settings.tint.effect.gradient.caption": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Two colors across the icon" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "图标里左右两种颜色" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "圖示裡左右兩種顏色" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "アイコンの左右で2色" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "아이콘 좌우에 두 가지 색상" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Deux couleurs dans l’icône" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Zwei Farben im Symbol" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Dos colores en el icono" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Duas cores no ícone" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Due colori nell’icona" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Два цвета в значке" } }
+      }
+    },
+    "settings.tint.effect.both": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Both" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "两者都有" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "兩者都有" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "両方" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "둘 다" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Les deux" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Beides" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Ambos" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Ambos" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Entrambi" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Оба" } }
+      }
+    },
+    "settings.tint.effect.both.caption": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Left to right, and changes with charge" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "左右渐变，并随电量变化" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "左右漸層，並隨電量變化" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "左右グラデーションが充電量で変化" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "좌우 그라데이션이 충전량에 따라 변화" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "De gauche à droite, et suit la charge" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Links nach rechts, mit Ladestand" } },
+        "es": { "stringUnit": { "state": "translated", "value": "De izquierda a derecha y cambia con la carga" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Da esquerda à direita e muda com a carga" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Da sinistra a destra e cambia con la carica" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Слева направо и меняется с зарядом" } }
+      }
+    },
+    "settings.tint.color.single": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Color" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "颜色" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "顏色" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "色" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "색상" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Couleur" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Farbe" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Color" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Cor" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Colore" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Цвет" } }
+      }
+    },
+    "settings.tint.color.left": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Left Side" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "左边" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "左邊" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "左側" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "왼쪽" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Gauche" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Links" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Izquierda" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Esquerda" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Sinistra" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Слева" } }
+      }
+    },
+    "settings.tint.color.right": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Right Side" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "右边" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "右邊" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "右側" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "오른쪽" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Droite" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Rechts" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Derecha" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Direita" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Destra" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Справа" } }
+      }
+    },
+    "settings.tint.color.at %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "At %lld%" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "电量 %lld% 时" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "電量 %lld% 時" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "%lld% のとき" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "%lld%일 때" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "À %lld %" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Bei %lld %" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Al %lld %" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Em %lld%" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Al %lld%" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "При %lld%" } }
+      }
+    },
+    "settings.tint.otherColor": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Other Color" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "其他颜色" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "其他顏色" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "その他の色" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "기타 색상" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Autre couleur" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Andere Farbe" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Otro color" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Outra cor" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Altro colore" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Другой цвет" } }
+      }
+    },
+    "settings.tint.swatch.red": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Red" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "红色" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "紅色" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "赤" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "빨간색" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Rouge" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Rot" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Rojo" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Vermelho" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Rosso" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Красный" } }
+      }
+    },
+    "settings.tint.swatch.orange": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Orange" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "橙色" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "橙色" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "オレンジ" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "주황색" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Orange" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Orange" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Naranja" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Laranja" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Arancione" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Оранжевый" } }
+      }
+    },
+    "settings.tint.swatch.yellow": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Yellow" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "黄色" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "黃色" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "黄" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "노란색" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Jaune" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Gelb" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Amarillo" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Amarelo" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Giallo" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Жёлтый" } }
+      }
+    },
+    "settings.tint.swatch.green": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Green" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "绿色" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "綠色" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "緑" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "초록색" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Vert" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Grün" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Verde" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Verde" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Verde" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Зелёный" } }
+      }
     }
   },
   "version": "1.0"

@@ -700,6 +700,9 @@ struct SettingsView: View {
     @State private var ringColorSelectionID: UUID?
     @State private var flowEditorTarget: FlowEditorTarget = .all
     @State private var saveDialog: SaveTintDialog?
+    @State private var menuBarTintOrigin: MenuBarTintPreset?
+    @State private var showsAllMenuBarPresets = false
+    @State private var menuBarEditingBandID: UUID?
     @State private var showingBluetoothDevices = false
     @State private var showingAuthorSupport = false
     @State private var bluetoothIconEditor: BluetoothIconEdit?
@@ -1061,6 +1064,7 @@ struct SettingsView: View {
         )
         return HStack(spacing: 0) {
             Image(nsImage: image)
+                .renderingMode(image.isTemplate ? .template : .original)
             if appState.settings.digitPlacement == .beside {
                 Text(" \(Int(appState.snapshot.percent.rounded()))%")
                     .font(.body)
@@ -2536,247 +2540,416 @@ struct SettingsView: View {
     @ViewBuilder
     private var menuBarSections: some View {
         Section {
+            SettingsPreviewCard(title: "settings.menuBar.preview.current") {
+                VStack(spacing: 12) {
+                    menuBarStripPreview
+                    Divider()
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("settings.menuBar.preview.levels")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                        menuBarLevelsPreview
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            }
+        }
+
+        Section {
             Picker("settings.icon.border", selection: $appState.settings.iconOutlined) {
                 Text("settings.icon.border.off").tag(false)
                 Text("settings.icon.border.on").tag(true)
             }
+            .pickerStyle(.segmented)
             Picker("settings.icon.digits", selection: $appState.settings.digitPlacement) {
                 ForEach(MenuBarDigitPlacement.allCases) { placement in
                     Text(LocalizedStringKey(placement.localizationKey)).tag(placement)
                 }
             }
-            Toggle("settings.icon.chargeGlyphs", isOn: $appState.settings.showChargeGlyphs)
+            .pickerStyle(.segmented)
+            Toggle(isOn: $appState.settings.showChargeGlyphs) {
+                SettingsRowLabel(title: "settings.icon.chargeGlyphs", caption: "settings.icon.chargeGlyphs.caption")
+            }
+        } header: {
+            Text("settings.icon.header")
         }
 
         Section {
-            Picker("settings.icon.tint.preset", selection: menuBarPresetPickerBinding) {
-                ForEach(MenuBarTintPreset.pickerCases) { preset in
-                    Text(LocalizedStringKey(preset.localizationKey)).tag(MenuBarPresetPickerItem.builtin(preset))
-                }
-                if !appState.settings.savedTintLibrary.menuBar.isEmpty {
-                    Divider()
-                    ForEach(appState.settings.savedTintLibrary.menuBar) { item in
-                        Text(item.name).tag(MenuBarPresetPickerItem.saved(item.id))
-                    }
-                }
-            }
-            presetEditor(
-                toolbar: {
-                    tintPresetSaveControls(
-                        canOverwrite: appState.settings.menuBarActiveSavedID != nil,
-                        onSave: { _ = appState.settings.updateMenuBarTintPreset() },
-                        onSaveAs: {
-                            savePresetName = defaultSaveName(for: .menuBar)
-                            saveDialog = .menuBar
-                        },
-                        deleteID: appState.settings.menuBarActiveSavedID,
-                        onDelete: { appState.settings.deleteSavedMenuBarTint(id: $0) }
+            menuBarPresetStatusRow
+            menuBarPresetGallery
+            if appState.settings.menuBarTint.preset != .off {
+                Toggle(isOn: menuBarOnBatteryOnlyBinding) {
+                    SettingsRowLabel(
+                        title: "settings.icon.tint.onBatteryOnly",
+                        caption: "settings.icon.tint.onBatteryOnly.caption"
                     )
                 }
-            ) {
-                if appState.settings.menuBarTint.preset != .off {
-                    Picker("settings.icon.tint.when", selection: tintModeBinding) {
-                        ForEach(MenuBarTintMode.allCases) { mode in
-                            Text(LocalizedStringKey(mode.localizationKey)).tag(mode)
-                        }
-                    }
-                    ForEach(appState.settings.menuBarTint.sortedBands) { band in
-                        editableTintBandRow(band)
-                    }
-                    Button("settings.icon.tint.add") {
-                        appState.settings.menuBarTint = appState.settings.menuBarTint.addingBand()
-                    }
-                }
+                menuBarRampRow
+            }
+        } header: {
+            Text("settings.color.header")
+        } footer: {
+            if appState.settings.menuBarTint.preset == .off {
+                Text("settings.icon.tint.offNote")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
             }
         }
     }
 
-    private var menuBarPresetPickerBinding: Binding<MenuBarPresetPickerItem> {
-        Binding(
-            get: {
-                if let id = appState.settings.menuBarActiveSavedID {
-                    return .saved(id)
-                }
-                return .builtin(appState.settings.menuBarTint.preset)
-            },
-            set: { item in
-                switch item {
-                case .builtin(let preset):
-                    appState.settings.applyTintPreset(preset)
-                case .saved(let id):
-                    appState.settings.applySavedMenuBarTint(id: id)
-                }
-            }
+    /// A slice of the menu bar over a soft wallpaper, with the real status icon in it.
+    private var menuBarStripPreview: some View {
+        HStack(spacing: 14) {
+            Spacer(minLength: 0)
+            Image(systemName: "wifi")
+            Image(systemName: "switch.2")
+            menuBarStatusIcon
+            Text(Date(), format: .dateTime.weekday(.abbreviated).hour().minute())
+                .monospacedDigit()
+        }
+        .font(.system(size: 13, weight: .medium))
+        .padding(.horizontal, 12)
+        .frame(height: 26)
+        .background(.bar, in: RoundedRectangle(cornerRadius: 7, style: .continuous))
+        .padding(.horizontal, 12)
+        .padding(.top, 10)
+        .padding(.bottom, 26)
+        .background(
+            LinearGradient(
+                colors: [
+                    Color(red: 0.42, green: 0.62, blue: 0.94),
+                    Color(red: 0.74, green: 0.62, blue: 0.93),
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            ),
+            in: RoundedRectangle(cornerRadius: 9, style: .continuous)
         )
+        .accessibilityElement(children: .combine)
     }
 
-    private var tintModeBinding: Binding<MenuBarTintMode> {
+    private struct MenuBarLevelSample: Identifiable {
+        var id: String
+        var percent: Double
+        var flowMode: EnergyFlowMode
+    }
+
+    private var menuBarLevelSamples: [MenuBarLevelSample] {
+        [
+            MenuBarLevelSample(id: "5", percent: 5, flowMode: .discharging),
+            MenuBarLevelSample(id: "15", percent: 15, flowMode: .discharging),
+            MenuBarLevelSample(id: "50", percent: 50, flowMode: .discharging),
+            MenuBarLevelSample(id: "100", percent: 100, flowMode: .discharging),
+            MenuBarLevelSample(id: "charging", percent: 60, flowMode: .charging),
+        ]
+    }
+
+    private var menuBarLevelsPreview: some View {
+        HStack(alignment: .bottom, spacing: 4) {
+            ForEach(menuBarLevelSamples) { sample in
+                VStack(spacing: 6) {
+                    menuBarGlyph(percent: sample.percent, flowMode: sample.flowMode, scheme: appState.settings.menuBarTint, scale: 1.35)
+                    Group {
+                        if sample.flowMode == .charging {
+                            Text("settings.menuBar.preview.charging")
+                        } else {
+                            Text(verbatim: "\(Int(sample.percent))%")
+                        }
+                    }
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity)
+            }
+        }
+        .id(colorScheme)
+    }
+
+    /// The battery exactly as the status item would draw it with `scheme`.
+    private func menuBarGlyph(percent: Double, flowMode: EnergyFlowMode, scheme: MenuBarTintScheme, scale: CGFloat) -> some View {
+        let appearance = NSApp.effectiveAppearance
+        let snapshot = tutorialPowerSnapshot(percent: percent, flowMode: flowMode)
+        let fill = scheme.fill(percent: percent, flowMode: flowMode, appearance: appearance)
+        let style = appState.settings.iconStyle
+        let image = MenuBarBatteryRenderer.image(
+            snapshot: snapshot,
+            style: style,
+            fill: fill,
+            appearance: appearance,
+            showChargeGlyphs: appState.settings.showChargeGlyphs
+        )
+        return HStack(spacing: 2) {
+            Image(nsImage: image)
+                .renderingMode(fill.isTemplate ? .template : .original)
+                .resizable()
+                .interpolation(.high)
+                .frame(width: image.size.width * scale, height: image.size.height * scale)
+            if style.showsPercentBeside {
+                Text(verbatim: "\(Int(percent))%")
+                    .font(.system(size: 11 * scale, weight: .medium))
+                    .monospacedDigit()
+            }
+        }
+        .foregroundStyle(.primary)
+        .frame(height: 16 * scale + 2)
+    }
+
+    private var menuBarSavedPreset: SavedTintPreset<MenuBarTintScheme>? {
+        guard let id = appState.settings.menuBarActiveSavedID else { return nil }
+        return appState.settings.savedTintLibrary.menuBar.first { $0.id == id }
+    }
+
+    private var menuBarSavedPresetModified: Bool {
+        guard let saved = menuBarSavedPreset else { return false }
+        let current = appState.settings.menuBarTint
+        return saved.payload.bands != current.bands || saved.payload.mode != current.mode
+    }
+
+    private var menuBarPresetStatus: String {
+        let language = appState.settings.language
+        let tint = appState.settings.menuBarTint
+        if let saved = menuBarSavedPreset {
+            return menuBarSavedPresetModified
+                ? Localization.string("settings.tint.status.modified %@", language: language, saved.name)
+                : saved.name
+        }
+        if tint.preset != .custom {
+            return Localization.string(tint.preset.localizationKey, language: language)
+        }
+        if let origin = menuBarTintOrigin {
+            let name = Localization.string(origin.localizationKey, language: language)
+            return Localization.string("settings.tint.status.modified %@", language: language, name)
+        }
+        return Localization.string("settings.icon.tint.custom", language: language)
+    }
+
+    private var menuBarCanRevert: Bool {
+        if menuBarSavedPreset != nil { return menuBarSavedPresetModified }
+        return appState.settings.menuBarTint.preset == .custom && menuBarTintOrigin != nil
+    }
+
+    private var menuBarPresetStatusRow: some View {
+        HStack(spacing: 8) {
+            Text("settings.tint.presetLabel")
+            Text(menuBarPresetStatus)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+            Spacer(minLength: 8)
+            if menuBarCanRevert {
+                Button("settings.tint.revert") {
+                    if let saved = menuBarSavedPreset {
+                        appState.settings.applySavedMenuBarTint(id: saved.id)
+                    } else if let origin = menuBarTintOrigin {
+                        appState.settings.applyTintPreset(origin)
+                    }
+                }
+            }
+            if menuBarSavedPresetModified {
+                Button("settings.tint.save") {
+                    _ = appState.settings.updateMenuBarTintPreset()
+                }
+            }
+            Button("settings.tint.saveAsPreset") {
+                savePresetName = defaultSaveName(for: .menuBar)
+                saveDialog = .menuBar
+            }
+            if let saved = menuBarSavedPreset {
+                Button {
+                    appState.settings.deleteSavedMenuBarTint(id: saved.id)
+                } label: {
+                    Image(systemName: "trash")
+                }
+                .buttonStyle(.borderless)
+                .help(Localization.string("settings.tint.delete", language: appState.settings.language))
+                .accessibilityLabel(Text("settings.tint.delete"))
+            }
+        }
+    }
+
+    private static let featuredMenuBarPresets: [MenuBarTintPreset] = [
+        .systemDefault, .defaultSlide, .defaultGradient, .batteryLevel, .smoothLevel,
+        .sunset, .ocean, .aurora, .lava, .off,
+    ]
+
+    private var menuBarPresetGallery: some View {
+        let language = appState.settings.language
+        let tint = appState.settings.menuBarTint
+        let savedID = appState.settings.menuBarActiveSavedID
+        let allPresets = MenuBarTintPreset.pickerCases.filter { $0 != .custom }
+        let saved = appState.settings.savedTintLibrary.menuBar
+        let needsAll = savedID != nil || (tint.preset != .custom && !Self.featuredMenuBarPresets.contains(tint.preset))
+        let expanded = showsAllMenuBarPresets || needsAll
+        let presets = expanded ? allPresets : Self.featuredMenuBarPresets
+        let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: 5)
+        return VStack(alignment: .leading, spacing: 10) {
+            LazyVGrid(columns: columns, spacing: 8) {
+                ForEach(presets) { preset in
+                    TintPresetChip(
+                        title: Localization.string(preset.localizationKey, language: language),
+                        selected: savedID == nil && tint.preset == preset
+                    ) {
+                        menuBarEditingBandID = nil
+                        menuBarTintOrigin = preset
+                        appState.settings.applyTintPreset(preset)
+                    } thumbnail: {
+                        TintRampBar(bands: MenuBarTintScheme.preset(preset).bands)
+                    }
+                }
+            }
+            if expanded, !saved.isEmpty {
+                Text("settings.tint.myPresets")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(.secondary)
+                LazyVGrid(columns: columns, spacing: 8) {
+                    ForEach(saved) { item in
+                        TintPresetChip(title: item.name, selected: savedID == item.id) {
+                            menuBarEditingBandID = nil
+                            menuBarTintOrigin = nil
+                            appState.settings.applySavedMenuBarTint(id: item.id)
+                        } thumbnail: {
+                            TintRampBar(bands: item.payload.bands)
+                        }
+                    }
+                }
+            }
+            if !needsAll {
+                Button {
+                    showsAllMenuBarPresets.toggle()
+                } label: {
+                    if expanded {
+                        Text("settings.tint.showFewer")
+                    } else if saved.isEmpty {
+                        Text(Localization.string("settings.tint.showAll %lld", language: language, allPresets.count))
+                    } else {
+                        Text(Localization.string("settings.tint.showAllAndMine %lld", language: language, allPresets.count))
+                    }
+                }
+                .buttonStyle(.link)
+                .font(.subheadline)
+            }
+        }
+        .padding(.vertical, 4)
+    }
+
+    private var menuBarOnBatteryOnlyBinding: Binding<Bool> {
         Binding(
-            get: { appState.settings.menuBarTint.mode },
-            set: { mode in
+            get: { appState.settings.menuBarTint.mode == .onBattery },
+            set: { onBatteryOnly in
                 var scheme = appState.settings.menuBarTint.markedCustom()
-                scheme.mode = mode
+                scheme.mode = onBatteryOnly ? .onBattery : .always
                 appState.settings.menuBarTint = scheme
             }
         )
     }
 
-    private func editableTintBandRow(_ band: MenuBarTintBand) -> some View {
-        let range = appState.settings.menuBarTint.percentRange(for: band.id)
-        return VStack(alignment: .leading, spacing: 8) {
-            HStack(alignment: .center, spacing: 8) {
-                TintPercentEditor(
-                    value: band.throughPercent,
-                    range: range,
-                    onCommit: { appState.settings.menuBarTint = appState.settings.menuBarTint.replacingBand(id: band.id, throughPercent: $0) }
-                )
-
-                Spacer(minLength: 8)
-
-                Picker("settings.icon.tint.blend", selection: tintBlendBinding(band.id)) {
-                    ForEach(MenuBarTintBlend.allCases) { blend in
-                        Text(LocalizedStringKey(blend.localizationKey)).tag(blend)
-                    }
-                }
-                .labelsHidden()
-                .fixedSize()
-
-                if appState.settings.menuBarTint.bands.count > 1 {
-                    Button {
-                        appState.settings.menuBarTint = appState.settings.menuBarTint.removingBand(id: band.id)
-                    } label: {
-                        Image(systemName: "minus.circle.fill")
-                            .foregroundStyle(.secondary)
-                    }
-                    .buttonStyle(.borderless)
-                    .help(LocalizedStringKey("settings.icon.tint.remove"))
-                }
-            }
-
-            tintWells(band)
-        }
-        .padding(.vertical, 2)
-    }
-
-    @ViewBuilder
-    private func tintWells(_ band: MenuBarTintBand) -> some View {
-        switch band.blend {
-        case .constant:
-            HStack(spacing: 8) {
-                Spacer()
-                tintWell(label: "settings.icon.tint.color", bandID: band.id, swatch: band.highRight, keyPath: \.highRight)
-            }
-        case .slide:
-            HStack(spacing: 12) {
-                Spacer()
-                tintWell(label: "settings.icon.tint.low", bandID: band.id, swatch: band.lowRight, keyPath: \.lowRight)
-                tintWell(label: "settings.icon.tint.high", bandID: band.id, swatch: band.highRight, keyPath: \.highRight)
-            }
-        case .gradient:
-            HStack(spacing: 12) {
-                Spacer()
-                tintWell(label: "settings.icon.tint.left", bandID: band.id, swatch: band.highLeft, keyPath: \.highLeft)
-                tintWell(label: "settings.icon.tint.right", bandID: band.id, swatch: band.highRight, keyPath: \.highRight)
-            }
-        case .slideGradient:
-            VStack(alignment: .trailing, spacing: 6) {
-                HStack(spacing: 12) {
-                    tintWell(label: "settings.icon.tint.lowLeft", bandID: band.id, swatch: band.lowLeft, keyPath: \.lowLeft)
-                    tintWell(label: "settings.icon.tint.lowRight", bandID: band.id, swatch: band.lowRight, keyPath: \.lowRight)
-                }
-                HStack(spacing: 12) {
-                    tintWell(label: "settings.icon.tint.highLeft", bandID: band.id, swatch: band.highLeft, keyPath: \.highLeft)
-                    tintWell(label: "settings.icon.tint.highRight", bandID: band.id, swatch: band.highRight, keyPath: \.highRight)
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .trailing)
-        }
-    }
-
-    private func tintWell(
-        label: LocalizedStringKey,
-        bandID: UUID,
-        swatch: MenuBarTintSwatch,
-        keyPath: WritableKeyPath<MenuBarTintBand, MenuBarTintSwatch>
-    ) -> some View {
-        HStack(spacing: 5) {
-            Text(label)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            if !swatch.followsMenuBar {
-                ColorPicker(
-                    label,
-                    selection: tintColorBinding(bandID, keyPath),
-                    supportsOpacity: false
-                )
-                .labelsHidden()
-                .fixedSize()
-            }
-            Toggle(isOn: tintFollowsMenuBarBinding(bandID, keyPath)) {
-                Text("settings.icon.tint.menuBarColor")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            .toggleStyle(.checkbox)
-        }
-    }
-
-    private func tintBlendBinding(_ id: UUID) -> Binding<MenuBarTintBlend> {
+    private var menuBarTransitionBinding: Binding<TintTransition?> {
         Binding(
-            get: { appState.settings.menuBarTint.bands.first(where: { $0.id == id })?.blend ?? .constant },
-            set: { blend in
-                appState.settings.menuBarTint = appState.settings.menuBarTint.replacingBand(id: id, blend: blend)
+            get: { TintRamp.transition(of: appState.settings.menuBarTint.bands) },
+            set: { transition in
+                guard let transition else { return }
+                setMenuBarBands(TintRamp.applying(transition, to: appState.settings.menuBarTint.bands))
             }
         )
     }
 
-    private func tintColorBinding(
-        _ id: UUID,
-        _ keyPath: WritableKeyPath<MenuBarTintBand, MenuBarTintSwatch>
-    ) -> Binding<Color> {
-        Binding(
-            get: {
-                appState.settings.menuBarTint.bands.first(where: { $0.id == id })?[keyPath: keyPath].color ?? .primary
-            },
-            set: { color in
-                replaceSwatch(id: id, keyPath: keyPath, swatch: .from(color: color))
-            }
-        )
-    }
-
-    private func tintFollowsMenuBarBinding(
-        _ id: UUID,
-        _ keyPath: WritableKeyPath<MenuBarTintBand, MenuBarTintSwatch>
-    ) -> Binding<Bool> {
-        Binding(
-            get: {
-                appState.settings.menuBarTint.bands.first(where: { $0.id == id })?[keyPath: keyPath].followsMenuBar ?? false
-            },
-            set: { follows in
-                replaceSwatch(id: id, keyPath: keyPath, swatch: follows ? .menuBar : .systemGreen)
-            }
-        )
-    }
-
-    private func replaceSwatch(
-        id: UUID,
-        keyPath: WritableKeyPath<MenuBarTintBand, MenuBarTintSwatch>,
-        swatch: MenuBarTintSwatch
-    ) {
+    private func setMenuBarBands(_ bands: [MenuBarTintBand]) {
         var scheme = appState.settings.menuBarTint.markedCustom()
-        scheme.bands = scheme.bands.map { band in
-            guard band.id == id else { return band }
-            var next = band
-            next[keyPath: keyPath] = swatch
-            if next.blend == .constant {
-                next.highRight = swatch
-                next.highLeft = swatch
-                next.lowRight = swatch
-                next.lowLeft = swatch
-            }
-            return next
-        }
+        scheme.bands = bands
         appState.settings.menuBarTint = scheme.normalized()
+    }
+
+    private var menuBarRampRow: some View {
+        let bands = appState.settings.menuBarTint.bands
+        let language = appState.settings.language
+        return VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 8) {
+                Text("settings.icon.tint.byCharge")
+                Spacer(minLength: 8)
+                Text("settings.tint.transition")
+                    .foregroundStyle(.secondary)
+                Picker("settings.tint.transition", selection: menuBarTransitionBinding) {
+                    ForEach(TintTransition.allCases) { transition in
+                        Text(LocalizedStringKey(transition.localizationKey)).tag(Optional(transition))
+                    }
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                .fixedSize()
+            }
+            TintRampEditor(
+                bands: bands,
+                followLabel: "settings.tint.menuBarDefault",
+                language: language,
+                editingID: $menuBarEditingBandID,
+                onChange: setMenuBarBands
+            ) { band, lower in
+                menuBarSegmentEditor(band, lower: lower)
+            }
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Text("settings.tint.ramp.hint")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 8)
+                Button {
+                    if let result = TintRamp.addingBoundary(to: bands) {
+                        setMenuBarBands(result.bands)
+                        menuBarEditingBandID = result.newID
+                    }
+                } label: {
+                    Label("settings.tint.addBoundary", systemImage: "plus")
+                }
+                .disabled(bands.count >= 8)
+            }
+        }
+        .padding(.vertical, 4)
+    }
+
+    private func menuBarSegmentEditor(_ band: MenuBarTintBand, lower: Int) -> some View {
+        let ordered = TintRamp.sorted(appState.settings.menuBarTint.bands)
+        let index = ordered.firstIndex { $0.id == band.id }
+        let previous = index.flatMap { $0 > 0 ? ordered[$0 - 1] : nil }
+        return TintSegmentEditor(
+            band: band,
+            lower: lower,
+            previous: previous,
+            language: appState.settings.language,
+            rangeKey: "settings.tint.segment.range %lld %lld",
+            captionKey: "settings.tint.segment.caption",
+            atKey: "settings.tint.color.at %lld",
+            followName: "settings.tint.menuBarDefault",
+            followNote: "settings.tint.menuBarDefault.note",
+            canDelete: ordered.count > 1,
+            onChange: { next in
+                setMenuBarBands(TintRamp.replacing(next, in: appState.settings.menuBarTint.bands))
+            },
+            onDelete: {
+                menuBarEditingBandID = nil
+                setMenuBarBands(TintRamp.removing(band.id, from: appState.settings.menuBarTint.bands))
+            }
+        ) {
+            menuBarSegmentPreview(band, lower: lower)
+        }
+    }
+
+    /// The icon at the bottom and top of a segment, so the effect is visible at a glance.
+    private func menuBarSegmentPreview(_ band: MenuBarTintBand, lower: Int) -> some View {
+        var scheme = appState.settings.menuBarTint.markedCustom()
+        scheme.mode = .always
+        let low = Double(min(band.throughPercent, lower + 1))
+        let high = Double(band.throughPercent)
+        return HStack(spacing: 4) {
+            if band.blend.slides, low < high {
+                menuBarGlyph(percent: low, flowMode: .discharging, scheme: scheme, scale: 1.2)
+                Image(systemName: "arrow.right")
+                    .font(.system(size: 9, weight: .semibold))
+                    .foregroundStyle(.tertiary)
+            }
+            menuBarGlyph(percent: high, flowMode: .discharging, scheme: scheme, scale: 1.2)
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 6)
+        .background(Color.primary.opacity(0.05), in: RoundedRectangle(cornerRadius: 7, style: .continuous))
     }
 
     @ViewBuilder
