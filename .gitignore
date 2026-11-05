@@ -11,3 +11,4 @@ xcuserdata/
 *.dSYM
 .swiftpm/
 .idea/
+.cursor/
