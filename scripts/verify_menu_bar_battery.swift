@@ -86,7 +86,7 @@ enum VerifyMenuBarBattery {
             }
             return (coverage, columns, rows)
         }
-        struct Ink { var width: Int; var height: Int; var widestRow: Int; var area: CGFloat; var first: Int; var last: Int }
+        struct Ink { var width: Int; var height: Int; var widestRow: Int; var area: CGFloat; var first: Int; var last: Int; var rowInk: [CGFloat] }
         func inkRuns(_ bitmap: NSBitmapImageRep, threshold: CGFloat = 0.4) -> [Ink] {
             let (coverage, columns, _) = knockout(bitmap)
             let marked = (0..<columns.count).map { i in coverage.contains { $0[i] > threshold } }
@@ -103,7 +103,8 @@ enum VerifyMenuBarBattery {
                     widestRow: coverage.map { $0[i...j].filter { $0 > threshold }.count }.max()!,
                     area: coverage.reduce(0) { $0 + $1[i...j].reduce(0, +) },
                     first: i,
-                    last: j
+                    last: j,
+                    rowInk: coverage.map { $0[i...j].reduce(0, +) }.filter { $0 > threshold }
                 ))
                 i = j + 1
             }
@@ -129,6 +130,25 @@ enum VerifyMenuBarBattery {
         } else {
             check(false, "The inside bolt separates from the digits")
         }
+        // Targets measured from the 2x screenshot of the macOS battery at 100% charging.
+        let threeDigits = inkRuns(render(100, style: .systemPercentInside, charging: true))
+        print("  100% charging runs:", threeDigits.map { "\($0.first)-\($0.last) \($0.width)x\($0.height) area \(Int($0.area))" })
+        if threeDigits.count == 4 {
+            let digitsOnly = threeDigits.prefix(3)
+            check(digitsOnly.allSatisfy { $0.height == 13 } && digitsOnly.dropFirst().allSatisfy { $0.width >= 9 && $0.width <= 10 }, "Three inside digits match the system's 13px height and 9-10px zeros")
+            check(threeDigits[1].first - threeDigits[0].last - 1 == 3 && threeDigits[2].first - threeDigits[1].last - 1 == 2, "Three inside digits keep the system's 3px and 2px spacing")
+            let bolt = threeDigits[3]
+            let stems = bolt.rowInk.prefix(3) + bolt.rowInk.suffix(3)
+            print("  100% bolt rows:", bolt.rowInk.map { String(format: "%.1f", $0) })
+            check(bolt.height == 12 && bolt.width >= 7 && bolt.width <= 9, "The three-digit bolt matches the system's 12px height and 7-9px width")
+            check(bolt.area > 29 && bolt.area < 38, "The three-digit bolt matches the system's ink area")
+            check(stems.allSatisfy { $0 < 2.4 } && bolt.rowInk.filter { $0 > 4 }.count == 2, "The three-digit bolt has the system's thin stems and two-pixel middle bar")
+            let gap = bolt.first - threeDigits[2].last - 1
+            check(gap >= 2 && gap <= 3, "The three-digit bolt sits as close to the digits as the system's")
+        } else {
+            check(false, "Three inside digits and the bolt render as separate glyphs")
+        }
+
         let fullCharging = render(100, style: .systemPercentInside, charging: true)
         let inkColumns = (1..<49).filter { px in
             (8..<24).contains { py in fullCharging.colorAt(x: px, y: py)!.alphaComponent < 0.5 }

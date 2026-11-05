@@ -86,6 +86,7 @@ enum MenuBarBatteryRenderer {
         var digitBox: NSRect
         var font: NSFont
         var text: String
+        var kern: CGFloat
         var glyphBox: NSRect
     }
 
@@ -115,16 +116,18 @@ enum MenuBarBatteryRenderer {
         let fontSize: CGFloat = {
             // The outlined body keeps a 2pt gutter, so the shared size fills the interior.
             if style.isOutlined, showsText { return digits >= 3 ? 7.2 : 8.0 }
-            return digits >= 3 ? 9.3 : 10.2
+            return digits >= 3 ? 9.0 : 10.2
         }()
         let insideKnockout = showsText && !style.isOutlined
         let font = percentFont(size: fontSize)
         var textSize = text.isEmpty
             ? NSSize.zero
             : (text as NSString).size(withAttributes: [.font: font])
+        // The system spaces three inside digits slightly wider than the font does.
+        let kern: CGFloat = insideKnockout && digits >= 3 ? 0.5 : 0
         if insideKnockout {
             // Space the knockout by ink so the bolt sits as close to the digits as the system's.
-            let line = CTLineCreateWithAttributedString(NSAttributedString(string: text, attributes: [.font: font]))
+            let line = CTLineCreateWithAttributedString(NSAttributedString(string: text, attributes: [.font: font, .kern: kern]))
             textSize.width = CTLineGetBoundsWithOptions(line, [.useGlyphPathBounds]).width
         }
         let insideBolt = insideBoltInkSize(digits: digits)
@@ -133,7 +136,7 @@ enum MenuBarBatteryRenderer {
         case .bolt: glyphAdvance = insideKnockout ? insideBolt.width : (showsText ? 5.8 : 8.8)
         case nil: glyphAdvance = 0
         }
-        let gap: CGFloat = (showsText && glyph != nil) ? (insideKnockout ? 1.0 : 0.45) : 0
+        let gap: CGFloat = (showsText && glyph != nil) ? (insideKnockout ? (digits >= 3 ? 1.0 : 0.7) : 0.45) : 0
         let groupWidth = (showsText ? textSize.width : 0) + gap + glyphAdvance
         let bodyWidth: CGFloat = {
             if !showsText { return 23 }
@@ -166,6 +169,7 @@ enum MenuBarBatteryRenderer {
             digitBox: digitBox,
             font: font,
             text: text,
+            kern: kern,
             glyphBox: glyphBox
         )
     }
@@ -206,7 +210,7 @@ enum MenuBarBatteryRenderer {
         NSColor.black.setStroke()
 
         if style.showsPercentInside, !metrics.text.isEmpty {
-            punchCenteredText(metrics.text, font: metrics.font, in: metrics.digitBox, snapsBaseline: true)
+            punchCenteredText(metrics.text, font: metrics.font, in: metrics.digitBox, kern: metrics.kern, snapsBaseline: true)
         }
 
         NSGraphicsContext.restoreGraphicsState()
@@ -427,12 +431,14 @@ enum MenuBarBatteryRenderer {
         font: NSFont,
         in box: NSRect,
         color: NSColor = .black,
+        kern: CGFloat = 0,
         snapsBaseline: Bool = false
     ) {
         let line = CTLineCreateWithAttributedString(
             NSAttributedString(string: text, attributes: [
                 .font: font,
-                .foregroundColor: color
+                .foregroundColor: color,
+                .kern: kern
             ])
         )
         let bounds = CTLineGetBoundsWithOptions(line, [.useGlyphPathBounds])
@@ -484,72 +490,31 @@ enum MenuBarBatteryRenderer {
         NSGraphicsContext.restoreGraphicsState()
     }
 
-    /// The system battery's inside bolt is the `bolt.fill` silhouette; `ink` is its
-    /// filled bounds as a fraction of the symbol image.
-    private static let insideBoltSymbol: (image: NSImage, ink: NSRect)? = {
-        guard let image = NSImage(systemSymbolName: "bolt.fill", accessibilityDescription: nil) else { return nil }
-        let scale: CGFloat = 16
-        let size = image.size
-        guard let rep = NSBitmapImageRep(
-            bitmapDataPlanes: nil,
-            pixelsWide: Int(size.width * scale),
-            pixelsHigh: Int(size.height * scale),
-            bitsPerSample: 8,
-            samplesPerPixel: 4,
-            hasAlpha: true,
-            isPlanar: false,
-            colorSpaceName: .deviceRGB,
-            bytesPerRow: 0,
-            bitsPerPixel: 0
-        ) else { return nil }
-        rep.size = size
-        NSGraphicsContext.saveGraphicsState()
-        NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: rep)
-        image.draw(in: NSRect(origin: .zero, size: size))
-        NSGraphicsContext.restoreGraphicsState()
-        var minX = rep.pixelsWide, minY = rep.pixelsHigh, maxX = -1, maxY = -1
-        for y in 0..<rep.pixelsHigh {
-            for x in 0..<rep.pixelsWide where (rep.colorAt(x: x, y: y)?.alphaComponent ?? 0) > 0.5 {
-                minX = min(minX, x); maxX = max(maxX, x)
-                minY = min(minY, y); maxY = max(maxY, y)
-            }
-        }
-        guard maxX >= minX else { return nil }
-        let w = CGFloat(rep.pixelsWide), h = CGFloat(rep.pixelsHigh)
-        let ink = NSRect(
-            x: CGFloat(minX) / w,
-            y: (h - CGFloat(maxY) - 1) / h,
-            width: CGFloat(maxX - minX + 1) / w,
-            height: CGFloat(maxY - minY + 1) / h
-        )
-        return (image, ink)
-    }()
+    /// Traced from the macOS battery's 2x inside bolt: thin stems whose edges run
+    /// straight through the middle bar, blunt tips, symmetric about the centre.
+    private static let insideBoltOutline: [NSPoint] = [
+        NSPoint(x: 1.13, y: 3.0), NSPoint(x: 0.67, y: 3.0), NSPoint(x: -2.06, y: -0.5), NSPoint(x: -0.21, y: -0.5),
+        NSPoint(x: -1.13, y: -3.0), NSPoint(x: -0.67, y: -3.0), NSPoint(x: 2.06, y: 0.5), NSPoint(x: 0.21, y: 0.5),
+    ]
 
     private static func insideBoltInkSize(digits: Int) -> NSSize {
-        let height: CGFloat = digits >= 3 ? 7.4 : 8.0
-        guard let symbol = insideBoltSymbol else { return NSSize(width: 5.8, height: height) }
-        let aspect = symbol.image.size.width / max(symbol.image.size.height, 1)
-        return NSSize(width: height * aspect * symbol.ink.width / symbol.ink.height, height: height)
+        // The system shrinks the bolt to 12px tall beside three digits, ~15px beside two.
+        let height: CGFloat = digits >= 3 ? 6.0 : 7.3
+        return NSSize(width: height * 4.12 / 6, height: height)
     }
 
     private static func punchChargeMark(in box: NSRect, digits: Int) {
-        guard let symbol = insideBoltSymbol else { return }
-        let ink = insideBoltInkSize(digits: digits)
-        let height = ink.height / symbol.ink.height
-        let width = height * symbol.image.size.width / max(symbol.image.size.height, 1)
-        let rect = NSRect(
-            x: box.midX - symbol.ink.midX * width,
-            y: box.midY - symbol.ink.midY * height,
-            width: width,
-            height: height
-        )
-        symbol.image.draw(
-            in: rect,
-            from: .zero,
-            operation: .destinationOut,
-            fraction: 1,
-            respectFlipped: true,
-            hints: [.interpolation: NSImageInterpolation.high]
-        )
+        let scale = insideBoltInkSize(digits: digits).height / 6
+        let bolt = NSBezierPath()
+        for (i, point) in insideBoltOutline.enumerated() {
+            let p = NSPoint(x: box.midX + point.x * scale, y: box.midY + point.y * scale)
+            if i == 0 { bolt.move(to: p) } else { bolt.line(to: p) }
+        }
+        bolt.close()
+        NSGraphicsContext.saveGraphicsState()
+        NSGraphicsContext.current?.compositingOperation = .destinationOut
+        NSColor.black.setFill()
+        bolt.fill()
+        NSGraphicsContext.restoreGraphicsState()
     }
 }
