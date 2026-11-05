@@ -2,17 +2,19 @@
 
 ## 正在做
 
-- 修改菜单栏电池图标：无边框模式下内部数字的大小，以及电池圆角矩形的形状（Ryan）。
+- [UI] 修改菜单栏电池图标：无边框模式下内部数字的大小，以及电池圆角矩形的形状（Ryan）。
 
 ## 待做
 
-- 高级自定义圆环：用户添加一条能取出数字的命令，就可以创建一个圆环。
+- [bug][UI] 低电量模式菜单栏图标变颜色，和低电量菜单栏图标变颜色互相冲突。
+- [bug][UI] 外接屏幕上的展示分辨率偏低。
+- [feature] 高级自定义圆环：用户添加一条能取出数字的命令，就可以创建一个圆环。
 
 ## 有开发者账号之后做
 
-- 用 Developer ID 签名并公证 dmg 和 zip，改掉安装说明里「第一次打开会被拦住」。发布时不要替换或重启 `/Applications/MacPower.app`。
-- 做桌面小组件。WidgetKit 扩展和主应用打在同一个包里，用电量这些状态走 App Group。
-- 向官方 Homebrew（`homebrew/cask`）提交。个人 tap 继续用，安装仍要加 `--no-quarantine`。
+- [feature] 用 Developer ID 签名并公证 dmg 和 zip，改掉安装说明里「第一次打开会被拦住」。发布时不要替换或重启 `/Applications/MacPower.app`。
+- [feature] 做桌面小组件。WidgetKit 扩展和主应用打在同一个包里，用电量这些状态走 App Group。
+- [feature] 向官方 Homebrew（`homebrew/cask`）提交。个人 tap 继续用，安装仍要加 `--no-quarantine`。
 
 ## 已做完归档
 
