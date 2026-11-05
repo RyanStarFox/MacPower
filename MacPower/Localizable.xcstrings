@@ -16442,6 +16442,70 @@
         "it": { "stringUnit": { "state": "translated", "value": "L’impatto energetico usa lo stesso metodo di Monitoraggio Attività, ma con un altro intervallo e un altro aggiornamento, quindi i numeri sono vicini ma non identici." } },
         "ru": { "stringUnit": { "state": "translated", "value": "«Влияние на энергию» считается так же, как в Мониторинге системы, но за другой период и с другим обновлением, поэтому числа близки, но не совпадают." } }
       }
+    },
+    "settings.popover.contents": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Panel contents" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "面板内容" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "面板內容" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "パネルの内容" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "패널 내용" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Contenu du panneau" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Inhalt des Bedienfelds" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Contenido del panel" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Conteúdo do painel" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Contenuto del pannello" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Содержимое панели" } }
+      }
+    },
+    "settings.popover.order.footer": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Drag ≡ to reorder. Keep at least one block on." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "按住 ≡ 拖动调整顺序，至少保留一个模块。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "按住 ≡ 拖動調整順序，至少保留一個模組。" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "≡ をドラッグして並べ替えます。少なくとも1つはオンにしてください。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "≡를 끌어 순서를 바꿉니다. 적어도 하나는 켜 두세요." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Faites glisser ≡ pour réordonner. Gardez au moins un bloc activé." } },
+        "de": { "stringUnit": { "state": "translated", "value": "Zum Umordnen ≡ ziehen. Mindestens ein Block muss an bleiben." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Arrastra ≡ para reordenar. Deja al menos un bloque activado." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Arraste ≡ para reordenar. Deixe pelo menos um bloco ativado." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Trascina ≡ per riordinare. Lascia attivo almeno un blocco." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Перетаскивайте ≡, чтобы менять порядок. Хотя бы один блок должен остаться включённым." } }
+      }
+    },
+    "settings.popover.appearance": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Panel appearance" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "面板外观" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "面板外觀" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "パネルの外観" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "패널 모양" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Apparence du panneau" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Darstellung des Bedienfelds" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Aspecto del panel" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Aparência do painel" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Aspetto del pannello" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Вид панели" } }
+      }
+    },
+    "settings.button.footer": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Wherever it goes, right-clicking the menu bar icon always opens Settings." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "无论放在哪里，右键点按菜单栏图标都能打开设置。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "無論放在哪裡，右鍵點按選單列圖示都能打開設定。" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "どこに置いても、メニューバーのアイコンを右クリックすれば設定を開けます。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "어디에 두든 메뉴 막대 아이콘을 오른쪽 클릭하면 설정을 열 수 있습니다." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Où qu’il soit, un clic droit sur l’icône de la barre des menus ouvre toujours les réglages." } },
+        "de": { "stringUnit": { "state": "translated", "value": "Wo auch immer sie ist: Ein Rechtsklick auf das Menüleistensymbol öffnet immer die Einstellungen." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Esté donde esté, al hacer clic derecho en el icono de la barra de menús siempre se abre la configuración." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Onde quer que esteja, clicar com o botão direito no ícone da barra de menus sempre abre os Ajustes." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Ovunque si trovi, un clic destro sull’icona nella barra dei menu apre sempre le impostazioni." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Где бы она ни была, правый щелчок по значку в строке меню всегда открывает настройки." } }
+      }
     }
   },
   "version": "1.0"

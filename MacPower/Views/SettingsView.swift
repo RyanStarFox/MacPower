@@ -1928,13 +1928,37 @@ struct SettingsView: View {
         }
     }
 
+
     @ViewBuilder
     private var panelSections: some View {
         Section {
-            Toggle("settings.popover.arrow", isOn: $appState.settings.showPopoverArrow)
-                .onChange(of: appState.settings.showPopoverArrow) { _, _ in
-                    appState.onPopoverChromeChange?()
-                }
+            SettingsPreviewCard(title: "settings.preview.panel") {
+                panelPreviewSchematic
+            }
+        }
+        Section {
+            ForEach(appState.settings.popoverOrder) { entry in
+                popoverOrderEntry(entry)
+            }
+            Button {
+                appState.settings.addPopoverDivider()
+            } label: {
+                Label("settings.popover.addDivider", systemImage: "plus")
+            }
+        } header: {
+            Text("settings.popover.contents")
+        } footer: {
+            Text("settings.popover.order.footer")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+        Section {
+            Toggle(isOn: $appState.settings.showPopoverArrow) {
+                SettingsRowLabel(title: "settings.popover.arrow", caption: "tutorial.panel.arrow")
+            }
+            .onChange(of: appState.settings.showPopoverArrow) { _, _ in
+                appState.onPopoverChromeChange?()
+            }
             Picker("settings.button.placement", selection: $appState.settings.settingsButtonPlacement) {
                 ForEach(SettingsButtonPlacement.allCases) { placement in
                     Text(LocalizedStringKey(placement.localizationKey)).tag(placement)
@@ -1946,20 +1970,69 @@ struct SettingsView: View {
                         Text(LocalizedStringKey(host.localizationKey)).tag(host)
                     }
                 }
-            }
-        }
-
-        Section {
-            ForEach(appState.settings.popoverOrder) { entry in
-                popoverOrderEntry(entry)
-            }
-            Button {
-                appState.settings.addPopoverDivider()
-            } label: {
-                Label("settings.popover.addDivider", systemImage: "plus")
+                .padding(.leading, 16)
             }
         } header: {
-            Text("settings.popover.order")
+            Text("settings.popover.appearance")
+        } footer: {
+            Text("settings.button.footer")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    /// The panel's blocks in their current order, as a small outline: hidden
+    /// blocks drop out, dividers show as rules, and a gear marks the settings button.
+    private var panelPreviewSchematic: some View {
+        VStack(alignment: .leading, spacing: 7) {
+            ForEach(appState.settings.popoverOrder) { entry in
+                panelPreviewLine(entry)
+            }
+        }
+        .padding(10)
+        .frame(width: 240, alignment: .leading)
+        .background(Color(nsColor: .windowBackgroundColor), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .strokeBorder(Color.primary.opacity(0.1), lineWidth: 0.5)
+        }
+        .shadow(color: .black.opacity(0.08), radius: 6, y: 2)
+    }
+
+    @ViewBuilder
+    private func panelPreviewLine(_ entry: PopoverEntry) -> some View {
+        let placement = appState.settings.settingsButtonPlacement
+        switch entry {
+        case .block(let block):
+            if popoverVisibilityBinding(block).wrappedValue, block != .settings || placement == .ownBlock {
+                let icon = popoverBlockIcon(block)
+                HStack(spacing: 6) {
+                    SettingsSidebarIcon(glyph: icon.glyph, palette: icon.palette, size: 16)
+                    Text(LocalizedStringKey(block.localizationKey))
+                        .font(.system(size: 11))
+                    Spacer(minLength: 4)
+                    if placement == .insideBlock, appState.settings.settingsButtonHost.rawValue == block.rawValue {
+                        Image(systemName: "gearshape")
+                            .font(.system(size: 10))
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+        case .divider:
+            Divider()
+        }
+    }
+
+    /// The sidebar's icon for each panel block, so the list matches the pages.
+    private func popoverBlockIcon(_ block: PopoverBlock) -> (glyph: SettingsSidebarGlyph, palette: SettingsIconPalette) {
+        switch block {
+        case .rings: (.symbol("circle.circle", extent: 0.62, weight: .medium), .blue)
+        case .flow: (.symbol("bolt.fill", extent: 0.64, weight: .medium), .cyan)
+        case .topApps: (.symbol("chart.bar.fill", extent: 0.58, weight: .medium), .blue)
+        case .lowPower: (.symbol("leaf.fill", extent: 0.6, weight: .medium), .green)
+        case .localIP: (.symbol("network", extent: 0.65, weight: .regular), .blue)
+        case .batteryCycle: (.symbol("arrow.triangle.2.circlepath", extent: 0.64, weight: .medium), .gray)
+        case .settings: (.gear, .gray)
         }
     }
 
@@ -3068,18 +3141,22 @@ struct SettingsView: View {
         }
     }
 
+
     private func popoverOrderRow(_ block: PopoverBlock) -> some View {
         let entry = PopoverEntry.block(block)
+        let icon = popoverBlockIcon(block)
         return HStack(spacing: 8) {
             popoverDragHandle {
                 popoverDrag.entry = entry
                 return NSItemProvider(object: entry.rawValue as NSString)
             }
+            SettingsSidebarIcon(glyph: icon.glyph, palette: icon.palette, size: 22)
             Toggle(LocalizedStringKey(block.localizationKey), isOn: popoverVisibilityBinding(block))
                 .disabled(appState.settings.isSoleVisiblePopoverBlock(block))
         }
         .onDrop(of: [.plainText], delegate: popoverDropDelegate(for: entry))
     }
+
 
     private func popoverDividerRow(_ id: UUID) -> some View {
         let entry = PopoverEntry.divider(id)
@@ -3088,9 +3165,12 @@ struct SettingsView: View {
                 popoverDrag.entry = entry
                 return NSItemProvider(object: entry.rawValue as NSString)
             }
+            SettingsDashedRule()
             Text("settings.popover.divider")
+                .font(.subheadline)
                 .foregroundStyle(.secondary)
-            Spacer(minLength: 8)
+                .fixedSize()
+            SettingsDashedRule()
             Button {
                 appState.settings.removePopoverDivider(id: id)
             } label: {

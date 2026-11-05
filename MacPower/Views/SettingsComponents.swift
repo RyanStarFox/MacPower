@@ -158,3 +158,22 @@ struct SettingsLeadingRow<Tile: View>: View {
         .contentShape(Rectangle())
     }
 }
+
+/// A dashed horizontal rule, for divider entries in a list.
+struct SettingsDashedRule: View {
+    var body: some View {
+        DashedLine()
+            .stroke(Color.secondary.opacity(0.5), style: StrokeStyle(lineWidth: 1, dash: [4, 3]))
+            .frame(height: 1)
+            .accessibilityHidden(true)
+    }
+
+    private struct DashedLine: Shape {
+        func path(in rect: CGRect) -> Path {
+            var path = Path()
+            path.move(to: CGPoint(x: rect.minX, y: rect.midY))
+            path.addLine(to: CGPoint(x: rect.maxX, y: rect.midY))
+            return path
+        }
+    }
+}
