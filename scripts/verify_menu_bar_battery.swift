@@ -14,7 +14,7 @@ enum VerifyMenuBarBattery {
         }
 
         let appearance = NSAppearance(named: .darkAqua)!
-        func render(_ percent: Double, style: MenuBarIconStyle = .outlineFill, charging: Bool = false, fill: MenuBarResolvedFill = .template) -> NSBitmapImageRep {
+        func render(_ percent: Double, style: MenuBarIconStyle = .outlineFill, charging: Bool = false, fill: MenuBarResolvedFill = .template, appearance: NSAppearance = appearance) -> NSBitmapImageRep {
             var snapshot = PowerSnapshot.empty
             snapshot.percent = percent
             snapshot.flowMode = charging ? .charging : .discharging
@@ -69,6 +69,26 @@ enum VerifyMenuBarBattery {
         let borderlessDigits = render(0, style: .systemPercentInside)
         let borderlessDigitAlphas = (8..<16).flatMap { x in (5..<11).map { y in color(borderlessDigits, CGFloat(x), CGFloat(y)).alphaComponent } }
         check(borderlessDigitAlphas.contains(where: { $0 < 0.01 }) && borderlessDigitAlphas.contains(where: { abs($0 - 0.52) < 0.01 }), "Borderless digits retain the original knockout over a visible backing")
+
+        let yellow = MenuBarResolvedFill(left: .systemYellow, right: .systemYellow, isTemplate: false)
+        let yellowOutlined = render(50, fill: yellow)
+        let yellowBorderless = render(50, style: .systemFill, fill: yellow)
+        let outlinedCharge = color(yellowOutlined, 5, 8)
+        let outlinedFrame = color(yellowOutlined, 12, 2.25)
+        let borderlessEmpty = color(yellowBorderless, 18, 8)
+        let borderlessCap = color(yellowBorderless, 25, 8)
+        func isNeutral(_ c: NSColor) -> Bool {
+            abs(c.redComponent - c.greenComponent) < 0.05 && abs(c.greenComponent - c.blueComponent) < 0.05
+        }
+        check(outlinedCharge.redComponent > outlinedCharge.blueComponent + 0.3, "Colored charge is yellow")
+        check(isNeutral(outlinedFrame), "Colored outlined battery keeps a neutral frame")
+        check(isNeutral(color(yellowOutlined, 24.25, 8)), "Colored outlined battery keeps a neutral terminal")
+        check(isNeutral(borderlessEmpty), "Colored borderless battery keeps a neutral empty region")
+        check(isNeutral(borderlessCap), "Colored borderless battery keeps a neutral terminal")
+        check(isNeutral(color(render(50, charging: true, fill: yellow), 11, 8)), "Colored outlined battery keeps a neutral charging bolt")
+        let lightFrame = color(render(50, fill: yellow, appearance: NSAppearance(named: .aqua)!), 12, 2.25)
+        check(isNeutral(lightFrame) && lightFrame.redComponent < 0.2, "Colored frame adapts to light appearance")
+        check(outlinedFrame.redComponent > 0.8, "Colored frame adapts to dark appearance")
 
         let gradient = render(100, fill: MenuBarResolvedFill(left: .red, right: .blue, isTemplate: false))
         check(color(gradient, 4, 7).redComponent > color(gradient, 4, 7).blueComponent && color(gradient, 20, 7).blueComponent > color(gradient, 20, 7).redComponent, "Custom gradients still flow from left to right")

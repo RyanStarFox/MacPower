@@ -447,6 +447,7 @@ struct LowPowerSection: View {
 
 /// Matches the battery menu's energy-mode control: gray rounded row, battery glyph, one label.
 struct EnergyModeButton: View {
+    @Environment(\.colorScheme) private var colorScheme
     var title: String
     var systemImage = "battery.100percent"
     var detail: String?
@@ -458,9 +459,18 @@ struct EnergyModeButton: View {
 
     var body: some View {
         HStack(spacing: LowPowerButtonRowLayout.iconSpacing) {
-            Image(systemName: systemImage)
-                .font(.system(size: LowPowerButtonRowLayout.fontSize, weight: .medium))
-                .foregroundStyle(iconYellow ? AnyShapeStyle(Color.yellow) : AnyShapeStyle(.primary))
+            Group {
+                if iconYellow {
+                    Image(nsImage: lowPowerBatteryImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 20, height: 13)
+                } else {
+                    Image(systemName: systemImage)
+                        .font(.system(size: LowPowerButtonRowLayout.fontSize, weight: .medium))
+                        .foregroundStyle(.primary)
+                }
+            }
                 .frame(width: LowPowerButtonRowLayout.iconSide, height: LowPowerButtonRowLayout.iconSide)
                 .background(Circle().fill(Color.primary.opacity(0.08)))
             if let detail {
@@ -493,6 +503,20 @@ struct EnergyModeButton: View {
                 .fill(Color.primary.opacity(0.06))
         )
         .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+    }
+
+    private var lowPowerBatteryImage: NSImage {
+        var snapshot = PowerSnapshot.empty
+        snapshot.percent = 35
+        let appearance = NSAppearance(named: colorScheme == .dark ? .darkAqua : .aqua)!
+        let yellow = NSColor.systemYellow
+        return MenuBarBatteryRenderer.image(
+            snapshot: snapshot,
+            style: .outlineFill,
+            fill: MenuBarResolvedFill(left: yellow, right: yellow, isTemplate: false),
+            appearance: appearance,
+            showChargeGlyphs: false
+        )
     }
 
     /// The visible title sits on top of every reserved title. Height follows the
