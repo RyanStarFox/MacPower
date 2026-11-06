@@ -51,6 +51,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 struct MenuBarIconKey: Equatable {
     var percent: Int
     var flowMode: EnergyFlowMode
+    var lowPowerMode: Bool
     var outlined: Bool
     var digits: MenuBarDigitPlacement
     var tint: MenuBarTintScheme
@@ -61,6 +62,7 @@ struct MenuBarIconKey: Equatable {
     init(_ state: AppState) {
         percent = Int(state.snapshot.percent.rounded(.towardZero))
         flowMode = state.snapshot.flowMode
+        lowPowerMode = ProcessInfo.processInfo.isLowPowerModeEnabled
         outlined = state.settings.iconOutlined
         digits = state.settings.digitPlacement
         tint = state.settings.menuBarTint

@@ -662,8 +662,16 @@ struct MenuBarTintScheme: Codable, Equatable, Sendable {
         fillSwatches(percent: percent, flowMode: flowMode).right
     }
 
-    func fill(percent: Double, flowMode: EnergyFlowMode, appearance: NSAppearance) -> MenuBarResolvedFill {
+    func fill(percent: Double, flowMode: EnergyFlowMode, appearance: NSAppearance, lowPowerMode: Bool = false) -> MenuBarResolvedFill {
         if preset == .off { return .template }
+        if lowPowerMode {
+            var configured = self
+            configured.mode = .always
+            let chosen = configured.fill(percent: percent, flowMode: flowMode, appearance: appearance)
+            if !chosen.isTemplate { return chosen }
+            let yellow = MenuBarTintSwatch.systemYellow.paintNSColor(appearance: appearance)
+            return MenuBarResolvedFill(left: yellow, right: yellow, isTemplate: false)
+        }
         if mode == .onBattery, flowMode != .discharging, flowMode != .underpowered {
             return .template
         }

@@ -10,6 +10,7 @@ final class StatusItemController: NSObject, NSPopoverDelegate, NSMenuDelegate {
     private var defaultArrowHeight: CGFloat?
     private var appearanceObservation: NSKeyValueObservation?
     private var themeChangeObserver: NSObjectProtocol?
+    private var powerStateObserver: NSObjectProtocol?
     private var scrollObserver: NSObjectProtocol?
     /// Clip-view origin from the last time the panel was scrolled. `NSClipView` is flipped, so 0 is the top.
     private var savedScrollOffset: CGFloat = 0
@@ -93,6 +94,19 @@ final class StatusItemController: NSObject, NSPopoverDelegate, NSMenuDelegate {
             }
         }
 
+        powerStateObserver = NotificationCenter.default.addObserver(
+            forName: .NSProcessInfoPowerStateDidChange,
+            object: ProcessInfo.processInfo,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in
+                guard let self else { return }
+                if self.appState.lowPowerNow != nil, !self.appState.lowPowerBusy {
+                    self.appState.lowPowerNow = ProcessInfo.processInfo.isLowPowerModeEnabled
+                }
+                self.refreshIcon()
+            }
+        }
         refreshIcon(force: true)
     }
 

@@ -218,7 +218,9 @@ struct PopoverRootView: View {
             if appState.settings.showLowPower {
                 LowPowerSection(
                     strategy: appState.settings.lowPowerStrategy ?? appState.lowPowerPreset,
+                    savedStrategy: appState.settings.lowPowerStrategy,
                     lowPowerOn: appState.lowPowerNow,
+                    externalConnected: appState.snapshot.externalConnected,
                     failed: appState.lowPowerChangeFailed,
                     language: appState.settings.language,
                     panelWidth: panelWidth,
