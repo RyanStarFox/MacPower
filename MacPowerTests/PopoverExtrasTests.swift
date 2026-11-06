@@ -25,7 +25,7 @@ final class PopoverExtrasTests: XCTestCase {
             for language in [AppLanguage.simplifiedChinese, .english, .german, .russian] {
                 for visibility in LowPowerButtonVisibility.allCases {
                     for layout in LowPowerButtonLayout.allCases {
-                        func height(current: Bool, saved: LowPowerPreset?) -> Int? {
+                        @MainActor func height(current: Bool, saved: LowPowerPreset?) -> Int? {
                             let section = LowPowerSection(
                                 strategy: .onlyBattery,
                                 savedStrategy: saved,
