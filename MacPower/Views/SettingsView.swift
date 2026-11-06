@@ -2437,7 +2437,7 @@ struct SettingsView: View {
                 .monospacedDigit()
                 .foregroundStyle(.secondary)
             Stepper(
-                "",
+                title,
                 value: Binding(get: { kilobytes }, set: set),
                 in: AppSettings.halfSpeedRange,
                 step: 64
@@ -2468,7 +2468,7 @@ struct SettingsView: View {
                 }
             }
             .foregroundStyle(.secondary)
-            Stepper("", value: Binding(get: { value }, set: set), in: range, step: step)
+            Stepper(title, value: Binding(get: { value }, set: set), in: range, step: step)
                 .labelsHidden()
                 .fixedSize()
         }
@@ -2534,6 +2534,7 @@ struct SettingsView: View {
             .buttonStyle(.plain)
             .popover(isPresented: $showingAuthorSupport, arrowEdge: .trailing) {
                 authorSupportPopover
+                    .environment(\.locale, appState.settings.resolvedLocale)
             }
         }
     }
@@ -3170,7 +3171,7 @@ struct SettingsView: View {
                     .monospacedDigit()
                     .foregroundStyle(.secondary)
                 Stepper(
-                    "",
+                    "settings.rings.half.swap.title",
                     value: Binding(
                         get: { appState.settings.swapHalfMegabytes },
                         set: { appState.settings.swapHalfMegabytes = $0 }
@@ -3194,6 +3195,7 @@ struct SettingsView: View {
                 }
                 .popover(isPresented: ringScalePresented(.thermalState), arrowEdge: .bottom) {
                     ringScalePopover(.thermalState)
+                        .environment(\.locale, appState.settings.resolvedLocale)
                 }
             }
             Picker("settings.rings.temperatureUnit", selection: $appState.settings.temperatureUnit) {
@@ -3386,6 +3388,7 @@ struct SettingsView: View {
                     set: { if !$0, ringOptionsItemID == item.id { ringOptionsItemID = nil } }
                 ), arrowEdge: .bottom) {
                     ringBluetoothOptions(item)
+                        .environment(\.locale, appState.settings.resolvedLocale)
                 }
             }
             ringMoveMenu(item, rowIndex: rowIndex)
@@ -4341,12 +4344,15 @@ struct SettingsView: View {
 
     private var iconSlotColumnWidth: CGFloat { 56 }
 
-    private func iconZoomSlider(value: Binding<Double>, width: CGFloat? = nil) -> some View {
+    private func iconZoomSlider(value: Binding<Double>, name: String, width: CGFloat? = nil) -> some View {
         let percent = Int((value.wrappedValue * 100).rounded())
+        let language = appState.settings.language
         return VStack(spacing: 2) {
             Slider(value: value, in: GlyphSlot.minScale...GlyphSlot.maxScale, step: 0.01)
                 .controlSize(.mini)
                 .labelsHidden()
+                .accessibilityLabel(Text(verbatim: Localization.string("settings.icons.zoom.for %@", language: language, name)))
+                .accessibilityValue(Text(verbatim: "\(percent)%"))
             Text("\(percent)%")
                 .font(.caption2.monospacedDigit())
                 .foregroundStyle(.secondary)
@@ -4648,6 +4654,7 @@ struct SettingsView: View {
                 .buttonStyle(.plain)
                 .popover(isPresented: bluetoothIconPresented(ring.id, part: target.part), arrowEdge: .bottom) {
                     bluetoothIconChoices(device: target.device, ring: ring, part: target.part)
+                        .environment(\.locale, appState.settings.resolvedLocale)
                 }
                 Text(title)
                     .lineLimit(2)
@@ -4839,7 +4846,7 @@ struct SettingsView: View {
                         .monospacedDigit()
                         .foregroundStyle(.secondary)
                     Stepper(
-                        "",
+                        "settings.rings.half.swap",
                         value: Binding(
                             get: { appState.settings.swapHalfMegabytes },
                             set: { appState.settings.swapHalfMegabytes = $0 }
@@ -4922,14 +4929,17 @@ struct SettingsView: View {
             }
             .buttonStyle(.plain)
             .help(Localization.string("settings.icons.clickToChange", language: language))
+            .accessibilityLabel(Text(verbatim: Localization.string("settings.icons.change.for %@", language: language, Localization.string(ring.localizationKey, language: language))))
             .popover(isPresented: ringIconEditorPresented(ring), arrowEdge: .bottom) {
                 ringIconChoicePopover(ring)
+                    .environment(\.locale, appState.settings.resolvedLocale)
             }
             iconZoomSlider(
                 value: Binding(
                     get: { appState.settings.ringIcons.slot(for: ring).scale },
                     set: { appState.settings.ringIcons = appState.settings.ringIcons.withScale($0, for: ring) }
                 ),
+                name: Localization.string(ring.localizationKey, language: language),
                 width: column
             )
         }
@@ -4975,11 +4985,13 @@ struct SettingsView: View {
                     }
                 }
             }
+            .accessibilityLabel(Text(verbatim: Localization.string("settings.icons.change.for %@", language: language, Localization.string(role.localizationKey, language: language))))
             iconZoomSlider(
                 value: Binding(
                     get: { appState.settings.flowIcons.slot(for: role).scale },
                     set: { appState.settings.flowIcons = appState.settings.flowIcons.withScale($0, for: role) }
-                )
+                ),
+                name: Localization.string(role.localizationKey, language: language)
             )
         }
         .frame(width: iconSlotColumnWidth)

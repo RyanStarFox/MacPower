@@ -1792,3 +1792,23 @@ final class TintRampTests: XCTestCase {
         XCTAssertEqual([next.lowLeft, next.lowRight, next.highLeft, next.highRight], Array(repeating: .systemOrange, count: 4))
     }
 }
+
+final class RingPlacementTests: XCTestCase {
+    /// Showing a ring that no row holds yet must put it in a row, or it counts as shown but never appears.
+    func testShowingAnUnplacedRingPlacesIt() {
+        let suite = "MacPower.RingPlacement.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suite)!
+        defaults.removePersistentDomain(forName: suite)
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let settings = AppSettings(defaults: defaults)
+        for slot in RingSlot.allCases where !settings.enabledRingSlots.contains(slot) {
+            settings.setRingSlot(slot, visible: true)
+            XCTAssertTrue(settings.ringRows.flatMap { $0 }.contains { $0.slot == slot }, "\(slot) is shown but sits in no row")
+        }
+        settings.setRingSlot(.memoryPressure, visible: false)
+        settings.setRingSlot(.memoryPressure, visible: true)
+        settings.addRingRow()
+        settings.moveRingItem(id: RingItem.slot(.memoryPressure).id, toEndOfRow: 1)
+        XCTAssertEqual(settings.ringRows[1].map(\.id), [RingItem.slot(.memoryPressure).id])
+    }
+}

@@ -389,6 +389,7 @@ struct TintRampEditor<SegmentEditor: View>: View {
                 arrowEdge: .bottom
             ) {
                 segmentEditor(band, lower)
+                    .environment(\.locale, language.resolvedLocale)
             }
             .help(title)
             .accessibilityElement()
@@ -421,15 +422,24 @@ struct TintRampEditor<SegmentEditor: View>: View {
         }
         .frame(width: 22, height: handleHeight)
         .position(x: width * Double(percent) / 100, y: handleHeight / 2)
-        .accessibilityElement()
-        .accessibilityLabel(Localization.string("settings.tint.boundary", language: language))
-        .accessibilityValue("\(percent)%")
-        .accessibilityAdjustableAction { direction in
-            let step = direction == .increment ? 1 : -1
-            let next = min(range.upperBound, max(range.lowerBound, band.throughPercent + step))
-            if next != band.throughPercent {
-                onChange(TintRamp.moving(band.id, to: next, in: committed))
+        .accessibilityRepresentation {
+            // To VoiceOver each split point is an ordinary slider over the range it can move in.
+            Slider(
+                value: Binding(
+                    get: { Double(band.throughPercent) },
+                    set: { value in
+                        let next = min(range.upperBound, max(range.lowerBound, Int(value.rounded())))
+                        if next != band.throughPercent {
+                            onChange(TintRamp.moving(band.id, to: next, in: committed))
+                        }
+                    }
+                ),
+                in: Double(range.lowerBound)...Double(max(range.lowerBound, range.upperBound)),
+                step: 1
+            ) {
+                Text(verbatim: Localization.string("settings.tint.boundary", language: language))
             }
+            .accessibilityValue(Text(verbatim: "\(percent)%"))
         }
     }
 

@@ -423,9 +423,13 @@ final class AppSettings {
 
     func setRingSlot(_ slot: RingSlot, visible: Bool) {
         if visible {
+            // A ring that was never placed gets its spot first: once it counts as shown,
+            // the layout no longer reserves a place for it.
+            let needsPlacement = !ringRows.flatMap({ $0 }).contains(where: { $0.slot == slot })
+            let placed = needsPlacement ? ringLayoutEntries() : []
             enabledRingSlots.insert(slot)
-            if !ringRows.flatMap({ $0 }).contains(where: { $0.slot == slot }) {
-                applyRingLayout(ringLayoutEntries())
+            if needsPlacement {
+                applyRingLayout(placed)
             }
         } else {
             enabledRingSlots.remove(slot)
