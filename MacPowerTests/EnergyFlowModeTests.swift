@@ -1002,6 +1002,31 @@ final class MenuBarTintTests: XCTestCase {
         XCTAssertEqual(scheme.swatch(percent: 21, flowMode: .discharging), .menuBar)
     }
 
+    func testLowPowerUsesConfiguredThresholdBeforeYellowFallback() {
+        let appearance = NSAppearance(named: .darkAqua)!
+        let scheme = MenuBarTintScheme(preset: .custom, mode: .onBattery, bands: [
+            MenuBarTintBand(throughPercent: 30, swatch: .systemRed),
+            MenuBarTintBand(throughPercent: 100, swatch: .menuBar)
+        ])
+        let red = MenuBarTintSwatch.systemRed.paintNSColor(appearance: appearance)
+        let yellow = MenuBarTintSwatch.systemYellow.paintNSColor(appearance: appearance)
+        XCTAssertEqual(scheme.fill(percent: 30, flowMode: .discharging, appearance: appearance, lowPowerMode: true).left, red)
+        XCTAssertEqual(scheme.fill(percent: 30, flowMode: .charging, appearance: appearance, lowPowerMode: true).left, red)
+        XCTAssertEqual(scheme.fill(percent: 31, flowMode: .discharging, appearance: appearance, lowPowerMode: true).left, yellow)
+        XCTAssertEqual(scheme.fill(percent: 31, flowMode: .charging, appearance: appearance, lowPowerMode: true).left, yellow)
+    }
+
+    func testLowPowerRespectsDisabledAndCustomColors() {
+        let appearance = NSAppearance(named: .aqua)!
+        let blue = MenuBarTintSwatch.rgb(0.1, 0.3, 0.8)
+        let scheme = MenuBarTintScheme(preset: .custom, mode: .always, bands: [
+            MenuBarTintBand(throughPercent: 100, swatch: blue)
+        ])
+        XCTAssertEqual(scheme.fill(percent: 5, flowMode: .discharging, appearance: appearance, lowPowerMode: true).left, blue.paintNSColor(appearance: appearance))
+        XCTAssertTrue(MenuBarTintScheme.off.fill(percent: 5, flowMode: .discharging, appearance: appearance, lowPowerMode: true).isTemplate)
+        XCTAssertTrue(MenuBarTintScheme.systemDefault.fill(percent: 50, flowMode: .discharging, appearance: appearance, lowPowerMode: false).isTemplate)
+    }
+
     func testOffPresetNeverTints() {
         let scheme = MenuBarTintScheme.off
         XCTAssertEqual(scheme.swatch(percent: 5, flowMode: .discharging), .menuBar)

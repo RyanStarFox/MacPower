@@ -1,4 +1,5 @@
 import Darwin
+import SwiftUI
 import XCTest
 @testable import MacPower
 
@@ -8,6 +9,51 @@ final class PopoverExtrasTests: XCTestCase {
         XCTAssertEqual(LowPowerPreset.preset(battery: true, ac: true), .alwaysSave)
         XCTAssertEqual(LowPowerPreset.preset(battery: true, ac: false), .onlyBattery)
         XCTAssertEqual(LowPowerPreset.preset(battery: false, ac: true), .onlyPower)
+    }
+
+    func testLowPowerDefaultDetectsOnlyOverridesForActiveSource() {
+        let preset = LowPowerPreset.onlyBattery
+        XCTAssertFalse(preset.isOverridden(current: nil, externalConnected: false))
+        XCTAssertFalse(preset.isOverridden(current: true, externalConnected: false))
+        XCTAssertTrue(preset.isOverridden(current: false, externalConnected: false))
+        XCTAssertFalse(preset.isOverridden(current: false, externalConnected: true))
+        XCTAssertTrue(preset.isOverridden(current: true, externalConnected: true))
+    }
+
+    func testLowPowerNoticeDoesNotResizeThePanel() async {
+        await MainActor.run {
+            for language in [AppLanguage.simplifiedChinese, .english, .german, .russian] {
+                for visibility in LowPowerButtonVisibility.allCases {
+                    for layout in LowPowerButtonLayout.allCases {
+                        func height(current: Bool, saved: LowPowerPreset?) -> Int? {
+                            let section = LowPowerSection(
+                                strategy: .onlyBattery,
+                                savedStrategy: saved,
+                                lowPowerOn: current,
+                                externalConnected: false,
+                                failed: false,
+                                language: language,
+                                panelWidth: PopoverLayout.width,
+                                layout: layout,
+                                visibility: visibility,
+                                onStrategy: { _ in },
+                                onToggleNow: {}
+                            )
+                            let view = section.frame(width: PopoverLayout.width - PopoverLayout.padding * 2)
+                            let renderer = ImageRenderer(content: view)
+                            renderer.scale = 2
+                            return renderer.cgImage?.height
+                        }
+                        let matching = height(current: true, saved: .onlyBattery)
+                        let overridden = height(current: false, saved: .onlyBattery)
+                        let noDefault = height(current: true, saved: nil)
+                        XCTAssertNotNil(matching, "\(language), \(visibility), \(layout)")
+                        XCTAssertEqual(matching, overridden, "\(language), \(visibility), \(layout)")
+                        XCTAssertEqual(matching, noDefault, "\(language), \(visibility), \(layout)")
+                    }
+                }
+            }
+        }
     }
 
     func testLowPowerPresetParsesPmsetSections() {
@@ -440,7 +486,7 @@ final class PopoverExtrasTests: XCTestCase {
         )
         XCTAssertEqual(
             Localization.string("settings.lowPower.buttons.strategy", language: .simplifiedChinese),
-            "仅策略"
+            "仅默认状态"
         )
         XCTAssertEqual(
             Localization.string("settings.lowPower.buttons.now", language: .simplifiedChinese),
@@ -455,6 +501,9 @@ final class PopoverExtrasTests: XCTestCase {
             "settings.lowPower.buttons.both",
             "settings.lowPower.buttons.strategy",
             "settings.lowPower.buttons.now",
+            "popover.lowPower.defaultState",
+            "popover.lowPower.currentState",
+            "popover.lowPower.override",
         ]
         for language in AppLanguage.allCases where language != .system {
             for key in keys {

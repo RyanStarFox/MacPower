@@ -645,7 +645,8 @@ final class AppState {
         settings.menuBarTint.fill(
             percent: snapshot.percent,
             flowMode: snapshot.flowMode,
-            appearance: appearance
+            appearance: appearance,
+            lowPowerMode: ProcessInfo.processInfo.isLowPowerModeEnabled
         )
     }
 }

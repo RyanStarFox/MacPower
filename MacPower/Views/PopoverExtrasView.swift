@@ -231,6 +231,7 @@ enum LowPowerButtonRowLayout {
     static let fontSize: CGFloat = 13
     static let strategyLines = 2
     static let lowPowerLines = 1
+    static let menuIndicatorWidth: CGFloat = 12
 
     static func textColumnWidth(panelWidth: CGFloat, sideBySide: Bool) -> CGFloat {
         let content = panelWidth - PopoverLayout.padding * 2
@@ -245,7 +246,7 @@ enum LowPowerButtonRowLayout {
     ) -> Bool {
         let width = textColumnWidth(panelWidth: panelWidth, sideBySide: true)
         let strategiesFit = strategyLabels.allSatisfy {
-            labelFits($0, width: width, maxLines: strategyLines)
+            labelFits($0, width: width - menuIndicatorWidth, maxLines: strategyLines)
         }
         return strategiesFit && labelFits(lowPowerLabel, width: width, maxLines: lowPowerLines)
     }
@@ -306,7 +307,9 @@ enum LowPowerButtonRowLayout {
 
 struct LowPowerSection: View {
     var strategy: LowPowerPreset?
+    var savedStrategy: LowPowerPreset?
     var lowPowerOn: Bool?
+    var externalConnected: Bool
     var failed: Bool
     var language: AppLanguage
     var panelWidth: CGFloat
@@ -352,6 +355,13 @@ struct LowPowerSection: View {
             )
             if lowPowerOn != nil || strategy != nil {
                 buttons
+                // Keep the popover height steady when the override notice changes.
+                Text(Localization.string("popover.lowPower.override", language: language))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .opacity(isOverridden ? 1 : 0)
+                    .accessibilityHidden(!isOverridden)
             } else {
                 Text(Localization.string("popover.lowPower.reading", language: language))
                     .font(.callout)
@@ -370,31 +380,47 @@ struct LowPowerSection: View {
         .animation(nil, value: failed)
     }
 
+    private var isOverridden: Bool {
+        savedStrategy?.isOverridden(current: lowPowerOn, externalConnected: externalConnected) == true
+    }
+
     @ViewBuilder
     private var buttons: some View {
         if visibility.showsStrategy && visibility.showsLowPower {
             if sideBySide {
                 HStack(spacing: LowPowerButtonRowLayout.buttonSpacing) {
-                    strategyMenu
+                    strategyControl
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    nowButton
+                    nowControl
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
                 .fixedSize(horizontal: false, vertical: true)
             } else {
                 VStack(alignment: .leading, spacing: LowPowerButtonRowLayout.buttonSpacing) {
-                    strategyMenu
+                    strategyControl
                         .frame(maxWidth: .infinity)
-                    nowButton
+                    nowControl
                         .frame(maxWidth: .infinity)
                 }
             }
         } else if visibility.showsStrategy {
-            strategyMenu
+            strategyControl
                 .frame(maxWidth: .infinity)
         } else {
-            nowButton
+            nowControl
                 .frame(maxWidth: .infinity)
+        }
+    }
+
+    private var strategyControl: some View {
+        LowPowerLabeledButton(label: Localization.string("popover.lowPower.defaultState", language: language)) {
+            strategyMenu
+        }
+    }
+
+    private var nowControl: some View {
+        LowPowerLabeledButton(label: Localization.string("popover.lowPower.currentState", language: language)) {
+            nowButton
         }
     }
 
@@ -417,7 +443,8 @@ struct LowPowerSection: View {
                 detail: nil,
                 lineLimit: LowPowerButtonRowLayout.strategyLines,
                 fillsHeight: sideBySide,
-                reserveTitles: strategyLabels
+                reserveTitles: strategyLabels,
+                showsMenuIndicator: true
             )
         }
         .menuIndicator(.hidden)
@@ -429,8 +456,9 @@ struct LowPowerSection: View {
         Button(action: onToggleNow) {
             EnergyModeButton(
                 title: lowPowerTitle,
+                systemImage: "battery.25percent",
                 detail: nil,
-                iconYellow: lowPowerOn == true,
+                iconActive: lowPowerOn == true,
                 fillsHeight: sideBySide
             )
         }
@@ -445,34 +473,44 @@ struct LowPowerSection: View {
     }
 }
 
+/// Distinguishes a default-state selector from the current-state button.
+struct LowPowerLabeledButton<Content: View>: View {
+    var label: String
+    @ViewBuilder var content: Content
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(label)
+                .font(.system(size: 11))
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+                .padding(.leading, LowPowerButtonRowLayout.textLeading)
+            content
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
 /// Matches the battery menu's energy-mode control: gray rounded row, battery glyph, one label.
 struct EnergyModeButton: View {
-    @Environment(\.colorScheme) private var colorScheme
     var title: String
     var systemImage = "battery.100percent"
     var detail: String?
-    var iconYellow = false
+    var iconActive = false
     var lineLimit = 1
     var fillsHeight = false
     /// Hidden copies of every label, so the button stays as tall as the tallest one.
     var reserveTitles: [String] = []
+    var showsMenuIndicator = false
 
     var body: some View {
         HStack(spacing: LowPowerButtonRowLayout.iconSpacing) {
-            Group {
-                if iconYellow {
-                    Image(nsImage: lowPowerBatteryImage)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 20, height: 13)
-                } else {
-                    Image(systemName: systemImage)
-                        .font(.system(size: LowPowerButtonRowLayout.fontSize, weight: .medium))
-                        .foregroundStyle(.primary)
-                }
-            }
+            Image(systemName: systemImage)
+                .font(.system(size: LowPowerButtonRowLayout.fontSize, weight: .medium))
+                .foregroundStyle(iconActive ? Color.white : (systemImage == "battery.25percent" ? Color.primary.opacity(0.55) : Color.primary))
                 .frame(width: LowPowerButtonRowLayout.iconSide, height: LowPowerButtonRowLayout.iconSide)
-                .background(Circle().fill(Color.primary.opacity(0.08)))
+                .background(Circle().fill(iconActive ? Color.accentColor : Color.primary.opacity(0.08)))
             if let detail {
                 VStack(alignment: .leading, spacing: 0) {
                     Text(title)
@@ -488,7 +526,15 @@ struct EnergyModeButton: View {
             } else {
                 titleLabel(title)
             }
-            Spacer(minLength: 0)
+            Spacer(minLength: showsMenuIndicator ? LowPowerButtonRowLayout.menuIndicatorWidth : 0)
+                .overlay(alignment: .trailing) {
+                    if showsMenuIndicator {
+                        Image(systemName: "chevron.down")
+                            .font(.system(size: 9, weight: .semibold))
+                            .foregroundStyle(.secondary)
+                            .accessibilityHidden(true)
+                    }
+                }
         }
         .padding(.leading, LowPowerButtonRowLayout.textLeading)
         .padding(.trailing, LowPowerButtonRowLayout.textTrailing)
@@ -503,20 +549,6 @@ struct EnergyModeButton: View {
                 .fill(Color.primary.opacity(0.06))
         )
         .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-    }
-
-    private var lowPowerBatteryImage: NSImage {
-        var snapshot = PowerSnapshot.empty
-        snapshot.percent = 35
-        let appearance = NSAppearance(named: colorScheme == .dark ? .darkAqua : .aqua)!
-        let yellow = NSColor.systemYellow
-        return MenuBarBatteryRenderer.image(
-            snapshot: snapshot,
-            style: .outlineFill,
-            fill: MenuBarResolvedFill(left: yellow, right: yellow, isTemplate: false),
-            appearance: appearance,
-            showChargeGlyphs: false
-        )
     }
 
     /// The visible title sits on top of every reserved title. Height follows the

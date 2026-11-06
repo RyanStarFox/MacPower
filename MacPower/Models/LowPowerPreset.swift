@@ -26,6 +26,11 @@ enum LowPowerPreset: String, CaseIterable, Identifiable, Equatable, Sendable {
         }
     }
 
+    func isOverridden(current: Bool?, externalConnected: Bool) -> Bool {
+        guard let current else { return false }
+        return current != (externalConnected ? ac : battery)
+    }
+
     static func preset(battery: Bool, ac: Bool) -> LowPowerPreset {
         switch (battery, ac) {
         case (false, false): .alwaysPerformance

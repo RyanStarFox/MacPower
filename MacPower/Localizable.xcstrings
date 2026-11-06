@@ -2640,17 +2640,17 @@
     "settings.lowPower.buttons.strategy": {
       "extractionState": "manual",
       "localizations": {
-        "de": { "stringUnit": { "state": "translated", "value": "Nur Regel" } },
-        "en": { "stringUnit": { "state": "translated", "value": "Rule only" } },
-        "es": { "stringUnit": { "state": "translated", "value": "Solo regla" } },
-        "fr": { "stringUnit": { "state": "translated", "value": "Règle seule" } },
-        "it": { "stringUnit": { "state": "translated", "value": "Solo regola" } },
-        "ja": { "stringUnit": { "state": "translated", "value": "方針のみ" } },
-        "ko": { "stringUnit": { "state": "translated", "value": "전략만" } },
-        "pt-BR": { "stringUnit": { "state": "translated", "value": "Só a regra" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Только план" } },
-        "zh-Hans": { "stringUnit": { "state": "translated", "value": "仅策略" } },
-        "zh-Hant": { "stringUnit": { "state": "translated", "value": "僅策略" } }
+        "de": { "stringUnit": { "state": "translated", "value": "Nur Standard" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Default only" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Solo predeterminado" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Par défaut seul" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Solo predefinito" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "デフォルトのみ" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "기본 상태만" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Só padrão" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Только по умолчанию" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "仅默认状态" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "僅預設狀態" } }
       }
     },
     "settings.lowPower.buttons.now": {
@@ -12083,6 +12083,54 @@
         "zh-Hant": { "stringUnit": { "state": "translated", "value": "低電量" } }
       }
     },
+    "popover.lowPower.defaultState": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Standardzustand" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Default state" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Estado predeterminado" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "État par défaut" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Stato predefinito" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "デフォルトの状態" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "기본 상태" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Estado padrão" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Состояние по умолчанию" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "默认状态" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "預設狀態" } }
+      }
+    },
+    "popover.lowPower.currentState": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Aktueller Zustand" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Current state" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Estado actual" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "État actuel" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Stato attuale" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "現在の状態" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "현재 상태" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Estado atual" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Текущее состояние" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "当前状态" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "目前狀態" } }
+      }
+    },
+    "popover.lowPower.override": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Der aktuelle Zustand weicht vom Standard ab. Beim Wechsel der Stromquelle gilt wieder der Standard." } },
+        "en": { "stringUnit": { "state": "translated", "value": "The current state differs from the default. The default is reapplied when the power source changes." } },
+        "es": { "stringUnit": { "state": "translated", "value": "El estado actual difiere del predeterminado. Se volverá a aplicar al cambiar la fuente de alimentación." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "L’état actuel diffère de l’état par défaut. Celui-ci sera réappliqué au changement d’alimentation." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Lo stato attuale è diverso da quello predefinito, che verrà riapplicato al cambio di alimentazione." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "現在の状態はデフォルトと異なります。電源が切り替わるとデフォルトの状態に戻ります。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "현재 상태가 기본 상태와 다릅니다. 전원이 바뀌면 기본 상태가 다시 적용됩니다." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "O estado atual difere do padrão. O padrão será reaplicado quando a fonte de energia mudar." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Текущее состояние отличается от заданного по умолчанию. При смене источника питания настройки по умолчанию будут применены снова." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "当前状态与默认状态不同，切换电源后会恢复默认状态。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "目前狀態與預設狀態不同，切換電源後會恢復預設狀態。" } }
+      }
+    },
     "popover.lowPower.strategy": {
       "extractionState": "manual",
       "localizations": {
@@ -15278,49 +15326,49 @@
     "tutorial.lowPower.strategy": {
       "extractionState": "manual",
       "localizations": {
-        "de": { "stringUnit": { "state": "translated", "value": "Die linke Taste zeigt den Kurznamen der aktuellen Regel. Darüber lassen sich Leistung, Energiesparen, Nur bei Batterie sparen und Nur am Netz sparen wählen." } },
-        "en": { "stringUnit": { "state": "translated", "value": "The left button shows the short name of the current rule. Open it to choose Performance, Low Power, Low Power on battery, or Low Power when plugged in." } },
-        "es": { "stringUnit": { "state": "translated", "value": "El botón de la izquierda muestra el nombre corto de la regla actual. Ábrelo para elegir Rendimiento, Ahorro de energía, Ahorro solo con batería o Ahorro solo con corriente." } },
-        "fr": { "stringUnit": { "state": "translated", "value": "Le bouton de gauche affiche le nom court de la règle en cours. Ouvre-le pour choisir Performance, Économie d’énergie, Économie sur batterie ou Économie sur secteur." } },
-        "it": { "stringUnit": { "state": "translated", "value": "Il pulsante a sinistra mostra il nome breve della regola attuale. Aprilo per scegliere Prestazioni, Risparmio energetico, Risparmio solo a batteria o Risparmio solo da rete." } },
-        "ja": { "stringUnit": { "state": "translated", "value": "左のボタンには、いまの方針の短い名前が出ます。開くと、性能、省エネ、電池使用時のみ省エネ、電源接続時のみ省エネから選べます。" } },
-        "ko": { "stringUnit": { "state": "translated", "value": "왼쪽 버튼에는 현재 전략의 짧은 이름이 나옵니다. 열면 성능, 절전, 배터리일 때만 절전, 전원 연결 시만 절전 중에서 고릅니다." } },
-        "pt-BR": { "stringUnit": { "state": "translated", "value": "O botão da esquerda mostra o nome curto da regra atual. Abra para escolher Desempenho, Economia de energia, Economia só na bateria ou Economia só na tomada." } },
-        "ru": { "stringUnit": { "state": "translated", "value": "На левой кнопке короткое имя текущего плана. Откройте её, чтобы выбрать Производительность, Энергосбережение, Экономия только от батареи или Экономия только от сети." } },
-        "zh-Hans": { "stringUnit": { "state": "translated", "value": "左边按钮上是当前策略的短名。点开可以选择性能、节能、仅使用电池时节能、仅接通电源时节能。" } },
-        "zh-Hant": { "stringUnit": { "state": "translated", "value": "左邊按鈕上是目前策略的短名。點開可以選擇效能、節能、僅使用電池時節能、僅接通電源時節能。" } }
+        "de": { "stringUnit": { "state": "translated", "value": "Unter Standardzustand wählst du, wann der Energiesparmodus bei Batterie- und Netzbetrieb gilt." } },
+        "en": { "stringUnit": { "state": "translated", "value": "Use Default state to choose when Low Power Mode applies on battery and on power." } },
+        "es": { "stringUnit": { "state": "translated", "value": "En Estado predeterminado eliges cuándo se activa el ahorro con batería o corriente." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Dans État par défaut, choisissez quand activer l’économie sur batterie et sur secteur." } },
+        "it": { "stringUnit": { "state": "translated", "value": "In Stato predefinito scegli quando attivare il risparmio a batteria e da rete." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "「デフォルトの状態」で、バッテリー使用時と電源接続時の省エネ設定を選びます。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "기본 상태에서 배터리 사용 중과 전원 연결 중의 절전 설정을 선택합니다." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Em Estado padrão, escolha quando a economia se aplica na bateria e na tomada." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "В разделе «Состояние по умолчанию» выберите, когда включать энергосбережение от батареи и от сети." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "点击“默认状态”，选择使用电池和接通电源时的节能方式。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "點擊「預設狀態」，選擇使用電池和接通電源時的節能方式。" } }
       }
     },
     "tutorial.lowPower.now": {
       "extractionState": "manual",
       "localizations": {
-        "de": { "stringUnit": { "state": "translated", "value": "Die Taste zeigt, ob das Sparen gerade an ist. Ein Klick schaltet es um. Ein gelbes Symbol bedeutet, dass es an ist." } },
-        "en": { "stringUnit": { "state": "translated", "value": "This button shows whether saving is on right now. Click it to toggle. A yellow icon means it is on." } },
-        "es": { "stringUnit": { "state": "translated", "value": "Este botón indica si el ahorro está activo ahora. Un clic lo enciende o apaga. El icono amarillo significa que está activo." } },
-        "fr": { "stringUnit": { "state": "translated", "value": "Ce bouton indique si l’économie est active maintenant. Un clic la bascule. Une icône jaune signifie qu’elle est active." } },
-        "it": { "stringUnit": { "state": "translated", "value": "Questo pulsante indica se il risparmio è attivo adesso. Un clic lo commuta. L’icona gialla significa che è attivo." } },
-        "ja": { "stringUnit": { "state": "translated", "value": "このボタンは、いま省エネがオンかを示します。点で切り替えます。アイコンが黄色ならオンです。" } },
-        "ko": { "stringUnit": { "state": "translated", "value": "이 버튼은 지금 절전이 켜져 있는지 보여 줍니다. 누르면 전환됩니다. 아이콘이 노란 색이면 켜진 상태입니다." } },
-        "pt-BR": { "stringUnit": { "state": "translated", "value": "Este botão mostra se a economia está ligada agora. Um clique alterna. O ícone amarelo significa que está ligada." } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Эта кнопка показывает, включено ли сбережение сейчас. Нажатие переключает его. Жёлтый значок значит, что оно включено." } },
-        "zh-Hans": { "stringUnit": { "state": "translated", "value": "这个按钮表示现在开没开节能。点一下就切换。图标是黄色时，表示已经打开。" } },
-        "zh-Hant": { "stringUnit": { "state": "translated", "value": "這個按鈕表示現在開沒開節能。點一下就切換。圖示是黃色時，表示已經打開。" } }
+        "de": { "stringUnit": { "state": "translated", "value": "Die Taste zeigt, ob das Sparen gerade an ist. Ein Klick schaltet es um. Ein farbiges Symbol bedeutet, dass es an ist." } },
+        "en": { "stringUnit": { "state": "translated", "value": "This button shows whether saving is on right now. Click it to toggle. A colored icon means it is on." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Este botón indica si el ahorro está activo ahora. Un clic lo enciende o apaga. El icono de color significa que está activo." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Ce bouton indique si l’économie est active maintenant. Un clic la bascule. Une icône colorée signifie qu’elle est active." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Questo pulsante indica se il risparmio è attivo adesso. Un clic lo commuta. L’icona colorata significa che è attivo." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "このボタンは、いま省エネがオンかを示します。点で切り替えます。アイコンに色が付いていればオンです。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "이 버튼은 지금 절전이 켜져 있는지 보여 줍니다. 누르면 전환됩니다. 아이콘에 색이 표시되면 켜진 상태입니다." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Este botão mostra se a economia está ligada agora. Um clique alterna. O ícone colorido significa que está ligada." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Эта кнопка показывает, включено ли сбережение сейчас. Нажатие переключает его. Цветной значок значит, что оно включено." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "这个按钮表示现在开没开节能。点一下就切换。图标变成彩色时，表示已经打开。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "這個按鈕表示現在開沒開節能。點一下就切換。圖示變成彩色時，表示已經打開。" } }
       }
     },
     "tutorial.lowPower.buttons": {
       "extractionState": "manual",
       "localizations": {
-        "de": { "stringUnit": { "state": "translated", "value": "Es können beide Tasten erscheinen, nur die Regel oder nur Niedrig." } },
-        "en": { "stringUnit": { "state": "translated", "value": "You can show both buttons, the rule only, or Low only." } },
-        "es": { "stringUnit": { "state": "translated", "value": "Pueden aparecer los dos botones, solo la regla o solo Baja." } },
-        "fr": { "stringUnit": { "state": "translated", "value": "Les deux boutons peuvent apparaître, ou seulement la règle, ou seulement Faible." } },
-        "it": { "stringUnit": { "state": "translated", "value": "Possono comparire entrambi i pulsanti, solo la regola o solo Bassa." } },
-        "ja": { "stringUnit": { "state": "translated", "value": "両方を出すか、方針だけ、低電力だけにできます。" } },
-        "ko": { "stringUnit": { "state": "translated", "value": "둘 다 보이거나, 전략만, 또는 저전력만 보이게 할 수 있습니다." } },
-        "pt-BR": { "stringUnit": { "state": "translated", "value": "Os dois botões podem aparecer, só a regra ou só Baixa." } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Можно показать обе кнопки, только план или только экономию." } },
-        "zh-Hans": { "stringUnit": { "state": "translated", "value": "可以两个都出现，也可以只留策略，或只留低电量。" } },
-        "zh-Hant": { "stringUnit": { "state": "translated", "value": "可以兩個都出現，也可以只留策略，或只留低電量。" } }
+        "de": { "stringUnit": { "state": "translated", "value": "Du kannst beide Tasten, nur den Standardzustand oder nur Niedrig anzeigen." } },
+        "en": { "stringUnit": { "state": "translated", "value": "You can show both buttons, only Default state, or only Low Power." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Puedes mostrar ambos botones, solo Estado predeterminado o solo Baja." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Vous pouvez afficher les deux boutons, seulement État par défaut ou seulement Faible." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Puoi mostrare entrambi i pulsanti, solo Stato predefinito o solo Bassa." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "両方、デフォルトの状態のみ、または低電力のみを表示できます。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "두 버튼을 모두 표시하거나 기본 상태 또는 저전력만 표시할 수 있습니다." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Você pode mostrar os dois botões, só Estado padrão ou só Baixa." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Можно показать обе кнопки, только состояние по умолчанию или только экономию." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "可以显示两个按钮，也可以只显示默认状态或低电量。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "可以顯示兩個按鈕，也可以只顯示預設狀態或低電量。" } }
       }
     },
     "tutorial.lowPower.layout": {
@@ -15342,17 +15390,17 @@
     "tutorial.lowPower.body": {
       "extractionState": "manual",
       "localizations": {
-        "de": { "stringUnit": { "state": "translated", "value": "Öffne Modus in der Seitenleiste. Die linke Taste zeigt den Namen der aktuellen Regel und öffnet das Menü. Niedrig zeigt, ob das Sparen gerade an ist, und schaltet es um. Tasten kann Beide, Nur Regel oder Nur Niedrig sein. Anordnung ist Zwei in einer Zeile, wenn die Länge reicht oder Immer eines pro Zeile. Bleibt nur eine Taste, lässt sich die Anordnung nicht ändern." } },
-        "en": { "stringUnit": { "state": "translated", "value": "Open Power in the sidebar. The left button shows the current rule’s name and opens the rule menu. Low shows whether saving is on right now and toggles it. Buttons can be Both, Rule only, or Low only. Layout is Two per row when the length fits or Always one per row. With only one button shown, Layout cannot be changed." } },
-        "es": { "stringUnit": { "state": "translated", "value": "Abre Modo en la barra lateral. El botón de la izquierda muestra el nombre de la regla actual y abre el menú. Baja indica si el ahorro está activo ahora y lo enciende o apaga. Botones puede ser Ambos, Solo regla o Solo baja. Disposición es Dos en una fila si la longitud lo permite o Siempre uno por fila. Si solo queda un botón, Disposición no se puede cambiar." } },
-        "fr": { "stringUnit": { "state": "translated", "value": "Ouvre Mode dans la barre latérale. Le bouton de gauche montre le nom de la règle en cours et ouvre le menu. Faible indique si l’économie est active maintenant et la bascule. Boutons peut être Les deux, Règle seule ou Faible seul. Disposition est Deux par ligne si la longueur le permet ou Toujours un par ligne. S’il ne reste qu’un bouton, Disposition ne se règle pas." } },
-        "it": { "stringUnit": { "state": "translated", "value": "Apri Modo nella barra laterale. Il pulsante a sinistra mostra il nome della regola attuale e apre il menu. Bassa indica se il risparmio è attivo adesso e lo commuta. Pulsanti può essere Entrambi, Solo regola o Solo bassa. Disposizione è Due per riga se la lunghezza lo consente o Sempre uno per riga. Se resta un solo pulsante, Disposizione non si può cambiare." } },
-        "ja": { "stringUnit": { "state": "translated", "value": "サイドバーの「省エネ」を開きます。左のボタンは現在の方針の名前を示し、方針のメニューを開きます。「低電力」はいま省エネ中かどうかを示し、点でオンとオフを切り替えます。ボタンは両方、方針のみ、低電力のみから選べます。並びは「長さが足りれば二つを一行」か「常に一つを一行」です。ボタンが一つだけのとき、並びは変更できません。" } },
-        "ko": { "stringUnit": { "state": "translated", "value": "사이드바에서 절전을 엽니다. 왼쪽 버튼은 현재 전략 이름을 보여주고 전략 메뉴를 엽니다. 저전력은 지금 절전 중인지 보여 주고, 누르면 켜거나 끕니다. 버튼은 둘 다, 전략만, 저전력만 중에서 고릅니다. 배치는 길이가 되면 한 줄에 둘, 또는 항상 한 줄에 하나입니다. 버튼이 하나만 남으면 배치는 바꿀 수 없습니다." } },
-        "pt-BR": { "stringUnit": { "state": "translated", "value": "Abra Modo na barra lateral. O botão da esquerda mostra o nome da regra atual e abre o menu. Baixa mostra se a economia está ligada agora e a alterna. Botões pode ser Ambos, Só a regra ou Só baixa. Disposição é Dois por linha se o comprimento permitir ou Sempre um por linha. Com um só botão visível, Disposição não pode ser alterada." } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Откройте Режим на боковой панели. Левая кнопка показывает имя текущего плана и открывает меню. Экономия показывает, включено ли сбережение сейчас, и переключает его. Кнопки могут быть Оба, Только план или Только экономия. Расположение — Два в ряд, если длина позволяет или Всегда по одному в ряд. Когда видна только одна кнопка, Расположение нельзя изменить." } },
-        "zh-Hans": { "stringUnit": { "state": "translated", "value": "在侧边栏打开「能耗模式」。左边的按钮显示当前策略的名字，点开是策略菜单。右边的「低电量」表示现在开没开，点一下就切换。按钮可以是都出现、仅策略或仅低电量。排列在「长度允许下两个一行」和「永远一个一行」之间选；只留一个按钮时，排列不能改。" } },
-        "zh-Hant": { "stringUnit": { "state": "translated", "value": "在側邊欄打開「能耗模式」。左邊的按鈕顯示目前策略的名字，點開是策略選單。右邊的「低電量」表示現在開沒開，點一下就切換。按鈕可以是都出現、僅策略或僅低電量。排列在「長度允許下兩個一行」和「永遠一個一行」之間選；只留一個按鈕時，排列不能改。" } }
+        "de": { "stringUnit": { "state": "translated", "value": "Unter Energiemodus zeigt Standardzustand die gewählte Einstellung und öffnet das Menü. Aktueller Zustand zeigt, ob das Energiesparen an ist; ein Klick schaltet es um. Du kannst beide Tasten oder nur eine anzeigen und die Anordnung wählen." } },
+        "en": { "stringUnit": { "state": "translated", "value": "In Energy Mode, Default state shows your saved choice and opens its menu. Current state shows whether Low Power Mode is on; click it to toggle. You can show both buttons or just one, and choose their layout." } },
+        "es": { "stringUnit": { "state": "translated", "value": "En Modo de energía, Estado predeterminado muestra tu elección y abre el menú. Estado actual indica si el ahorro está activo y lo cambia al hacer clic. Puedes mostrar ambos botones o solo uno y elegir su disposición." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Dans Mode d’énergie, État par défaut affiche votre choix et ouvre le menu. État actuel indique si l’économie est active et permet de la basculer. Vous pouvez afficher les deux boutons ou un seul et choisir leur disposition." } },
+        "it": { "stringUnit": { "state": "translated", "value": "In Modalità energia, Stato predefinito mostra la scelta salvata e apre il menu. Stato attuale indica se il risparmio è attivo e permette di cambiarlo. Puoi mostrare entrambi i pulsanti o uno solo e scegliere la disposizione." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "「エネルギーモード」では、「デフォルトの状態」に保存した設定が表示され、クリックするとメニューが開きます。「現在の状態」では低電力モードのオン・オフを確認して切り替えられます。表示するボタンと並び方も選べます。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "에너지 모드에서 기본 상태는 저장된 설정을 보여 주고 메뉴를 엽니다. 현재 상태는 저전력 모드가 켜져 있는지 보여 주며 눌러서 전환할 수 있습니다. 표시할 버튼과 배치도 선택할 수 있습니다." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Em Modo de energia, Estado padrão mostra a escolha salva e abre o menu. Estado atual mostra se a economia está ligada e permite alterná-la. Você pode mostrar os dois botões ou apenas um e escolher a disposição." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "В разделе «Режим энергии» состояние по умолчанию показывает выбранную настройку и открывает меню. Текущее состояние показывает, включено ли энергосбережение, и позволяет его переключить. Можно показать обе кнопки или одну и выбрать расположение." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "在“能耗模式”中，“默认状态”显示已选设置，点击可重新选择；“当前状态”显示低电量模式是否开启，点击可直接切换。可以显示两个按钮或只显示一个，并选择排列方式。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "在「能耗模式」中，「預設狀態」顯示已選設定，點擊可重新選擇；「目前狀態」顯示低電量模式是否開啟，點擊可直接切換。可以顯示兩個按鈕或只顯示一個，並選擇排列方式。" } }
       }
     },
     "tutorial.panel.body": {

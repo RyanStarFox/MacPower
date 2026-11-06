@@ -1518,24 +1518,32 @@ struct SettingsView: View {
             title: Localization.string(strategy.shortLocalizationKey, language: language),
             lineLimit: LowPowerButtonRowLayout.strategyLines,
             fillsHeight: sideBySide,
-            reserveTitles: labels
+            reserveTitles: labels,
+            showsMenuIndicator: true
         )
         let nowButton = EnergyModeButton(
             title: lowTitle,
-            iconYellow: appState.lowPowerNow == true,
+            systemImage: "battery.25percent",
+            iconActive: appState.lowPowerNow == true,
             lineLimit: LowPowerButtonRowLayout.lowPowerLines,
             fillsHeight: sideBySide
         )
+        let defaultControl = LowPowerLabeledButton(label: Localization.string("popover.lowPower.defaultState", language: language)) {
+            strategyButton
+        }
+        let currentControl = LowPowerLabeledButton(label: Localization.string("popover.lowPower.currentState", language: language)) {
+            nowButton
+        }
         return Group {
             if sideBySide {
                 HStack(alignment: .top, spacing: LowPowerButtonRowLayout.buttonSpacing) {
-                    strategyButton
-                    nowButton
+                    defaultControl
+                    currentControl
                 }
             } else {
                 VStack(alignment: .leading, spacing: LowPowerButtonRowLayout.buttonSpacing) {
-                    strategyButton
-                    nowButton
+                    defaultControl
+                    currentControl
                 }
             }
         }
@@ -2330,23 +2338,11 @@ struct SettingsView: View {
         }
     }
 
-    /// The panel's low-power battery: a yellow charge in a neutral frame, drawn
-    /// by the menu bar renderer like the button in the panel.
+    /// Match the panel's inactive low-power button in the settings preview.
     private var lowPowerBatteryGlyph: some View {
-        var snapshot = PowerSnapshot.empty
-        snapshot.percent = 35
-        let appearance = NSAppearance(named: colorScheme == .dark ? .darkAqua : .aqua) ?? NSApp.effectiveAppearance
-        let yellow = NSColor.systemYellow
-        let image = MenuBarBatteryRenderer.image(
-            snapshot: snapshot,
-            style: .outlineFill,
-            fill: MenuBarResolvedFill(left: yellow, right: yellow, isTemplate: false),
-            appearance: appearance,
-            showChargeGlyphs: false
-        )
-        return Image(nsImage: image)
-            .resizable()
-            .aspectRatio(contentMode: .fit)
+        Image(systemName: "battery.25percent")
+            .font(.system(size: 10, weight: .medium))
+            .foregroundStyle(.secondary)
             .frame(width: 16, height: 10)
             .accessibilityHidden(true)
     }
