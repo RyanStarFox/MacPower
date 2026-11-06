@@ -389,6 +389,7 @@ struct TintRampEditor<SegmentEditor: View>: View {
                 arrowEdge: .bottom
             ) {
                 segmentEditor(band, lower)
+                    .environment(\.locale, language.resolvedLocale)
             }
             .help(title)
             .accessibilityElement()
