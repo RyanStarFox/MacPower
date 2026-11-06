@@ -18250,6 +18250,38 @@
         "it": { "stringUnit": { "state": "translated", "value": "Questo tratto finisce a" } },
         "ru": { "stringUnit": { "state": "translated", "value": "Отрезок заканчивается на" } }
       }
+    },
+    "settings.icons.zoom.for %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "%@ zoom" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "「%@」图标缩放" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "「%@」圖示縮放" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "%@の拡大率" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "%@ 확대/축소" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Zoom de %@" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Zoom für %@" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Zoom de %@" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Zoom de %@" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Zoom di %@" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Масштаб: %@" } }
+      }
+    },
+    "settings.icons.change.for %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Change %@ icon" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "更换「%@」图标" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "更換「%@」圖示" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "%@のアイコンを変更" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "%@ 아이콘 변경" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Changer l’icône %@" } },
+        "de": { "stringUnit": { "state": "translated", "value": "Symbol für %@ ändern" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Cambiar icono de %@" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Alterar ícone de %@" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Cambia icona di %@" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Изменить значок: %@" } }
+      }
     }
   },
   "version": "1.0"
