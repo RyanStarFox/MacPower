@@ -2,6 +2,19 @@ import CoreText
 import AppKit
 
 enum MenuBarBatteryRenderer {
+    /// Chrome stays a template so the menu bar can tint it for light/dark wallpaper.
+    /// Colored charge is a separate non-template overlay on the status item.
+    struct StatusItemContent {
+        var chrome: NSImage
+        var charge: NSImage?
+    }
+
+    private enum Layer {
+        case full
+        case chrome
+        case charge
+    }
+
     static func image(
         snapshot: PowerSnapshot,
         style: MenuBarIconStyle,
@@ -9,6 +22,88 @@ enum MenuBarBatteryRenderer {
         appearance: NSAppearance,
         showChargeGlyphs: Bool
     ) -> NSImage {
+        let prepared = prepare(snapshot: snapshot, style: style, fill: fill, appearance: appearance, showChargeGlyphs: showChargeGlyphs)
+        let image = rasterImage(size: prepared.size, appearance: appearance) { rect in
+            drawBattery(
+                in: rect,
+                metrics: prepared.metrics,
+                percent: snapshot.percent / 100,
+                style: style,
+                fill: fill,
+                neutralFill: prepared.neutralFill,
+                glyph: prepared.glyph,
+                layer: .full
+            )
+        }
+        image.isTemplate = fill.isTemplate
+        return image
+    }
+
+    static func statusItemContent(
+        snapshot: PowerSnapshot,
+        style: MenuBarIconStyle,
+        fill: MenuBarResolvedFill,
+        appearance: NSAppearance,
+        showChargeGlyphs: Bool
+    ) -> StatusItemContent {
+        if fill.isTemplate {
+            let image = image(
+                snapshot: snapshot,
+                style: style,
+                fill: fill,
+                appearance: appearance,
+                showChargeGlyphs: showChargeGlyphs
+            )
+            return StatusItemContent(chrome: image, charge: nil)
+        }
+
+        let prepared = prepare(snapshot: snapshot, style: style, fill: fill, appearance: appearance, showChargeGlyphs: showChargeGlyphs)
+        // Template black for chrome — AppKit retints it to the menu bar's adaptive color.
+        let chromeNeutral = MenuBarResolvedFill.template
+        let chrome = rasterImage(size: prepared.size, appearance: appearance) { rect in
+            drawBattery(
+                in: rect,
+                metrics: prepared.metrics,
+                percent: snapshot.percent / 100,
+                style: style,
+                fill: fill,
+                neutralFill: chromeNeutral,
+                glyph: prepared.glyph,
+                layer: .chrome
+            )
+        }
+        chrome.isTemplate = true
+
+        let charge = rasterImage(size: prepared.size, appearance: appearance) { rect in
+            drawBattery(
+                in: rect,
+                metrics: prepared.metrics,
+                percent: snapshot.percent / 100,
+                style: style,
+                fill: fill,
+                neutralFill: chromeNeutral,
+                glyph: prepared.glyph,
+                layer: .charge
+            )
+        }
+        charge.isTemplate = false
+        return StatusItemContent(chrome: chrome, charge: charge)
+    }
+
+    private struct Prepared {
+        var metrics: Metrics
+        var size: NSSize
+        var glyph: MenuBarGlyph?
+        var neutralFill: MenuBarResolvedFill
+    }
+
+    private static func prepare(
+        snapshot: PowerSnapshot,
+        style: MenuBarIconStyle,
+        fill: MenuBarResolvedFill,
+        appearance: NSAppearance,
+        showChargeGlyphs: Bool
+    ) -> Prepared {
         let percent = Int(snapshot.percent.rounded(.towardZero))
         let charging = snapshot.flowMode == .charging
         let plugged = snapshot.flowMode == .adapterHold || snapshot.flowMode == .underpowered
@@ -22,25 +117,18 @@ enum MenuBarBatteryRenderer {
         if fill.isTemplate {
             neutralFill = fill
         } else {
+            // In-window previews bake the label color for the current appearance.
             let color = MenuBarTintSwatch.menuBar.paintNSColor(appearance: appearance)
             neutralFill = MenuBarResolvedFill(left: color, right: color, isTemplate: false)
         }
         let height: CGFloat = 16
         let metrics = layout(percent: percent, style: style, glyph: glyph, height: height)
-        let size = NSSize(width: metrics.totalWidth, height: height)
-        let image = rasterImage(size: size, appearance: appearance) { rect in
-            drawBattery(
-                in: rect,
-                metrics: metrics,
-                percent: snapshot.percent / 100,
-                style: style,
-                fill: fill,
-                neutralFill: neutralFill,
-                glyph: glyph
-            )
-        }
-        image.isTemplate = fill.isTemplate
-        return image
+        return Prepared(
+            metrics: metrics,
+            size: NSSize(width: metrics.totalWidth, height: height),
+            glyph: glyph,
+            neutralFill: neutralFill
+        )
     }
 
     /// Draw at 2x so the terminal gap stays a real hole after template scaling.
@@ -194,7 +282,8 @@ enum MenuBarBatteryRenderer {
         style: MenuBarIconStyle,
         fill: MenuBarResolvedFill,
         neutralFill: MenuBarResolvedFill,
-        glyph: MenuBarGlyph?
+        glyph: MenuBarGlyph?,
+        layer: Layer
     ) {
         let body = metrics.body
         if style.isOutlined {
@@ -203,14 +292,26 @@ enum MenuBarBatteryRenderer {
                 cap: metrics.cap,
                 percent: percent,
                 fill: fill,
-                neutralFill: neutralFill
+                neutralFill: neutralFill,
+                layer: layer
             )
-            if style.showsPercentInside {
+            if layer != .charge, style.showsPercentInside {
                 drawOutlinedText(metrics: metrics, percent: percent, fill: neutralFill)
+            }
+            if layer == .charge, style.showsPercentInside {
+                // Punch digits through the colored charge so wallpaper shows through.
+                NSGraphicsContext.saveGraphicsState()
+                NSGraphicsContext.current?.compositingOperation = .destinationOut
+                punchCenteredText(metrics.text, font: metrics.font, in: metrics.digitBox)
+                NSGraphicsContext.restoreGraphicsState()
             }
             if glyph != nil {
                 let target = style.showsPercentInside ? metrics.glyphBox : body
-                drawOutlinedChargeMark(in: target, compact: style.showsPercentInside, fill: neutralFill)
+                if layer != .charge {
+                    drawOutlinedChargeMark(in: target, compact: style.showsPercentInside, fill: neutralFill)
+                } else if style.showsPercentInside {
+                    punchOutlinedChargeMark(in: target, compact: true)
+                }
             }
             return
         }
@@ -226,7 +327,8 @@ enum MenuBarBatteryRenderer {
                 : continuousRoundedRect(body, radius: 3.8),
             backingAlpha: percentInside ? 0.50 : 0.52,
             terminalAlpha: percentInside ? 0.60 : 0.62,
-            terminalKappa: percentInside ? 0.46 : 0.55228475
+            terminalKappa: percentInside ? 0.46 : 0.55228475,
+            layer: layer
         )
 
         guard !style.showsPercentBeside || glyph != nil else { return }
@@ -249,7 +351,7 @@ enum MenuBarBatteryRenderer {
             case .bolt:
                 if style.showsPercentInside {
                     punchChargeMark(in: metrics.glyphBox, digits: metrics.text.count, color: knockout)
-                } else {
+                } else if layer != .charge {
                     drawChargeMark(in: body, fill: neutralFill)
                 }
             }
@@ -265,45 +367,52 @@ enum MenuBarBatteryRenderer {
         bodyPath: NSBezierPath,
         backingAlpha: CGFloat,
         terminalAlpha: CGFloat,
-        terminalKappa: CGFloat
+        terminalKappa: CGFloat,
+        layer: Layer
     ) {
         let clamped = min(1, max(0, percent))
         let capPath = terminalPath(in: cap, kappa: terminalKappa)
         let dim = neutralFill.withAlpha(terminalAlpha)
 
-        NSGraphicsContext.saveGraphicsState()
-        bodyPath.addClip()
-        paint(neutralFill.withAlpha(backingAlpha), in: body)
-        NSGraphicsContext.restoreGraphicsState()
-        NSGraphicsContext.saveGraphicsState()
-        capPath.addClip()
-        paint(dim, in: cap)
-        NSGraphicsContext.restoreGraphicsState()
+        if layer != .charge {
+            NSGraphicsContext.saveGraphicsState()
+            bodyPath.addClip()
+            paint(neutralFill.withAlpha(backingAlpha), in: body)
+            NSGraphicsContext.restoreGraphicsState()
+            NSGraphicsContext.saveGraphicsState()
+            capPath.addClip()
+            paint(dim, in: cap)
+            NSGraphicsContext.restoreGraphicsState()
+        }
 
-        NSGraphicsContext.saveGraphicsState()
-        bodyPath.addClip()
-        NSBezierPath(rect: NSRect(
-            x: body.minX,
-            y: body.minY,
-            width: body.width * clamped,
-            height: body.height
-        )).addClip()
-        paint(fill, in: body)
-        NSGraphicsContext.restoreGraphicsState()
+        if layer != .chrome {
+            NSGraphicsContext.saveGraphicsState()
+            bodyPath.addClip()
+            NSBezierPath(rect: NSRect(
+                x: body.minX,
+                y: body.minY,
+                width: body.width * clamped,
+                height: body.height
+            )).addClip()
+            paint(fill, in: body)
+            NSGraphicsContext.restoreGraphicsState()
+        }
 
         // Template rendering blends anti-aliased edges; cut the gap so the terminal stays detached.
-        let gap = NSRect(
-            x: body.maxX,
-            y: 0,
-            width: max(0, cap.minX - body.maxX),
-            height: max(body.maxY, cap.maxY) + 2
-        )
-        if gap.width > 0 {
-            NSGraphicsContext.saveGraphicsState()
-            NSGraphicsContext.current?.compositingOperation = .destinationOut
-            NSColor.black.setFill()
-            gap.fill()
-            NSGraphicsContext.restoreGraphicsState()
+        if layer != .charge {
+            let gap = NSRect(
+                x: body.maxX,
+                y: 0,
+                width: max(0, cap.minX - body.maxX),
+                height: max(body.maxY, cap.maxY) + 2
+            )
+            if gap.width > 0 {
+                NSGraphicsContext.saveGraphicsState()
+                NSGraphicsContext.current?.compositingOperation = .destinationOut
+                NSColor.black.setFill()
+                gap.fill()
+                NSGraphicsContext.restoreGraphicsState()
+            }
         }
     }
 
@@ -313,16 +422,19 @@ enum MenuBarBatteryRenderer {
         cap: NSRect,
         percent: CGFloat,
         fill: MenuBarResolvedFill,
-        neutralFill: MenuBarResolvedFill
+        neutralFill: MenuBarResolvedFill,
+        layer: Layer
     ) {
-        if percent > 0 {
+        if layer != .chrome, percent > 0 {
             NSGraphicsContext.saveGraphicsState()
             outlinedChargePath(body: body, percent: percent).addClip()
             paint(fill, in: body.insetBy(dx: 2, dy: 2))
             NSGraphicsContext.restoreGraphicsState()
         }
-        paintOutline(in: body, fill: neutralFill)
-        paintTemplate(named: "MenuBarBatteryCap", in: cap, fill: neutralFill)
+        if layer != .charge {
+            paintOutline(in: body, fill: neutralFill)
+            paintTemplate(named: "MenuBarBatteryCap", in: cap, fill: neutralFill)
+        }
     }
 
     /// A 1pt inside stroke at half opacity, like the native frame.
@@ -410,11 +522,20 @@ enum MenuBarBatteryRenderer {
     }
 
     private static func drawOutlinedChargeMark(in box: NSRect, compact: Bool, fill: MenuBarResolvedFill) {
-        let width: CGFloat = compact ? 5.8 : 11
-        let height = width * 14 / 11
-        let rect = NSRect(x: box.midX - width / 2, y: box.midY - height / 2, width: width, height: height)
+        let rect = outlinedChargeMarkRect(in: box, compact: compact)
         NSImage(named: "MenuBarBatteryBoltMask")?.draw(in: rect, from: .zero, operation: .destinationOut, fraction: 1)
         paintTemplate(named: "MenuBarBatteryBolt", in: rect, fill: fill)
+    }
+
+    private static func punchOutlinedChargeMark(in box: NSRect, compact: Bool) {
+        let rect = outlinedChargeMarkRect(in: box, compact: compact)
+        NSImage(named: "MenuBarBatteryBoltMask")?.draw(in: rect, from: .zero, operation: .destinationOut, fraction: 1)
+    }
+
+    private static func outlinedChargeMarkRect(in box: NSRect, compact: Bool) -> NSRect {
+        let width: CGFloat = compact ? 5.8 : 11
+        let height = width * 14 / 11
+        return NSRect(x: box.midX - width / 2, y: box.midY - height / 2, width: width, height: height)
     }
 
     /// A flat inner edge and a narrow, rounded outer edge, detached from the body.
