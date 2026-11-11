@@ -2038,22 +2038,26 @@ struct SettingsView: View {
 
     @ViewBuilder
     private var permissionLowPowerAdminRow: some View {
+        let access = AppPermissions.lowPowerAdminAccess
         let status = AppPermissions.status(for: .lowPowerAdmin)
         VStack(alignment: .leading, spacing: 10) {
             SettingsRowLabel(
                 title: "settings.permissions.lowPower.title",
-                caption: "settings.permissions.lowPower.caption"
+                caption: lowPowerAdminCaption(access)
             )
             permissionStatusLine(status)
             HStack(spacing: 8) {
-                if status == .allowed {
+                switch access {
+                case .macPowerRule:
                     Button("settings.permissions.lowPower.revoke") {
                         Task {
                             _ = await AppPermissions.revokeLowPowerAdmin()
                             refreshPermissionStatus()
                         }
                     }
-                } else {
+                case .systemSudo:
+                    EmptyView()
+                case .unavailable:
                     Button("settings.permissions.lowPower.grant") {
                         Task {
                             _ = await AppPermissions.grantLowPowerAdmin()
@@ -2064,6 +2068,14 @@ struct SettingsView: View {
                 }
                 Spacer(minLength: 0)
             }
+        }
+    }
+
+    private func lowPowerAdminCaption(_ access: LowPowerModeController.AdminAccess) -> LocalizedStringKey {
+        switch access {
+        case .macPowerRule: "settings.permissions.lowPower.caption.macPower"
+        case .systemSudo: "settings.permissions.lowPower.caption.system"
+        case .unavailable: "settings.permissions.lowPower.caption"
         }
     }
 

@@ -60,9 +60,41 @@ enum LowPowerModeController {
         }.value
     }
 
-    /// True when the limited `pmset` sudoers rule for this Mac is already installed.
+    /// True when the limited MacPower `pmset` sudoers rule is installed.
     static var hasPasswordlessRule: Bool {
         FileManager.default.isReadableFile(atPath: LowPowerPrivilege.sudoersPath)
+    }
+
+    /// How Low Power Mode can already run without an interactive password prompt.
+    /// A machine with broader passwordless `sudo` (not our file) still counts as ready.
+    enum AdminAccess: Equatable, Sendable {
+        /// `/etc/sudoers.d/macpower-lowpower` is present.
+        case macPowerRule
+        /// `sudo -n pmset` already works (for example a NOPASSWD admin account).
+        case systemSudo
+        case unavailable
+    }
+
+    static var adminAccess: AdminAccess {
+        if hasPasswordlessRule { return .macPowerRule }
+        if canRunPmsetWithoutPassword { return .systemSudo }
+        return .unavailable
+    }
+
+    /// `sudo -n` can invoke `pmset` without asking for a password.
+    static var canRunPmsetWithoutPassword: Bool {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/sudo")
+        process.arguments = ["-n", "/usr/bin/pmset", "-g", "custom"]
+        process.standardOutput = FileHandle.nullDevice
+        process.standardError = FileHandle.nullDevice
+        do {
+            try process.run()
+            process.waitUntilExit()
+        } catch {
+            return false
+        }
+        return process.terminationStatus == 0
     }
 
     /// Asks for an administrator password and installs the limited sudoers rule
@@ -75,8 +107,10 @@ enum LowPowerModeController {
     }
 
     /// Asks for an administrator password and removes the MacPower low-power sudoers rule.
+    /// Broader system sudo (NOPASSWD elsewhere) is left alone.
     static func revokePasswordlessRule() async -> Bool {
         await Task.detached {
+            guard hasPasswordlessRule else { return true }
             _ = removePasswordlessRule()
             return !hasPasswordlessRule
         }.value

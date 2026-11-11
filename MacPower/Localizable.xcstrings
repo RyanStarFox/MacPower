@@ -39483,67 +39483,67 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Grant installs /etc/sudoers.d/macpower-lowpower. Revoke removes that file (password again). It does not affect Bluetooth or other apps."
+            "value": "If this Mac lacks passwordless sudo, Allow installs /etc/sudoers.d/macpower-lowpower. Revoke removes only that MacPower file. Broader system sudo is unchanged."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "「允许」会写入 /etc/sudoers.d/macpower-lowpower。「撤销」会删掉这个文件（还要再输一次密码）。不影响蓝牙或其他应用。"
+            "value": "如果这台 Mac 还没有免密 sudo，「允许」会写入 /etc/sudoers.d/macpower-lowpower。「撤销」只删 MacPower 这个文件，不动系统里更宽的 sudo。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "「允許」會寫入 /etc/sudoers.d/macpower-lowpower。「撤銷」會刪掉這個檔案（還要再輸入一次密碼）。不影響藍牙或其他 App。"
+            "value": "如果這台 Mac 還沒有免密 sudo，「允許」會寫入 /etc/sudoers.d/macpower-lowpower。「撤銷」只刪 MacPower 這個檔案，不動系統裡更寬的 sudo。"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "「許可」は /etc/sudoers.d/macpower-lowpower を入れます。「取り消し」はそのファイルを消します（再パスワード）。Bluetooth や他アプリには影響しません。"
+            "value": "パスワードなし sudo が無いとき、「許可」は /etc/sudoers.d/macpower-lowpower を入れます。「取り消し」はその MacPower ファイルだけ消し、広い sudo は触りません。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "「허용」은 /etc/sudoers.d/macpower-lowpower를 둡니다. 「철회」는 그 파일을 지웁니다(암호 다시). Bluetooth나 다른 앱에는 영향 없습니다."
+            "value": "암호 없는 sudo가 없을 때 「허용」은 /etc/sudoers.d/macpower-lowpower를 둡니다. 「철회」는 그 MacPower 파일만 지우며 더 넓은 sudo는 건드리지 않습니다."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Autoriser crée /etc/sudoers.d/macpower-lowpower. Révoquer le supprime (mot de passe à nouveau). Sans effet sur Bluetooth ni d’autres apps."
+            "value": "Sans sudo sans mot de passe, Autoriser crée /etc/sudoers.d/macpower-lowpower. Révoquer ne supprime que ce fichier MacPower, pas un sudo plus large."
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Erlauben legt /etc/sudoers.d/macpower-lowpower an. Widerrufen löscht die Datei (Passwort erneut). Betrifft nicht Bluetooth oder andere Apps."
+            "value": "Ohne passwortloses sudo legt Erlauben /etc/sudoers.d/macpower-lowpower an. Widerrufen löscht nur diese MacPower-Datei, nicht breiteres sudo."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Permitir crea /etc/sudoers.d/macpower-lowpower. Revocar lo borra (otra contraseña). No afecta a Bluetooth ni a otras apps."
+            "value": "Sin sudo sin contraseña, Permitir crea /etc/sudoers.d/macpower-lowpower. Revocar solo borra ese archivo de MacPower, no un sudo más amplio."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Permitir cria /etc/sudoers.d/macpower-lowpower. Revogar remove o arquivo (senha de novo). Não afeta Bluetooth nem outros apps."
+            "value": "Sem sudo sem senha, Permitir cria /etc/sudoers.d/macpower-lowpower. Revogar remove só esse arquivo do MacPower, não um sudo mais amplo."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Consenti crea /etc/sudoers.d/macpower-lowpower. Revoca lo elimina (password di nuovo). Non tocca Bluetooth né altre app."
+            "value": "Senza sudo senza password, Consenti crea /etc/sudoers.d/macpower-lowpower. Revoca elimina solo quel file MacPower, non un sudo più ampio."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "«Разрешить» создаёт /etc/sudoers.d/macpower-lowpower. «Отозвать» удаляет файл (пароль снова). Bluetooth и другие приложения не затрагивает."
+            "value": "Без NOPASSWD sudo «Разрешить» создаёт /etc/sudoers.d/macpower-lowpower. «Отозвать» удаляет только этот файл MacPower, не более широкий sudo."
           }
         }
       }
@@ -39686,6 +39686,148 @@
           "stringUnit": {
             "state": "translated",
             "value": "Отозвать…"
+          }
+        }
+      }
+    },
+    "settings.permissions.lowPower.caption.macPower": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacPower installed a narrow sudoers rule so Low Power Mode can change without asking every time."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacPower 已经装了一条很窄的 sudoers 规则，改节能模式不用每次再问密码。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacPower 已經裝了一條很窄的 sudoers 規則，改節能模式不用每次再問密碼。"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacPower が狭い sudoers ルールを入れたので、低電力モードは毎回パスワードを聞かずに変えられます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacPower가 좁은 sudoers 규칙을 넣어 두어, 저전력 모드를 바꿀 때 매번 암호를 묻지 않습니다."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacPower a installé une règle sudoers limitée pour changer le mode économie d’énergie sans redemander à chaque fois."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacPower hat eine enge sudoers-Regel gesetzt, damit der Energiesparmodus nicht jedes Mal ein Passwort braucht."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacPower instaló una regla sudoers estrecha para cambiar el modo de bajo consumo sin pedir contraseña cada vez."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O MacPower instalou uma regra sudoers estreita para mudar o modo de baixo consumo sem pedir senha toda vez."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacPower ha installato una regola sudoers stretta così la modalità risparmio si cambia senza chiedere la password ogni volta."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacPower поставил узкое правило sudoers, чтобы менять режим энергосбережения без пароля каждый раз."
+          }
+        }
+      }
+    },
+    "settings.permissions.lowPower.caption.system": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This Mac can already run pmset without a password (for example passwordless sudo for your account). Low Power Mode works; MacPower did not install its own rule."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这台 Mac 已经能无密码运行 pmset（例如账户开了免密 sudo）。节能模式本来就能用，MacPower 没有另装自己的规则。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這台 Mac 已經能無密碼執行 pmset（例如帳戶開了免密 sudo）。節能模式本來就能用，MacPower 沒有另裝自己的規則。"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "この Mac はすでにパスワードなしで pmset を実行できます（例: アカウントの NOPASSWD sudo）。低電力モードはそのままで使え、MacPower 独自のルールは入れていません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 Mac은 이미 암호 없이 pmset을 실행할 수 있습니다(예: 계정의 NOPASSWD sudo). 저전력 모드는 그대로 쓸 수 있으며 MacPower 자체 규칙은 설치하지 않았습니다."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce Mac peut déjà lancer pmset sans mot de passe (par ex. sudo sans mot de passe). Le mode économie d’énergie fonctionne ; MacPower n’a pas installé sa propre règle."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dieser Mac kann pmset bereits ohne Passwort ausführen (z. B. passwortloses sudo). Energiesparmodus geht; MacPower hat keine eigene Regel gesetzt."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este Mac ya puede ejecutar pmset sin contraseña (p. ej. sudo sin contraseña). El modo de bajo consumo funciona; MacPower no instaló su propia regla."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este Mac já consegue rodar pmset sem senha (por exemplo sudo sem senha). O modo de baixo consumo funciona; o MacPower não instalou a própria regra."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Questo Mac può già eseguire pmset senza password (es. sudo senza password). La modalità risparmio funziona; MacPower non ha installato una propria regola."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "На этом Mac уже можно запускать pmset без пароля (например NOPASSWD sudo). Режим энергосбережения работает; MacPower свою правило не ставил."
           }
         }
       }

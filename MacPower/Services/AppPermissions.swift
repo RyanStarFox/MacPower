@@ -40,8 +40,16 @@ enum AppPermissions {
             @unknown default: return .unknown
             }
         case .lowPowerAdmin:
-            return LowPowerModeController.hasPasswordlessRule ? .allowed : .notDetermined
+            switch LowPowerModeController.adminAccess {
+            case .macPowerRule, .systemSudo: return .allowed
+            case .unavailable: return .notDetermined
+            }
         }
+    }
+
+    /// Where Low Power Mode admin access comes from, when it is already allowed.
+    static var lowPowerAdminAccess: LowPowerModeController.AdminAccess {
+        LowPowerModeController.adminAccess
     }
 
     /// Whether live `IOBluetoothDevice` reads are allowed. Denied / restricted
