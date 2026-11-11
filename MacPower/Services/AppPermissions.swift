@@ -1,12 +1,11 @@
 import AppKit
 import CoreBluetooth
 import Foundation
-import ServiceManagement
 
 /// Permissions MacPower may need, with status checks and links into System Settings.
 enum AppPermissionKind: String, CaseIterable, Identifiable, Sendable {
     case bluetooth
-    case loginItem
+    case lowPowerAdmin
 
     var id: String { rawValue }
 }
@@ -40,13 +39,8 @@ enum AppPermissions {
             case .notDetermined: return .notDetermined
             @unknown default: return .unknown
             }
-        case .loginItem:
-            switch SMAppService.mainApp.status {
-            case .enabled: return .allowed
-            case .notRegistered: return .notDetermined
-            case .notFound, .requiresApproval: return .denied
-            @unknown default: return .unknown
-            }
+        case .lowPowerAdmin:
+            return LowPowerModeController.hasPasswordlessRule ? .allowed : .notDetermined
         }
     }
 
@@ -60,24 +54,19 @@ enum AppPermissions {
     }
 
     static func openSystemSettings(for kind: AppPermissionKind) {
-        let candidates: [String]
         switch kind {
         case .bluetooth:
-            candidates = [
+            let candidates = [
                 "x-apple.systempreferences:com.apple.settings.PrivacySecurity.extension?Privacy_Bluetooth",
                 "x-apple.systempreferences:com.apple.preference.security?Privacy_Bluetooth",
                 "x-apple.systempreferences:com.apple.Settings.extension.PrivacySecurity?Privacy_Bluetooth",
             ]
-        case .loginItem:
-            candidates = [
-                "x-apple.systempreferences:com.apple.LoginItems-Settings.extension",
-                "x-apple.systempreferences:com.apple.LoginItems-Settings.extension?status",
-                "x-apple.systempreferences:com.apple.preference.general",
-            ]
-        }
-        for raw in candidates {
-            guard let url = URL(string: raw) else { continue }
-            if NSWorkspace.shared.open(url) { return }
+            for raw in candidates {
+                guard let url = URL(string: raw) else { continue }
+                if NSWorkspace.shared.open(url) { return }
+            }
+        case .lowPowerAdmin:
+            break
         }
     }
 
@@ -86,6 +75,16 @@ enum AppPermissions {
         let current = status(for: .bluetooth)
         guard current == .notDetermined else { return current }
         return await BluetoothPermissionRequester.shared.request()
+    }
+
+    static func grantLowPowerAdmin() async -> AppPermissionStatus {
+        _ = await LowPowerModeController.grantPasswordlessRule()
+        return status(for: .lowPowerAdmin)
+    }
+
+    static func revokeLowPowerAdmin() async -> AppPermissionStatus {
+        _ = await LowPowerModeController.revokePasswordlessRule()
+        return status(for: .lowPowerAdmin)
     }
 }
 

@@ -407,9 +407,9 @@ final class LoginLaunchTests: XCTestCase {
             XCTAssertFalse(status.localizationKey.isEmpty)
             XCTAssertTrue(status.localizationKey.hasPrefix("settings.permissions.status."))
         }
-        XCTAssertEqual(AppPermissionKind.allCases.map(\.rawValue), ["bluetooth", "loginItem"])
+        XCTAssertEqual(AppPermissionKind.allCases.map(\.rawValue), ["bluetooth", "lowPowerAdmin"])
         _ = AppPermissions.status(for: .bluetooth)
-        _ = AppPermissions.status(for: .loginItem)
+        _ = AppPermissions.status(for: .lowPowerAdmin)
     }
 
     func testBluetoothMergeFillsHFPBatteryFromIOBluetooth() {

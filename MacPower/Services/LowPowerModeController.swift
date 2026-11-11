@@ -60,6 +60,28 @@ enum LowPowerModeController {
         }.value
     }
 
+    /// True when the limited `pmset` sudoers rule for this Mac is already installed.
+    static var hasPasswordlessRule: Bool {
+        FileManager.default.isReadableFile(atPath: LowPowerPrivilege.sudoersPath)
+    }
+
+    /// Asks for an administrator password and installs the limited sudoers rule
+    /// used for Low Power Mode changes. Returns whether the rule is present afterward.
+    static func grantPasswordlessRule() async -> Bool {
+        await Task.detached {
+            _ = installPasswordlessRule()
+            return hasPasswordlessRule
+        }.value
+    }
+
+    /// Asks for an administrator password and removes the MacPower low-power sudoers rule.
+    static func revokePasswordlessRule() async -> Bool {
+        await Task.detached {
+            _ = removePasswordlessRule()
+            return !hasPasswordlessRule
+        }.value
+    }
+
     /// Asks for an administrator password at most once, then keeps a sudoers rule that
     /// allows only these exact `pmset` low-power commands.
     private static func runSync(_ arguments: [String]) -> Bool {
@@ -67,6 +89,10 @@ enum LowPowerModeController {
         if first.ok { return true }
         guard first.needsPrivilege, installPasswordlessRule() else { return false }
         return sudo(arguments).ok
+    }
+
+    private static func removePasswordlessRule() -> Bool {
+        authorize(tool: "/bin/rm", arguments: ["-f", LowPowerPrivilege.sudoersPath])
     }
 
     private static func sudo(_ arguments: [String]) -> (ok: Bool, needsPrivilege: Bool) {
@@ -97,7 +123,7 @@ enum LowPowerModeController {
         trap 'rm -f "$tmp"' EXIT
         printf '%s' "$1" | /usr/bin/base64 -d > "$tmp"
         /usr/sbin/visudo -cf "$tmp"
-        /usr/bin/install -m 440 "$tmp" /etc/sudoers.d/macpower-lowpower
+        /usr/bin/install -m 440 "$tmp" "\(LowPowerPrivilege.sudoersPath)"
         """
         return authorize(tool: "/bin/sh", arguments: ["-c", script, "macpower", payload])
     }
@@ -152,6 +178,8 @@ enum LowPowerModeController {
 }
 
 enum LowPowerPrivilege {
+    static let sudoersPath = "/etc/sudoers.d/macpower-lowpower"
+
     /// Rules for one local account. The name is restricted so it cannot change the rule itself.
     static func sudoers(user: String) -> String? {
         guard user.range(of: #"^[A-Za-z0-9._-]{1,32}$"#, options: .regularExpression) != nil else { return nil }

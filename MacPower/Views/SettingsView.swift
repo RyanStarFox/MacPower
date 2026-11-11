@@ -1,5 +1,4 @@
 import AppKit
-import ServiceManagement
 import SwiftUI
 
 extension Notification.Name {
@@ -1965,7 +1964,6 @@ struct SettingsView: View {
     }
 
     private func refreshPermissionStatus() {
-        appState.launchAtLoginEnabled = SMAppService.mainApp.status == .enabled
         permissionRefresh = Date()
     }
 
@@ -1977,18 +1975,9 @@ struct SettingsView: View {
         }
     }
 
-
     @ViewBuilder
     private var permissionsSections: some View {
         let _ = permissionRefresh
-        Section {
-            Text("settings.permissions.intro")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(maxWidth: .infinity, alignment: .leading)
-        }
-
         Section {
             permissionBluetoothRow
         } header: {
@@ -2000,20 +1989,11 @@ struct SettingsView: View {
         }
 
         Section {
-            Toggle(isOn: launchAtLoginBinding) {
-                SettingsRowLabel(
-                    title: "settings.permissions.login.title",
-                    caption: "settings.permissions.login.caption"
-                )
-            }
-            permissionStatusLine(AppPermissions.status(for: .loginItem))
-            Button("settings.permissions.login.openSettings") {
-                AppPermissions.openSystemSettings(for: .loginItem)
-            }
+            permissionLowPowerAdminRow
         } header: {
-            Text("settings.permissions.login.header")
+            Text("settings.permissions.lowPower.header")
         } footer: {
-            Text("settings.permissions.login.footer")
+            Text("settings.permissions.lowPower.footer")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
         }
@@ -2051,10 +2031,36 @@ struct SettingsView: View {
                         AppPermissions.openSystemSettings(for: .bluetooth)
                     }
                 }
+                Spacer(minLength: 0)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var permissionLowPowerAdminRow: some View {
+        let status = AppPermissions.status(for: .lowPowerAdmin)
+        VStack(alignment: .leading, spacing: 10) {
+            SettingsRowLabel(
+                title: "settings.permissions.lowPower.title",
+                caption: "settings.permissions.lowPower.caption"
+            )
+            permissionStatusLine(status)
+            HStack(spacing: 8) {
                 if status == .allowed {
-                    Text("settings.permissions.bluetooth.revokeHint")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                    Button("settings.permissions.lowPower.revoke") {
+                        Task {
+                            _ = await AppPermissions.revokeLowPowerAdmin()
+                            refreshPermissionStatus()
+                        }
+                    }
+                } else {
+                    Button("settings.permissions.lowPower.grant") {
+                        Task {
+                            _ = await AppPermissions.grantLowPowerAdmin()
+                            refreshPermissionStatus()
+                        }
+                    }
+                    .keyboardShortcut(.defaultAction)
                 }
                 Spacer(minLength: 0)
             }

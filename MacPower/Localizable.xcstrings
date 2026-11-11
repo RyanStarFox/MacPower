@@ -39263,6 +39263,432 @@
           }
         }
       }
+    },
+    "settings.permissions.lowPower.header": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Low Power Mode"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "节能模式"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "節能模式"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "低電力モード"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "저전력 모드"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mode économie d’énergie"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Energiesparmodus"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modo de bajo consumo"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modo de baixo consumo"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modalità risparmio"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Режим энергосбережения"
+          }
+        }
+      }
+    },
+    "settings.permissions.lowPower.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Administrator for Low Power Mode"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "节能模式的管理员权限"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "節能模式的管理員權限"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "低電力モードの管理者権限"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "저전력 모드 관리자 권한"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Administrateur pour le mode économie d’énergie"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Administrator für den Energiesparmodus"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Administrador para el modo de bajo consumo"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Administrador para o modo de baixo consumo"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amministratore per la modalità risparmio"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Администратор для режима энергосбережения"
+          }
+        }
+      }
+    },
+    "settings.permissions.lowPower.caption": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Changing Low Power Mode needs an administrator password once. MacPower then installs a narrow rule that only allows those pmset commands."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "改节能模式需要输入一次管理员密码。之后 MacPower 会装一条很窄的规则，只允许这些 pmset 命令。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "改節能模式需要輸入一次管理員密碼。之後 MacPower 會裝一條很窄的規則，只允許這些 pmset 命令。"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "低電力モードの変更には管理者パスワードが一度必要です。その後、該当の pmset だけを許す狭いルールを入れます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "저전력 모드를 바꾸려면 관리자 암호가 한 번 필요합니다. 이후 해당 pmset 명령만 허용하는 좁은 규칙을 둡니다."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Changer le mode économie d’énergie demande un mot de passe administrateur une fois. MacPower installe ensuite une règle limitée à ces commandes pmset."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Den Energiesparmodus ändern braucht einmal das Administratorpasswort. Danach setzt MacPower eine enge Regel nur für diese pmset-Befehle."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cambiar el modo de bajo consumo pide una vez la contraseña de administrador. Luego MacPower instala una regla estrecha solo para esos pmset."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mudar o modo de baixo consumo pede a senha de administrador uma vez. Depois o MacPower instala uma regra estreita só para esses pmset."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cambiare la modalità risparmio chiede una volta la password amministratore. Poi MacPower installa una regola stretta solo per quei pmset."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Смена режима энергосбережения один раз просит пароль администратора. Затем MacPower ставит узкое правило только для этих pmset."
+          }
+        }
+      }
+    },
+    "settings.permissions.lowPower.footer": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grant installs /etc/sudoers.d/macpower-lowpower. Revoke removes that file (password again). It does not affect Bluetooth or other apps."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「允许」会写入 /etc/sudoers.d/macpower-lowpower。「撤销」会删掉这个文件（还要再输一次密码）。不影响蓝牙或其他应用。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「允許」會寫入 /etc/sudoers.d/macpower-lowpower。「撤銷」會刪掉這個檔案（還要再輸入一次密碼）。不影響藍牙或其他 App。"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「許可」は /etc/sudoers.d/macpower-lowpower を入れます。「取り消し」はそのファイルを消します（再パスワード）。Bluetooth や他アプリには影響しません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「허용」은 /etc/sudoers.d/macpower-lowpower를 둡니다. 「철회」는 그 파일을 지웁니다(암호 다시). Bluetooth나 다른 앱에는 영향 없습니다."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autoriser crée /etc/sudoers.d/macpower-lowpower. Révoquer le supprime (mot de passe à nouveau). Sans effet sur Bluetooth ni d’autres apps."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erlauben legt /etc/sudoers.d/macpower-lowpower an. Widerrufen löscht die Datei (Passwort erneut). Betrifft nicht Bluetooth oder andere Apps."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permitir crea /etc/sudoers.d/macpower-lowpower. Revocar lo borra (otra contraseña). No afecta a Bluetooth ni a otras apps."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permitir cria /etc/sudoers.d/macpower-lowpower. Revogar remove o arquivo (senha de novo). Não afeta Bluetooth nem outros apps."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consenti crea /etc/sudoers.d/macpower-lowpower. Revoca lo elimina (password di nuovo). Non tocca Bluetooth né altre app."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«Разрешить» создаёт /etc/sudoers.d/macpower-lowpower. «Отозвать» удаляет файл (пароль снова). Bluetooth и другие приложения не затрагивает."
+          }
+        }
+      }
+    },
+    "settings.permissions.lowPower.grant": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "允许…"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "允許…"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "許可…"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "허용…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autoriser…"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erlauben…"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permitir…"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permitir…"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consenti…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разрешить…"
+          }
+        }
+      }
+    },
+    "settings.permissions.lowPower.revoke": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revoke…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "撤销…"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "撤銷…"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "取り消し…"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "철회…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Révoquer…"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Widerrufen…"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revocar…"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revogar…"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revoca…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отозвать…"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
