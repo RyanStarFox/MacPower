@@ -21,6 +21,8 @@ final class StatusItemController: NSObject, NSPopoverDelegate, NSMenuDelegate {
     private var lastTooltip: String?
     private var isRefreshingIcon = false
     private var isShowingStatusMenu = false
+    /// Colored charge sits above template chrome so the empty frame still tracks the menu bar.
+    private var chargeOverlay: PassthroughImageView?
     /// Clicks outside a menu-bar popover never reach this accessory app, so
     /// `.transient` alone leaves the panel up until the status item is clicked again.
     private var outsideClickMonitors: [Any] = []
@@ -160,15 +162,14 @@ final class StatusItemController: NSObject, NSPopoverDelegate, NSMenuDelegate {
         defer { isRefreshingIcon = false }
 
         let fill = appState.menuBarFill(appearance: appearance)
-        let image = MenuBarBatteryRenderer.image(
+        let content = MenuBarBatteryRenderer.statusItemContent(
             snapshot: appState.snapshot,
             style: appState.settings.iconStyle,
             fill: fill,
             appearance: appearance,
             showChargeGlyphs: appState.settings.showChargeGlyphs
         )
-        image.isTemplate = fill.isTemplate
-        button.image = image
+        button.image = content.chrome
 
         let title: String
         if appState.settings.digitPlacement == .beside {
@@ -180,6 +181,8 @@ final class StatusItemController: NSObject, NSPopoverDelegate, NSMenuDelegate {
             button.title = title
             lastTitle = title
         }
+
+        syncChargeOverlay(on: button, charge: content.charge)
 
         let tip = tooltip
         if tip != lastTooltip {
@@ -528,6 +531,39 @@ final class StatusItemController: NSObject, NSPopoverDelegate, NSMenuDelegate {
         button.layer?.masksToBounds = true
     }
 
+    private func syncChargeOverlay(on button: NSStatusBarButton, charge: NSImage?) {
+        guard let charge else {
+            chargeOverlay?.isHidden = true
+            chargeOverlay?.image = nil
+            return
+        }
+        let overlay = chargeOverlay ?? {
+            let view = PassthroughImageView()
+            view.imageScaling = .scaleNone
+            view.wantsLayer = true
+            button.addSubview(view)
+            chargeOverlay = view
+            return view
+        }()
+        overlay.image = charge
+        overlay.isHidden = false
+        button.layoutSubtreeIfNeeded()
+        let size = charge.size
+        if let cell = button.cell as? NSButtonCell {
+            let imageRect = cell.imageRect(forBounds: button.bounds)
+            if imageRect.width > 0, imageRect.height > 0 {
+                overlay.frame = imageRect
+                return
+            }
+        }
+        overlay.frame = NSRect(
+            x: ((button.bounds.width - size.width) / 2).rounded(.towardZero),
+            y: ((button.bounds.height - size.height) / 2).rounded(.towardZero),
+            width: size.width,
+            height: size.height
+        )
+    }
+
     private func legacyHighlightColor(for button: NSStatusBarButton) -> NSColor {
         var color = NSColor.selectedContentBackgroundColor
         button.effectiveAppearance.performAsCurrentDrawingAppearance {
@@ -575,4 +611,9 @@ final class StatusItemController: NSObject, NSPopoverDelegate, NSMenuDelegate {
         guard delta > 0.5 else { return }
         window.setFrame(window.frame.offsetBy(dx: 0, dy: delta), display: true, animate: false)
     }
+}
+
+/// Lets clicks fall through to the status-item button.
+private final class PassthroughImageView: NSImageView {
+    override func hitTest(_ point: NSPoint) -> NSView? { nil }
 }
