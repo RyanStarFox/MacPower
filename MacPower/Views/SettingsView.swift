@@ -1,4 +1,5 @@
 import AppKit
+import ServiceManagement
 import SwiftUI
 
 extension Notification.Name {
@@ -669,7 +670,7 @@ private struct SettingsSidebarRow: View {
 
 struct SettingsView: View {
     fileprivate enum Pane: String, CaseIterable, Identifiable {
-        case general, panel, tutorial, menuBar, rings, flow, topApps, lowPower, localIP, batteryCycle, about
+        case general, permissions, panel, tutorial, menuBar, rings, flow, topApps, lowPower, localIP, batteryCycle, about
         var id: String { rawValue }
     }
 
@@ -726,6 +727,8 @@ struct SettingsView: View {
     @State private var showingBluetoothDevices = false
     @State private var showingAuthorSupport = false
     @State private var bluetoothIconEditor: BluetoothIconEdit?
+    @State private var showingBluetoothPermissionReason = false
+    @State private var permissionRefresh = Date()
 
     private enum SaveTintDialog: Identifiable {
         case menuBar, ring, flow, ringIcon, flowIcon
@@ -828,6 +831,7 @@ struct SettingsView: View {
             [
                 // System Settings' General.
                 entry(.general, "settings.section.general", .gear, .gray),
+                entry(.permissions, "settings.tab.permissions", symbol("lock.shield.fill", 0.6), .blue),
             ],
             [
                 // System Settings' Battery.
@@ -1920,6 +1924,7 @@ struct SettingsView: View {
         Form {
             switch pane {
             case .general: generalSections
+            case .permissions: permissionsSections
             case .panel: panelSections
             case .menuBar: menuBarSections
             case .rings: ringsSections
@@ -1937,8 +1942,154 @@ struct SettingsView: View {
         .scrollBounceBehavior(.basedOnSize, axes: .vertical)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background(SettingsFormWidthLock())
+        .onChange(of: pane) { _, newPane in
+            if newPane == .permissions {
+                refreshPermissionStatus()
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+            guard pane == .permissions else { return }
+            refreshPermissionStatus()
+        }
+        .alert(
+            "settings.permissions.bluetooth.reason.title",
+            isPresented: $showingBluetoothPermissionReason
+        ) {
+            Button("settings.permissions.bluetooth.reason.continue") {
+                Task { await requestBluetoothFromSettings() }
+            }
+            Button("settings.permissions.bluetooth.reason.cancel", role: .cancel) {}
+        } message: {
+            Text("settings.permissions.bluetooth.reason.body")
+        }
     }
 
+    private func refreshPermissionStatus() {
+        appState.launchAtLoginEnabled = SMAppService.mainApp.status == .enabled
+        permissionRefresh = Date()
+    }
+
+    private func requestBluetoothFromSettings() async {
+        _ = await AppPermissions.requestBluetoothAccess()
+        refreshPermissionStatus()
+        if AppPermissions.status(for: .bluetooth) == .allowed {
+            await appState.refreshBluetoothNow()
+        }
+    }
+
+
+    @ViewBuilder
+    private var permissionsSections: some View {
+        let _ = permissionRefresh
+        Section {
+            Text("settings.permissions.intro")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+
+        Section {
+            permissionBluetoothRow
+        } header: {
+            Text("settings.permissions.bluetooth.header")
+        } footer: {
+            Text("settings.permissions.bluetooth.footer")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+
+        Section {
+            Toggle(isOn: launchAtLoginBinding) {
+                SettingsRowLabel(
+                    title: "settings.permissions.login.title",
+                    caption: "settings.permissions.login.caption"
+                )
+            }
+            permissionStatusLine(AppPermissions.status(for: .loginItem))
+            Button("settings.permissions.login.openSettings") {
+                AppPermissions.openSystemSettings(for: .loginItem)
+            }
+        } header: {
+            Text("settings.permissions.login.header")
+        } footer: {
+            Text("settings.permissions.login.footer")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+
+        Section {
+            Button("settings.permissions.refresh") {
+                refreshPermissionStatus()
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var permissionBluetoothRow: some View {
+        let status = AppPermissions.status(for: .bluetooth)
+        VStack(alignment: .leading, spacing: 10) {
+            SettingsRowLabel(
+                title: "settings.permissions.bluetooth.title",
+                caption: "settings.permissions.bluetooth.caption"
+            )
+            permissionStatusLine(status)
+            HStack(spacing: 8) {
+                switch status {
+                case .notDetermined:
+                    Button("settings.permissions.bluetooth.allow") {
+                        showingBluetoothPermissionReason = true
+                    }
+                    .keyboardShortcut(.defaultAction)
+                case .denied, .restricted:
+                    Button("settings.permissions.bluetooth.openSettings") {
+                        AppPermissions.openSystemSettings(for: .bluetooth)
+                    }
+                    .keyboardShortcut(.defaultAction)
+                case .allowed, .unknown:
+                    Button("settings.permissions.bluetooth.openSettings") {
+                        AppPermissions.openSystemSettings(for: .bluetooth)
+                    }
+                }
+                if status == .allowed {
+                    Text("settings.permissions.bluetooth.revokeHint")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer(minLength: 0)
+            }
+        }
+    }
+
+    private func permissionStatusLine(_ status: AppPermissionStatus) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: permissionStatusSymbol(status))
+                .foregroundStyle(permissionStatusColor(status))
+            Text(LocalizedStringKey(status.localizationKey))
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            Spacer(minLength: 0)
+        }
+        .accessibilityElement(children: .combine)
+    }
+
+    private func permissionStatusSymbol(_ status: AppPermissionStatus) -> String {
+        switch status {
+        case .allowed: "checkmark.circle.fill"
+        case .denied, .restricted: "xmark.octagon.fill"
+        case .notDetermined: "questionmark.circle.fill"
+        case .unknown: "exclamationmark.circle.fill"
+        }
+    }
+
+    private func permissionStatusColor(_ status: AppPermissionStatus) -> Color {
+        switch status {
+        case .allowed: .green
+        case .denied, .restricted: .red
+        case .notDetermined: .orange
+        case .unknown: .secondary
+        }
+    }
 
     @ViewBuilder
     private var generalSections: some View {

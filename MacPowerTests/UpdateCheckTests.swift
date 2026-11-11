@@ -396,6 +396,64 @@ final class LoginLaunchTests: XCTestCase {
         XCTAssertTrue(devices[1].levels.isEmpty)
     }
 
+    func testPermissionStatusLocalizationKeysExist() {
+        for status in [
+            AppPermissionStatus.allowed,
+            .denied,
+            .restricted,
+            .notDetermined,
+            .unknown,
+        ] {
+            XCTAssertFalse(status.localizationKey.isEmpty)
+            XCTAssertTrue(status.localizationKey.hasPrefix("settings.permissions.status."))
+        }
+        XCTAssertEqual(AppPermissionKind.allCases.map(\.rawValue), ["bluetooth", "loginItem"])
+        _ = AppPermissions.status(for: .bluetooth)
+        _ = AppPermissions.status(for: .loginItem)
+    }
+
+    func testBluetoothMergeFillsHFPBatteryFromIOBluetooth() {
+        let profiler = [
+            BluetoothSeenDevice(
+                address: "80-c3-ba-4a-92-9d",
+                name: "MOMENTUM 4",
+                connected: true,
+                levels: [:],
+                minorType: "Headset"
+            ),
+            BluetoothSeenDevice(
+                address: "48:35:AB:56:64:1C",
+                name: "AirPods 5",
+                connected: false,
+                levels: [.left: 100, .right: 100, .box: 85]
+            ),
+        ]
+        let live = [
+            BluetoothSeenDevice(
+                address: "80:C3:BA:4A:92:9D",
+                name: "MOMENTUM 4",
+                connected: true,
+                levels: [.single: 40]
+            ),
+            BluetoothSeenDevice(
+                address: "48-35-ab-56-64-1c",
+                name: "AirPods 5",
+                connected: false,
+                levels: [.left: 74, .right: 62]
+            ),
+        ]
+        let merged = BluetoothBatteryReader.merge(profiler: profiler, live: live)
+        let momentum = merged.first { $0.name.contains("MOMENTUM") }
+        let airpods = merged.first { $0.name.contains("AirPods") }
+        XCTAssertEqual(momentum?.address, "80:C3:BA:4A:92:9D")
+        XCTAssertEqual(momentum?.levels[.single], 40)
+        XCTAssertEqual(momentum?.minorType, "Headset")
+        XCTAssertEqual(airpods?.levels[.left], 100)
+        XCTAssertEqual(airpods?.levels[.right], 100)
+        XCTAssertEqual(airpods?.levels[.box], 85)
+        XCTAssertEqual(BluetoothBatteryReader.normalizeAddress("80-c3-ba-4a-92-9d"), "80:C3:BA:4A:92:9D")
+    }
+
     private func openEvent() -> NSAppleEventDescriptor {
         NSAppleEventDescriptor(
             eventClass: kCoreEventClass,
