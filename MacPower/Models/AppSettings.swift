@@ -189,6 +189,8 @@ final class AppSettings {
         static let temperatureHalfCelsius = "temperatureHalfCelsius"
         static let temperatureUnit = "temperatureUnit"
         static let swapHalfMegabytes = "swapHalfMegabytes"
+        static let compressorHalfMegabytes = "compressorHalfMegabytes"
+        static let didSplitSwapCompressor = "didSplitSwapCompressor"
         static let thermalNominalPercent = "thermalNominalPercent"
         static let thermalFairPercent = "thermalFairPercent"
         static let thermalSeriousPercent = "thermalSeriousPercent"
@@ -970,6 +972,11 @@ final class AppSettings {
         didSet { storeRingScale(\.swapHalfMegabytes, range: Self.swapHalfLimit(), key: Keys.swapHalfMegabytes) }
     }
 
+    /// Compressor RAM that fills the ring to 50%. A full ring stays one memory.
+    var compressorHalfMegabytes: Int {
+        didSet { storeRingScale(\.compressorHalfMegabytes, range: Self.swapHalfLimit(), key: Keys.compressorHalfMegabytes) }
+    }
+
     var thermalNominalPercent: Int {
         didSet { storeRingScale(\.thermalNominalPercent, range: Self.thermalPercentRange, key: Keys.thermalNominalPercent) }
     }
@@ -1543,6 +1550,12 @@ final class AppSettings {
             fallback: Self.defaultSwapHalfMegabytes(),
             range: Self.swapHalfLimit()
         )
+        compressorHalfMegabytes = Self.clampedStoredInteger(
+            defaults,
+            key: Keys.compressorHalfMegabytes,
+            fallback: Self.defaultSwapHalfMegabytes(),
+            range: Self.swapHalfLimit()
+        )
         thermalNominalPercent = Self.clampedStoredInteger(
             defaults,
             key: Keys.thermalNominalPercent,
@@ -1594,6 +1607,7 @@ final class AppSettings {
         ensureOnePopoverBlockVisible()
         keepSettingsButtonOffHiddenHost()
         alignPreviousDefaults()
+        offerCompressorBesideSwapIfNeeded()
 
         store.set(resolvedMotion.rawValue, forKey: Keys.motionStyle)
         store.set(settingsButtonPlacement.rawValue, forKey: Keys.settingsButtonPlacement)
@@ -1950,6 +1964,25 @@ final class AppSettings {
             }
             store.set(5, forKey: revisionKey)
         }
+    }
+
+    /// People who already show 交换 were looking at compressor bytes under that name.
+    /// Offer a real 压缩 ring once, placed after 交换, without forcing it later.
+    private func offerCompressorBesideSwapIfNeeded() {
+        guard !store.bool(forKey: Keys.didSplitSwapCompressor) else { return }
+        store.set(true, forKey: Keys.didSplitSwapCompressor)
+        guard enabledRingSlots.contains(.swap), !enabledRingSlots.contains(.compressor) else { return }
+        setRingSlot(.compressor, visible: true)
+        if let swapRow = ringRows.firstIndex(where: { row in row.contains { $0.slot == .swap } }),
+           let compressorIndex = ringRows[swapRow].firstIndex(where: { $0.slot == .compressor }),
+           let swapIndex = ringRows[swapRow].firstIndex(where: { $0.slot == .swap }),
+           compressorIndex != swapIndex + 1 {
+            let item = ringRows[swapRow].remove(at: compressorIndex)
+            let insertAt = compressorIndex < swapIndex ? swapIndex : swapIndex + 1
+            ringRows[swapRow].insert(item, at: min(insertAt, ringRows[swapRow].count))
+            persistRingRows()
+        }
+        storeVisibleRings()
     }
 
     private func persistTint() {

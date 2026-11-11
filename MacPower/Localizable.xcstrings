@@ -13603,6 +13603,148 @@
         }
       }
     },
+    "ring.compressor": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compressed"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "压缩"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "壓縮"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "圧縮"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "압축"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compressé"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Komprimiert"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comprimido"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comprimido"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compressa"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сжатие"
+          }
+        }
+      }
+    },
+    "ring.caption.compressor %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compressed: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "压缩：%@"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "壓縮：%@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "圧縮: %@"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "압축: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compressé : %@"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Komprimiert: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comprimido: %@"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comprimido: %@"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compressa: %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сжатие: %@"
+          }
+        }
+      }
+    },
     "ring.caption.disk %lld": {
       "extractionState": "manual",
       "localizations": {
@@ -14274,6 +14416,148 @@
         "ru": { "stringUnit": { "state": "translated", "value": "Этот размер заполняет кольцо наполовину. Полное кольцо — это всегда вся память. По умолчанию это её четверть." } },
         "zh-Hans": { "stringUnit": { "state": "translated", "value": "改这个大小，圆环就走到一半。满圈始终是这台 Mac 的整份内存。默认是内存的四分之一。" } },
         "zh-Hant": { "stringUnit": { "state": "translated", "value": "改這個大小，圓環就走到一半。滿圈始終是這台 Mac 的整份記憶體。預設是記憶體的四分之一。" } }
+      }
+    },
+    "settings.rings.half.compressor": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compressed at 50%"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "压缩 50%"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "壓縮 50%"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "圧縮 50%"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "압축 50%"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compressé à 50 %"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Komprimiert bei 50 %"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comprimido al 50 %"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comprimido em 50%"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compressa al 50%"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сжатие на 50%"
+          }
+        }
+      }
+    },
+    "settings.rings.half.compressor.note": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This size fills the ring halfway. A full ring is always all of this Mac’s memory. The default is a quarter of that memory."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "改这个大小，圆环就走到一半。满圈始终是这台 Mac 的整份内存。默认是内存的四分之一。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "改這個大小，圓環就走到一半。滿圈始終是這台 Mac 的整份記憶體。預設是記憶體的四分之一。"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "この大きさでリングが半分になります。満タンは常にこの Mac のメモリ全体です。初期値はその 4 分の 1 です。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 크기에서 링이 절반이 됩니다. 가득 찬 링은 항상 이 Mac의 메모리 전체입니다. 기본값은 그 4분의 1입니다."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette taille remplit l’anneau à moitié. Un anneau plein correspond toujours à toute la mémoire. La valeur d’origine est un quart de cette mémoire."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Größe füllt den Ring zur Hälfte. Ein voller Ring ist immer der gesamte Arbeitsspeicher. Voreingestellt ist ein Viertel davon."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este tamaño llena el anillo hasta la mitad. El anillo lleno es siempre toda la memoria. El valor inicial es un cuarto de esa memoria."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este tamanho enche o anel até a metade. O anel cheio é sempre toda a memória. O padrão é um quarto dessa memória."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Questa dimensione riempie l’anello a metà. L’anello pieno è sempre tutta la memoria. Il valore iniziale è un quarto di quella memoria."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Этот размер заполняет кольцо наполовину. Полное кольцо — это всегда вся память. По умолчанию это её четверть."
+          }
+        }
       }
     },
     "settings.rings.scale": {
@@ -18073,6 +18357,148 @@
         "pt-BR": { "stringUnit": { "state": "translated", "value": "Um anel completo é sempre toda a memória deste Mac." } },
         "it": { "stringUnit": { "state": "translated", "value": "Un anello completo è sempre tutta la memoria di questo Mac." } },
         "ru": { "stringUnit": { "state": "translated", "value": "Полное кольцо — это всегда вся память этого Mac." } }
+      }
+    },
+    "settings.rings.half.compressor.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compressed memory for half a ring"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "压缩到多少时走半圈"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "壓縮到多少時走半圈"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "リング半分になる圧縮"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "링 절반이 되는 압축"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mémoire compressée pour un demi-anneau"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Komprimierter Speicher für einen halben Ring"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Memoria comprimida para medio anillo"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Memória comprimida para meio anel"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Memoria compressa per mezzo anello"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сжатая память на полкольца"
+          }
+        }
+      }
+    },
+    "settings.rings.half.compressor.caption": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A full ring is always all of this Mac’s memory."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "满圈始终是这台 Mac 的全部内存。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "滿圈始終是這台 Mac 的全部記憶體。"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "リング1周は常にこのMacのメモリ全体です。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "링 한 바퀴는 항상 이 Mac의 전체 메모리입니다."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un anneau complet correspond toujours à toute la mémoire de ce Mac."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein voller Ring ist immer der gesamte Speicher dieses Mac."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un anillo completo es siempre toda la memoria de este Mac."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Um anel completo é sempre toda a memória deste Mac."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un anello completo è sempre tutta la memoria di questo Mac."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Полное кольцо — это всегда вся память этого Mac."
+          }
+        }
       }
     },
     "settings.rings.thermal.title": {

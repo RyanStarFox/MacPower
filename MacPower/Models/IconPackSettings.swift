@@ -172,6 +172,7 @@ struct RingIconSettings: Codable, Equatable, Sendable {
     var disk: GlyphSlot
     var memoryPressure: GlyphSlot
     var swap: GlyphSlot
+    var compressor: GlyphSlot
     var download: GlyphSlot
     var upload: GlyphSlot
     var batteryTemperature: GlyphSlot
@@ -180,6 +181,7 @@ struct RingIconSettings: Codable, Equatable, Sendable {
     static let diskGlyph = GlyphSlot.system("internaldrive.fill")
     static let memoryPressureGlyph = GlyphSlot.system("gauge.with.dots.needle.67percent")
     static let swapGlyph = GlyphSlot.system("arrow.left.arrow.right")
+    static let compressorGlyph = GlyphSlot.system("rectangle.compress.vertical")
     static let downloadGlyph = GlyphSlot.system("arrow.down")
     static let uploadGlyph = GlyphSlot.system("arrow.up")
     static let batteryTemperatureGlyph = GlyphSlot.system("thermometer.medium")
@@ -201,6 +203,7 @@ struct RingIconSettings: Codable, Equatable, Sendable {
                 disk: diskGlyph,
                 memoryPressure: memoryPressureGlyph,
                 swap: swapGlyph,
+                compressor: compressorGlyph,
                 download: downloadGlyph,
                 upload: uploadGlyph,
                 batteryTemperature: batteryTemperatureGlyph,
@@ -216,6 +219,7 @@ struct RingIconSettings: Codable, Equatable, Sendable {
                 disk: .system("externaldrive.fill"),
                 memoryPressure: .system("speedometer"),
                 swap: .system("arrow.triangle.2.circlepath"),
+                compressor: .system("arrow.down.right.and.arrow.up.left"),
                 download: .system("arrow.down.to.line"),
                 upload: .system("arrow.up.to.line"),
                 batteryTemperature: .system("thermometer.variable"),
@@ -231,6 +235,7 @@ struct RingIconSettings: Codable, Equatable, Sendable {
                 disk: .system("internaldrive"),
                 memoryPressure: .system("gauge.with.dots.needle.33percent"),
                 swap: .system("arrow.up.arrow.down"),
+                compressor: .system("rectangle.compress.vertical"),
                 download: .system("square.and.arrow.down"),
                 upload: .system("square.and.arrow.up"),
                 batteryTemperature: .system("thermometer.low"),
@@ -246,6 +251,7 @@ struct RingIconSettings: Codable, Equatable, Sendable {
                 disk: .system("opticaldisc.fill"),
                 memoryPressure: .system("gauge.with.dots.needle.bottom.50percent"),
                 swap: .system("arrow.2.squarepath"),
+                compressor: .system("arrow.down.forward.and.arrow.up.backward"),
                 download: .system("arrow.down.circle.fill"),
                 upload: .system("arrow.up.circle.fill"),
                 batteryTemperature: .system("thermometer.medium.slash"),
@@ -263,6 +269,7 @@ struct RingIconSettings: Codable, Equatable, Sendable {
         disk: GlyphSlot,
         memoryPressure: GlyphSlot,
         swap: GlyphSlot,
+        compressor: GlyphSlot,
         download: GlyphSlot,
         upload: GlyphSlot,
         batteryTemperature: GlyphSlot,
@@ -277,6 +284,7 @@ struct RingIconSettings: Codable, Equatable, Sendable {
             disk: disk,
             memoryPressure: memoryPressure,
             swap: swap,
+            compressor: compressor,
             download: download,
             upload: upload,
             batteryTemperature: batteryTemperature,
@@ -301,6 +309,7 @@ struct RingIconSettings: Codable, Equatable, Sendable {
         case .disk: disk
         case .memoryPressure: memoryPressure
         case .swap: swap
+        case .compressor: compressor
         }
     }
 
@@ -313,6 +322,7 @@ struct RingIconSettings: Codable, Equatable, Sendable {
         case .disk: disk
         case .memoryPressure: memoryPressure
         case .swap: swap
+        case .compressor: compressor
         case .download: download
         case .upload: upload
         case .speedPair: download
@@ -332,6 +342,7 @@ struct RingIconSettings: Codable, Equatable, Sendable {
         case .disk: copy.disk = slot
         case .memoryPressure: copy.memoryPressure = slot
         case .swap: copy.swap = slot
+        case .compressor: copy.compressor = slot
         case .download: copy.download = slot
         case .upload: copy.upload = slot
         case .speedPair: break
@@ -363,6 +374,7 @@ struct RingIconSettings: Codable, Equatable, Sendable {
         disk = Self.scaled(try container.decodeIfPresent(GlyphSlot.self, forKey: .disk) ?? Self.diskGlyph, legacy: legacy)
         memoryPressure = Self.scaled(try container.decodeIfPresent(GlyphSlot.self, forKey: .memoryPressure) ?? Self.memoryPressureGlyph, legacy: legacy)
         swap = Self.scaled(try container.decodeIfPresent(GlyphSlot.self, forKey: .swap) ?? Self.swapGlyph, legacy: legacy)
+        compressor = Self.scaled(try container.decodeIfPresent(GlyphSlot.self, forKey: .compressor) ?? Self.compressorGlyph, legacy: legacy)
         download = Self.scaled(try container.decodeIfPresent(GlyphSlot.self, forKey: .download) ?? Self.downloadGlyph, legacy: legacy)
         upload = Self.scaled(try container.decodeIfPresent(GlyphSlot.self, forKey: .upload) ?? Self.uploadGlyph, legacy: legacy)
         batteryTemperature = Self.scaled(try container.decodeIfPresent(GlyphSlot.self, forKey: .batteryTemperature) ?? Self.batteryTemperatureGlyph, legacy: legacy)
@@ -384,6 +396,7 @@ struct RingIconSettings: Codable, Equatable, Sendable {
         try container.encode(disk, forKey: .disk)
         try container.encode(memoryPressure, forKey: .memoryPressure)
         try container.encode(swap, forKey: .swap)
+        try container.encode(compressor, forKey: .compressor)
         try container.encode(download, forKey: .download)
         try container.encode(upload, forKey: .upload)
         try container.encode(batteryTemperature, forKey: .batteryTemperature)
@@ -391,7 +404,7 @@ struct RingIconSettings: Codable, Equatable, Sendable {
     }
 
     private enum CodingKeys: String, CodingKey {
-        case preset, battery, cpu, gpu, memory, disk, memoryPressure, swap
+        case preset, battery, cpu, gpu, memory, disk, memoryPressure, swap, compressor
         case download, upload, batteryTemperature, thermalState
         case legacyPackScale = "scale"
     }
@@ -405,6 +418,7 @@ struct RingIconSettings: Codable, Equatable, Sendable {
         disk: GlyphSlot,
         memoryPressure: GlyphSlot,
         swap: GlyphSlot,
+        compressor: GlyphSlot,
         download: GlyphSlot,
         upload: GlyphSlot,
         batteryTemperature: GlyphSlot,
@@ -418,6 +432,7 @@ struct RingIconSettings: Codable, Equatable, Sendable {
         self.disk = disk
         self.memoryPressure = memoryPressure
         self.swap = swap
+        self.compressor = compressor
         self.download = download
         self.upload = upload
         self.batteryTemperature = batteryTemperature
@@ -758,6 +773,14 @@ extension RingKind {
                 .system("arrow.triangle.2.circlepath"),
                 .system("memorychip"),
                 .system("arrow.2.squarepath")
+            ]
+        case .compressor:
+            [
+                .system("rectangle.compress.vertical"),
+                .system("arrow.down.right.and.arrow.up.left"),
+                .system("arrow.down.forward.and.arrow.up.backward"),
+                .system("memorychip"),
+                .system("archivebox.fill")
             ]
         }
     }

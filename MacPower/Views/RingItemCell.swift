@@ -203,7 +203,7 @@ struct RingItemCell: View {
             caption: caption,
             accessibilityName: name,
             glyph: appState.settings.ringIcons.slot(for: kind),
-            accessibilityValue: kind == .swap ? "\(name) \(caption)" : nil
+            accessibilityValue: kind == .swap || kind == .compressor ? "\(name) \(caption)" : nil
         )
     }
 
@@ -265,14 +265,22 @@ struct RingItemCell: View {
     }
 
     private func metricCaption(_ kind: RingKind, percent: Double, language: AppLanguage) -> String {
-        if kind == .swap {
+        switch kind {
+        case .swap:
             return Localization.string(
                 kind.captionKey,
                 language: language,
                 SwapUsageFormat.string(bytes: appState.metrics.swapUsedBytes)
             )
+        case .compressor:
+            return Localization.string(
+                kind.captionKey,
+                language: language,
+                SwapUsageFormat.string(bytes: appState.metrics.compressorUsedBytes)
+            )
+        default:
+            return Localization.string(kind.captionKey, language: language, Int64(percent.rounded()))
         }
-        return Localization.string(kind.captionKey, language: language, Int64(percent.rounded()))
     }
 
     private func percent(for kind: RingKind) -> Double {
@@ -287,6 +295,12 @@ struct RingItemCell: View {
             SwapUsageFormat.ringPercent(
                 usedBytes: appState.metrics.swapUsedBytes,
                 halfBytes: Double(appState.settings.swapHalfMegabytes) * 1_048_576,
+                memoryBytes: SwapUsageFormat.physicalMemoryBytes()
+            )
+        case .compressor:
+            SwapUsageFormat.ringPercent(
+                usedBytes: appState.metrics.compressorUsedBytes,
+                halfBytes: Double(appState.settings.compressorHalfMegabytes) * 1_048_576,
                 memoryBytes: SwapUsageFormat.physicalMemoryBytes()
             )
         }

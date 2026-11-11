@@ -13,6 +13,8 @@ final class SystemMetricsService {
     private var lastPressure: Double = 0
     private var lastSwap: Double = 0
     private var lastSwapBytes: Double = 0
+    private var lastCompressor: Double = 0
+    private var lastCompressorBytes: Double = 0
     private var lastDownload: Double = 0
     private var lastUpload: Double = 0
     private var lastNetworkSample: (counters: [String: NetworkInterfaceRates.Counters], time: TimeInterval)?
@@ -28,14 +30,15 @@ final class SystemMetricsService {
         var disk = false
         var pressure = false
         var swap = false
+        var compressor = false
         var network = false
 
         var samplesAnything: Bool {
-            cpu || gpu || memory || disk || pressure || swap || network
+            cpu || gpu || memory || disk || pressure || swap || compressor || network
         }
 
         static let all = Needs(
-            cpu: true, gpu: true, memory: true, disk: true, pressure: true, swap: true, network: true
+            cpu: true, gpu: true, memory: true, disk: true, pressure: true, swap: true, compressor: true, network: true
         )
     }
 
@@ -120,6 +123,11 @@ final class SystemMetricsService {
             lastSwap = reading.percent
             lastSwapBytes = reading.usedBytes
         }
+        if wanted.compressor {
+            let reading = Self.compressorReading()
+            lastCompressor = reading.percent
+            lastCompressorBytes = reading.usedBytes
+        }
         if wanted.network, let rates = Self.networkRates(since: &lastNetworkSample) {
             lastDownload = rates.download
             lastUpload = rates.upload
@@ -134,6 +142,8 @@ final class SystemMetricsService {
             memoryPressurePercent: lastPressure,
             swapPercent: lastSwap,
             swapUsedBytes: lastSwapBytes,
+            compressorPercent: lastCompressor,
+            compressorUsedBytes: lastCompressorBytes,
             downloadBytesPerSecond: lastDownload,
             uploadBytesPerSecond: lastUpload
         )
@@ -209,14 +219,23 @@ final class SystemMetricsService {
     }
 
     private static func swapReading() -> (percent: Double, usedBytes: Double) {
-        var diskUsed: Double = 0
+        var used: Double = 0
         var usage = xsw_usage()
         var size = MemoryLayout<xsw_usage>.size
         if sysctlbyname("vm.swapusage", &usage, &size, nil, 0) == 0 {
-            diskUsed = Double(usage.xsu_used)
+            used = Double(usage.xsu_used)
         }
+        let memory = SwapUsageFormat.physicalMemoryBytes()
+        let percent = SwapUsageFormat.ringPercent(
+            usedBytes: used,
+            halfBytes: memory / 4,
+            memoryBytes: memory
+        )
+        return (percent, used)
+    }
 
-        var compressorPages: UInt64 = 0
+    private static func compressorReading() -> (percent: Double, usedBytes: Double) {
+        var pages: UInt64 = 0
         var pageBytes: UInt64 = 0
         var stats = vm_statistics64()
         var count = mach_msg_type_number_t(MemoryLayout<vm_statistics64>.stride / MemoryLayout<integer_t>.stride)
@@ -229,14 +248,9 @@ final class SystemMetricsService {
             var pageSize: vm_size_t = 0
             host_page_size(mach_host_self(), &pageSize)
             pageBytes = UInt64(pageSize)
-            compressorPages = UInt64(stats.compressor_page_count)
+            pages = UInt64(stats.compressor_page_count)
         }
-
-        let used = SwapUsageFormat.usedBytes(
-            diskSwapBytes: diskUsed,
-            compressorPages: compressorPages,
-            pageSize: pageBytes
-        )
+        let used = SwapUsageFormat.compressorBytes(pages: pages, pageSize: pageBytes)
         let memory = SwapUsageFormat.physicalMemoryBytes()
         let percent = SwapUsageFormat.ringPercent(
             usedBytes: used,
