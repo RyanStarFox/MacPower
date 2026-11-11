@@ -11,6 +11,8 @@ struct SystemSnapshot: Equatable, Sendable {
     var swapUsedBytes: Double = 0
     var compressorPercent: Double = 0
     var compressorUsedBytes: Double = 0
+    var overflowPercent: Double = 0
+    var overflowUsedBytes: Double = 0
     var downloadBytesPerSecond: Double = 0
     var uploadBytesPerSecond: Double = 0
 
@@ -28,6 +30,8 @@ struct SystemSnapshot: Equatable, Sendable {
             && SwapUsageFormat.string(bytes: swapUsedBytes) == SwapUsageFormat.string(bytes: other.swapUsedBytes)
             && Self.sameRingPercent(compressorPercent, other.compressorPercent)
             && SwapUsageFormat.string(bytes: compressorUsedBytes) == SwapUsageFormat.string(bytes: other.compressorUsedBytes)
+            && Self.sameRingPercent(overflowPercent, other.overflowPercent)
+            && SwapUsageFormat.string(bytes: overflowUsedBytes) == SwapUsageFormat.string(bytes: other.overflowUsedBytes)
             && Self.sameRate(downloadBytesPerSecond, other.downloadBytesPerSecond)
             && Self.sameRate(uploadBytesPerSecond, other.uploadBytesPerSecond)
     }
@@ -53,6 +57,11 @@ enum SwapUsageFormat {
     /// RAM currently held by the memory compressor (`compressor_page_count`).
     static func compressorBytes(pages: UInt64, pageSize: UInt64) -> Double {
         pageSize == 0 ? 0 : Double(pages) * Double(pageSize)
+    }
+
+    /// Disk swap plus compressor RAM — overflow past what fits uncompressed in memory.
+    static func overflowBytes(diskSwapBytes: Double, compressorBytes: Double) -> Double {
+        max(0, diskSwapBytes) + max(0, compressorBytes)
     }
 
     /// `halfBytes` sits at 50%. A full ring is always one memory’s worth of swap.

@@ -173,6 +173,7 @@ struct RingIconSettings: Codable, Equatable, Sendable {
     var memoryPressure: GlyphSlot
     var swap: GlyphSlot
     var compressor: GlyphSlot
+    var overflow: GlyphSlot
     var download: GlyphSlot
     var upload: GlyphSlot
     var batteryTemperature: GlyphSlot
@@ -182,6 +183,7 @@ struct RingIconSettings: Codable, Equatable, Sendable {
     static let memoryPressureGlyph = GlyphSlot.system("gauge.with.dots.needle.67percent")
     static let swapGlyph = GlyphSlot.system("arrow.left.arrow.right")
     static let compressorGlyph = GlyphSlot.system("rectangle.compress.vertical")
+    static let overflowGlyph = GlyphSlot.system("exclamationmark.triangle.fill")
     static let downloadGlyph = GlyphSlot.system("arrow.down")
     static let uploadGlyph = GlyphSlot.system("arrow.up")
     static let batteryTemperatureGlyph = GlyphSlot.system("thermometer.medium")
@@ -204,6 +206,7 @@ struct RingIconSettings: Codable, Equatable, Sendable {
                 memoryPressure: memoryPressureGlyph,
                 swap: swapGlyph,
                 compressor: compressorGlyph,
+                overflow: overflowGlyph,
                 download: downloadGlyph,
                 upload: uploadGlyph,
                 batteryTemperature: batteryTemperatureGlyph,
@@ -220,6 +223,7 @@ struct RingIconSettings: Codable, Equatable, Sendable {
                 memoryPressure: .system("speedometer"),
                 swap: .system("arrow.triangle.2.circlepath"),
                 compressor: .system("arrow.down.right.and.arrow.up.left"),
+                overflow: .system("exclamationmark.octagon.fill"),
                 download: .system("arrow.down.to.line"),
                 upload: .system("arrow.up.to.line"),
                 batteryTemperature: .system("thermometer.variable"),
@@ -236,6 +240,7 @@ struct RingIconSettings: Codable, Equatable, Sendable {
                 memoryPressure: .system("gauge.with.dots.needle.33percent"),
                 swap: .system("arrow.up.arrow.down"),
                 compressor: .system("rectangle.compress.vertical"),
+                overflow: .system("exclamationmark.triangle"),
                 download: .system("square.and.arrow.down"),
                 upload: .system("square.and.arrow.up"),
                 batteryTemperature: .system("thermometer.low"),
@@ -252,6 +257,7 @@ struct RingIconSettings: Codable, Equatable, Sendable {
                 memoryPressure: .system("gauge.with.dots.needle.bottom.50percent"),
                 swap: .system("arrow.2.squarepath"),
                 compressor: .system("arrow.down.forward.and.arrow.up.backward"),
+                overflow: .system("exclamationmark.circle.fill"),
                 download: .system("arrow.down.circle.fill"),
                 upload: .system("arrow.up.circle.fill"),
                 batteryTemperature: .system("thermometer.medium.slash"),
@@ -270,6 +276,7 @@ struct RingIconSettings: Codable, Equatable, Sendable {
         memoryPressure: GlyphSlot,
         swap: GlyphSlot,
         compressor: GlyphSlot,
+        overflow: GlyphSlot,
         download: GlyphSlot,
         upload: GlyphSlot,
         batteryTemperature: GlyphSlot,
@@ -285,6 +292,7 @@ struct RingIconSettings: Codable, Equatable, Sendable {
             memoryPressure: memoryPressure,
             swap: swap,
             compressor: compressor,
+            overflow: overflow,
             download: download,
             upload: upload,
             batteryTemperature: batteryTemperature,
@@ -310,6 +318,7 @@ struct RingIconSettings: Codable, Equatable, Sendable {
         case .memoryPressure: memoryPressure
         case .swap: swap
         case .compressor: compressor
+        case .overflow: overflow
         }
     }
 
@@ -323,6 +332,7 @@ struct RingIconSettings: Codable, Equatable, Sendable {
         case .memoryPressure: memoryPressure
         case .swap: swap
         case .compressor: compressor
+        case .overflow: overflow
         case .download: download
         case .upload: upload
         case .speedPair: download
@@ -343,6 +353,7 @@ struct RingIconSettings: Codable, Equatable, Sendable {
         case .memoryPressure: copy.memoryPressure = slot
         case .swap: copy.swap = slot
         case .compressor: copy.compressor = slot
+        case .overflow: copy.overflow = slot
         case .download: copy.download = slot
         case .upload: copy.upload = slot
         case .speedPair: break
@@ -375,6 +386,7 @@ struct RingIconSettings: Codable, Equatable, Sendable {
         memoryPressure = Self.scaled(try container.decodeIfPresent(GlyphSlot.self, forKey: .memoryPressure) ?? Self.memoryPressureGlyph, legacy: legacy)
         swap = Self.scaled(try container.decodeIfPresent(GlyphSlot.self, forKey: .swap) ?? Self.swapGlyph, legacy: legacy)
         compressor = Self.scaled(try container.decodeIfPresent(GlyphSlot.self, forKey: .compressor) ?? Self.compressorGlyph, legacy: legacy)
+        overflow = Self.scaled(try container.decodeIfPresent(GlyphSlot.self, forKey: .overflow) ?? Self.overflowGlyph, legacy: legacy)
         download = Self.scaled(try container.decodeIfPresent(GlyphSlot.self, forKey: .download) ?? Self.downloadGlyph, legacy: legacy)
         upload = Self.scaled(try container.decodeIfPresent(GlyphSlot.self, forKey: .upload) ?? Self.uploadGlyph, legacy: legacy)
         batteryTemperature = Self.scaled(try container.decodeIfPresent(GlyphSlot.self, forKey: .batteryTemperature) ?? Self.batteryTemperatureGlyph, legacy: legacy)
@@ -397,6 +409,7 @@ struct RingIconSettings: Codable, Equatable, Sendable {
         try container.encode(memoryPressure, forKey: .memoryPressure)
         try container.encode(swap, forKey: .swap)
         try container.encode(compressor, forKey: .compressor)
+        try container.encode(overflow, forKey: .overflow)
         try container.encode(download, forKey: .download)
         try container.encode(upload, forKey: .upload)
         try container.encode(batteryTemperature, forKey: .batteryTemperature)
@@ -404,7 +417,7 @@ struct RingIconSettings: Codable, Equatable, Sendable {
     }
 
     private enum CodingKeys: String, CodingKey {
-        case preset, battery, cpu, gpu, memory, disk, memoryPressure, swap, compressor
+        case preset, battery, cpu, gpu, memory, disk, memoryPressure, swap, compressor, overflow
         case download, upload, batteryTemperature, thermalState
         case legacyPackScale = "scale"
     }
@@ -419,6 +432,7 @@ struct RingIconSettings: Codable, Equatable, Sendable {
         memoryPressure: GlyphSlot,
         swap: GlyphSlot,
         compressor: GlyphSlot,
+        overflow: GlyphSlot,
         download: GlyphSlot,
         upload: GlyphSlot,
         batteryTemperature: GlyphSlot,
@@ -433,6 +447,7 @@ struct RingIconSettings: Codable, Equatable, Sendable {
         self.memoryPressure = memoryPressure
         self.swap = swap
         self.compressor = compressor
+        self.overflow = overflow
         self.download = download
         self.upload = upload
         self.batteryTemperature = batteryTemperature
@@ -781,6 +796,14 @@ extension RingKind {
                 .system("arrow.down.forward.and.arrow.up.backward"),
                 .system("memorychip"),
                 .system("archivebox.fill")
+            ]
+        case .overflow:
+            [
+                .system("exclamationmark.triangle.fill"),
+                .system("exclamationmark.octagon.fill"),
+                .system("exclamationmark.triangle"),
+                .system("exclamationmark.circle.fill"),
+                .system("memorychip")
             ]
         }
     }

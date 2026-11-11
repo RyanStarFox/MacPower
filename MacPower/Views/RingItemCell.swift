@@ -203,7 +203,7 @@ struct RingItemCell: View {
             caption: caption,
             accessibilityName: name,
             glyph: appState.settings.ringIcons.slot(for: kind),
-            accessibilityValue: kind == .swap || kind == .compressor ? "\(name) \(caption)" : nil
+            accessibilityValue: kind == .swap || kind == .compressor || kind == .overflow ? "\(name) \(caption)" : nil
         )
     }
 
@@ -278,6 +278,12 @@ struct RingItemCell: View {
                 language: language,
                 SwapUsageFormat.string(bytes: appState.metrics.compressorUsedBytes)
             )
+        case .overflow:
+            return Localization.string(
+                kind.captionKey,
+                language: language,
+                SwapUsageFormat.string(bytes: appState.metrics.overflowUsedBytes)
+            )
         default:
             return Localization.string(kind.captionKey, language: language, Int64(percent.rounded()))
         }
@@ -301,6 +307,12 @@ struct RingItemCell: View {
             SwapUsageFormat.ringPercent(
                 usedBytes: appState.metrics.compressorUsedBytes,
                 halfBytes: Double(appState.settings.compressorHalfMegabytes) * 1_048_576,
+                memoryBytes: SwapUsageFormat.physicalMemoryBytes()
+            )
+        case .overflow:
+            SwapUsageFormat.ringPercent(
+                usedBytes: appState.metrics.overflowUsedBytes,
+                halfBytes: Double(appState.settings.overflowHalfMegabytes) * 1_048_576,
                 memoryBytes: SwapUsageFormat.physicalMemoryBytes()
             )
         }

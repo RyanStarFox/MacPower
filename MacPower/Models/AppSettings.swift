@@ -190,7 +190,9 @@ final class AppSettings {
         static let temperatureUnit = "temperatureUnit"
         static let swapHalfMegabytes = "swapHalfMegabytes"
         static let compressorHalfMegabytes = "compressorHalfMegabytes"
+        static let overflowHalfMegabytes = "overflowHalfMegabytes"
         static let didSplitSwapCompressor = "didSplitSwapCompressor"
+        static let didOfferOverflowRing = "didOfferOverflowRing"
         static let thermalNominalPercent = "thermalNominalPercent"
         static let thermalFairPercent = "thermalFairPercent"
         static let thermalSeriousPercent = "thermalSeriousPercent"
@@ -977,6 +979,11 @@ final class AppSettings {
         didSet { storeRingScale(\.compressorHalfMegabytes, range: Self.swapHalfLimit(), key: Keys.compressorHalfMegabytes) }
     }
 
+    /// Disk swap plus compressor that fills the overflow ring to 50%.
+    var overflowHalfMegabytes: Int {
+        didSet { storeRingScale(\.overflowHalfMegabytes, range: Self.swapHalfLimit(), key: Keys.overflowHalfMegabytes) }
+    }
+
     var thermalNominalPercent: Int {
         didSet { storeRingScale(\.thermalNominalPercent, range: Self.thermalPercentRange, key: Keys.thermalNominalPercent) }
     }
@@ -1556,6 +1563,12 @@ final class AppSettings {
             fallback: Self.defaultSwapHalfMegabytes(),
             range: Self.swapHalfLimit()
         )
+        overflowHalfMegabytes = Self.clampedStoredInteger(
+            defaults,
+            key: Keys.overflowHalfMegabytes,
+            fallback: Self.defaultSwapHalfMegabytes(),
+            range: Self.swapHalfLimit()
+        )
         thermalNominalPercent = Self.clampedStoredInteger(
             defaults,
             key: Keys.thermalNominalPercent,
@@ -1608,6 +1621,7 @@ final class AppSettings {
         keepSettingsButtonOffHiddenHost()
         alignPreviousDefaults()
         offerCompressorBesideSwapIfNeeded()
+        offerOverflowBesideMemoryRingsIfNeeded()
 
         store.set(resolvedMotion.rawValue, forKey: Keys.motionStyle)
         store.set(settingsButtonPlacement.rawValue, forKey: Keys.settingsButtonPlacement)
@@ -1973,16 +1987,35 @@ final class AppSettings {
         store.set(true, forKey: Keys.didSplitSwapCompressor)
         guard enabledRingSlots.contains(.swap), !enabledRingSlots.contains(.compressor) else { return }
         setRingSlot(.compressor, visible: true)
-        if let swapRow = ringRows.firstIndex(where: { row in row.contains { $0.slot == .swap } }),
-           let compressorIndex = ringRows[swapRow].firstIndex(where: { $0.slot == .compressor }),
-           let swapIndex = ringRows[swapRow].firstIndex(where: { $0.slot == .swap }),
-           compressorIndex != swapIndex + 1 {
-            let item = ringRows[swapRow].remove(at: compressorIndex)
-            let insertAt = compressorIndex < swapIndex ? swapIndex : swapIndex + 1
-            ringRows[swapRow].insert(item, at: min(insertAt, ringRows[swapRow].count))
-            persistRingRows()
+        placeRing(.compressor, after: .swap)
+        storeVisibleRings()
+    }
+
+    /// Offer 内存溢出压力 once beside 压缩 or 交换, for people who already watch those rings.
+    private func offerOverflowBesideMemoryRingsIfNeeded() {
+        guard !store.bool(forKey: Keys.didOfferOverflowRing) else { return }
+        store.set(true, forKey: Keys.didOfferOverflowRing)
+        let watchesMemoryOverflow = enabledRingSlots.contains(.swap) || enabledRingSlots.contains(.compressor)
+        guard watchesMemoryOverflow, !enabledRingSlots.contains(.overflow) else { return }
+        setRingSlot(.overflow, visible: true)
+        if enabledRingSlots.contains(.compressor) {
+            placeRing(.overflow, after: .compressor)
+        } else {
+            placeRing(.overflow, after: .swap)
         }
         storeVisibleRings()
+    }
+
+    private func placeRing(_ slot: RingSlot, after anchor: RingSlot) {
+        guard let row = ringRows.firstIndex(where: { items in items.contains { $0.slot == anchor } }),
+              let slotIndex = ringRows[row].firstIndex(where: { $0.slot == slot }),
+              let anchorIndex = ringRows[row].firstIndex(where: { $0.slot == anchor }),
+              slotIndex != anchorIndex + 1
+        else { return }
+        let item = ringRows[row].remove(at: slotIndex)
+        let insertAt = slotIndex < anchorIndex ? anchorIndex : anchorIndex + 1
+        ringRows[row].insert(item, at: min(insertAt, ringRows[row].count))
+        persistRingRows()
     }
 
     private func persistTint() {

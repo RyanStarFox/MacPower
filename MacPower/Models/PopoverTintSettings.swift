@@ -265,7 +265,7 @@ struct ValueTintScheme: Codable, Equatable, Sendable {
 }
 
 enum RingKind: String, CaseIterable, Identifiable, Codable, Sendable {
-    case battery, cpu, gpu, memory, disk, memoryPressure, swap, compressor
+    case battery, cpu, gpu, memory, disk, memoryPressure, swap, compressor, overflow
 
     var id: String { rawValue }
 
@@ -279,6 +279,7 @@ enum RingKind: String, CaseIterable, Identifiable, Codable, Sendable {
         case .memoryPressure: "ring.pressure"
         case .swap: "ring.swap"
         case .compressor: "ring.compressor"
+        case .overflow: "ring.overflow"
         }
     }
 
@@ -292,6 +293,7 @@ enum RingKind: String, CaseIterable, Identifiable, Codable, Sendable {
         case .memoryPressure: "ring.caption.pressure %lld"
         case .swap: "ring.caption.swap %@"
         case .compressor: "ring.caption.compressor %@"
+        case .overflow: "ring.caption.overflow %@"
         }
     }
 }
@@ -311,7 +313,7 @@ enum RingOddRow: String, CaseIterable, Identifiable, Sendable {
 }
 
 enum RingSlot: String, CaseIterable, Identifiable, Codable, Sendable {
-    case battery, cpu, gpu, memory, disk, memoryPressure, swap, compressor, download, upload, speedPair, batteryTemperature, thermalState
+    case battery, cpu, gpu, memory, disk, memoryPressure, swap, compressor, overflow, download, upload, speedPair, batteryTemperature, thermalState
 
     var id: String { rawValue }
 
@@ -386,7 +388,7 @@ struct RingColor: Codable, Equatable, Identifiable, Sendable {
 
 /// Which catalog color a ring segment paints with.
 enum RingColorSegment: String, Codable, CaseIterable, Identifiable, Sendable {
-    case battery, cpu, gpu, memory, disk, memoryPressure, swap, compressor, download, upload, batteryTemperature, thermalState
+    case battery, cpu, gpu, memory, disk, memoryPressure, swap, compressor, overflow, download, upload, batteryTemperature, thermalState
 
     var id: String { rawValue }
 
@@ -404,6 +406,7 @@ enum RingColorSegment: String, Codable, CaseIterable, Identifiable, Sendable {
         case .memoryPressure: "ring.pressure"
         case .swap: "ring.swap"
         case .compressor: "ring.compressor"
+        case .overflow: "ring.overflow"
         case .download: "settings.rings.download"
         case .upload: "settings.rings.upload"
         case .batteryTemperature: "settings.rings.batteryTemperature"
@@ -428,7 +431,7 @@ struct RingTintSettings: Codable, Equatable, Sendable {
     static let glide = RingTintSettings.preset(.glide)
 
     private static let editableSegments: [RingColorSegment] = [.battery, .cpu, .gpu, .memory]
-    private static let memoryFollowers: [RingColorSegment] = [.disk, .memoryPressure, .swap, .compressor, .batteryTemperature, .thermalState]
+    private static let memoryFollowers: [RingColorSegment] = [.disk, .memoryPressure, .swap, .compressor, .overflow, .batteryTemperature, .thermalState]
 
     var battery: ValueTintScheme { scheme(forSegment: .battery) }
     var cpu: ValueTintScheme { scheme(forSegment: .cpu) }
@@ -511,6 +514,7 @@ struct RingTintSettings: Codable, Equatable, Sendable {
             .memoryPressure: memoryID,
             .swap: memoryID,
             .compressor: memoryID,
+            .overflow: memoryID,
             .batteryTemperature: memoryID,
             .thermalState: memoryID,
             .download: downloadID,

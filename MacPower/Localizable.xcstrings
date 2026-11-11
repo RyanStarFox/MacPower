@@ -13674,6 +13674,77 @@
         }
       }
     },
+    "ring.overflow": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Memory Overflow"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "内存溢出压力"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "記憶體溢出壓力"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "メモリ溢れ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "메모리 오버플로"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Débordement mémoire"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Speicherüberlauf"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desbordamiento de memoria"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estouro de memória"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overflow di memoria"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Переполнение памяти"
+          }
+        }
+      }
+    },
     "ring.caption.compressor %@": {
       "extractionState": "manual",
       "localizations": {
@@ -13741,6 +13812,77 @@
           "stringUnit": {
             "state": "translated",
             "value": "Сжатие: %@"
+          }
+        }
+      }
+    },
+    "ring.caption.overflow %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overflow: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "溢出：%@"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "溢出：%@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "溢れ: %@"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "오버플로: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Débordement : %@"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Überlauf: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desbordamiento: %@"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estouro: %@"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overflow: %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Переполнение: %@"
           }
         }
       }
@@ -14556,6 +14698,148 @@
           "stringUnit": {
             "state": "translated",
             "value": "Этот размер заполняет кольцо наполовину. Полное кольцо — это всегда вся память. По умолчанию это её четверть."
+          }
+        }
+      }
+    },
+    "settings.rings.half.overflow": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overflow at 50%"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "溢出 50%"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "溢出 50%"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "溢れ 50%"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "오버플로 50%"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Débordement à 50 %"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Überlauf bei 50 %"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desbordamiento al 50 %"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estouro em 50%"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overflow al 50%"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Переполнение на 50%"
+          }
+        }
+      }
+    },
+    "settings.rings.half.overflow.note": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This size fills the ring halfway. A full ring is always all of this Mac’s memory. The default is a quarter of that memory. Overflow is disk swap plus compressed memory."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "改这个大小，圆环就走到一半。满圈始终是这台 Mac 的整份内存。默认是内存的四分之一。溢出是磁盘交换加压缩占用。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "改這個大小，圓環就走到一半。滿圈始終是這台 Mac 的整份記憶體。預設是記憶體的四分之一。溢出是磁碟交換加壓縮占用。"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "この大きさでリングが半分になります。満タンは常にこの Mac のメモリ全体です。初期値はその 4 分の 1 です。溢れはスワップと圧縮の合計です。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 크기에서 링이 절반이 됩니다. 가득 찬 링은 항상 이 Mac의 메모리 전체입니다. 기본값은 그 4분의 1입니다. 오버플로는 스왑과 압축의 합입니다."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette taille remplit l’anneau à moitié. Un anneau plein correspond toujours à toute la mémoire. La valeur d’origine est un quart de cette mémoire. Le débordement est le swap plus la mémoire compressée."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Größe füllt den Ring zur Hälfte. Ein voller Ring ist immer der gesamte Arbeitsspeicher. Voreingestellt ist ein Viertel davon. Überlauf ist Swap plus komprimierter Speicher."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este tamaño llena el anillo hasta la mitad. El anillo lleno es siempre toda la memoria. El valor inicial es un cuarto de esa memoria. El desbordamiento es el intercambio más la memoria comprimida."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este tamanho enche o anel até a metade. O anel cheio é sempre toda a memória. O padrão é um quarto dessa memória. O estouro é o swap mais a memória comprimida."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Questa dimensione riempie l’anello a metà. L’anello pieno è sempre tutta la memoria. Il valore iniziale è un quarto di quella memoria. L’overflow è lo swap più la memoria compressa."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Этот размер заполняет кольцо наполовину. Полное кольцо — это всегда вся память. По умолчанию это её четверть. Переполнение — это подкачка плюс сжатая память."
           }
         }
       }
@@ -18497,6 +18781,148 @@
           "stringUnit": {
             "state": "translated",
             "value": "Полное кольцо — это всегда вся память этого Mac."
+          }
+        }
+      }
+    },
+    "settings.rings.half.overflow.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overflow for half a ring"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "溢出到多少时走半圈"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "溢出到多少時走半圈"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "リング半分になる溢れ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "링 절반이 되는 오버플로"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Débordement pour un demi-anneau"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Überlauf für einen halben Ring"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desbordamiento para medio anillo"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estouro para meio anel"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overflow per mezzo anello"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Переполнение на полкольца"
+          }
+        }
+      }
+    },
+    "settings.rings.half.overflow.caption": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disk swap plus compressed memory. A full ring is always all of this Mac’s memory."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "磁盘交换加压缩占用。满圈始终是这台 Mac 的全部内存。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "磁碟交換加壓縮占用。滿圈始終是這台 Mac 的全部記憶體。"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スワップと圧縮の合計。リング1周は常にこのMacのメモリ全体です。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "스왑과 압축의 합. 링 한 바퀴는 항상 이 Mac의 전체 메모리입니다."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Swap plus mémoire compressée. Un anneau complet correspond toujours à toute la mémoire de ce Mac."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Swap plus komprimierter Speicher. Ein voller Ring ist immer der gesamte Speicher dieses Mac."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Intercambio más memoria comprimida. Un anillo completo es siempre toda la memoria de este Mac."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Swap mais memória comprimida. Um anel completo é sempre toda a memória deste Mac."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Swap più memoria compressa. Un anello completo è sempre tutta la memoria di questo Mac."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подкачка плюс сжатая память. Полное кольцо — это всегда вся память этого Mac."
           }
         }
       }

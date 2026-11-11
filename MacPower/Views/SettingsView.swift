@@ -3201,6 +3201,24 @@ struct SettingsView: View {
                 .fixedSize()
             }
             HStack(spacing: 8) {
+                SettingsRowLabel(title: "settings.rings.half.overflow.title", caption: "settings.rings.half.overflow.caption")
+                Spacer(minLength: 8)
+                Text(SwapUsageFormat.string(bytes: Double(appState.settings.overflowHalfMegabytes) * 1_048_576))
+                    .monospacedDigit()
+                    .foregroundStyle(.secondary)
+                Stepper(
+                    "settings.rings.half.overflow.title",
+                    value: Binding(
+                        get: { appState.settings.overflowHalfMegabytes },
+                        set: { appState.settings.overflowHalfMegabytes = $0 }
+                    ),
+                    in: AppSettings.swapHalfLimit(),
+                    step: AppSettings.swapHalfStep
+                )
+                .labelsHidden()
+                .fixedSize()
+            }
+            HStack(spacing: 8) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("settings.rings.thermal.title")
                     Text(verbatim: thermalScaleSummary)
@@ -4899,6 +4917,29 @@ struct SettingsView: View {
                     .fixedSize()
                 }
                 Text("settings.rings.half.compressor.note")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            case .overflow:
+                HStack(spacing: 8) {
+                    Text("settings.rings.half.overflow")
+                    Spacer(minLength: 8)
+                    Text(SwapUsageFormat.string(bytes: Double(appState.settings.overflowHalfMegabytes) * 1_048_576))
+                        .monospacedDigit()
+                        .foregroundStyle(.secondary)
+                    Stepper(
+                        "settings.rings.half.overflow",
+                        value: Binding(
+                            get: { appState.settings.overflowHalfMegabytes },
+                            set: { appState.settings.overflowHalfMegabytes = $0 }
+                        ),
+                        in: AppSettings.swapHalfLimit(),
+                        step: AppSettings.swapHalfStep
+                    )
+                    .labelsHidden()
+                    .fixedSize()
+                }
+                Text("settings.rings.half.overflow.note")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)

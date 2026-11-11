@@ -801,6 +801,24 @@ final class PopoverExtrasTests: XCTestCase {
         XCTAssertEqual(SwapUsageFormat.string(bytes: Double(pages * page)), "16 MB")
     }
 
+    func testOverflowBytesAddsDiskSwapAndCompressor() {
+        let page: UInt64 = 16_384
+        let pages: UInt64 = 1_000
+        let compressed = SwapUsageFormat.compressorBytes(pages: pages, pageSize: page)
+        XCTAssertEqual(
+            SwapUsageFormat.overflowBytes(diskSwapBytes: 0, compressorBytes: compressed),
+            compressed
+        )
+        XCTAssertEqual(
+            SwapUsageFormat.overflowBytes(diskSwapBytes: 2_097_152, compressorBytes: compressed),
+            compressed + 2_097_152
+        )
+        XCTAssertEqual(
+            SwapUsageFormat.overflowBytes(diskSwapBytes: 1_048_576, compressorBytes: 0),
+            1_048_576
+        )
+    }
+
     func testSwapRingMeasuresUsedBytesAgainstInstalledMemory() {
         let gigabyte = 1024.0 * 1024 * 1024
         let memory = 32 * gigabyte

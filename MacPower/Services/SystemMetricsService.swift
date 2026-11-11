@@ -15,6 +15,8 @@ final class SystemMetricsService {
     private var lastSwapBytes: Double = 0
     private var lastCompressor: Double = 0
     private var lastCompressorBytes: Double = 0
+    private var lastOverflow: Double = 0
+    private var lastOverflowBytes: Double = 0
     private var lastDownload: Double = 0
     private var lastUpload: Double = 0
     private var lastNetworkSample: (counters: [String: NetworkInterfaceRates.Counters], time: TimeInterval)?
@@ -31,14 +33,15 @@ final class SystemMetricsService {
         var pressure = false
         var swap = false
         var compressor = false
+        var overflow = false
         var network = false
 
         var samplesAnything: Bool {
-            cpu || gpu || memory || disk || pressure || swap || compressor || network
+            cpu || gpu || memory || disk || pressure || swap || compressor || overflow || network
         }
 
         static let all = Needs(
-            cpu: true, gpu: true, memory: true, disk: true, pressure: true, swap: true, compressor: true, network: true
+            cpu: true, gpu: true, memory: true, disk: true, pressure: true, swap: true, compressor: true, overflow: true, network: true
         )
     }
 
@@ -118,15 +121,28 @@ final class SystemMetricsService {
         if wanted.pressure {
             lastPressure = Self.memoryPressurePercent()
         }
-        if wanted.swap {
+        if wanted.swap || wanted.overflow {
             let reading = Self.swapReading()
             lastSwap = reading.percent
             lastSwapBytes = reading.usedBytes
         }
-        if wanted.compressor {
+        if wanted.compressor || wanted.overflow {
             let reading = Self.compressorReading()
             lastCompressor = reading.percent
             lastCompressorBytes = reading.usedBytes
+        }
+        if wanted.overflow {
+            let used = SwapUsageFormat.overflowBytes(
+                diskSwapBytes: lastSwapBytes,
+                compressorBytes: lastCompressorBytes
+            )
+            let memory = SwapUsageFormat.physicalMemoryBytes()
+            lastOverflowBytes = used
+            lastOverflow = SwapUsageFormat.ringPercent(
+                usedBytes: used,
+                halfBytes: memory / 4,
+                memoryBytes: memory
+            )
         }
         if wanted.network, let rates = Self.networkRates(since: &lastNetworkSample) {
             lastDownload = rates.download
@@ -144,6 +160,8 @@ final class SystemMetricsService {
             swapUsedBytes: lastSwapBytes,
             compressorPercent: lastCompressor,
             compressorUsedBytes: lastCompressorBytes,
+            overflowPercent: lastOverflow,
+            overflowUsedBytes: lastOverflowBytes,
             downloadBytesPerSecond: lastDownload,
             uploadBytesPerSecond: lastUpload
         )
