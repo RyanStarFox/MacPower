@@ -114,7 +114,7 @@ One run does all three:
 
 Gitee reads `machine gitee.com` from `~/.netrc` on this Mac. Do not put the token in the repository. If this version is already mirrored, the command exits.
 
-Install notes live in the repository root: `如何安装.txt`, `如何安装.md`, `如何安装.html`, `如何安装.docx`, and the English files `how2install.txt`, `how2install.md`, `how2install.html`, `how2install.docx`. They do not change per version and are not uploaded again with each release.
+Install notes live in `docs/install/`: `如何安装.txt`, `如何安装.md`, `如何安装.html`, `如何安装.docx`, and the English files `how2install.txt`, `how2install.md`, `how2install.html`, `how2install.docx`. They do not change per version and are not uploaded again with each release. Contribution notes are in `docs/CONTRIBUTING.md`.
 
 The Baidu refresh token is authorized once. The script saves the replacement token locally after each refresh. The first time, or after the token is rejected, run:
 

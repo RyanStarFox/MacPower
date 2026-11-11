@@ -18,7 +18,7 @@ MacPower 是菜单栏电池监视器，不进 Dock。需要 macOS 14 或更高�
 
 双击打开 MacPower。系统会弹出「未打开 MacPower.app」，正文是「Apple 无法验证 MacPower.app 是否包含可能危害 Mac 安全或泄漏隐私的恶意软件」。点「完成」，不要点「移到废纸篓」。方法一和方法二都会先看到这个窗口。
 
-这个窗口的截图：docs/install/gatekeeper-zh.png
+这个窗口的截图：gatekeeper-zh.png
 
 接着用方法一允许打开。方法一不行，再用方法二。
 
@@ -26,7 +26,7 @@ MacPower 是菜单栏电池监视器，不进 Dock。需要 macOS 14 或更高�
 
 打开「系统设置 → 隐私与安全」，把右边页面拉到「安全性」最下面。会看到「已阻止 MacPower.app 以保护 Mac」，点右边的「仍要打开」，再按提示确认。
 
-这一步的截图：docs/install/privacy-zh.png
+这一步的截图：privacy-zh.png
 
 方法二：用终端清除隔离
 

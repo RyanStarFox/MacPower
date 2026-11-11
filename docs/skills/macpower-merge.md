@@ -19,7 +19,7 @@ description: >-
 
 ## 提交什么
 
-功能改动、任务清单、这份 skill、`CONTRIBUTING.md` 里对它的指引，都留在当前分支上，随这次 Pull Request 进 `main`。
+功能改动、任务清单、这份 skill、`docs/CONTRIBUTING.md` 里对它的指引，都留在当前分支上，随这次 Pull Request 进 `main`。
 
 不要提交 `__pycache__`、`dist`、`.superpowers`、`DerivedData`、`build`，也不要提交令牌或本机凭据。
 

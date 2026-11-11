@@ -114,7 +114,7 @@ python3 scripts/sync_latest_release.py
 
 Gitee 使用本机 `~/.netrc` 里的 `machine gitee.com`，私人令牌不要写进仓库。这个版本已经同步过时，命令会直接结束。
 
-安装说明是仓库根目录里的固定文件：`如何安装.txt`、`如何安装.md`、`如何安装.html`、`如何安装.docx`，以及英文的 `how2install.txt`、`how2install.md`、`how2install.html`、`how2install.docx`。内容不随版本变化，不随每次 Release 重复上传。
+安装说明在 `docs/install/`：`如何安装.txt`、`如何安装.md`、`如何安装.html`、`如何安装.docx`，以及英文的 `how2install.txt`、`how2install.md`、`how2install.html`、`how2install.docx`。内容不随版本变化，不随每次 Release 重复上传。参与修改见 `docs/CONTRIBUTING.md`。
 
 百度的 refresh token 只授权一次。脚本刷新后会把新 token 存回本机，不用每次手动改。第一次，或 token 失效后：
 

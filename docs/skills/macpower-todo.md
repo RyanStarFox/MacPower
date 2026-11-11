@@ -10,7 +10,7 @@ description: >-
 
 The shared copy is `docs/skills/macpower-todo.md` in the MacPower repository. The local copy is `~/.cursor/skills/macpower-todo/SKILL.md`. When these instructions change, update both files so they stay the same.
 
-Edit only `docs/todo.md` in the MacPower repository, plus these two skill files and `CONTRIBUTING.md` when the task-list rules themselves change. Do not rewrite `MacPower/ReleaseNotes.json` for a task-list change. Do not commit `scripts/__pycache__` or unrelated dirty files. Never force-push `main`.
+Edit only `docs/todo.md` in the MacPower repository, plus these two skill files and `docs/CONTRIBUTING.md` when the task-list rules themselves change. Do not rewrite `MacPower/ReleaseNotes.json` for a task-list change. Do not commit `scripts/__pycache__` or unrelated dirty files. Never force-push `main`.
 
 One task lives in one section. Change only the lines that move. Leave archived versions in their existing order.
 
@@ -29,6 +29,6 @@ Every open task starts with one or more tags, written with no space between them
 
 ## Pushing
 
-A newly added task is committed on `main` and pushed there directly, with no branch and no pull request. Commit `docs/todo.md`. If this same change also updates the task-list rules, include `docs/skills/macpower-todo.md` and `CONTRIBUTING.md`. Pull so the push can fast-forward, then `git push origin HEAD`. If the push is rejected, fetch and merge, then push. Do not force-push.
+A newly added task is committed on `main` and pushed there directly, with no branch and no pull request. Commit `docs/todo.md`. If this same change also updates the task-list rules, include `docs/skills/macpower-todo.md` and `docs/CONTRIBUTING.md`. Pull so the push can fast-forward, then `git push origin HEAD`. If the push is rejected, fetch and merge, then push. Do not force-push.
 
 Claiming uses the branch and pull request above, not a direct push to `main`. Archiving a finished task stays local until the user asks to push.

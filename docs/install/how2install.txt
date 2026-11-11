@@ -18,7 +18,7 @@ The disk image is not notarized by Apple. I do not have an Apple Developer accou
 
 Double-click MacPower. macOS shows “MacPower.app” Not Opened. The text says Apple could not verify that MacPower.app is free of malware that may harm your Mac or compromise your privacy. Click Done. Do not click Move to Trash. Both methods start after this window.
 
-Screenshot of this window: docs/install/gatekeeper-en.png
+Screenshot of this window: gatekeeper-en.png
 
 Then allow it with method 1. Use method 2 if method 1 does not work.
 
@@ -26,7 +26,7 @@ Method 1: Allow it in System Settings
 
 Open System Settings → Privacy & Security and scroll to the bottom of the Security section. You should see “MacPower.app” was blocked to protect your Mac. Click Open Anyway and confirm the prompt.
 
-Screenshot of this step: docs/install/privacy-en.png
+Screenshot of this step: privacy-en.png
 
 Method 2: Clear quarantine in Terminal
 
