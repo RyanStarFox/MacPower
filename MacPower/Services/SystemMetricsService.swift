@@ -209,10 +209,34 @@ final class SystemMetricsService {
     }
 
     private static func swapReading() -> (percent: Double, usedBytes: Double) {
+        var diskUsed: Double = 0
         var usage = xsw_usage()
         var size = MemoryLayout<xsw_usage>.size
-        guard sysctlbyname("vm.swapusage", &usage, &size, nil, 0) == 0 else { return (0, 0) }
-        let used = Double(usage.xsu_used)
+        if sysctlbyname("vm.swapusage", &usage, &size, nil, 0) == 0 {
+            diskUsed = Double(usage.xsu_used)
+        }
+
+        var compressorPages: UInt64 = 0
+        var pageBytes: UInt64 = 0
+        var stats = vm_statistics64()
+        var count = mach_msg_type_number_t(MemoryLayout<vm_statistics64>.stride / MemoryLayout<integer_t>.stride)
+        let kernel = withUnsafeMutablePointer(to: &stats) { pointer in
+            pointer.withMemoryRebound(to: integer_t.self, capacity: Int(count)) { ints in
+                host_statistics64(mach_host_self(), HOST_VM_INFO64, ints, &count)
+            }
+        }
+        if kernel == KERN_SUCCESS {
+            var pageSize: vm_size_t = 0
+            host_page_size(mach_host_self(), &pageSize)
+            pageBytes = UInt64(pageSize)
+            compressorPages = UInt64(stats.compressor_page_count)
+        }
+
+        let used = SwapUsageFormat.usedBytes(
+            diskSwapBytes: diskUsed,
+            compressorPages: compressorPages,
+            pageSize: pageBytes
+        )
         let memory = SwapUsageFormat.physicalMemoryBytes()
         let percent = SwapUsageFormat.ringPercent(
             usedBytes: used,

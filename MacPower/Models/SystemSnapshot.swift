@@ -46,6 +46,14 @@ struct SystemSnapshot: Equatable, Sendable {
 }
 
 enum SwapUsageFormat {
+    /// Disk swap plus RAM held by the compressor.
+    /// On Apple Silicon, `vm.swapusage` often stays at 0 while the compressor
+    /// holds gigabytes — that overflow is what the 交换 ring should show.
+    static func usedBytes(diskSwapBytes: Double, compressorPages: UInt64, pageSize: UInt64) -> Double {
+        let compressed = pageSize == 0 ? 0 : Double(compressorPages) * Double(pageSize)
+        return max(0, diskSwapBytes) + compressed
+    }
+
     /// `halfBytes` sits at 50%. A full ring is always one memory’s worth of swap.
     /// The curve is `1 - (1 - used/memory) ^ p`, with `p` chosen so `halfBytes` is 50%.
     /// The default half is a quarter of installed memory.
