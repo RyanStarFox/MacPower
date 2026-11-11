@@ -189,6 +189,10 @@ final class AppSettings {
         static let temperatureHalfCelsius = "temperatureHalfCelsius"
         static let temperatureUnit = "temperatureUnit"
         static let swapHalfMegabytes = "swapHalfMegabytes"
+        static let compressorHalfMegabytes = "compressorHalfMegabytes"
+        static let overflowHalfMegabytes = "overflowHalfMegabytes"
+        static let didSplitSwapCompressor = "didSplitSwapCompressor"
+        static let didOfferOverflowRing = "didOfferOverflowRing"
         static let thermalNominalPercent = "thermalNominalPercent"
         static let thermalFairPercent = "thermalFairPercent"
         static let thermalSeriousPercent = "thermalSeriousPercent"
@@ -970,6 +974,16 @@ final class AppSettings {
         didSet { storeRingScale(\.swapHalfMegabytes, range: Self.swapHalfLimit(), key: Keys.swapHalfMegabytes) }
     }
 
+    /// Compressor RAM that fills the ring to 50%. A full ring stays one memory.
+    var compressorHalfMegabytes: Int {
+        didSet { storeRingScale(\.compressorHalfMegabytes, range: Self.swapHalfLimit(), key: Keys.compressorHalfMegabytes) }
+    }
+
+    /// Disk swap plus compressor that fills the overflow ring to 50%.
+    var overflowHalfMegabytes: Int {
+        didSet { storeRingScale(\.overflowHalfMegabytes, range: Self.swapHalfLimit(), key: Keys.overflowHalfMegabytes) }
+    }
+
     var thermalNominalPercent: Int {
         didSet { storeRingScale(\.thermalNominalPercent, range: Self.thermalPercentRange, key: Keys.thermalNominalPercent) }
     }
@@ -1543,6 +1557,18 @@ final class AppSettings {
             fallback: Self.defaultSwapHalfMegabytes(),
             range: Self.swapHalfLimit()
         )
+        compressorHalfMegabytes = Self.clampedStoredInteger(
+            defaults,
+            key: Keys.compressorHalfMegabytes,
+            fallback: Self.defaultSwapHalfMegabytes(),
+            range: Self.swapHalfLimit()
+        )
+        overflowHalfMegabytes = Self.clampedStoredInteger(
+            defaults,
+            key: Keys.overflowHalfMegabytes,
+            fallback: Self.defaultSwapHalfMegabytes(),
+            range: Self.swapHalfLimit()
+        )
         thermalNominalPercent = Self.clampedStoredInteger(
             defaults,
             key: Keys.thermalNominalPercent,
@@ -1594,6 +1620,8 @@ final class AppSettings {
         ensureOnePopoverBlockVisible()
         keepSettingsButtonOffHiddenHost()
         alignPreviousDefaults()
+        offerCompressorBesideSwapIfNeeded()
+        offerOverflowBesideMemoryRingsIfNeeded()
 
         store.set(resolvedMotion.rawValue, forKey: Keys.motionStyle)
         store.set(settingsButtonPlacement.rawValue, forKey: Keys.settingsButtonPlacement)
@@ -1950,6 +1978,44 @@ final class AppSettings {
             }
             store.set(5, forKey: revisionKey)
         }
+    }
+
+    /// People who already show 交换 were looking at compressor bytes under that name.
+    /// Offer a real 压缩 ring once, placed after 交换, without forcing it later.
+    private func offerCompressorBesideSwapIfNeeded() {
+        guard !store.bool(forKey: Keys.didSplitSwapCompressor) else { return }
+        store.set(true, forKey: Keys.didSplitSwapCompressor)
+        guard enabledRingSlots.contains(.swap), !enabledRingSlots.contains(.compressor) else { return }
+        setRingSlot(.compressor, visible: true)
+        placeRing(.compressor, after: .swap)
+        storeVisibleRings()
+    }
+
+    /// Offer 内存溢出压力 once beside 压缩 or 交换, for people who already watch those rings.
+    private func offerOverflowBesideMemoryRingsIfNeeded() {
+        guard !store.bool(forKey: Keys.didOfferOverflowRing) else { return }
+        store.set(true, forKey: Keys.didOfferOverflowRing)
+        let watchesMemoryOverflow = enabledRingSlots.contains(.swap) || enabledRingSlots.contains(.compressor)
+        guard watchesMemoryOverflow, !enabledRingSlots.contains(.overflow) else { return }
+        setRingSlot(.overflow, visible: true)
+        if enabledRingSlots.contains(.compressor) {
+            placeRing(.overflow, after: .compressor)
+        } else {
+            placeRing(.overflow, after: .swap)
+        }
+        storeVisibleRings()
+    }
+
+    private func placeRing(_ slot: RingSlot, after anchor: RingSlot) {
+        guard let row = ringRows.firstIndex(where: { items in items.contains { $0.slot == anchor } }),
+              let slotIndex = ringRows[row].firstIndex(where: { $0.slot == slot }),
+              let anchorIndex = ringRows[row].firstIndex(where: { $0.slot == anchor }),
+              slotIndex != anchorIndex + 1
+        else { return }
+        let item = ringRows[row].remove(at: slotIndex)
+        let insertAt = slotIndex < anchorIndex ? anchorIndex : anchorIndex + 1
+        ringRows[row].insert(item, at: min(insertAt, ringRows[row].count))
+        persistRingRows()
     }
 
     private func persistTint() {

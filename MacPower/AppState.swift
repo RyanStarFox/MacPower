@@ -161,6 +161,8 @@ final class AppState {
             disk: slots.contains(.disk),
             pressure: slots.contains(.memoryPressure),
             swap: slots.contains(.swap),
+            compressor: slots.contains(.compressor),
+            overflow: slots.contains(.overflow),
             network: slots.contains(.download) || slots.contains(.upload) || slots.contains(.speedPair)
         )
     }

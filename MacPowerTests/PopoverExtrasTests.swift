@@ -783,30 +783,40 @@ final class PopoverExtrasTests: XCTestCase {
         XCTAssertEqual(ipv4.interfaceName, "Wi-Fi")
     }
 
-    func testSwapUsedBytesIncludesCompressorPages() {
+    func testCompressorBytesFromOccupiedPages() {
         let page: UInt64 = 16_384
         let pages: UInt64 = 1_000
         XCTAssertEqual(
-            SwapUsageFormat.usedBytes(diskSwapBytes: 0, compressorPages: pages, pageSize: page),
+            SwapUsageFormat.compressorBytes(pages: pages, pageSize: page),
             Double(pages * page)
         )
         XCTAssertEqual(
-            SwapUsageFormat.usedBytes(diskSwapBytes: 1_048_576, compressorPages: pages, pageSize: page),
-            Double(pages * page) + 1_048_576
-        )
-        XCTAssertEqual(
-            SwapUsageFormat.usedBytes(diskSwapBytes: 2_097_152, compressorPages: 0, pageSize: page),
-            2_097_152
-        )
-        XCTAssertEqual(
-            SwapUsageFormat.usedBytes(diskSwapBytes: 0, compressorPages: 0, pageSize: page),
+            SwapUsageFormat.compressorBytes(pages: 0, pageSize: page),
             0
         )
         XCTAssertEqual(
-            SwapUsageFormat.usedBytes(diskSwapBytes: 1_048_576, compressorPages: pages, pageSize: 0),
-            1_048_576
+            SwapUsageFormat.compressorBytes(pages: pages, pageSize: 0),
+            0
         )
         XCTAssertEqual(SwapUsageFormat.string(bytes: Double(pages * page)), "16 MB")
+    }
+
+    func testOverflowBytesAddsDiskSwapAndCompressor() {
+        let page: UInt64 = 16_384
+        let pages: UInt64 = 1_000
+        let compressed = SwapUsageFormat.compressorBytes(pages: pages, pageSize: page)
+        XCTAssertEqual(
+            SwapUsageFormat.overflowBytes(diskSwapBytes: 0, compressorBytes: compressed),
+            compressed
+        )
+        XCTAssertEqual(
+            SwapUsageFormat.overflowBytes(diskSwapBytes: 2_097_152, compressorBytes: compressed),
+            compressed + 2_097_152
+        )
+        XCTAssertEqual(
+            SwapUsageFormat.overflowBytes(diskSwapBytes: 1_048_576, compressorBytes: 0),
+            1_048_576
+        )
     }
 
     func testSwapRingMeasuresUsedBytesAgainstInstalledMemory() {
