@@ -219,7 +219,7 @@ enum MenuBarBatteryRenderer {
             if style.isOutlined, showsText { return digits >= 3 ? 7.2 : 8.0 }
             // Beside the bolt the system shrinks three digits to 13px; alone they stay 15px.
             // Semibold PingFang reads closer to the system's weight than Medium.
-            if digits >= 3 { return glyph != nil ? 9.2 : 10.2 }
+            if digits >= 3 { return glyph != nil ? 9.15 : 10.2 }
             return 10.4
         }()
         let insideKnockout = showsText && !style.isOutlined
@@ -228,7 +228,7 @@ enum MenuBarBatteryRenderer {
             ? NSSize.zero
             : (text as NSString).size(withAttributes: [.font: font])
         // The system spaces three inside digits slightly wider than the font does.
-        let kern: CGFloat = insideKnockout && digits >= 3 ? (glyph != nil ? 0.4 : 0.35) : 0
+        let kern: CGFloat = insideKnockout && digits >= 3 ? (glyph != nil ? 0.35 : 0.35) : 0
         if insideKnockout {
             // Space the knockout by ink so the bolt sits as close to the digits as the system's.
             let line = CTLineCreateWithAttributedString(NSAttributedString(string: text, attributes: [.font: font, .kern: kern]))
@@ -240,7 +240,8 @@ enum MenuBarBatteryRenderer {
         case .bolt: glyphAdvance = insideKnockout ? insideBolt.width : (showsText ? 5.8 : 8.8)
         case nil: glyphAdvance = 0
         }
-        let gap: CGFloat = (showsText && glyph != nil) ? (insideKnockout ? (digits >= 3 ? 0.9 : 0.7) : 0.45) : 0
+        // Keep the bolt near the trailing curve the way the system 100% charging icon does.
+        let gap: CGFloat = (showsText && glyph != nil) ? (insideKnockout ? (digits >= 3 ? 0.75 : 0.7) : 0.45) : 0
         let groupWidth = (showsText ? textSize.width : 0) + gap + glyphAdvance
         let bodyWidth: CGFloat = {
             if !showsText { return 23 }
@@ -255,7 +256,15 @@ enum MenuBarBatteryRenderer {
             width: capWidth,
             height: capHeight
         )
-        let groupX = body.midX - groupWidth / 2
+        // Path-bounds centering sits "100⚡" a little left of the system icon; bias it trailing
+        // without shoving the bolt past the body's right curve.
+        let groupBias: CGFloat = {
+            guard insideKnockout, percentInside else { return 0 }
+            if digits >= 3, glyph != nil { return 0.55 }
+            if digits >= 3 { return 0.2 }
+            return 0
+        }()
+        let groupX = body.midX - groupWidth / 2 + groupBias
         let digitBox = NSRect(
             x: groupX,
             y: body.minY,
@@ -354,7 +363,7 @@ enum MenuBarBatteryRenderer {
                 color: knockout,
                 kern: metrics.kern,
                 snapsBaseline: true,
-                opticalNudgeY: percentInside ? 0.5 : 0
+                opticalNudgeY: percentInside ? 0.35 : 0
             )
         }
 
@@ -669,7 +678,7 @@ enum MenuBarBatteryRenderer {
 
     private static func insideBoltInkSize(digits: Int) -> NSSize {
         // The system shrinks the bolt to 12px tall beside three digits, ~15px beside two.
-        let height: CGFloat = digits >= 3 ? 6.2 : 7.3
+        let height: CGFloat = digits >= 3 ? 6.0 : 7.3
         return NSSize(width: height * 4.12 / 6, height: height)
     }
 
