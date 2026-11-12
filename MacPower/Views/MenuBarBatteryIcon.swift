@@ -269,8 +269,9 @@ enum MenuBarBatteryRenderer {
             guard insideKnockout, percentInside else { return 0 }
             if digits >= 3, glyph != nil { return 0.45 }
             if digits >= 3 { return 0.35 }
-            if digits == 2, glyph != nil { return 0.35 }
-            if digits == 2 { return 0.25 }
+            if digits == 2, glyph != nil { return 0.2 }
+            // Idle two-digit system pad is ~10/11; ink centering alone lands at 11/11.
+            if digits == 2 { return -0.15 }
             return 0
         }()
         let groupX = body.midX - groupWidth / 2 + groupBias
