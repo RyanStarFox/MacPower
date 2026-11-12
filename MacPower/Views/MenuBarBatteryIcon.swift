@@ -220,7 +220,8 @@ enum MenuBarBatteryRenderer {
             // Beside the bolt the system shrinks three digits to 13px; alone they stay 15px.
             // Semibold PingFang reads closer to the system's weight than Medium.
             if digits >= 3 { return glyph != nil ? 9.15 : 10.2 }
-            if digits == 2 { return glyph != nil ? 9.6 : 10.2 }
+            // Two-digit system "99" ink is ~23px at 2x; 10.2 + 0.3 kern was ~25px and looked off-center.
+            if digits == 2 { return glyph != nil ? 9.5 : 9.85 }
             return 10.4
         }()
         let insideKnockout = showsText && !style.isOutlined
@@ -232,7 +233,7 @@ enum MenuBarBatteryRenderer {
         let kern: CGFloat = {
             guard insideKnockout else { return 0 }
             if digits >= 3 { return 0.35 }
-            if digits == 2 { return 0.3 }
+            if digits == 2 { return 0.12 }
             return 0
         }()
         if insideKnockout {
@@ -262,14 +263,14 @@ enum MenuBarBatteryRenderer {
             width: capWidth,
             height: capHeight
         )
-        // Glyph-path centering sits two- and three-digit labels left of the system icon.
-        // Bias trailing so left/right padding matches the menu-bar battery.
+        // System two-digit labels sit ~0.49 of the body (padL 10 / padR 11 at 2x). A small
+        // trailing bias matches that after ink-width centering.
         let groupBias: CGFloat = {
             guard insideKnockout, percentInside else { return 0 }
             if digits >= 3, glyph != nil { return 0.45 }
             if digits >= 3 { return 0.35 }
-            if digits == 2, glyph != nil { return 0.5 }
-            if digits == 2 { return 0.7 }
+            if digits == 2, glyph != nil { return 0.35 }
+            if digits == 2 { return 0.25 }
             return 0
         }()
         let groupX = body.midX - groupWidth / 2 + groupBias
