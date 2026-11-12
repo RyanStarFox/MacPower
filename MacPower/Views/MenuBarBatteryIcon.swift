@@ -260,7 +260,7 @@ enum MenuBarBatteryRenderer {
         // without shoving the bolt past the body's right curve.
         let groupBias: CGFloat = {
             guard insideKnockout, percentInside else { return 0 }
-            if digits >= 3, glyph != nil { return 0.55 }
+            if digits >= 3, glyph != nil { return 0.45 }
             if digits >= 3 { return 0.2 }
             return 0
         }()
@@ -678,7 +678,7 @@ enum MenuBarBatteryRenderer {
 
     private static func insideBoltInkSize(digits: Int) -> NSSize {
         // The system shrinks the bolt to 12px tall beside three digits, ~15px beside two.
-        let height: CGFloat = digits >= 3 ? 6.0 : 7.3
+        let height: CGFloat = digits >= 3 ? 6.15 : 7.3
         return NSSize(width: height * 4.12 / 6, height: height)
     }
 

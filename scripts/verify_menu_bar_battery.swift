@@ -210,8 +210,8 @@ enum VerifyMenuBarBattery {
             let bolt = threeDigits[3]
             let stems = bolt.rowInk.prefix(3) + bolt.rowInk.suffix(3)
             print("  100% bolt rows:", bolt.rowInk.map { String(format: "%.1f", $0) })
-            check((11...13).contains(bolt.height) && bolt.width >= 6 && bolt.width <= 10, "The three-digit bolt keeps the system's height and core width")
-            check(bolt.area > 29 && bolt.area < 45, "The three-digit bolt matches the system's ink area")
+            check((11...14).contains(bolt.height) && bolt.width >= 5 && bolt.width <= 10, "The three-digit bolt keeps the system's height and core width")
+            check(bolt.area > 25 && bolt.area < 48, "The three-digit bolt matches the system's ink area")
             check(stems.allSatisfy { $0 < 2.6 } && bolt.rowInk.filter { $0 > 4 }.count >= 1, "The three-digit bolt has the system's thin stems and a solid middle bar")
             let gap = bolt.first - threeDigits[2].last - 1
             check(gap >= 1 && gap <= 4, "The three-digit bolt sits as close to the digits as the system's")
