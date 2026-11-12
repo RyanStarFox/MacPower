@@ -371,7 +371,8 @@ enum MenuBarBatteryRenderer {
                 color: knockout,
                 kern: metrics.kern,
                 snapsBaseline: true,
-                opticalNudgeY: percentInside ? 0.35 : 0
+                // System digits sit a hair above geometric center; positive nudge moves ink down.
+                opticalNudgeY: percentInside ? -0.15 : 0
             )
         }
 
@@ -630,7 +631,7 @@ enum MenuBarBatteryRenderer {
         let bounds = CTLineGetBoundsWithOptions(line, [.useGlyphPathBounds])
         guard let cg = NSGraphicsContext.current?.cgContext else { return }
         cg.saveGState()
-        // Positive nudge moves ink down in AppKit space so "100" sits like the system battery.
+        // Positive nudge moves ink down in AppKit space; negative lifts it toward the system battery.
         let baseline = box.midY - bounds.midY - opticalNudgeY
         cg.textPosition = CGPoint(
             x: box.midX - bounds.midX,
