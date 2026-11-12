@@ -186,9 +186,13 @@ enum MenuBarBatteryRenderer {
         var glyphBox: NSRect
     }
 
+    /// Prefer PingFang Semibold: its digit widths fit the 23pt system body the way
+    /// SF Rounded Semibold does not. Fall back to the system rounded face.
     private static func percentFont(size: CGFloat) -> NSFont {
-        if let pingfang = NSFont(name: "PingFangSC-Medium", size: size) {
-            return pingfang
+        for name in ["PingFangSC-Semibold", "PingFangSC-Medium"] {
+            if let font = NSFont(name: name, size: size), font.fontName.hasPrefix("PingFang") {
+                return font
+            }
         }
         let base = NSFont.systemFont(ofSize: size, weight: .semibold)
         let rounded = base.fontDescriptor.withDesign(.rounded) ?? base.fontDescriptor
@@ -214,16 +218,24 @@ enum MenuBarBatteryRenderer {
             // The outlined body keeps a 2pt gutter, so the shared size fills the interior.
             if style.isOutlined, showsText { return digits >= 3 ? 7.2 : 8.0 }
             // Beside the bolt the system shrinks three digits to 13px; alone they stay 15px.
-            if digits >= 3 { return glyph != nil ? 9.0 : 10.0 }
-            return 10.2
+            // Semibold PingFang reads closer to the system's weight than Medium.
+            if digits >= 3 { return glyph != nil ? 9.15 : 10.2 }
+            // Two-digit system "99" ink is ~23px at 2x; 10.2 + 0.3 kern was ~25px and looked off-center.
+            if digits == 2 { return glyph != nil ? 9.5 : 9.85 }
+            return 10.4
         }()
         let insideKnockout = showsText && !style.isOutlined
         let font = percentFont(size: fontSize)
         var textSize = text.isEmpty
             ? NSSize.zero
             : (text as NSString).size(withAttributes: [.font: font])
-        // The system spaces three inside digits slightly wider than the font does.
-        let kern: CGFloat = insideKnockout && digits >= 3 ? (glyph != nil ? 0.5 : 0.4) : 0
+        // The system spaces inside digits slightly wider than the raw font advance.
+        let kern: CGFloat = {
+            guard insideKnockout else { return 0 }
+            if digits >= 3 { return 0.35 }
+            if digits == 2 { return 0.12 }
+            return 0
+        }()
         if insideKnockout {
             // Space the knockout by ink so the bolt sits as close to the digits as the system's.
             let line = CTLineCreateWithAttributedString(NSAttributedString(string: text, attributes: [.font: font, .kern: kern]))
@@ -235,7 +247,8 @@ enum MenuBarBatteryRenderer {
         case .bolt: glyphAdvance = insideKnockout ? insideBolt.width : (showsText ? 5.8 : 8.8)
         case nil: glyphAdvance = 0
         }
-        let gap: CGFloat = (showsText && glyph != nil) ? (insideKnockout ? (digits >= 3 ? 1.0 : 0.7) : 0.45) : 0
+        // Keep the bolt near the trailing curve the way the system 100% charging icon does.
+        let gap: CGFloat = (showsText && glyph != nil) ? (insideKnockout ? (digits >= 3 ? 0.75 : 0.7) : 0.45) : 0
         let groupWidth = (showsText ? textSize.width : 0) + gap + glyphAdvance
         let bodyWidth: CGFloat = {
             if !showsText { return 23 }
@@ -250,7 +263,18 @@ enum MenuBarBatteryRenderer {
             width: capWidth,
             height: capHeight
         )
-        let groupX = body.midX - groupWidth / 2
+        // System two-digit labels sit ~0.49 of the body (padL 10 / padR 11 at 2x). A small
+        // trailing bias matches that after ink-width centering.
+        let groupBias: CGFloat = {
+            guard insideKnockout, percentInside else { return 0 }
+            if digits >= 3, glyph != nil { return 0.45 }
+            if digits >= 3 { return 0.35 }
+            if digits == 2, glyph != nil { return 0.2 }
+            // Idle two-digit system pad is ~10/11; ink centering alone lands at 11/11.
+            if digits == 2 { return -0.15 }
+            return 0
+        }()
+        let groupX = body.midX - groupWidth / 2 + groupBias
         let digitBox = NSRect(
             x: groupX,
             y: body.minY,
@@ -333,15 +357,25 @@ enum MenuBarBatteryRenderer {
 
         guard !style.showsPercentBeside || glyph != nil else { return }
 
-        // Keep a little of the body under the digits and bolt so the knockout stays antialiased.
-        let knockout = percentInside ? NSColor.black.withAlphaComponent(0.895) : NSColor.black
+        // Full knockout: the system battery punches clean holes. Glyph rasterization
+        // already softens edges; leaving body under the ink made 100% look grey.
+        let knockout = NSColor.black
         NSGraphicsContext.saveGraphicsState()
         NSGraphicsContext.current?.compositingOperation = .destinationOut
         knockout.setFill()
         knockout.setStroke()
 
         if style.showsPercentInside, !metrics.text.isEmpty {
-            punchCenteredText(metrics.text, font: metrics.font, in: metrics.digitBox, color: knockout, kern: metrics.kern, snapsBaseline: true)
+            punchCenteredText(
+                metrics.text,
+                font: metrics.font,
+                in: metrics.digitBox,
+                color: knockout,
+                kern: metrics.kern,
+                snapsBaseline: true,
+                // System digits sit a hair above geometric center; positive nudge moves ink down.
+                opticalNudgeY: percentInside ? -0.15 : 0
+            )
         }
 
         NSGraphicsContext.restoreGraphicsState()
@@ -586,7 +620,8 @@ enum MenuBarBatteryRenderer {
         in box: NSRect,
         color: NSColor = .black,
         kern: CGFloat = 0,
-        snapsBaseline: Bool = false
+        snapsBaseline: Bool = false,
+        opticalNudgeY: CGFloat = 0
     ) {
         let line = CTLineCreateWithAttributedString(
             NSAttributedString(string: text, attributes: [
@@ -598,7 +633,8 @@ enum MenuBarBatteryRenderer {
         let bounds = CTLineGetBoundsWithOptions(line, [.useGlyphPathBounds])
         guard let cg = NSGraphicsContext.current?.cgContext else { return }
         cg.saveGState()
-        let baseline = box.midY - bounds.midY
+        // Positive nudge moves ink down in AppKit space; negative lifts it toward the system battery.
+        let baseline = box.midY - bounds.midY - opticalNudgeY
         cg.textPosition = CGPoint(
             x: box.midX - bounds.midX,
             // The 2x raster keeps flat digit edges on whole pixels.
@@ -653,7 +689,7 @@ enum MenuBarBatteryRenderer {
 
     private static func insideBoltInkSize(digits: Int) -> NSSize {
         // The system shrinks the bolt to 12px tall beside three digits, ~15px beside two.
-        let height: CGFloat = digits >= 3 ? 6.0 : 7.3
+        let height: CGFloat = digits >= 3 ? 6.15 : 7.3
         return NSSize(width: height * 4.12 / 6, height: height)
     }
 
