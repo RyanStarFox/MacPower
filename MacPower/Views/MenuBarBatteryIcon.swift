@@ -220,6 +220,7 @@ enum MenuBarBatteryRenderer {
             // Beside the bolt the system shrinks three digits to 13px; alone they stay 15px.
             // Semibold PingFang reads closer to the system's weight than Medium.
             if digits >= 3 { return glyph != nil ? 9.15 : 10.2 }
+            if digits == 2 { return glyph != nil ? 9.6 : 10.2 }
             return 10.4
         }()
         let insideKnockout = showsText && !style.isOutlined
@@ -227,8 +228,13 @@ enum MenuBarBatteryRenderer {
         var textSize = text.isEmpty
             ? NSSize.zero
             : (text as NSString).size(withAttributes: [.font: font])
-        // The system spaces three inside digits slightly wider than the font does.
-        let kern: CGFloat = insideKnockout && digits >= 3 ? (glyph != nil ? 0.35 : 0.35) : 0
+        // The system spaces inside digits slightly wider than the raw font advance.
+        let kern: CGFloat = {
+            guard insideKnockout else { return 0 }
+            if digits >= 3 { return 0.35 }
+            if digits == 2 { return 0.3 }
+            return 0
+        }()
         if insideKnockout {
             // Space the knockout by ink so the bolt sits as close to the digits as the system's.
             let line = CTLineCreateWithAttributedString(NSAttributedString(string: text, attributes: [.font: font, .kern: kern]))
@@ -256,12 +262,14 @@ enum MenuBarBatteryRenderer {
             width: capWidth,
             height: capHeight
         )
-        // Path-bounds centering sits "100⚡" a little left of the system icon; bias it trailing
-        // without shoving the bolt past the body's right curve.
+        // Glyph-path centering sits two- and three-digit labels left of the system icon.
+        // Bias trailing so left/right padding matches the menu-bar battery.
         let groupBias: CGFloat = {
             guard insideKnockout, percentInside else { return 0 }
             if digits >= 3, glyph != nil { return 0.45 }
-            if digits >= 3 { return 0.2 }
+            if digits >= 3 { return 0.35 }
+            if digits == 2, glyph != nil { return 0.5 }
+            if digits == 2 { return 0.7 }
             return 0
         }()
         let groupX = body.midX - groupWidth / 2 + groupBias
