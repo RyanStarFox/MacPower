@@ -32,7 +32,8 @@ struct AppTheme: Equatable, Sendable {
                 discharging: Color(red: isDark ? 0.98 : 0.86, green: isDark ? 0.67 : 0.48, blue: isDark ? 0.31 : 0.16),
                 adapterHold: Color(red: isDark ? 0.45 : 0.18, green: isDark ? 0.68 : 0.48, blue: isDark ? 0.98 : 0.86),
                 underpowered: Color(red: isDark ? 0.55 : 0.22, green: isDark ? 0.72 : 0.50, blue: isDark ? 0.98 : 0.90),
-                lowBatteryYellow: isDark ? Color(red: 1.00, green: 0.84, blue: 0.25) : Color(red: 0.82, green: 0.58, blue: 0.05),
+                // Match system Low Power menu-bar yellow `#FFD702`.
+                lowBatteryYellow: Color(red: 1.00, green: 215.0 / 255.0, blue: 2.0 / 255.0),
                 lowBatteryRed: isDark ? Color(red: 1.00, green: 0.42, blue: 0.38) : Color(red: 0.82, green: 0.16, blue: 0.15),
                 sheen: .white.opacity(isDark ? 0.55 : 0.70)
             )

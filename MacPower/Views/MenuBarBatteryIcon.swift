@@ -221,7 +221,8 @@ enum MenuBarBatteryRenderer {
             // Semibold PingFang reads closer to the system's weight than Medium.
             if digits >= 3 { return glyph != nil ? 9.15 : 10.2 }
             // Two-digit system "99" ink is ~23px at 2x; 10.2 + 0.3 kern was ~25px and looked off-center.
-            if digits == 2 { return glyph != nil ? 9.5 : 9.85 }
+            // 66% charging: system first "6" ~11px; 9.65 inked ~10 — bump slightly.
+            if digits == 2 { return glyph != nil ? 9.8 : 9.85 }
             return 10.4
         }()
         let insideKnockout = showsText && !style.isOutlined
@@ -248,7 +249,12 @@ enum MenuBarBatteryRenderer {
         case nil: glyphAdvance = 0
         }
         // Keep the bolt near the trailing curve the way the system 100% charging icon does.
-        let gap: CGFloat = (showsText && glyph != nil) ? (insideKnockout ? (digits >= 3 ? 0.75 : 0.7) : 0.45) : 0
+        // 92% charging (system @ screenshot): padL=6, digit–bolt gap=4, padR=2 on 41px body
+        // → ~1.1pt gap for two digits; 100% uses a slightly tighter 0.75.
+        let gap: CGFloat = (showsText && glyph != nil)
+            // 66% charging @2x: system digit–bolt gap≈2px; 1.55 read as 4px — pull in.
+            ? (insideKnockout ? (digits >= 3 ? 0.75 : 0.85) : 0.45)
+            : 0
         let groupWidth = (showsText ? textSize.width : 0) + gap + glyphAdvance
         let bodyWidth: CGFloat = {
             if !showsText { return 23 }
@@ -269,7 +275,8 @@ enum MenuBarBatteryRenderer {
             guard insideKnockout, percentInside else { return 0 }
             if digits >= 3, glyph != nil { return 0.45 }
             if digits >= 3 { return 0.35 }
-            if digits == 2, glyph != nil { return 0.2 }
+            // Keep padL≈6 after the tighter 0.85 gap (66%/92% charging screenshots).
+            if digits == 2, glyph != nil { return 0.25 }
             // Idle two-digit system pad is ~10/11; ink centering alone lands at 11/11.
             if digits == 2 { return -0.15 }
             return 0
@@ -366,6 +373,13 @@ enum MenuBarBatteryRenderer {
         knockout.setStroke()
 
         if style.showsPercentInside, !metrics.text.isEmpty {
+            // Idle 2-digit: slightly above geometric center (−0.15). With a bolt the
+            // digit ink mass sits higher (relMid ~0.47 vs system ~0.51) — nudge down.
+            let opticalNudgeY: CGFloat = {
+                guard percentInside else { return 0 }
+                // 66% charging: 0.25 left digits ~0.4px low vs system mid 0.488.
+                return glyph != nil ? 0.05 : -0.15
+            }()
             punchCenteredText(
                 metrics.text,
                 font: metrics.font,
@@ -373,8 +387,7 @@ enum MenuBarBatteryRenderer {
                 color: knockout,
                 kern: metrics.kern,
                 snapsBaseline: true,
-                // System digits sit a hair above geometric center; positive nudge moves ink down.
-                opticalNudgeY: percentInside ? -0.15 : 0
+                opticalNudgeY: opticalNudgeY
             )
         }
 
@@ -689,7 +702,8 @@ enum MenuBarBatteryRenderer {
 
     private static func insideBoltInkSize(digits: Int) -> NSSize {
         // The system shrinks the bolt to 12px tall beside three digits, ~15px beside two.
-        let height: CGFloat = digits >= 3 ? 6.15 : 7.3
+        // 2-digit charging: 66% system bolt ~10px on 45px body; 7.0 read 9px — nudge up.
+        let height: CGFloat = digits >= 3 ? 6.15 : 7.25
         return NSSize(width: height * 4.12 / 6, height: height)
     }
 
