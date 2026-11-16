@@ -139,6 +139,12 @@ enum MenuBarTintSwatch: Codable, Equatable, Hashable, Sendable {
     case systemGreen
     case custom(red: Double, green: Double, blue: Double)
 
+    /// System Low Power menu-bar yellow as sampled by Digital Color Meter (`#FFD702`).
+    /// `NSColor.systemYellow` screens as a lighter lemon (`#FFE016`) in our deviceRGB bitmaps.
+    static let lowBatteryYellowRed = 1.0
+    static let lowBatteryYellowGreen = 215.0 / 255.0
+    static let lowBatteryYellowBlue = 2.0 / 255.0
+
     var followsMenuBar: Bool {
         if case .menuBar = self { return true }
         return false
@@ -149,7 +155,12 @@ enum MenuBarTintSwatch: Codable, Equatable, Hashable, Sendable {
         case .menuBar: Color.primary
         case .systemRed: Color.red
         case .systemOrange: Color.orange
-        case .systemYellow: Color.yellow
+        case .systemYellow:
+            Color(
+                red: Self.lowBatteryYellowRed,
+                green: Self.lowBatteryYellowGreen,
+                blue: Self.lowBatteryYellowBlue
+            )
         case .systemGreen: Color.green
         case .custom(let red, let green, let blue): Color(red: red, green: green, blue: blue)
         }
@@ -166,7 +177,14 @@ enum MenuBarTintSwatch: Codable, Equatable, Hashable, Sendable {
             case .menuBar: resolved = .black
             case .systemRed: resolved = .systemRed
             case .systemOrange: resolved = .systemOrange
-            case .systemYellow: resolved = .systemYellow
+            case .systemYellow:
+                // Device RGB so the menu-bar bitmap keeps exact `#FFD702` bytes.
+                resolved = NSColor(
+                    deviceRed: Self.lowBatteryYellowRed,
+                    green: Self.lowBatteryYellowGreen,
+                    blue: Self.lowBatteryYellowBlue,
+                    alpha: 1
+                )
             case .systemGreen: resolved = .systemGreen
             case .custom(let red, let green, let blue):
                 resolved = NSColor(srgbRed: red, green: green, blue: blue, alpha: 1)

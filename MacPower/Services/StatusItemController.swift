@@ -23,6 +23,9 @@ final class StatusItemController: NSObject, NSPopoverDelegate, NSMenuDelegate {
     private var isShowingStatusMenu = false
     /// Colored charge sits above template chrome so the empty frame still tracks the menu bar.
     private var chargeOverlay: PassthroughImageView?
+    /// Inactive-screen menu bars dim template images; the colored overlay must follow.
+    private var menuBarFocusObservers: [NSObjectProtocol] = []
+    private var lastMenuBarEmphasized: Bool?
     /// Clicks outside a menu-bar popover never reach this accessory app, so
     /// `.transient` alone leaves the panel up until the status item is clicked again.
     private var outsideClickMonitors: [Any] = []
@@ -109,7 +112,73 @@ final class StatusItemController: NSObject, NSPopoverDelegate, NSMenuDelegate {
                 self.refreshIcon()
             }
         }
+        installMenuBarFocusObservers()
         refreshIcon(force: true)
+    }
+
+    private func installMenuBarFocusObservers() {
+        let center = NotificationCenter.default
+        let names: [Notification.Name] = [
+            NSWindow.didBecomeKeyNotification,
+            NSWindow.didResignKeyNotification,
+            NSApplication.didBecomeActiveNotification,
+            NSApplication.didResignActiveNotification,
+            NSApplication.didChangeScreenParametersNotification,
+        ]
+        for name in names {
+            menuBarFocusObservers.append(
+                center.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
+                    Task { @MainActor in self?.refreshIconIfMenuBarFocusChanged() }
+                }
+            )
+        }
+        menuBarFocusObservers.append(
+            NSWorkspace.shared.notificationCenter.addObserver(
+                forName: NSWorkspace.activeSpaceDidChangeNotification,
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                Task { @MainActor in self?.refreshIconIfMenuBarFocusChanged() }
+            }
+        )
+    }
+
+    /// Template chrome is dimmed by AppKit on an inactive-display menu bar; the
+    /// non-template charge overlay is not. Measured ~0.34 alpha of `#FFD702` over
+    /// the menu-bar teal lands near the system's muted olive (`#7A9B7A`).
+    private var isStatusItemMenuBarEmphasized: Bool {
+        guard NSScreen.screens.count > 1 else { return true }
+        guard let itemScreen = statusItemScreen else { return true }
+        let focusScreen = NSApp.keyWindow?.screen
+            ?? NSApp.mainWindow?.screen
+            ?? NSApp.orderedWindows.first(where: \.isKeyWindow)?.screen
+            ?? NSApp.orderedWindows.first(where: { $0.isVisible && $0.canBecomeKey })?.screen
+        guard let focusScreen else { return itemScreen == NSScreen.main }
+        return itemScreen == focusScreen
+    }
+
+    private var statusItemScreen: NSScreen? {
+        if let screen = statusItem.button?.window?.screen { return screen }
+        guard let button = statusItem.button, let window = button.window else { return NSScreen.main }
+        let screenRect = window.convertToScreen(button.convert(button.bounds, to: nil))
+        let point = NSPoint(x: screenRect.midX, y: screenRect.midY)
+        return NSScreen.screens.first { $0.frame.contains(point) } ?? NSScreen.main
+    }
+
+    private func refreshIconIfMenuBarFocusChanged() {
+        let emphasized = isStatusItemMenuBarEmphasized
+        guard emphasized != lastMenuBarEmphasized else {
+            syncChargeOverlayDimming()
+            return
+        }
+        refreshIcon(force: true)
+    }
+
+    private func syncChargeOverlayDimming() {
+        guard let overlay = chargeOverlay, !overlay.isHidden else { return }
+        // Alpha is baked into the charge bitmap when dimmed; keep the view opaque.
+        overlay.alphaValue = 1
+        overlay.layer?.opacity = 1
     }
 
     func applyLocalization() {
@@ -152,16 +221,23 @@ final class StatusItemController: NSObject, NSPopoverDelegate, NSMenuDelegate {
         let appearance = button.effectiveAppearance
         let key = MenuBarIconKey(appState)
         let appearanceName = appearance.name
+        let emphasized = isStatusItemMenuBarEmphasized
         if !force,
            key == lastRenderedKey,
-           appearanceName == lastAppearanceName {
+           appearanceName == lastAppearanceName,
+           emphasized == lastMenuBarEmphasized {
             return
         }
 
         isRefreshingIcon = true
         defer { isRefreshingIcon = false }
 
-        let fill = appState.menuBarFill(appearance: appearance)
+        var fill = appState.menuBarFill(appearance: appearance)
+        // Bake inactive-menu-bar dimming into the charge layer (view alpha is unreliable
+        // on wantsLayer status-item overlays and was leaving us bright lemon/cream).
+        if !emphasized, !fill.isTemplate {
+            fill = fill.withAlpha(0.34)
+        }
         let content = MenuBarBatteryRenderer.statusItemContent(
             snapshot: appState.snapshot,
             style: appState.settings.iconStyle,
@@ -170,6 +246,7 @@ final class StatusItemController: NSObject, NSPopoverDelegate, NSMenuDelegate {
             showChargeGlyphs: appState.settings.showChargeGlyphs
         )
         button.image = content.chrome
+        lastMenuBarEmphasized = emphasized
 
         let title: String
         if appState.settings.digitPlacement == .beside {
@@ -553,6 +630,7 @@ final class StatusItemController: NSObject, NSPopoverDelegate, NSMenuDelegate {
             let imageRect = cell.imageRect(forBounds: button.bounds)
             if imageRect.width > 0, imageRect.height > 0 {
                 overlay.frame = imageRect
+                syncChargeOverlayDimming()
                 return
             }
         }
@@ -562,6 +640,7 @@ final class StatusItemController: NSObject, NSPopoverDelegate, NSMenuDelegate {
             width: size.width,
             height: size.height
         )
+        syncChargeOverlayDimming()
     }
 
     private func legacyHighlightColor(for button: NSStatusBarButton) -> NSColor {
