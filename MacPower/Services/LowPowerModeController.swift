@@ -60,6 +60,62 @@ enum LowPowerModeController {
         }.value
     }
 
+    /// True when the limited MacPower `pmset` sudoers rule is installed.
+    static var hasPasswordlessRule: Bool {
+        FileManager.default.isReadableFile(atPath: LowPowerPrivilege.sudoersPath)
+    }
+
+    /// How Low Power Mode can already run without an interactive password prompt.
+    /// A machine with broader passwordless `sudo` (not our file) still counts as ready.
+    enum AdminAccess: Equatable, Sendable {
+        /// `/etc/sudoers.d/macpower-lowpower` is present.
+        case macPowerRule
+        /// `sudo -n pmset` already works (for example a NOPASSWD admin account).
+        case systemSudo
+        case unavailable
+    }
+
+    static var adminAccess: AdminAccess {
+        if hasPasswordlessRule { return .macPowerRule }
+        if canRunPmsetWithoutPassword { return .systemSudo }
+        return .unavailable
+    }
+
+    /// `sudo -n` can invoke `pmset` without asking for a password.
+    static var canRunPmsetWithoutPassword: Bool {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/sudo")
+        process.arguments = ["-n", "/usr/bin/pmset", "-g", "custom"]
+        process.standardOutput = FileHandle.nullDevice
+        process.standardError = FileHandle.nullDevice
+        do {
+            try process.run()
+            process.waitUntilExit()
+        } catch {
+            return false
+        }
+        return process.terminationStatus == 0
+    }
+
+    /// Asks for an administrator password and installs the limited sudoers rule
+    /// used for Low Power Mode changes. Returns whether the rule is present afterward.
+    static func grantPasswordlessRule() async -> Bool {
+        await Task.detached {
+            _ = installPasswordlessRule()
+            return hasPasswordlessRule
+        }.value
+    }
+
+    /// Asks for an administrator password and removes the MacPower low-power sudoers rule.
+    /// Broader system sudo (NOPASSWD elsewhere) is left alone.
+    static func revokePasswordlessRule() async -> Bool {
+        await Task.detached {
+            guard hasPasswordlessRule else { return true }
+            _ = removePasswordlessRule()
+            return !hasPasswordlessRule
+        }.value
+    }
+
     /// Asks for an administrator password at most once, then keeps a sudoers rule that
     /// allows only these exact `pmset` low-power commands.
     private static func runSync(_ arguments: [String]) -> Bool {
@@ -67,6 +123,10 @@ enum LowPowerModeController {
         if first.ok { return true }
         guard first.needsPrivilege, installPasswordlessRule() else { return false }
         return sudo(arguments).ok
+    }
+
+    private static func removePasswordlessRule() -> Bool {
+        authorize(tool: "/bin/rm", arguments: ["-f", LowPowerPrivilege.sudoersPath])
     }
 
     private static func sudo(_ arguments: [String]) -> (ok: Bool, needsPrivilege: Bool) {
@@ -97,7 +157,7 @@ enum LowPowerModeController {
         trap 'rm -f "$tmp"' EXIT
         printf '%s' "$1" | /usr/bin/base64 -d > "$tmp"
         /usr/sbin/visudo -cf "$tmp"
-        /usr/bin/install -m 440 "$tmp" /etc/sudoers.d/macpower-lowpower
+        /usr/bin/install -m 440 "$tmp" "\(LowPowerPrivilege.sudoersPath)"
         """
         return authorize(tool: "/bin/sh", arguments: ["-c", script, "macpower", payload])
     }
@@ -152,6 +212,8 @@ enum LowPowerModeController {
 }
 
 enum LowPowerPrivilege {
+    static let sudoersPath = "/etc/sudoers.d/macpower-lowpower"
+
     /// Rules for one local account. The name is restricted so it cannot change the rule itself.
     static func sudoers(user: String) -> String? {
         guard user.range(of: #"^[A-Za-z0-9._-]{1,32}$"#, options: .regularExpression) != nil else { return nil }

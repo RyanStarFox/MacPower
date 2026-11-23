@@ -123,9 +123,10 @@ final class AppState {
         syncBluetoothMonitoring()
     }
 
-    /// Each read runs `system_profiler`, a whole process, so the 8-second loop
-    /// runs only while its result is on screen: the panel is open, or the device
-    /// picker is. It used to run all day for anyone with a headphone ring.
+    /// Each read still shells out to `system_profiler` (for product / vendor /
+    /// minor type) and also asks `IOBluetoothDevice` for live percents, so the
+    /// 8-second loop runs only while a result is on screen: the panel is open,
+    /// or the device picker is.
     func syncBluetoothMonitoring() {
         let needed = bluetoothScanWanted || (isPopoverOpen && !settings.bluetoothRingDevices.isEmpty)
         if needed {

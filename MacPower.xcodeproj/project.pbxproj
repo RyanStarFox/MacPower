@@ -13,6 +13,8 @@
 		5E771C0A0B0C4D2E8F901A05 /* RingItemCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E771C0A0B0C4D2E8F901A06 /* RingItemCell.swift */; };
 		0A11B0A1D0014E7A9C01B101 /* RingBoard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A11B0A1D0014E7A9C01B201 /* RingBoard.swift */; };
 		0A11B0A1D0014E7A9C01B102 /* BluetoothBatteryReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A11B0A1D0014E7A9C01B202 /* BluetoothBatteryReader.swift */; };
+		0A11B0A1D0014E7A9C01B103 /* AppPermissions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A11B0A1D0014E7A9C01B203 /* AppPermissions.swift */; };
+		0A11B0A1D0014E7A9C01B104 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 0A11B0A1D0014E7A9C01B204 /* InfoPlist.xcstrings */; };
 		0F789E41829F0C0E6B8AA796 /* ThemePalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20A295272AA067DB3D994259 /* ThemePalette.swift */; };
 		121DC64F59FA1C1EB941860E /* PopoverTintSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2B191D2207AFED12081FC6F /* PopoverTintSettings.swift */; };
 		13E0F3C8CE126FBD27A68889 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB22BA21030C6770FD5A2BE1 /* AppState.swift */; };
@@ -79,6 +81,8 @@
 		2A87ED6CEDCC37BA32FEFD25 /* StatusRingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusRingView.swift; sourceTree = "<group>"; };
 		0A11B0A1D0014E7A9C01B201 /* RingBoard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RingBoard.swift; sourceTree = "<group>"; };
 		0A11B0A1D0014E7A9C01B202 /* BluetoothBatteryReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothBatteryReader.swift; sourceTree = "<group>"; };
+		0A11B0A1D0014E7A9C01B203 /* AppPermissions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppPermissions.swift; sourceTree = "<group>"; };
+		0A11B0A1D0014E7A9C01B204 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 		3968B1F4514587C19DC9E189 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
 		3ED65D999AA01B5F39EEF59A /* Compatibility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Compatibility.swift; sourceTree = "<group>"; };
 		424B895D8EAD698D2709E1C4 /* PowerSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowerSnapshot.swift; sourceTree = "<group>"; };
@@ -137,6 +141,7 @@
 				BB22BA21030C6770FD5A2BE1 /* AppState.swift */,
 				04FD5D63D480A11EE0E91E88 /* Assets.xcassets */,
 				CF97ADE4B8CDD69AECEE68E7 /* Info.plist */,
+				0A11B0A1D0014E7A9C01B204 /* InfoPlist.xcstrings */,
 				9E3AC898FC0E9E06A6F67EF0 /* Localizable.xcstrings */,
 				C4E8A1B09F2D4A6E8B1C3D5F /* ReleaseNotes.json */,
 				160699993F1F6529C046625A /* Localization.swift */,
@@ -160,6 +165,7 @@
 				C2AFE15BB6E2593BA442FDA8 /* TimeEstimateService.swift */,
 				A0BE273AFEFD0F7B157013AE /* UpdateChecker.swift */,
 				0A11B0A1D0014E7A9C01B202 /* BluetoothBatteryReader.swift */,
+				0A11B0A1D0014E7A9C01B203 /* AppPermissions.swift */,
 				B7E2C91A4D6F4088A1C35E70 /* UpdateInstaller.swift */,
 				2F6E8D14A9C54B70E1D3A886 /* LowPowerModeController.swift */,
 				4D8B2A17C6E54F09B3A1D772 /* TopAppSampler.swift */,
@@ -345,6 +351,7 @@
 				6A4700B5CC53C0C3E8118460 /* AppIcon.icon in Resources */,
 				F676AEA3B2252403F2114D1F /* Assets.xcassets in Resources */,
 				80B7D3366C4DE0B34F8F070F /* Localizable.xcstrings in Resources */,
+				0A11B0A1D0014E7A9C01B104 /* InfoPlist.xcstrings in Resources */,
 				D5F9B2C10A3E5B7F9C2D4E60 /* ReleaseNotes.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -370,6 +377,7 @@
 				92376D10D7128EA67F7F408D /* AppSettings.swift in Sources */,
 				0A11B0A1D0014E7A9C01B101 /* RingBoard.swift in Sources */,
 				0A11B0A1D0014E7A9C01B102 /* BluetoothBatteryReader.swift in Sources */,
+				0A11B0A1D0014E7A9C01B103 /* AppPermissions.swift in Sources */,
 				13E0F3C8CE126FBD27A68889 /* AppState.swift in Sources */,
 				6F9C22DA2FCF1138F03E58BD /* AppTheme.swift in Sources */,
 				19EB4249A938149F93DF7BB5 /* AppVersion.swift in Sources */,

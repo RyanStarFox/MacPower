@@ -1,0 +1,77 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "NSBluetoothAlwaysUsageDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacPower reads the battery level of Bluetooth headphones and accessories you have already paired, so those levels can appear in the panel rings. It does not scan for nearby devices or send audio."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacPower 只会读取你已经配对的蓝牙耳机和配件的电量，用来在面板圆环里显示。不会扫描附近设备，也不会收发音频。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacPower 只會讀取你已經配對的藍牙耳機和配件的電量，用來在面板圓環裡顯示。不會掃描附近裝置，也不會收發音訊。"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacPower は、すでにペアリングした Bluetooth ヘッドフォンなどの電池残量を読み、パネルのリングに表示するためだけに使います。付近の機器は探さず、音声も送受信しません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacPower는 이미 페어링된 Bluetooth 헤드폰·액세서리의 배터리를 읽어 패널 링에 표시할 때만 사용합니다. 주변 기기를 검색하거나 오디오를 주고받지 않습니다."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacPower lit uniquement le niveau de batterie des écouteurs et accessoires Bluetooth déjà appairés, pour l’afficher dans les anneaux du panneau. Il ne recherche pas d’appareils à proximité et n’envoie pas d’audio."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacPower liest nur den Akkustand bereits gekoppelter Bluetooth-Kopfhörer und Zubehörteile, um ihn in den Ringen im Panel anzuzeigen. Es sucht nicht in der Nähe und sendet kein Audio."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacPower solo lee el nivel de batería de auriculares y accesorios Bluetooth ya emparejados para mostrarlo en los anillos del panel. No busca dispositivos cercanos ni envía audio."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O MacPower só lê o nível de bateria de fones e acessórios Bluetooth já pareados para mostrar nos anéis do painel. Não procura aparelhos por perto nem envia áudio."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacPower legge solo il livello di batteria di cuffie e accessori Bluetooth già associati, per mostrarlo negli anelli del pannello. Non cerca dispositivi vicini né invia audio."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacPower читает только заряд уже сопряжённых Bluetooth-наушников и аксессуаров, чтобы показать его в кольцах панели. Не ищет устройства рядом и не передаёт звук."
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}
